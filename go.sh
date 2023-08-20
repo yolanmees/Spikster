@@ -5,7 +5,7 @@ BUILD=202112181
 PASS=$(openssl rand -base64 32|sha256sum|base64|head -c 32| tr '[:upper:]' '[:lower:]')
 DBPASS=$(openssl rand -base64 24|sha256sum|base64|head -c 32| tr '[:upper:]' '[:lower:]')
 SERVERID=$(openssl rand -base64 12|sha256sum|base64|head -c 32| tr '[:upper:]' '[:lower:]')
-REPO=andreapollastri/cipi
+REPO=yolanmees/Spikster
 if [ -z "$1" ];
     BRANCH=latest
 then
@@ -34,7 +34,7 @@ bgpurple=$(tput setab 5)
 
 
 
-#################################################### CIPI SETUP ######
+#################################################### Spikster SETUP ######
 
 
 
@@ -183,24 +183,24 @@ alias ll='ls -alF'
 
 
 
-# CIPI DIRS
+# Spikster DIRS
 clear
 echo "${bggreen}${black}${bold}"
-echo "Cipi directories..."
+echo "Spikster directories..."
 echo "${reset}"
 sleep 1s
 
-sudo mkdir /etc/cipi/
-sudo chmod o-r /etc/cipi
-sudo mkdir /var/cipi/
-sudo chmod o-r /var/cipi
+sudo mkdir /etc/spikster/
+sudo chmod o-r /etc/spikster
+sudo mkdir /var/spikster/
+sudo chmod o-r /var/spikster
 
 
 
 # USER
 clear
 echo "${bggreen}${black}${bold}"
-echo "Cipi root user..."
+echo "Spikster root user..."
 echo "${reset}"
 sleep 1s
 
@@ -404,7 +404,7 @@ echo "${reset}"
 sleep 1s
 
 sudo apt-get -y install git
-sudo ssh-keygen -t rsa -C "git@github.com" -f /etc/cipi/github -q -P ""
+sudo ssh-keygen -t rsa -C "git@github.com" -f /etc/Spikster/github -q -P ""
 
 
 
@@ -461,7 +461,7 @@ server {
     }
 }
 EOF
-sudo mkdir /etc/nginx/cipi/
+sudo mkdir /etc/nginx/Spikster/
 sudo systemctl restart nginx.service
 
 
@@ -676,7 +676,7 @@ sudo service supervisor restart
 # COMPLETE
 clear
 echo "${bggreen}${black}${bold}"
-echo "Cipi installation has been completed..."
+echo "Spikster installation has been completed..."
 echo "${reset}"
 sleep 1s
 
