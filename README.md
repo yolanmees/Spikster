@@ -50,11 +50,11 @@ $ root@aws:~# wget -O - https://raw.githubusercontent.com/yolanmees/Spikster/mas
 Remember to open ports: 22, 80 and 443!
 
 #### Installation Note
-Before you can use Cipi, please make sure your server fulfils these requirements:
+Before you can use Spikster, please make sure your server fulfils these requirements:
 
-- Ubuntu 20.04 x86_64 LTS (Fresh installation)
-- If the server is virtual (VPS), OpenVZ may not be supported
-- We are checking Cipi compatibility within Oracle / ARM (not full supported yet)
+- Ubuntu version:
+- - 20.04 x86_64 LTS (Fresh installation)
+- If the server is virtual (VPS)
 
 Hardware Requirement: More than 1GB of HD / At least 1 core processor / 512MB minimum RAM / At least 1 public IP  Address (IPv6 and NAT VPS are not supported) / For VPS providers such as AWS, those providers already include an external firewall for your VPS. Please open port 22, 80 and 443 to install Cipi.
 
