@@ -104,7 +104,7 @@ Thank you for considering contributing to the Cipi Project (code, issues, feedba
 Cipi is an open-source software licensed under the MIT license.
 
 ## Need support with Cipi?
-Please open an issue here: https://github.com/andreapollastri/cipi/issues.
+Please open an issue here: https://github.com/yolanmees/Spikster/issues.
 
 ## Write to Cipi
 Write an email to: hello@cipi.sh
