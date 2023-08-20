@@ -77,7 +77,7 @@ if [ "$ID" = "ubuntu" ]; then
             ;;
         *)
             echo "${bgred}${white}${bold}"
-            echo "Cipi requires Linux Ubuntu 20.04 LTS"
+            echo "Spikster requires a minimum of Linux Ubuntu 20.04 LTS"
             echo "${reset}"
             exit 1;
             break
@@ -85,7 +85,7 @@ if [ "$ID" = "ubuntu" ]; then
     esac
 else
     echo "${bgred}${white}${bold}"
-    echo "Cipi requires Linux Ubuntu 20.04 LTS"
+    echo "Spikster requires a minimum requires Linux Ubuntu 20.04 LTS"
     echo "${reset}"
     exit 1
 fi
@@ -105,7 +105,7 @@ if [ "$(id -u)" = "0" ]; then
 else
     clear
     echo "${bgred}${white}${bold}"
-    echo "You have to run Cipi as root. (In AWS use 'sudo -s')"
+    echo "You have to run Spikster as root. (In AWS use 'sudo -s')"
     echo "${reset}"
     exit 1
 fi
