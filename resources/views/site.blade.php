@@ -283,6 +283,9 @@
                 deploy.session.setValue(data.deploy);
                 getDataNoDT('/api/servers/'+data.server_id+'/domains');
                 switch (data.php) {
+                    case '8.2':
+                        $('#php82').attr("selected","selected");
+                        break;
                     case '8.1':
                         $('#php81').attr("selected","selected");
                         break;
