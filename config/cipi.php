@@ -12,16 +12,16 @@
         'jwt_refresh'       => env('JWT_REFRESH', 7200),
 
         // Custom Vars
-        'name'              => env('CIPI_NAME', 'Cipi Control Panel'),
-        'website'           => env('CIPI_WEBSITE', 'https://cipi.sh'),
+        'name'              => env('CIPI_NAME', 'Spikster Control Panel'),
+        'website'           => env('CIPI_WEBSITE', 'https://github.com/yolanmees/Spikster'),
         'activesetupcount'  => env('CIPI_ACTIVESETUPCOUNT', 'https://service.cipi.sh/setupcount'),
         'documentation'     => env('CIPI_DOCUMENTATION', 'https://cipi.sh/docs.html'),
         'app'               => env('CIPI_APP', 'https://play.google.com/store/apps/details?id=it.christiangiupponi.cipi'),
 
         // Global Settings
         'users_prefix'      => env('CIPI_USERS_PREFIX', 'cp'),
-        'phpvers'           => ['8.1','8.0','7.4'],
+        'phpvers'           => ['8.2', '8.1','8.0','7.4'],
         'services'          => ['nginx','php','mysql','redis','supervisor'],
-        'default_php'       => '8.0',
+        'default_php'       => '8.2',
 
     ];
