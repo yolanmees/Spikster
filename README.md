@@ -45,7 +45,7 @@ AWS by default disables root login. To login as root inside AWS, login as defaul
 ```
 $ ssh ubuntu@<your server IP address>
 $ ubuntu@aws:~$ sudo -s
-$ root@aws:~# wget -O - [https://cipi.sh/go.sh](https://raw.githubusercontent.com/yolanmees/Spikster/master/go.sh) | bash
+$ root@aws:~# wget -O - https://raw.githubusercontent.com/yolanmees/Spikster/master/go.sh | bash
 ```
 Remember to open ports: 22, 80 and 443!
 
