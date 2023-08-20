@@ -23,13 +23,13 @@ Cipi is a Laravel based cloud server control panel that supports Digital Ocean, 
 
 - Secure: no unsed open ports, unprivileged PHP, isolated system users and filesystem, only SFTP (no insecure FTP), Free SSL certificates everywhere.
 
-- Always update: Cipi takes care about your business and automatically keeps your server's software up to date so you always have the latest security patches.
+- Always update: Spikster takes care about your business and automatically keeps your server's software up to date so you always have the latest security patches.
 
-- Integrate Cipi with your own software via Rest API and Swagger.
+- Integrate Spikster with your own software via Rest API and Swagger.
 
 - Real-time servers stats: Keep an eye on everything through an awesome dashboard.
 
-- Always up to date: Cipi installs last versions of LTS dists and supports Ubuntu 20.04 LTS :)
+- Always up to date: Spikster installs last versions of LTS dists and supports Ubuntu 20.04 LTS :)
 
 
 ## Documentation
@@ -80,33 +80,25 @@ To correctly manage remote servers Cipi has to be on a public IP address (IPv4).
 
 <img src="https://cipi.sh/assets/images/docs/site.png"> 
 
-## Why use Cipi?
-Cipi is easy, stable, powerful and free for any personal and commercial use and it's a perfect alternative to Runcloud, Ploi.io, Serverpilot, Forge, Moss.sh and similar software...
+## Why use Spikster?
+Spikster is easy, stable, powerful and free for any personal and commercial use and it's a perfect alternative to Cpanel, Plesk, Runcloud, CyberPanel, DirectAdmin, Forge and similar software...
 
-## Mobile App
-Christian Giupponi (https://zerouno.io) has developed the Cipi Mobile App.<br>
-Android: https://play.google.com/store/apps/details?id=it.christiangiupponi.cipi<br>
-iOS: Coming soon!<br><br>
-
-## Cipi Roadmap... what's next? 
-- Cipi Version 4 (half 2022)
-- Laravel 9 support
+## Spikster Roadmap... what's next? 
+- Update all packages since Cipi v3
+- Laravel 10 & Livewire 3 support
 - Backup on s3
 - Apps installer
 - ...
 
 ## Contributing
-Thank you for considering contributing to the Cipi Project (code, issues, feedbacks, stars, promo, beers) :)
+Thank you for considering contributing to the Spikster Project
 
 #### ...anyway star this project on Github, Thankyou ;)
 
 ## Licence
-Cipi is an open-source software licensed under the MIT license.
+Spikster is an open-source software licensed under the MIT license.
 
-## Need support with Cipi?
+## Need support with Spikster?
 Please open an issue here: https://github.com/yolanmees/Spikster/issues.
 
-## Write to Cipi
-Write an email to: hello@cipi.sh
-
-### ...enjoy Cipi :)
+### ...enjoy Spikster :)
