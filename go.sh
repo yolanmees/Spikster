@@ -69,6 +69,12 @@ if [ "$ID" = "ubuntu" ]; then
         20.04)
             break
             ;;
+        22.04)
+            break
+            ;;
+        23.04)
+            break
+            ;;
         *)
             echo "${bgred}${white}${bold}"
             echo "Cipi requires Linux Ubuntu 20.04 LTS"
