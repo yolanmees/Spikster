@@ -86,7 +86,9 @@ Spikster is easy, stable, powerful and free for any personal and commercial use 
 
 ## Spikster Roadmap... what's next? 
 - Update all packages since Cipi v3
-- Laravel 10 & Livewire 3 support
+- Tailwindcss design
+- Livewire 3 components
+- Update manager
 - Backup on s3
 - Apps installer
 - ...
