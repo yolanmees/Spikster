@@ -52,7 +52,7 @@
 </head>
 <body class="sb-nav-fixed">
     <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
-        <a class="navbar-brand" href="/dashboard"><i class="fab fa-fw fa-linux"></i> {{ config('cipi.name') }}</a>
+        <a class="navbar-brand" href="/dashboard">{{ config('cipi.name') }}</a>
         <button class="btn btn-link btn-sm order-1 order-lg-0  d-lg-none" id="sidebarToggle" href="#"><i class="fas fa-bars"></i></button>
     </nav>
     <div id="layoutSidenav">

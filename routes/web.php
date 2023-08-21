@@ -49,4 +49,8 @@ Route::get('/settings', function () {
     return view('settings');
 });
 
+Route::get('/design', function () {
+    return view('design');
+});
+
 Route::get('/pdf/{site_id}/{token}', [SiteController::class, 'pdf']);
