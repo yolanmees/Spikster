@@ -1,5 +1,6 @@
-<h1>Updating Cipi to work with 22.04 and 23.04 + adding features</h1>
+<h1>Spikster is a fork of Cipi.</h1>
 
+### Added Ubuntu 22.04/23.04 and PHP 8.2 support
 
 <img src="https://github.com/andreapollastri/cipi/blob/master/utility/design/banner.png?raw=true">
 
@@ -10,14 +11,14 @@
 ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/andreapollastri/cipi?label=version)
 
 ## About
-Cipi is a Laravel based cloud server control panel that supports Digital Ocean, AWS, Vultr, Google Cloud, Linode, Azure and other VPS. It comes with nginx, Mysql, multi PHP-FPM versions, multi users, Supervisor, Composer, npm, free Let's Encrypt certificates, Git deployment, backups, ffmpeg, fail2ban, Redis, API and with a simple graphical interface useful to manage Laravel, Codeigniter, Symfony, WordPress or other PHP applications. With Cipi you don’t need to be a Sys Admin to deploy and manage websites and PHP applications powered by cloud VPS.
+Spikster is a Laravel based cloud server control panel that supports Digital Ocean, AWS, Vultr, Google Cloud, Linode, Azure and other VPS. It comes with nginx, Mysql, multi PHP-FPM versions, multi users, Supervisor, Composer, npm, free Let's Encrypt certificates, Git deployment, backups, ffmpeg, fail2ban, Redis, API and with a simple graphical interface useful to manage Laravel, Codeigniter, Symfony, WordPress or other PHP applications. With Spikster you don’t need to be a Sys Admin to deploy and manage websites and PHP applications powered by cloud VPS.
 
 ## Features
 - Easy install: setup one or more servers with a click in few minutes without be a Linux expert.
 
 - Server Management: manage one or more servers in as easy as a few clicks without be a LEMP Guru.
 
-- Perfect stack for PHP devs: Cipi comes with nginx, PHP, MySql, Composer, npm and Supervisor.
+- Perfect stack for PHP devs: Spikster comes with nginx, PHP, MySql, Composer, npm and Supervisor.
 
 - Multi-PHP: Run simultaneous PHP versions at your ease & convenience.
 
@@ -62,11 +63,11 @@ Hardware Requirement: More than 1GB of HD / At least 1 core processor / 512MB mi
 
 Installation may take up to about 30 minutes which may also depend on your server's internet speed. After the installation is completed, you are ready to use Cipi to manage your servers.
 
-To correctly manage remote servers Cipi has to be on a public IP address (IPv4). Do not use it in localhost!
+To correctly manage remote servers Spikster has to be on a public IP address (IPv4). Do not use it in localhost!
 
-## Cipi LEMP environment
+## Spikster LEMP environment
 - nginx: 1.18
-- PHP-FPM: 8.1, 8.0, 7.4
+- PHP-FPM: 8.2, 8.1, 8.0, 7.4
 - MySql: 8
 - node: 16
 - npm: 8
@@ -85,7 +86,9 @@ Spikster is easy, stable, powerful and free for any personal and commercial use 
 
 ## Spikster Roadmap... what's next? 
 - Update all packages since Cipi v3
-- Laravel 10 & Livewire 3 support
+- Tailwindcss design
+- Livewire 3 components
+- Update manager
 - Backup on s3
 - Apps installer
 - ...
