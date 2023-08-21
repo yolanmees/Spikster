@@ -1,3 +1,74 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+@layer components {
+    .btn {
+        @apply font-semibold py-2 px-4 rounded;
+    }
+    .btn-primary {
+        @apply bg-blue-500 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75;
+    }
+
+    .btn-secondary {
+        @apply bg-gray-500 text-white rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75;
+    }
+
+    .btn-danger {
+        @apply bg-red-500 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-75;
+    }
+
+    .btn-success {
+        @apply bg-green-500 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75;
+    }
+
+    .btn-warning {
+        @apply bg-yellow-500 text-white rounded-lg hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-opacity-75;
+    }
+
+    .btn-info {
+        @apply bg-teal-500 text-white rounded-lg hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-opacity-75;
+    }
+
+    .btn-light {
+        @apply bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75;
+    }
+
+    .btn-dark {
+        @apply bg-gray-700 text-white rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75;
+    }
+
+    .btn-link {
+        @apply text-blue-500 underline hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75;
+    }
+
+    .breadcrumbs {
+        @apply flex w-full text-sm leading-none bg-gray-100 text-gray-600 p-4 mb-4;
+    }
+    .breadcrumb-item {
+        @apply inline-block mr-8;
+    }
+    .card {
+        @apply bg-white rounded-lg border border-gray-400 overflow-hidden;
+    }
+    .card-header {
+        @apply bg-gray-200 text-gray-700 py-3 px-4 border-b border-gray-400;
+    }
+    .card-body {
+        @apply p-4;
+    }
+
+    .input-group {
+        @apply flex w-full mb-3;
+    }
+
+    .menu-item {
+        @apply bg-gray-800 text-white group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold;
+    }
+
+    .menu-item-active {
+        
+    }
+
+}

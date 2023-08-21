@@ -8,13 +8,14 @@
 
 
 @section('content')
-<ol class="breadcrumb mb-4">
-    <li class="ml-1 breadcrumb-item active">IP:<b><span class="ml-1" id="serveriptop"></span></b></li>
-    <li class="ml-1 breadcrumb-item active">{{ __('cipi.sites') }}:<b><span class="ml-1" id="serversites"></span></b></li>
-    <li class="ml-1 breadcrumb-item active">Ping:<b><span class="ml-1" id="serverping"><i class="fas fa-circle-notch fa-spin"></i></span></b></li>
+<ol class="breadcrumbs">
+    <li class="breadcrumb-item active">IP:<b><span class="ml-1" id="serveriptop"></span></b></li>
+    <li class="breadcrumb-item active">{{ __('cipi.sites') }}:<b><span class="ml-1" id="serversites"></span></b></li>
+    <li class="breadcrumb-item active">Ping:<b><span class="ml-1" id="serverping"><i class="fas fa-circle-notch fa-spin"></i></span></b></li>
 </ol>
-<div class="row">
-    <div class="col-xl-6">
+
+<div class="flex gap-x-4">
+    <div class="w-1/2">
         <div class="card mb-4">
             <div class="card-header">
                 <i class="fas fa-microchip fs-fw mr-1"></i>
@@ -26,7 +27,7 @@
             </div>
         </div>
     </div>
-    <div class="col-xl-6">
+    <div class="w-1/2">
         <div class="card mb-4">
             <div class="card-header">
                 <i class="fas fa-memory fs-fw mr-1"></i>
@@ -39,8 +40,8 @@
         </div>
     </div>
 </div>
-<div class="row">
-    <div class="col-xl-4">
+<div class="flex gap-x-4">
+    <div class="w-1/3">
         <div class="card mb-4">
             <div class="card-header">
                 <i class="fas fa-info-circle fs-fw mr-1"></i>
@@ -76,7 +77,7 @@
             </div>
         </div>
     </div>
-    <div class="col-xl-4">
+    <div class="w-1/3">
         <div class="card mb-4">
             <div class="card-header">
                 <i class="fas fa-power-off fs-fw mr-1"></i>
@@ -111,7 +112,7 @@
             </div>
         </div>
     </div>
-    <div class="col-xl-4">
+    <div class="w-1/3">
         <div class="card mb-4">
             <div class="card-header">
                 <i class="fas fa-tools fs-fw mr-1"></i>

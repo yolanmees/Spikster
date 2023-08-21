@@ -21,36 +21,43 @@ Route::get('/', function () {
     return 'Domain/Subdomain not configured on this Server!';
 });
 
-Route::get('/login', function () {
-    return view('login');
-});
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-});
+// Route::get('/login', function () {
+//     return view('login');
+// })->name('login');
 
-Route::get('/servers', function () {
-    return view('servers');
-});
+Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified' ])->group(function () {
 
-Route::get('/servers/{server_id}', function ($server_id) {
-    return view('server', compact('server_id'));
-});
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    });
 
-Route::get('/sites', function () {
-    return view('sites');
-});
+    Route::get('/servers', function () {
+        return view('servers');
+    });
 
-Route::get('/sites/{site_id}', function ($site_id) {
-    return view('site', compact('site_id'));
-});
+    Route::get('/servers/{server_id}', function ($server_id) {
+        return view('server', compact('server_id'));
+    });
 
-Route::get('/settings', function () {
-    return view('settings');
-});
+    Route::get('/sites', function () {
+        return view('sites');
+    });
 
-Route::get('/design', function () {
-    return view('design');
-});
+    Route::get('/sites/{site_id}', function ($site_id) {
+        return view('site', compact('site_id'));
+    });
 
-Route::get('/pdf/{site_id}/{token}', [SiteController::class, 'pdf']);
+    Route::get('/settings', function () {
+        return view('settings');
+    });
+
+    Route::get('/design', function () {
+        return view('design');
+    });
+
+
+
+    Route::get('/pdf/{site_id}/{token}', [SiteController::class, 'pdf']);
+
+});

@@ -66,7 +66,6 @@ class Kernel extends HttpKernel
         ],
         'api' => [
             'throttle:api',
-            \App\Http\Middleware\CipiAuth::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
     ];

@@ -8,7 +8,9 @@
 
 
 @section('content')
-<div id="dashboard"></div>
+<div clas="p-4">
+    <div id="dashboard"></div>
+</div>
 @endsection
 
 
@@ -53,12 +55,43 @@ $.ajax({
                         $('#hdd-'+server.server_id).html(data.hdd+'%');
                     }
                 });
-                $('#dashboard').append('<div class="row servercard" serverid="'+server.server_id+'"><div class="col-sm-12 mb-4"><div class="card border-left-default shadow h-100 py-2"><div class="card-body"><div class="row no-gutters align-items-center"><div class="col mr-2"><div class="text-xs font-weight-bold text-default text-uppercase mb-1 d-none d-lg-block">{{ __('cipi.server') }}</div><div class="h4 mb-0 font-weight-bold text-gray-800 mb-1">'+server.name+'</div></div><div class="col mr-2 d-none d-xl-block"><div class="text-xs font-weight-bold text-default text-uppercase mb-1 text-center">{{ __('cipi.sites') }}</div><div class="h6 mb-0 font-weight-bold text-gray-800 mb-1 text-center">'+server.sites+'</div></div><div class="col mr-2 d-none d-lg-block"><div class="text-xs font-weight-bold text-default text-uppercase mb-1 text-center">{{ __('cipi.cpu') }}</div><div class="h6 mb-0 font-weight-bold text-gray-800 mb-1 text-center" id="cpu-'+server.server_id+'"><i class="fas fa-spinner fa-spin" title="{{ __('cipi.loading_please_wait') }}"></i></div></div><div class="col mr-2 d-none d-lg-block"><div class="text-xs font-weight-bold text-default text-uppercase mb-1 text-center">{{ __('cipi.ram') }}</div><div class="h6 mb-0 font-weight-bold text-gray-800 mb-1 text-center" id="ram-'+server.server_id+'"><i class="fas fa-spinner fa-spin" title="{{ __('cipi.loading_please_wait') }}"></i></div></div><div class="col mr-2 d-none d-lg-block"><div class="text-xs font-weight-bold text-default text-uppercase mb-1 text-center">{{ __('cipi.hdd') }}</div><div class="h6 mb-0 font-weight-bold text-gray-800 mb-1 text-center" id="hdd-'+server.server_id+'"><i class="fas fa-spinner fa-spin" title="{{ __('cipi.loading_please_wait') }}"></i></div></div><div class="col-auto"><a href="/servers/'+server.server_id+'" title="{{ __('cipi.manage') }}"><i class="fas fa-arrow-circle-right fa-2x text-gray-300" id="ping-'+server.server_id+'"></i></a></div></div></div></div></div></div>');
+                $('#dashboard').append(`<div class="row flex w-full servercard" serverid="`+server.server_id+`">
+                    <div class="w-full mb-4">
+                        <div class="card border-left-default shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="flex">
+                                    <div class="w-2/12">
+                                        <div class="text-xs font-weight-bold text-default text-uppercase mb-1 d-none d-lg-block">{{ __('cipi.server') }}</div>
+                                        <div class="h4 mb-0 font-weight-bold text-gray-800 mb-1">`+server.name+`</div>
+                                    </div>
+                                    <div class="w-2/12 mr-2 d-none d-xl-block">
+                                        <div class="text-xs font-weight-bold text-default text-uppercase mb-1 text-center">{{ __('cipi.sites') }}</div>
+                                        <div class="h6 mb-0 font-weight-bold text-gray-800 mb-1 text-center">`+server.sites+`</div>
+                                    </div>
+                                    <div class="w-2/12 mr-2 d-none d-lg-block">
+                                        <div class="text-xs font-weight-bold text-default text-uppercase mb-1 text-center">{{ __('cipi.cpu') }}</div>
+                                        <div class="h6 mb-0 font-weight-bold text-gray-800 mb-1 text-center" id="cpu-`+server.server_id+`"><i class="fas fa-spinner fa-spin" title="{{ __('cipi.loading_please_wait') }}"></i></div>
+                                    </div>
+                                    <div class="w-2/12 mr-2 d-none d-lg-block">
+                                        <div class="text-xs font-weight-bold text-default text-uppercase mb-1 text-center">{{ __('cipi.ram') }}</div>
+                                        <div class="h6 mb-0 font-weight-bold text-gray-800 mb-1 text-center" id="ram-`+server.server_id+`"><i class="fas fa-spinner fa-spin" title="{{ __('cipi.loading_please_wait') }}"></i></div>
+                                    </div>
+                                    <div class="w-2/12 mr-2 d-none d-lg-block">
+                                        <div class="text-xs font-weight-bold text-default text-uppercase mb-1 text-center">{{ __('cipi.hdd') }}</div>
+                                        <div class="h6 mb-0 font-weight-bold text-gray-800 mb-1 text-center" id="hdd-`+server.server_id+`"><i class="fas fa-spinner fa-spin" title="{{ __('cipi.loading_please_wait') }}"></i></div>
+                                    </div>
+                                    <div class="col-auto"><a href="/servers/`+server.server_id+`" title="{{ __('cipi.manage') }}"><i class="fas fa-arrow-circle-right fa-2x text-gray-300" id="ping-`+server.server_id+`"></i></a></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`);
+
                 count=count+1;
             }
         });
         if(count = 0) {
-            $('#dashboard').html('<div class="col-sm-12 text-center"><div class="space"></div><div class="space"></div><div class="space"></div><i class="fab fa-linux fa-10x"></i><h4>{{ __('cipi.no_results_found') }}</h4><div class="space"></div><a href="/servers" class="btn btn-primary">{{ __('cipi.add_new_server') }}!</a><div class="space"></div></div>');
+            $('#dashboard').html('<div class="flex col-sm-12 text-center"><div class="space"></div><div class="space"></div><div class="space"></div><i class="fab fa-linux fa-10x"></i><h4>{{ __('cipi.no_results_found') }}</h4><div class="space"></div><a href="/servers" class="btn btn-primary">{{ __('cipi.add_new_server') }}!</a><div class="space"></div></div>');
         }
     }
 });

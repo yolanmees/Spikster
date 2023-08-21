@@ -124,7 +124,7 @@ class ServerController extends Controller
             array_push($response, $data);
         }
 
-        return response()->json($response);
+        return response()->json($response, 200);
     }
 
 
@@ -1332,6 +1332,7 @@ class ServerController extends Controller
                     $ssh->exec('sudo systemctl restart nginx.service');
                     break;
                 case 'php':
+                    $ssh->exec('sudo service php8.2-fpm restart');
                     $ssh->exec('sudo service php8.1-fpm restart');
                     $ssh->exec('sudo service php8.0-fpm restart');
                     $ssh->exec('sudo service php7.4-fpm restart');

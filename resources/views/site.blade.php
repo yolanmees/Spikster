@@ -8,14 +8,14 @@
 
 
 @section('content')
-<ol class="breadcrumb mb-4">
-    <li class="ml-1 breadcrumb-item active">IP:<b><span class="ml-1" id="siteip"></span></b></li>
-    <li class="ml-1 breadcrumb-item active">{{ __('cipi.aliases') }}:<b><span class="ml-1" id="sitealiases"></span></b></li>
-    <li class="ml-1 breadcrumb-item active">PHP:<b><span class="ml-1" id="sitephp"></span></b></li>
-    <li class="ml-1 breadcrumb-item active">{{ __('cipi.site_base_path') }}:<b><span class="ml-1">/home/</span><span id="siteuserinfo"></span>/web/<span id="sitebasepathinfo"></span></b></li>
+<ol class="breadcrumbs mb-4">
+    <li class="breadcrumb-item active">IP:<b><span class="ml-1" id="siteip"></span></b></li>
+    <li class="breadcrumb-item active">{{ __('cipi.aliases') }}:<b><span class="ml-1" id="sitealiases"></span></b></li>
+    <li class="breadcrumb-item active">PHP:<b><span class="ml-1" id="sitephp"></span></b></li>
+    <li class="breadcrumb-item active">{{ __('cipi.site_base_path') }}:<b><span class="ml-1">/home/</span><span id="siteuserinfo"></span>/web/<span id="sitebasepathinfo"></span></b></li>
 </ol>
-<div class="row">
-    <div class="col-xl-6">
+<div class="flex gap-x-4">
+    <div class="w-1/2">
         <div class="card mb-4">
             <div class="card-header">
                 <i class="fas fa-info-circle fs-fw mr-1"></i>
@@ -39,7 +39,7 @@
             </div>
         </div>
     </div>
-    <div class="col-xl-6">
+    <div class="w-1/2">
         <div class="card mb-4">
             <div class="card-header">
                 <i class="fas fa-globe fs-fw mr-1"></i>
@@ -63,8 +63,8 @@
         </div>
     </div>
 </div>
-<div class="row">
-    <div class="col-xl-4">
+<div class="flex gap-x-4">
+    <div class="w-1/3">
         <div class="card mb-4">
             <div class="card-header">
                 <i class="fas fa-lock fs-fw mr-1"></i>
@@ -82,7 +82,7 @@
             </div>
         </div>
     </div>
-    <div class="col-xl-4">
+    <div class="w-1/3">
         <div class="card mb-4">
             <div class="card-header">
                 <i class="fab fa-github fs-fw mr-1"></i>
@@ -108,7 +108,7 @@
             </div>
         </div>
     </div>
-    <div class="col-xl-4">
+    <div class="w-1/3">
         <div class="card mb-4">
             <div class="card-header">
                 <i class="fas fa-tools fs-fw mr-1"></i>

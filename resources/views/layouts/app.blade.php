@@ -1,10 +1,4 @@
 <!DOCTYPE html>
-<script>
-    if (localStorage.getItem('username') === null) {
-        window.location.replace('/login');
-    } //Session Check
-
-</script>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
@@ -20,7 +14,8 @@
     <link href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap4.min.css" rel="stylesheet" />
     <link href="https://cdn.datatables.net/responsive/2.2.7/css/responsive.bootstrap4.min.css" rel="stylesheet" />
     <link rel="icon" type="image/png" href="/favicon.png" />
-    <link href="/assets/css/app.css" rel="stylesheet" />
+    <link href="/css/app.css" rel="stylesheet" />
+
     <style>
         .space {
             min-height: 20px;
@@ -50,108 +45,74 @@
     </style>
     @yield('css')
 </head>
-<body class="sb-nav-fixed">
-    <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
-        <a class="navbar-brand" href="/dashboard">{{ config('cipi.name') }}</a>
-        <button class="btn btn-link btn-sm order-1 order-lg-0  d-lg-none" id="sidebarToggle" href="#"><i class="fas fa-bars"></i></button>
-    </nav>
-    <div id="layoutSidenav">
-        <div id="layoutSidenav_nav">
-            <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
-                <div class="sb-sidenav-menu">
-                    <div class="nav">
-                        <div class="sb-sidenav-menu-heading">{{ __('cipi.menu') }}</div>
-                        <a class="nav-link {{ request()->is('dashboard*') ? 'active' : '' }}" href="/dashboard">
-                            <div class="sb-nav-link-icon"><i class="fas fa-fw fa-th-large"></i></div>
-                            {{ __('cipi.sidebar_menu.dashboard') }}
-                        </a>
-                        <a class="nav-link {{ request()->is('servers*') ? 'active' : '' }}" href="/servers">
-                            <div class="sb-nav-link-icon"><i class="fas fa-fw fa-server"></i></div>
-                            {{ __('cipi.sidebar_menu.servers') }}
-                        </a>
-                        <a class="nav-link {{ request()->is('sites*') ? 'active' : '' }}" href="/sites">
-                            <div class="sb-nav-link-icon"><i class="fas fa-fw fa-rocket"></i></div>
-                            {{ __('cipi.sidebar_menu.sites') }}
-                        </a>
-                        <a class="nav-link {{ request()->is('settings*') ? 'active' : '' }}" href="/settings">
-                            <div class="sb-nav-link-icon"><i class="fas fa-fw fa-cog"></i></div>
-                            {{ __('cipi.sidebar_menu.settings') }}
-                        </a>
-                        <a class="nav-link" href="#" id="logout">
-                            <div class="sb-nav-link-icon"><i class="fas fa-fw fa-sign-out-alt"></i></div>
-                            {{ __('cipi.sidebar_menu.logout') }}
-                        </a>
-                    </div>
-                </div>
-                <div class="sb-sidenav-footer">
-                    <div class="small">{{ __('cipi.panel_version') }}:</div>
-                    <span id="panelversion"></span>
-                    <div class="space"></div>
-                    <div class="small">{{ __('cipi.logged_in_as') }}:</div>
-                    <span id="username"></span>
-                </div>
-            </nav>
-        </div>
-        <div id="layoutSidenav_content">
-            <main>
-                <div class="container-fluid">
-                    <h1 class="mt-4">@yield('title') <span id="maintitle"></span></h1>
-                    <div class="space"></div>
-                    <div id="success" class="d-none">
-                        <div class="row">
-                            <div class="col-xl-12">
-                                <div class="card bg-primary text-white mb-12">
-                                    <div class="card-body">
-                                        <b><i class="fas fa-check"></i></b> <span id="successtext"></span>
-                                        <button type="button" class="close" id="successx">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
+<body>
+
+    <!--
+  This example requires updating your template:
+
+  ```
+  <html class="h-full bg-gray-900">
+  <body class="h-full">
+  ```
+-->
+    <div>
+        @include('layouts.components.mobile-sidebar')
+
+
+   
+ 
+        @include('layouts.components.sidebar')
+
+
+        <div class="xl:pl-72">
+            <!-- Sticky search header -->
+            <div class="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-6 border-b border-white/5 bg-gray-900 px-4 shadow-sm sm:px-6 lg:px-8">
+                <button type="button" class="-m-2.5 p-2.5 text-white xl:hidden">
+                    <span class="sr-only">Open sidebar</span>
+                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10zm0 5.25a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75a.75.75 0 01-.75-.75z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+
+                <div class="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
+                    <form class="flex flex-1" action="#" method="GET">
+                        <label for="search-field" class="sr-only">Search</label>
+                        <div class="relative w-full">
+                            <svg class="pointer-events-none absolute inset-y-0 left-0 h-full w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
+                            </svg>
+                            <input id="search-field" class="block h-full w-full border-0 bg-transparent py-0 pl-8 pr-0 text-white focus:ring-0 sm:text-sm" placeholder="Search..." type="search" name="search">
                         </div>
-                        <div class="space"></div>
-                    </div>
-                    <div id="fail" class="d-none">
-                        <div class="row">
-                            <div class="col-xl-12">
-                                <div class="card bg-secondary text-white mb-12">
-                                    <div class="card-body">
-                                        <b><i class="fas fa-times"></i></b> <span id="failtext"></span>
-                                        <button type="button" class="close" id="failx">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="space"></div>
-                    </div>
-                    @yield('content')
-                </div>
-            </main>
-        </div>
-        <div id="mainloading" class="d-none">
-            <p><i class="fas fa-circle-notch fa-spin" id="mainloadingicon"></i> {{ __('cipi.loading_data') }}...</p>
-        </div>
-        @yield('extra')
-        <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="errorModalLabel">{{ __('cipi.system_error') }}</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <p>{{ __('cipi.unknown_error') }}</p>
-                        <div class="space"></div>
-                    </div>
+                    </form>
                 </div>
             </div>
+
+            <main class="m-4">
+                @yield('content')
+            </main>
+
+            <!-- Activity feed -->
+            {{-- <aside class="bg-black/10 lg:fixed lg:bottom-0 lg:right-0 lg:top-16 lg:w-96 lg:overflow-y-auto lg:border-l lg:border-white/5">
+                <header class="flex items-center justify-between border-b border-white/5 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+                    <h2 class="text-base font-semibold leading-7 text-white">Activity feed</h2>
+                    <a href="#" class="text-sm font-semibold leading-6 text-indigo-400">View all</a>
+                </header>
+                <ul role="list" class="divide-y divide-white/5">
+                    <li class="px-4 py-4 sm:px-6 lg:px-8">
+                        <div class="flex items-center gap-x-3">
+                            <img src="https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="" class="h-6 w-6 flex-none rounded-full bg-gray-800">
+                            <h3 class="flex-auto truncate text-sm font-semibold leading-6 text-white">Michael Foster</h3>
+                            <time datetime="2023-01-23T11:00" class="flex-none text-xs text-gray-600">1h</time>
+                        </div>
+                        <p class="mt-3 truncate text-sm text-gray-500">Pushed to <span class="text-gray-400">ios-app</span> (<span class="font-mono text-gray-400">2d89f0c8</span> on <span class="text-gray-400">main</span>)</p>
+                    </li>
+
+                    <!-- More items... -->
+                </ul>
+            </aside> --}}
         </div>
     </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/assets/js/app.js"></script>
