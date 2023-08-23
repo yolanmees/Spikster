@@ -437,7 +437,7 @@ echo "${reset}"
 sleep 1s
 
 sudo apt-get -y install git
-sudo ssh-keygen -t rsa -C "git@github.com" -f /etc/Spikster/github -q -P ""
+sudo ssh-keygen -t rsa -C "git@github.com" -f /etc/spikster/github -q -P ""
 
 
 
@@ -494,7 +494,7 @@ server {
     }
 }
 EOF
-sudo mkdir /etc/nginx/Spikster/
+sudo mkdir /etc/nginx/spikster/
 sudo systemctl restart nginx.service
 
 
@@ -600,7 +600,7 @@ CREATE DATABASE IF NOT EXISTS cipi;
 EOF
 clear
 sudo rm -rf /var/www/html
-cd /var/www && git clone https://github.com/$REPO.git html
+cd /var/www && git clone https://github.com/yolanmees/Spikster.git html
 cd /var/www/html && git pull
 cd /var/www/html && git checkout $BRANCH
 cd /var/www/html && git pull

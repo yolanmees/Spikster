@@ -69,7 +69,7 @@ sudo dos2unix $NGINX
 POOL=/etc/php/$PHP/fpm/pool.d/$USER_NAME.conf
 sudo wget $REMOTE/conf/php/$SITEID -O $POOL
 sudo dos2unix $POOL
-CUSTOM=/etc/nginx/cipi/$USER_NAME.conf
+CUSTOM=/etc/nginx/spikster/$USER_NAME.conf
 sudo wget $REMOTE/conf/nginx -O $CUSTOM
 sudo dos2unix $CUSTOM
 sudo ln -s $NGINX /etc/nginx/sites-enabled/$USER_NAME.conf
@@ -79,7 +79,7 @@ sudo systemctl restart nginx.service
 
 DBNAME=$USER_NAME
 DBUSER=$USER_NAME
-/usr/bin/mysql -u cipi -p$DBROOT <<EOF
+/usr/bin/mysql -u spikster -p$DBROOT <<EOF
 CREATE DATABASE IF NOT EXISTS $DBNAME;
 use mysql;
 CREATE USER $DBUSER@'%' IDENTIFIED WITH mysql_native_password BY '$DBPASS';
@@ -89,7 +89,7 @@ EOF
 
 sudo mkdir /home/$USER_NAME/.cache
 sudo mkdir /home/$USER_NAME/git
-sudo cp /etc/cipi/github /home/$USER_NAME/git/deploy
+sudo cp /etc/spikster/github /home/$USER_NAME/git/deploy
 
 sudo chown -R $USER_NAME:$USER_NAME /home/$USER_NAME/.cache
 sudo chown -R $USER_NAME:$USER_NAME /home/$USER_NAME/git
