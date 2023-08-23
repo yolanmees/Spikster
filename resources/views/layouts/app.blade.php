@@ -90,7 +90,9 @@
             <main class="m-4">
                 @yield('content')
             </main>
-
+            <div class="grid place-items-center"> 
+                @yield('extra')
+            </div>
             <!-- Activity feed -->
             {{-- <aside class="bg-black/10 lg:fixed lg:bottom-0 lg:right-0 lg:top-16 lg:w-96 lg:overflow-y-auto lg:border-l lg:border-white/5">
                 <header class="flex items-center justify-between border-b border-white/5 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">

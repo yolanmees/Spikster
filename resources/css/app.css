@@ -64,11 +64,44 @@
     }
 
     .menu-item {
-        @apply bg-gray-800 text-white group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold;
+        @apply text-gray-400 hover:text-white hover:bg-gray-800 flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold;
     }
 
     .menu-item-active {
-        
+        @apply bg-gray-800 text-white flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold;
     }
+
+    .modal {
+        @apply fixed hidden inset-0 z-50 items-center justify-center w-full h-full bg-gray-900 bg-opacity-50;
+    }
+
+    .modal[aria-modal="true"] {
+        @apply flex !important;
+    }
+
+    .modal-dialog {
+        @apply bg-white rounded-lg w-1/2 border border-gray-400;
+    }
+
+    .modal-content {
+        @apply py-4 px-6;
+    }
+
+    .modal-header {
+        @apply flex justify-between items-center border-b border-gray-400 pb-3;
+    }
+
+    .modal-title {
+        @apply text-lg font-semibold;
+    }
+
+    .modal-close {
+        @apply text-gray-400 hover:text-gray-600 cursor-pointer;
+    }
+
+    .modal-body {
+        @apply py-3;
+    }
+
 
 }

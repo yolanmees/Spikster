@@ -162,7 +162,7 @@
 
 @section('extra')
 <input type="hidden" id="currentip">
-<div class="modal fade" id="updateServerModal" tabindex="-1" role="dialog" aria-labelledby="updateServerModalLabel" aria-hidden="true">
+<dialog class="modal fade" id="updateServerModal" tabindex="-1" role="dialog" aria-labelledby="updateServerModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document" id="updateserverdialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -181,8 +181,8 @@
             </div>
         </div>
     </div>
-</div>
-<div class="modal fade" id="crontabModal" tabindex="-1" role="dialog" aria-labelledby="crontabModalLabel" aria-hidden="true">
+</dialog>
+<dialog class="modal fade" id="crontabModal" tabindex="-1" role="dialog" aria-labelledby="crontabModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -202,8 +202,8 @@
             </div>
         </div>
     </div>
-</div>
-<div class="modal fade" id="rootresetModal" tabindex="-1" role="dialog" aria-labelledby="rootresetModalLabel" aria-hidden="true">
+</dialog>
+<dialog class="modal fade" id="rootresetModal" tabindex="-1" role="dialog" aria-labelledby="rootresetModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -222,7 +222,7 @@
             </div>
         </div>
     </div>
-</div>
+</dialog>
 @endsection
 
 

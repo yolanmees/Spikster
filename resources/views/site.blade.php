@@ -148,7 +148,7 @@
 @section('extra')
 <input type="hidden" id="currentdomain">
 <input type="hidden" id="server_id">
-<div class="modal fade" id="repositoryModal" tabindex="-1" role="dialog" aria-labelledby="repositoryModalLabel" aria-hidden="true">
+<dialog class="modal fade" id="repositoryModal" tabindex="-1" role="dialog" aria-labelledby="repositoryModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document" id="repositorydialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -179,8 +179,8 @@
             </div>
         </div>
     </div>
-</div>
-<div class="modal fade" id="deployModal" tabindex="-1" role="dialog" aria-labelledby="deployModalLabel" aria-hidden="true">
+</dialog>
+<dialog class="modal fade" id="deployModal" tabindex="-1" role="dialog" aria-labelledby="deployModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -200,8 +200,8 @@
             </div>
         </div>
     </div>
-</div>
-<div class="modal fade" id="sshresetModal" tabindex="-1" role="dialog" aria-labelledby="sshresetModalLabel" aria-hidden="true">
+</dialog>
+<dialog class="modal fade" id="sshresetModal" tabindex="-1" role="dialog" aria-labelledby="sshresetModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -220,8 +220,8 @@
             </div>
         </div>
     </div>
-</div>
-<div class="modal fade" id="mysqlresetModal" tabindex="-1" role="dialog" aria-labelledby="mysqlresetModalLabel" aria-hidden="true">
+</dialog>
+<dialog class="modal fade" id="mysqlresetModal" tabindex="-1" role="dialog" aria-labelledby="mysqlresetModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -240,7 +240,7 @@
             </div>
         </div>
     </div>
-</div>
+</dialog>
 @endsection
 
 

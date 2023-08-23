@@ -40,7 +40,7 @@
 
 
 @section('extra')
-    <div class="modal fade" id="newSiteModal" tabindex="-1" role="dialog" aria-labelledby="newSiteModalLabel" aria-hidden="true">
+    <dialog class="modal fade" id="newSiteModal" tabindex="-1" role="dialog" aria-labelledby="newSiteModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document" id="newsitedialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -115,8 +115,8 @@
                 </div>
             </div>
         </div>
-    </div>
-    <div class="modal fade" id="deleteSiteModal" tabindex="-1" role="dialog" aria-labelledby="deleteSiteModalLabel" aria-hidden="true">
+    </dialog>
+    <dialog class="modal fade" id="deleteSiteModal" tabindex="-1" role="dialog" aria-labelledby="deleteSiteModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -137,7 +137,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </dialog>
 @endsection
 
 

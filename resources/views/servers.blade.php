@@ -41,7 +41,7 @@
 
 
 @section('extra')
-<div class="modal fade" id="newServerModal" tabindex="-1" role="dialog" aria-labelledby="newServerModalLabel" aria-hidden="true">
+<dialog class="modal fade" id="newServerModal" tabindex="-1" role="dialog" aria-labelledby="newServerModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document" id="newserverdialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -96,8 +96,8 @@
             </div>
         </div>
     </div>
-</div>
-<div class="modal fade" id="installServerModal" tabindex="-1" role="dialog" aria-labelledby="installServerModalLabel" aria-hidden="true">
+</dialog>
+<dialog class="modal fade" id="installServerModal" tabindex="-1" role="dialog" aria-labelledby="installServerModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -125,13 +125,13 @@
             </div>
         </div>
     </div>
-</div>
-<div class="modal fade" id="deleteServerModal" tabindex="-1" role="dialog" aria-labelledby="deleteServerModalLabel" aria-hidden="true">
+</dialog>
+<dialog class="modal fade" id="deleteServerModal" tabindex="-1" role="dialog" aria-labelledby="deleteServerModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="deleteServerModalLabel">{{ __('cipi.delete_server') }}</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeDialog()">
                 <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -151,7 +151,7 @@
             </div>
         </div>
     </div>
-</div>
+</dialog>
 @endsection
 
 
@@ -320,7 +320,10 @@
         $('#newserverok').addClass('d-none');
         $('#loading').addClass('d-none');
         $('#newserverdialog').removeClass('modal-lg');
+        {{-- const newServerModal = document.getElementById('newServerModal');
+        newServerModal.showModal(); --}}
         $('#newServerModal').modal();
+       
     });
 
     //New Server Validation

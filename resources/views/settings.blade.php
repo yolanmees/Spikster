@@ -9,8 +9,8 @@
 
 
 @section('content')
-<div class="row">
-    <div class="col-xl-6">
+<div class="flex gap-x-4">
+    <div class="w-1/2">
         <div class="card mb-4">
             <div class="card-header">
                 <i class="fas fa-user fs-fw mr-1"></i>
@@ -28,7 +28,7 @@
             </div>
         </div>
     </div>
-    <div class="col-xl-6">
+    <div class="w-1/2">
         <div class="card mb-4">
             <div class="card-header">
                 <i class="fas fa-key fs-fw mr-1"></i>
@@ -93,7 +93,7 @@
 
 
 @section('extra')
-<div class="modal fade" id="authorizeModal" tabindex="-1" role="dialog" aria-labelledby="authorizeModalLabel" aria-hidden="true">
+<dialog class="modal fade" id="authorizeModal" tabindex="-1" role="dialog" aria-labelledby="authorizeModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -115,7 +115,7 @@
             </div>
         </div>
     </div>
-</div>
+</dialog>
 @endsection
 
 
