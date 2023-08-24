@@ -1526,4 +1526,44 @@ class ServerController extends Controller
 
         return response()->json($response);
     }
+
+
+    public function fail2ban(string $server_id)
+    {
+        $server = Server::where('server_id', $server_id)->where('status', 1)->first();
+      
+        try {
+           
+            $ssh = new SSH2($server->ip, 22);
+            if (!$ssh->login('cipi', $server->password)) {
+                return response()->json([
+                    'message' => __('cipi.server_error_ssh_error_message').$server->server_id,
+                    'errors' => __('cipi.server_error')
+                ], 500);
+            }
+            $ssh->setTimeout(360);
+            $iptables = $ssh->exec("sqlite3 /var/lib/fail2ban/fail2ban.sqlite3 'select ip,jail from bips'");
+            $ssh->exec('exit');
+            
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => __('cipi.something_error_message'),
+                'errors' => __('cipi.error')
+            ], 500);
+        }
+
+        $iptables = explode("\n", $iptables);
+
+        foreach($iptables as $i => $iprow){
+            if($iprow == ""){
+                unset($iptables[$i]);
+            }else{
+                $iptables[$i] = explode("|", $iprow);
+            }
+        }
+
+        return response()->json([
+            $iptables
+        ]);
+    }
 }
