@@ -27,4 +27,28 @@
     <button class="btn btn-link">Link</button>
 </div>
 
+<div class="pb-4">
+    <div class="sm:hidden">
+        <label for="tabs" class="sr-only">Select a tab</label>
+        <!-- Use an "onChange" listener to redirect the user to the selected tab URL. -->
+        <select id="tabs" name="tabs" class="block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+            <option selected>Monitor</option>
+            <option>Server information</option>
+            <option></option>
+            <option>Billing</option>
+        </select>
+    </div>
+    <div class="hidden sm:block">
+        <nav class="flex space-x-4" aria-label="Tabs">
+            <!-- Current: "bg-gray-200 text-gray-800", Default: "text-gray-600 hover:text-gray-800" -->
+            <a href="#" class="tab-item">Monitor</a>
+            <a href="#" class="tab-item">Server information</a>
+            <a href="#" class="tab-item-active" aria-current="page">Security</a>
+            <a href="#" class="tab-item">Billing</a>
+        </nav>
+    </div>
+</div>
+
+
+
 @endsection

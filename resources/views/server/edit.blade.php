@@ -8,221 +8,252 @@
 
 
 @section('content')
-<ol class="breadcrumbs">
-    <li class="breadcrumb-item active">IP:<b><span class="ml-1" id="serveriptop"></span></b></li>
-    <li class="breadcrumb-item active">{{ __('cipi.sites') }}:<b><span class="ml-1" id="serversites"></span></b></li>
-    <li class="breadcrumb-item active">Ping:<b><span class="ml-1" id="serverping"><i class="fas fa-circle-notch fa-spin"></i></span></b></li>
-</ol>
+<div x-data="{ tab: 'monitor' }">
+    <ol class="breadcrumbs">
+        <li class="breadcrumb-item active">IP:<b><span class="ml-1" id="serveriptop"></span></b></li>
+        <li class="breadcrumb-item active">{{ __('cipi.sites') }}:<b><span class="ml-1" id="serversites"></span></b></li>
+        <li class="breadcrumb-item active">Ping:<b><span class="ml-1" id="serverping"><i class="fas fa-circle-notch fa-spin"></i></span></b></li>
+    </ol>
 
-<div class="flex gap-x-4">
-    <div class="w-1/2">
-        <div class="card mb-4">
-            <div class="card-header">
-                <i class="fas fa-microchip fs-fw mr-1"></i>
-                {{ __('cipi.server_cpu_realtime_load') }}
+    <div class="pb-4">
+        <div class="sm:hidden">
+            <label for="tabs" class="sr-only">Select a tab</label>
+            <!-- Use an "onChange" listener to redirect the user to the selected tab URL. -->
+            <select id="tabs" name="tabs" class="block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                <option selected>Monitor</option>
+                <option>Server information</option>
+                <option>Security</option>
+                <option>Tools</option>
+            </select>
+        </div>
+        <div class="hidden sm:block">
+            <nav class="flex space-x-4" aria-label="Tabs">
+                <!-- Current: "bg-gray-200 text-gray-800", Default: "text-gray-600 hover:text-gray-800" -->
+                <a @click="tab = 'monitor'" clas="tab" :class="tab === 'monitor' ? 'tab-item-active' : 'tab-item'" aria-current="page">Monitor</a>
+                <a @click="tab = 'server'" :class="tab === 'server' ? 'tab-item-active' : 'tab-item'">Server information</a>
+                <a @click="tab = 'security'" :class="tab === 'security' ? 'tab-item-active' : 'tab-item'">Security</a>
+                <a @click="tab = 'tools'" :class="tab === 'tools' ? 'tab-item-active' : 'tab-item'">Tools</a>
+            </nav>
+        </div>
+    </div>
+
+
+
+    <div class="flex gap-x-4" x-show="tab === 'monitor'">
+        <div class="w-1/2">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-microchip fs-fw mr-1"></i>
+                    {{ __('cipi.server_cpu_realtime_load') }}
+                </div>
+                <div class="card-body">
+                    <canvas id="cpuChart" width="100%" height="40"></canvas>
+                    <div class="space"></div>
+                </div>
             </div>
-            <div class="card-body">
-                <canvas id="cpuChart" width="100%" height="40"></canvas>
-                <div class="space"></div>
+        </div>
+        <div class="w-1/2">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-memory fs-fw mr-1"></i>
+                    {{ __('cipi.server_ram_realtime_load') }}
+                </div>
+                <div class="card-body">
+                    <canvas id="ramChart" width="100%" height="40"></canvas>
+                    <div class="space"></div>
+                </div>
             </div>
         </div>
     </div>
-    <div class="w-1/2">
-        <div class="card mb-4">
-            <div class="card-header">
-                <i class="fas fa-memory fs-fw mr-1"></i>
-                {{ __('cipi.server_ram_realtime_load') }}
-            </div>
-            <div class="card-body">
-                <canvas id="ramChart" width="100%" height="40"></canvas>
-                <div class="space"></div>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="flex gap-x-4">
-    <div class="w-1/3">
-        <div class="card mb-4">
-            <div class="card-header">
-                <i class="fas fa-info-circle fs-fw mr-1"></i>
-                {{ __('cipi.server_information') }}
-            </div>
-            <div class="card-body">
-                <p>{{ __('cipi.server_name') }}:</p>
-                <div class="input-group">
-                    <input class="form-control" type="text" placeholder="e.g. Production" id="servername" autocomplete="off" />
+    <div class="flex gap-x-4" x-show="tab === 'server'">
+        <div class="w-1/3">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-info-circle fs-fw mr-1"></i>
+                    {{ __('cipi.server_information') }}
                 </div>
-                <div class="space"></div>
-                <p>{{ __('cipi.server_ip') }}:</p>
-                <div class="input-group">
-                    <input class="form-control" type="text" placeholder="e.g. 123.123.123.123" id="serverip" autocomplete="off" />
-                </div>
-                <div class="space"></div>
-                <p>{{ __('cipi.server_provider') }}:</p>
-                <div class="input-group">
-                    <input class="form-control" type="text" placeholder="e.g. Digital Ocean" id="serverprovider" autocomplete="off" />
-                </div>
-                <div class="space"></div>
-                <p>{{ __('cipi.server_location') }}:</p>
-                <div class="input-group">
-                    <input class="form-control" type="text" placeholder="e.g. Amsterdam" id="serverlocation" autocomplete="off" />
-                </div>
-                <div class="space"></div>
-                <div class="text-center">
-                    <button class="btn btn-primary" type="button" id="updateServer">{{ __('cipi.update') }}</button>
-                </div>
-                <div class="space"></div>
-                <div class="space"></div>
-                <div class="space"></div>
-            </div>
-        </div>
-    </div>
-    <div class="w-1/3">
-        <div class="card mb-4">
-            <div class="card-header">
-                <i class="fas fa-power-off fs-fw mr-1"></i>
-                {{ __('cipi.system_services') }}
-            </div>
-            <div class="card-body">
-                <p>nginx</p>
-                <div class="text-center">
-                    <button class="btn btn-warning" type="button" id="restartnginx">{{ __('cipi.restart') }} <i class="fas fa-circle-notch fa-spin d-none" id="loadingnginx"></i></button>
-                </div>
-                <div class="space"></div>
-                <p>PHP-FPM</p>
-                <div class="text-center">
-                    <button class="btn btn-warning" type="button" id="restartphp">{{ __('cipi.restart') }} <i class="fas fa-circle-notch fa-spin d-none" id="loadingphp"></i></button>
-                </div>
-                <div class="space"></div>
-                <p>MySql</p>
-                <div class="text-center">
-                    <button class="btn btn-warning" type="button" id="restartmysql">{{ __('cipi.restart') }} <i class="fas fa-circle-notch fa-spin d-none" id="loadingmysql"></i></button>
-                </div>
-                <div class="space"></div>
-                <p>Redis</p>
-                <div class="text-center">
-                    <button class="btn btn-warning" type="button" id="restartredis">{{ __('cipi.restart') }} <i class="fas fa-circle-notch fa-spin d-none" id="loadingredis"></i></button>
-                </div>
-                <div class="space"></div>
-                <p>Supervisor</p>
-                <div class="text-center">
-                    <button class="btn btn-warning" type="button" id="restartsupervisor">{{ __('cipi.restart') }} <i class="fas fa-circle-notch fa-spin d-none" id="loadingsupervisor"></i></button>
-                </div>
-                <div class="space"></div>
-            </div>
-        </div>
-    </div>
-    <div class="w-1/3">
-        <div class="card mb-4">
-            <div class="card-header">
-                <i class="fas fa-tools fs-fw mr-1"></i>
-                {{ __('cipi.tools') }}
-            </div>
-            <div class="card-body">
-                <p>{{ __('cipi.php_cli_version') }}:</p>
-                <div class="input-group">
-                    <select class="form-control" id="phpver">
-                        <option value="8.2" id="php82">8.2</option>
-                        <option value="8.1" id="php81">8.1</option>
-                        <option value="8.0" id="php80">8.0</option>
-                        <option value="7.4" id="php74">7.4</option>
-                    </select>
-                    <div class="input-group-append">
-                        <button class="btn btn-primary" type="button" id="changephp"><i class="fas fa-edit"></i></button>
+                <div class="card-body">
+                    <p>{{ __('cipi.server_name') }}:</p>
+                    <div class="input-group">
+                        <input class="form-control" type="text" placeholder="e.g. Production" id="servername" autocomplete="off" />
                     </div>
+                    <div class="space"></div>
+                    <p>{{ __('cipi.server_ip') }}:</p>
+                    <div class="input-group">
+                        <input class="form-control" type="text" placeholder="e.g. 123.123.123.123" id="serverip" autocomplete="off" />
+                    </div>
+                    <div class="space"></div>
+                    <p>{{ __('cipi.server_provider') }}:</p>
+                    <div class="input-group">
+                        <input class="form-control" type="text" placeholder="e.g. Digital Ocean" id="serverprovider" autocomplete="off" />
+                    </div>
+                    <div class="space"></div>
+                    <p>{{ __('cipi.server_location') }}:</p>
+                    <div class="input-group">
+                        <input class="form-control" type="text" placeholder="e.g. Amsterdam" id="serverlocation" autocomplete="off" />
+                    </div>
+                    <div class="space"></div>
+                    <div class="text-center">
+                        <button class="btn btn-primary" type="button" id="updateServer">{{ __('cipi.update') }}</button>
+                    </div>
+                    <div class="space"></div>
+                    <div class="space"></div>
+                    <div class="space"></div>
                 </div>
-                <div class="space"></div>
-                <p>{{ __('cipi.manage_cron_jobs') }}:</p>
-                <div>
-                    <button class="btn btn-primary" type="button" id="editcrontab">{{ __('cipi.edit_crontab') }}</button>
+            </div>
+        </div>
+        <div class="w-1/3">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-power-off fs-fw mr-1"></i>
+                    {{ __('cipi.system_services') }}
                 </div>
-                <div class="space"></div>
-                <p>{{ __('cipi.reset_cipi_password') }}:</p>
-                <div>
-                    <button class="btn btn-danger" type="button" id="rootreset">{{ __('cipi.require_reset_cipi_password') }}</button>
+                <div class="card-body">
+                    <p>nginx</p>
+                    <div class="text-center">
+                        <button class="btn btn-warning" type="button" id="restartnginx">{{ __('cipi.restart') }} <i class="fas fa-circle-notch fa-spin d-none" id="loadingnginx"></i></button>
+                    </div>
+                    <div class="space"></div>
+                    <p>PHP-FPM</p>
+                    <div class="text-center">
+                        <button class="btn btn-warning" type="button" id="restartphp">{{ __('cipi.restart') }} <i class="fas fa-circle-notch fa-spin d-none" id="loadingphp"></i></button>
+                    </div>
+                    <div class="space"></div>
+                    <p>MySql</p>
+                    <div class="text-center">
+                        <button class="btn btn-warning" type="button" id="restartmysql">{{ __('cipi.restart') }} <i class="fas fa-circle-notch fa-spin d-none" id="loadingmysql"></i></button>
+                    </div>
+                    <div class="space"></div>
+                    <p>Redis</p>
+                    <div class="text-center">
+                        <button class="btn btn-warning" type="button" id="restartredis">{{ __('cipi.restart') }} <i class="fas fa-circle-notch fa-spin d-none" id="loadingredis"></i></button>
+                    </div>
+                    <div class="space"></div>
+                    <p>Supervisor</p>
+                    <div class="text-center">
+                        <button class="btn btn-warning" type="button" id="restartsupervisor">{{ __('cipi.restart') }} <i class="fas fa-circle-notch fa-spin d-none" id="loadingsupervisor"></i></button>
+                    </div>
+                    <div class="space"></div>
                 </div>
-                <div class="space"></div>
-                <p>{{ __('cipi.hd_memory_usage') }}:</p>
-                <div>
-                    <span class="btn" id="hd"><i class="fas fa-circle-notch fa-spin" title="{{ __('cipi.loading_data') }}"></i></span>
-                </div>
-                <div class="space"></div>
-                <p>{{ __('cipi.cipi_build_version') }}:</p>
-                <div>
-                    <span class="btn btn-secondary" id="serverbuild"><i class="fas fa-circle-notch fa-spin"></i></span>
-                </div>
-                <div class="space"></div>
             </div>
         </div>
     </div>
+    <div class="flex gap-x-4" x-show="tab === 'security'">
+    
+    </div>
+    <div class="flex gap-x-4" x-show="tab === 'tools'">
+        <div class="w-1/3">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-tools fs-fw mr-1"></i>
+                    {{ __('cipi.tools') }}
+                </div>
+                <div class="card-body">
+                    <p>{{ __('cipi.php_cli_version') }}:</p>
+                    <div class="input-group">
+                        <select class="form-control" id="phpver">
+                            <option value="8.2" id="php82">8.2</option>
+                            <option value="8.1" id="php81">8.1</option>
+                            <option value="8.0" id="php80">8.0</option>
+                            <option value="7.4" id="php74">7.4</option>
+                        </select>
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" type="button" id="changephp"><i class="fas fa-edit"></i></button>
+                        </div>
+                    </div>
+                    <div class="space"></div>
+                    <p>{{ __('cipi.manage_cron_jobs') }}:</p>
+                    <div>
+                        <button class="btn btn-primary" type="button" id="editcrontab">{{ __('cipi.edit_crontab') }}</button>
+                    </div>
+                    <div class="space"></div>
+                    <p>{{ __('cipi.reset_cipi_password') }}:</p>
+                    <div>
+                        <button class="btn btn-danger" type="button" id="rootreset">{{ __('cipi.require_reset_cipi_password') }}</button>
+                    </div>
+                    <div class="space"></div>
+                    <p>{{ __('cipi.hd_memory_usage') }}:</p>
+                    <div>
+                        <span class="btn" id="hd"><i class="fas fa-circle-notch fa-spin" title="{{ __('cipi.loading_data') }}"></i></span>
+                    </div>
+                    <div class="space"></div>
+                    <p>{{ __('cipi.cipi_build_version') }}:</p>
+                    <div>
+                        <span class="btn btn-secondary" id="serverbuild"><i class="fas fa-circle-notch fa-spin"></i></span>
+                    </div>
+                    <div class="space"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endsection
+
+
+
+    @section('extra')
+    <input type="hidden" id="currentip">
+    <dialog class="modal fade" id="updateServerModal" tabindex="-1" role="dialog" aria-labelledby="updateServerModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document" id="updateserverdialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updateServerModalLabel">{{ __('cipi.update_server_modal_title') }}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>{{ __('cipi.update_server_modal_text') }}</p>
+                    <p class="d-none" id="ipnotice"><b>{!! __('cipi.update_server_modal_ip') !!}</b></p>
+                    <div class="text-center">
+                        <button class="btn btn-primary" type="button" id="submit">{{ __('cipi.confirm') }} <i class="fas fa-circle-notch fa-spin d-none" id="loading"></i></button>
+                    </div>
+                    <div class="space"></div>
+                </div>
+            </div>
+        </div>
+    </dialog>
+    <dialog class="modal fade" id="crontabModal" tabindex="-1" role="dialog" aria-labelledby="crontabModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="crontabModalLabel">{{ __('cipi.server_crontab') }}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>{{ __('cipi.server_crontab_edit') }}:</p>
+                    <div id="crontab" style="height:250px;width:100%;"></div>
+                    <div class="space"></div>
+                    <div class="text-center">
+                        <button class="btn btn-primary" type="button" id="crontabsubmit">{{ __('cipi.save') }} <i class="fas fa-circle-notch fa-spin d-none" id="crontableloading"></i></button>
+                    </div>
+                    <div class="space"></div>
+                </div>
+            </div>
+        </div>
+    </dialog>
+    <dialog class="modal fade" id="rootresetModal" tabindex="-1" role="dialog" aria-labelledby="rootresetModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="rootresetModalLabel">{{ __('cipi.require_password_reset_modal_title') }}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>{{ __('cipi.require_password_reset_modal_text') }}</p>
+                    <div class="space"></div>
+                    <div class="text-center">
+                        <button class="btn btn-danger" type="button" id="rootresetsubmit">{{ __('cipi.confirm') }} <i class="fas fa-circle-notch fa-spin d-none" id="rootresetloading"></i></button>
+                    </div>
+                    <div class="space"></div>
+                </div>
+            </div>
+        </div>
+    </dialog>
 </div>
-@endsection
-
-
-
-@section('extra')
-<input type="hidden" id="currentip">
-<dialog class="modal fade" id="updateServerModal" tabindex="-1" role="dialog" aria-labelledby="updateServerModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document" id="updateserverdialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="updateServerModalLabel">{{ __('cipi.update_server_modal_title') }}</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p>{{ __('cipi.update_server_modal_text') }}</p>
-                <p class="d-none" id="ipnotice"><b>{!! __('cipi.update_server_modal_ip') !!}</b></p>
-                <div class="text-center">
-                    <button class="btn btn-primary" type="button" id="submit">{{ __('cipi.confirm') }} <i class="fas fa-circle-notch fa-spin d-none" id="loading"></i></button>
-                </div>
-                <div class="space"></div>
-            </div>
-        </div>
-    </div>
-</dialog>
-<dialog class="modal fade" id="crontabModal" tabindex="-1" role="dialog" aria-labelledby="crontabModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="crontabModalLabel">{{ __('cipi.server_crontab') }}</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p>{{ __('cipi.server_crontab_edit') }}:</p>
-                <div id="crontab" style="height:250px;width:100%;"></div>
-                <div class="space"></div>
-                <div class="text-center">
-                    <button class="btn btn-primary" type="button" id="crontabsubmit">{{ __('cipi.save') }} <i class="fas fa-circle-notch fa-spin d-none" id="crontableloading"></i></button>
-                </div>
-                <div class="space"></div>
-            </div>
-        </div>
-    </div>
-</dialog>
-<dialog class="modal fade" id="rootresetModal" tabindex="-1" role="dialog" aria-labelledby="rootresetModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="rootresetModalLabel">{{ __('cipi.require_password_reset_modal_title') }}</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p>{{ __('cipi.require_password_reset_modal_text') }}</p>
-                <div class="space"></div>
-                <div class="text-center">
-                    <button class="btn btn-danger" type="button" id="rootresetsubmit">{{ __('cipi.confirm') }} <i class="fas fa-circle-notch fa-spin d-none" id="rootresetloading"></i></button>
-                </div>
-                <div class="space"></div>
-            </div>
-        </div>
-    </div>
-</dialog>
 @endsection
 
 

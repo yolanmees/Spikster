@@ -15,6 +15,8 @@
     {{-- <link href="https://cdn.datatables.net/responsive/2.2.7/css/responsive.bootstrap4.min.css" rel="stylesheet" /> --}}
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link href="/css/app.css" rel="stylesheet" />
+    @livewireStyles
+
 
     <style>
         .space {
@@ -114,7 +116,7 @@
             </aside> --}}
         </div>
     </div>
-
+    @livewireScripts
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/assets/js/app.js"></script>

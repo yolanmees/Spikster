@@ -33,19 +33,19 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified' 
     });
 
     Route::get('/servers', function () {
-        return view('servers');
+        return view('server.list');
     });
 
     Route::get('/servers/{server_id}', function ($server_id) {
-        return view('server', compact('server_id'));
+        return view('server.edit', compact('server_id'));
     });
 
     Route::get('/sites', function () {
-        return view('sites');
+        return view('site.list');
     });
 
     Route::get('/sites/{site_id}', function ($site_id) {
-        return view('site', compact('site_id'));
+        return view('site.edit', compact('site_id'));
     });
 
     Route::get('/settings', function () {

@@ -53,7 +53,7 @@
         @apply bg-white rounded-lg border border-gray-400 overflow-hidden;
     }
     .card-header {
-        @apply bg-gray-200 text-gray-700 py-3 px-4 border-b border-gray-400;
+        @apply bg-gray-100 text-gray-700 py-3 px-4 border-b border-gray-400;
     }
     .card-body {
         @apply p-4;
@@ -101,6 +101,14 @@
 
     .modal-body {
         @apply py-3;
+    }
+
+    .tab-item {
+        @apply text-gray-600 hover:text-gray-800 rounded-md px-3 py-2 text-sm font-medium;
+    }
+
+    .tab-item-active {
+        @apply bg-gray-200 text-gray-800 rounded-md px-3 py-2 text-sm font-medium;
     }
 
 
