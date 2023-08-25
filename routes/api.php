@@ -32,6 +32,8 @@ Route::post('/servers/{server_id}/rootreset', [ServerController::class, 'rootres
 Route::post('/servers/{server_id}/servicerestart/{service}', [ServerController::class, 'servicerestart']);
 Route::get('/servers/{server_id}/sites', [ServerController::class, 'sites']);
 Route::get('/servers/{server_id}/domains', [ServerController::class, 'domains']);
+Route::get('/servers/{server_id}/fail2ban', [ServerController::class, 'fail2ban']);
+
 
 //Sites
 Route::get('/sites', [SiteController::class, 'index']);
