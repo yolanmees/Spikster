@@ -76,7 +76,20 @@ class ConfController extends Controller
         return response($script)->withHeaders(['Content-Type' =>'text/plain']);
     }
 
+    /**
+     * Nodejs Site host configuration
+     *
+     */
+    public function hostNodeJs($site_id)
+    {
+        $site = Site::where('site_id', $site_id)->firstOrFail();
 
+        $script = Storage::get('cipi/host_nodejs.conf');
+        $script = str_replace('???USER???', $site->username, $script);
+        $script = str_replace('???PORT???', str_pad($site->id, 4, 0, STR_PAD_RIGHT), $script);
+        $script = str_replace('???DOMAIN???', $site->domain, $script);
+        return response($script)->withHeaders(['Content-Type' =>'text/plain']);
+    }
     
     /**
      * Site alias configuration

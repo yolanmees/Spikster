@@ -1039,6 +1039,9 @@ select {
 .pointer-events-none {
   pointer-events: none;
 }
+.visible {
+  visibility: visible;
+}
 .static {
   position: static;
 }
@@ -1097,6 +1100,9 @@ select {
 .m-4 {
   margin: 1rem;
 }
+.m-2 {
+  margin: 0.5rem;
+}
 .-mx-2 {
   margin-left: -0.5rem;
   margin-right: -0.5rem;
@@ -1120,6 +1126,10 @@ select {
 .-my-2 {
   margin-top: -0.5rem;
   margin-bottom: -0.5rem;
+}
+.mx-1 {
+  margin-left: 0.25rem;
+  margin-right: 0.25rem;
 }
 .-mr-1 {
   margin-right: -0.25rem;
@@ -1291,6 +1301,9 @@ select {
 }
 .w-full {
   width: 100%;
+}
+.w-1 {
+  width: 0.25rem;
 }
 .min-w-0 {
   min-width: 0px;
@@ -1625,6 +1638,12 @@ select {
 }
 .p-6 {
   padding: 1.5rem;
+}
+.p-1 {
+  padding: 0.25rem;
+}
+.p-3 {
+  padding: 0.75rem;
 }
 .px-1 {
   padding-left: 0.25rem;

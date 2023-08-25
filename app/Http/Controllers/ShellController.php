@@ -71,7 +71,45 @@ class ShellController extends Controller
                 ->withHeaders(['Content-Type' =>'application/x-sh']);
     }
 
+     /**
+     * New Nodejs Site script
+     *
+    */
+    public function newsite_nodejs()
+    {
+        $script = Storage::get('cipi/newsite_nodejs.sh');
 
+        return response($script)
+                ->withHeaders(['Content-Type' =>'application/x-sh']);
+    }
+
+
+    /**
+     * New Nodejs Site script
+     *
+    */
+    public function start_nodejs()
+    {
+        $script = Storage::get('cipi/start_nodejs.sh');
+
+        return response($script)
+                ->withHeaders(['Content-Type' =>'application/x-sh']);
+    }
+
+
+    /**
+     * Stop Nodejs Site script
+     *
+    */
+    public function stop_nodejs()
+    {
+        $script = Storage::get('cipi/stop_nodejs.sh');
+
+        return response($script)
+                ->withHeaders(['Content-Type' =>'application/x-sh']);
+    }
+
+    
     /**
      * Delete Site script
      *

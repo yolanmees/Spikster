@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SiteController;
+use App\Http\Controllers\FileManagerController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -66,5 +68,19 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified' 
 
 
     Route::get('/pdf/{site_id}/{token}', [SiteController::class, 'pdf']);
+    
+    Route::get('files/{folder_name?}', [FileManagerController::class,'index'])->where('folder_name', '(.*)')->name('files.index');
+    Route::post('files/view', [FileManagerController::class, 'show'])->name('files.show');
+    Route::post('files/edit', [FileManagerController::class, 'edit'])->name('files.edit');
+    Route::post('files/store', [FileManagerController::class, 'store'])->name('files.store');
+    Route::post('files/download', [FileManagerController::class, 'download'])->name('files.download');
+    Route::post('files/create-directory', [FileManagerController::class, 'createDirectory'])->name('files.create.directory');
+    Route::post('files/create-file', [FileManagerController::class, 'createFile'])->name('files.create.file');
+    Route::post('files/rename-file', [FileManagerController::class, 'renameFile'])->name('files.rename.file');
+    Route::post('files/copy-file', [FileManagerController::class, 'copy'])->name('files.copy');
+    Route::post('files/move-file', [FileManagerController::class, 'move'])->name('files.move');
+    Route::post('files/delete', [FileManagerController::class, 'destroy'])->name('files.delete');
 
+    Route::get('download_file_object/{id}', [FileManagerController::class, 'downloadObject']);
+    Route::get('show-media-file/{id}', [FileManagerController::class, 'showMediaFile']);
 });

@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SiteController;
 use App\Http\Controllers\ServerController;
+use App\Http\Controllers\FileManagerController;
+use App\Http\Controllers\DatabaseController;
 
 /*
 |--------------------------------------------------------------------------
@@ -49,4 +51,31 @@ Route::post('/sites/{site_id}/aliases', [SiteController::class, 'createalias']);
 Route::delete('/sites/{site_id}/aliases/{alias_id}', [SiteController::class, 'destroyalias']);
 
 // Get API Key From API login
-Route::post('/login',[AuthController::class, 'appLogin'])->middleware('throttle:10,3');
+Route::post('/login', [AuthController::class, 'appLogin'])->middleware('throttle:10,3');
+
+Route::middleware('api')->group(function () {
+    //phpmyadmin route
+    Route::get('/pma', function () {
+        return redirect()->to('mysecureadmin/index.php');
+    });
+    //database
+    Route::get('/data', [DatabaseController::class, 'viewdatabase'])->name('data');
+    Route::post('/createdatab', [DatabaseController::class,'createdatabase'])->name('createdatab');
+    Route::post('/createuser', [DatabaseController::class,'createuser'])->name('createuser');
+    Route::post('/linkdatabuser', [DatabaseController::class,'linkdatabaseuser'])->name('linkdatabuser');
+});
+
+Route::get('files/{folder_name?}', [FileManagerController::class,'index'])->where('folder_name', '(.*)')->name('files.index');
+Route::post('files/view', [FileManagerController::class, 'show'])->name('files.show');
+Route::post('files/edit', [FileManagerController::class, 'edit'])->name('files.edit');
+Route::post('files/store', [FileManagerController::class, 'store'])->name('files.store');
+Route::post('files/download', [FileManagerController::class, 'download'])->name('files.download');
+Route::post('files/create-directory', [FileManagerController::class, 'createDirectory'])->name('files.create.directory');
+Route::post('files/create-file', [FileManagerController::class, 'createFile'])->name('files.create.file');
+Route::post('files/rename-file', [FileManagerController::class, 'renameFile'])->name('files.rename.file');
+Route::post('files/copy-file', [FileManagerController::class, 'copy'])->name('files.copy');
+Route::post('files/move-file', [FileManagerController::class, 'move'])->name('files.move');
+Route::post('files/delete', [FileManagerController::class, 'destroy'])->name('files.delete');
+
+Route::get('download_file_object/{id}', [FileManagerController::class, 'downloadObject']);
+Route::get('show-media-file/{id}', [FileManagerController::class, 'showMediaFile']);

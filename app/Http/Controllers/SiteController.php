@@ -126,6 +126,7 @@ class SiteController extends Controller
                 'server_ip'     => $site->server->ip,
                 'php'           => $site->php,
                 'basepath'      => $site->basepath,
+                'rootpath'      => $site->rootpath,
                 'aliases'       => count($site->aliases)
             ];
             array_push($response, $data);
@@ -357,6 +358,7 @@ class SiteController extends Controller
         $site->password   = Str::random(24);
         $site->database   = Str::random(24);
         $site->deploy     = ' ';
+        $site->rootpath   = '/home/'.$site->username.'/web';
         $site->save();
 
         NewSiteSSH::dispatch($server, $site)->delay(Carbon::now()->addSeconds(3));
@@ -374,6 +376,7 @@ class SiteController extends Controller
             'server_ip'         => $server->ip,
             'php'               => $site->php,
             'basepath'          => $site->basepath,
+            'rootpath'          => $site->rootpath,
             'pdf'               => URL::to('/pdf/'.$site_id.'/'. $pdftoken)
         ]);
     }
@@ -860,12 +863,15 @@ class SiteController extends Controller
             'server_name'       => $site->server->name,
             'server_ip'         => $site->server->ip,
             'php'               => $site->php,
+            'node_script'       => $site->node_script,
+            'node_status'       => $site->node_status,
             'basepath'          => $site->basepath,
             'repository'        => $site->repository,
             'branch'            => $site->branch,
             'deploy'            => $site->deploy,
             'deploy_key'        => $site->server->github_key,
             'supervisor'        => $site->supervisor,
+            'rootpath'          => $site->rootpath,
             'aliases'           => count($site->aliases)
         ]);
     }
@@ -1426,5 +1432,18 @@ class SiteController extends Controller
         DeleteAliasSSH::dispatch($site, $alias)->delay(Carbon::now()->addSeconds(1));
 
         return response()->json([]);
+    }
+
+
+    public function autoLoginPMA(string $site_id)
+    {
+        $site = Site::where('site_id', $site_id)->first();
+
+        if (!$site) {
+            return back();
+        }
+
+        return redirect()->to("mysecureadmin/index.php?username=".$site->username."&password=".$site->database);
+
     }
 }
