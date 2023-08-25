@@ -1533,7 +1533,6 @@ class ServerController extends Controller
         $server = Server::where('server_id', $server_id)->where('status', 1)->first();
       
         try {
-           
             $ssh = new SSH2($server->ip, 22);
             if (!$ssh->login('cipi', $server->password)) {
                 return response()->json([
@@ -1544,7 +1543,6 @@ class ServerController extends Controller
             $ssh->setTimeout(360);
             $iptables = $ssh->exec("sqlite3 /var/lib/fail2ban/fail2ban.sqlite3 'select ip,jail from bips'");
             $ssh->exec('exit');
-            
         } catch (\Throwable $th) {
             return response()->json([
                 'message' => __('cipi.something_error_message'),
@@ -1553,11 +1551,10 @@ class ServerController extends Controller
         }
 
         $iptables = explode("\n", $iptables);
-
-        foreach($iptables as $i => $iprow){
-            if($iprow == ""){
+        foreach ($iptables as $i => $iprow) {
+            if ($iprow == "") {
                 unset($iptables[$i]);
-            }else{
+            } else {
                 $iptables[$i] = explode("|", $iprow);
             }
         }

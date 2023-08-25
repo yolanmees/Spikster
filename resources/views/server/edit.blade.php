@@ -139,7 +139,21 @@
         </div>
     </div>
     <div class="flex gap-x-4" x-show="tab === 'security'">
-    
+        <div class="w-1/2">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-shield-alt fs-fw mr-1"></i>
+                    Security
+                </div>
+                <div class="card-body">
+                    <p>Fail2ban</p>
+                    <div>
+                        <a href="{{route('server.fail2ban', $server_id)}}" class="btn btn-primary" type="button" id="">Open Fail2ban</a>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
     </div>
     <div class="flex gap-x-4" x-show="tab === 'tools'">
         <div class="w-1/3">

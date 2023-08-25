@@ -39,6 +39,13 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified' 
     Route::get('/servers/{server_id}', function ($server_id) {
         return view('server.edit', compact('server_id'));
     });
+   
+    Route::get('/servers/{server_id}/fail2ban', function ($server_id) {
+        return view('server.fail2ban', compact('server_id'));
+    })->name('server.fail2ban');
+
+
+    
 
     Route::get('/sites', function () {
         return view('site.list');
@@ -49,7 +56,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified' 
     });
 
     Route::get('/settings', function () {
-        return view('settings');
+        return view('settings.settings');
     });
 
     Route::get('/design', function () {
