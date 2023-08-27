@@ -46,6 +46,11 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified' 
         return view('server.fail2ban', compact('server_id'));
     })->name('server.fail2ban');
 
+    Route::get('/servers/{server_id}/packages', function ($server_id) {
+        return view('server.packages-installed', compact('server_id'));
+    })->name('server.packages-installed');
+    
+
 
     
 

@@ -1579,7 +1579,7 @@ class ServerController extends Controller
         ]);
     }
 
-    public function installedPackages(string $server_id)
+    public function packages(string $server_id)
     {
         $server = Server::where('server_id', $server_id)->where('status', 1)->first();
       
@@ -1622,6 +1622,33 @@ class ServerController extends Controller
                     }
                 }
             }
+        }
+
+        return response()->json([
+            $packages
+        ]);
+    }
+
+    public function installPackage(string $server_id, string $package)
+    {
+        $server = Server::where('server_id', $server_id)->where('status', 1)->first();
+      
+        try {
+            $ssh = new SSH2($server->ip, 22);
+            if (!$ssh->login('cipi', $server->password)) {
+                return response()->json([
+                    'message' => __('cipi.server_error_ssh_error_message').$server->server_id,
+                    'errors' => __('cipi.server_error')
+                ], 500);
+            }
+            $ssh->setTimeout(360);
+            $packages = $ssh->exec("sudo apt-get install -y $package");
+            $ssh->exec('exit');
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => __('cipi.something_error_message'),
+                'errors' => __('cipi.error')
+            ], 500);
         }
 
         return response()->json([

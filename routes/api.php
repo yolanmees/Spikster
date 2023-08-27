@@ -35,7 +35,8 @@ Route::post('/servers/{server_id}/servicerestart/{service}', [ServerController::
 Route::get('/servers/{server_id}/sites', [ServerController::class, 'sites']);
 Route::get('/servers/{server_id}/domains', [ServerController::class, 'domains']);
 Route::get('/servers/{server_id}/fail2ban', [ServerController::class, 'fail2ban']);
-Route::get('/servers/{server_id}/installed/packages', [ServerController::class, 'installedPackages']);
+Route::get('/servers/{server_id}/packages', [ServerController::class, 'packages']);
+Route::post('/servers/{server_id}/packages/install', [ServerController::class, 'installPackage']);
 
 
 //Sites

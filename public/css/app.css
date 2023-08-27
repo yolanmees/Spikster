@@ -1200,6 +1200,9 @@ select {
 .mt-auto {
   margin-top: auto;
 }
+.mr-4 {
+  margin-right: 1rem;
+}
 .block {
   display: block;
 }
@@ -1250,6 +1253,9 @@ select {
 }
 .h-full {
   height: 100%;
+}
+.h-10 {
+  height: 2.5rem;
 }
 .min-h-screen {
   min-height: 100vh;
@@ -1305,6 +1311,9 @@ select {
 .w-1 {
   width: 0.25rem;
 }
+.w-10 {
+  width: 2.5rem;
+}
 .min-w-0 {
   min-width: 0px;
 }
@@ -1328,6 +1337,9 @@ select {
 }
 .flex-none {
   flex: none;
+}
+.flex-shrink-0 {
+  flex-shrink: 0;
 }
 .shrink-0 {
   flex-shrink: 0;
