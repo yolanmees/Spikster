@@ -1606,7 +1606,7 @@ class ServerController extends Controller
             if ($package == "") {
                 unset($packages[$i]);
             } else {
-                $packages[$i] = explode(" ", $package);
+                $package = explode("\t\t\t\t\t", $package);
             }
         }
 
