@@ -1606,7 +1606,10 @@ class ServerController extends Controller
             if ($package == "") {
                 unset($packages[$i]);
             } else {
-                $packages[$i] = explode("\t\t\t\t\t", $package);
+                $packages[$i] = explode("\t", $package);
+                while (str_contains($packages[$i][1], "\t")) {
+                    $packages[$i][1] = str_replace("\t", "", $packages[$i][1]);
+                }
             }
         }
 
