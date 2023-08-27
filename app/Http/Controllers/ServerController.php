@@ -1606,10 +1606,19 @@ class ServerController extends Controller
             if ($package == "") {
                 unset($packages[$i]);
             } else {
+                $k = 0;
                 $packages[$i] = explode("\t", $package);
                 foreach ($packages[$i] as $j => $item) {
                     if ($item == "") {
                         unset($packages[$i][$j]);
+                    } else {
+                        if ($k == 0) {
+                            $packages[$i]['package'] = $item;
+                        } elseif ($k == 1) {
+                            $packages[$i]['status'] = $item;
+                        }
+                        unset($packages[$i][$j]);
+                        $k++;
                     }
                 }
             }
