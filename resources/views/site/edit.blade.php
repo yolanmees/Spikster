@@ -140,7 +140,9 @@
             </div>
         </div>
     </div>
-     <div class="w-1/3">
+</div>
+<div class="flex gap-x-4">
+    <div class="w-1/3">
         <div class="card mb-4">
             <div class="card-header">
                 <i class="fas fa-rocket fs-fw mr-1"></i>
@@ -163,6 +165,55 @@
                 <div class="space"></div>
                 <div class="space"></div>
                 <div class="space"></div>
+            </div>
+        </div>
+    </div>
+    <div class="w-1/3">
+        <div class="card mb-4">
+            <div class="card-header flex">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-database h-5 w-5 mr-2">
+                    <ellipse cx="12" cy="5" rx="9" ry="3" />
+                    <path d="M3 5V19A9 3 0 0 0 21 19V5" />
+                    <path d="M3 12A9 3 0 0 0 21 12" />
+                </svg>
+
+                MYSQL
+            </div>
+            <div class="card-body">
+                <p>Set up your database</p>
+                <div class="text-center">
+                    <button class="btn btn-warning" type="button" style="min-width:200px" id="sitesetrepo"> <a href="{{ url('/data') }}" class="btn btn-warning" style="min-width:200px">DATABASE</a></button>
+                    <div class="space"></div>
+                </div>
+
+                <div class="space"></div>
+
+                <p>Manage your database</p>
+                <div class="text-center">
+                    <button class="btn btn-warning" type="button" style="min-width:200px" id="sitesetrepo"> <a href="{{ route('autopma', $site_id) }}" class="btn btn-warning" style="min-width:200px" target="_blank">phpMyAdmin</a></button>
+                    <div class="space"></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div id="nodejsManager" class="w-1/3 d-none">
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fab fa-github fs-fw mr-1"></i>
+                Nodejs Manager
+            </div>
+            <div class="card-body">
+                <p>Manage your project</p>
+                <div class="text-center">
+                    <button class="btn btn-warning" type="button" style="min-width:200px" id="startNodejsButton">Setup App</button>
+                    <div class="space"></div>
+                </div>
+                <div class="text-center">
+                    <button class="btn btn-danger" type="button" style="min-width:200px" id="stopNodeButton">Stop App</button>
+                    <div class="space"></div>
+                </div>
+
             </div>
         </div>
     </div>

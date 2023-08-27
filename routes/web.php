@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SiteController;
 use App\Http\Controllers\FileManagerController;
-
+use App\Http\Controllers\DatabaseController;
 
 /*
 |--------------------------------------------------------------------------
@@ -65,6 +65,18 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified' 
         return view('design');
     });
 
+    //phpmyadmin route
+    Route::get('/pma', function () {
+        return redirect()->to('mysecureadmin/index.php');
+    });
+
+    //phpmyadmin route with autologin
+    Route::get('/autopma/{site_id}', [NodejsController::class, 'autoLoginPMA'])->name('autopma');
+    //database
+    Route::get('/data', [DatabaseController::class, 'viewdatabase'])->name('data');
+    Route::post('/createdatab', [DatabaseController::class,'createdatabase'])->name('createdatab');
+    Route::post('/createuser', [DatabaseController::class,'createuser'])->name('createuser');
+    Route::post('/linkdatabuser', [DatabaseController::class,'linkdatabaseuser'])->name('linkdatabuser');
 
 
     Route::get('/pdf/{site_id}/{token}', [SiteController::class, 'pdf']);

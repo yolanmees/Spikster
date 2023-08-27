@@ -1578,4 +1578,40 @@ class ServerController extends Controller
             $iptables
         ]);
     }
+
+    public function installedPackages(string $server_id)
+    {
+        $server = Server::where('server_id', $server_id)->where('status', 1)->first();
+      
+        try {
+            $ssh = new SSH2($server->ip, 22);
+            if (!$ssh->login('cipi', $server->password)) {
+                return response()->json([
+                    'message' => __('cipi.server_error_ssh_error_message').$server->server_id,
+                    'errors' => __('cipi.server_error')
+                ], 500);
+            }
+            $ssh->setTimeout(360);
+            $packages = $ssh->exec("dpkg --get-selections");
+            $ssh->exec('exit');
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => __('cipi.something_error_message'),
+                'errors' => __('cipi.error')
+            ], 500);
+        }
+
+        $packages = explode("\n", $packages);
+        foreach ($packages as $i => $package) {
+            if ($package == "") {
+                unset($packages[$i]);
+            } else {
+                $packages[$i] = explode(" ", $package);
+            }
+        }
+
+        return response()->json([
+            $packages
+        ]);
+    }
 }
