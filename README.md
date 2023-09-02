@@ -88,7 +88,7 @@ Spikster is easy, stable, powerful and free for any personal and commercial use 
 - Update all packages since Cipi v3 ✔️
 - Tailwindcss design ✔️
 - Livewire 3 components
-- Update manager
+- Package & Update manager
 - Backup on s3
 - Apps installer
 - ...
