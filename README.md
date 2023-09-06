@@ -93,6 +93,10 @@ Spikster is easy, stable, powerful and free for any personal and commercial use 
 - Apps installer
 - ...
 
+## Join the community
+Join our discord server: https://discord.gg/ne99uNEetG
+
+
 ## Contributing
 Thank you for considering contributing to the Spikster Project
 
