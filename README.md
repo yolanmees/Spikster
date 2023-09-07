@@ -100,7 +100,7 @@ Join our discord server: https://discord.gg/ne99uNEetG
 ## Contributing
 Thank you for considering contributing to the Spikster Project
 
-#### ...anyway star this project on Github, Thankyou ;)
+#### ...anyway star this project on Github, Thank you ;)
 
 ## Licence
 Spikster is an open-source software licensed under the MIT license.
