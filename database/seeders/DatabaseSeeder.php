@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Auth;
 use App\Models\Server;
+use App\Models\User;
 use Illuminate\Support\Str;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -23,6 +24,12 @@ class DatabaseSeeder extends Seeder
             'username' => config('cipi.username'),
             'password' => Hash::make(config('cipi.password')),
             'apikey' => Str::random(48)
+        ]);
+
+        User::create([
+            'name' => 'admin',
+            'email' => 'admin@localhost',
+            'password' => Hash::make('password'),
         ]);
 
         Server::create([
