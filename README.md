@@ -87,10 +87,11 @@ Spikster is easy, stable, powerful and free for any personal and commercial use 
 ## Spikster Roadmap... what's next? 
 - Update all packages since Cipi v3 ✔️
 - Tailwindcss design ✔️
-- Livewire 3 components
+- Livewire 3 components ✔️
 - Package & Update manager
-- Backup on s3
+- New install process
 - Apps installer
+- Backups
 - ...
 
 ## Join the community
