@@ -32,7 +32,11 @@ class PackagesInstalled extends Component
         $url = $this->server->ip . '/api/servers/' . $this->server->server_id . '/packages';
         $response = Http::get($url);
         $response = $response->json()[0];
-
+        foreach ($response as $key => $value) {
+            if ($value['status'] !== "install") {
+                unset($response[$key]);
+            }
+        }
         return $response;
     }
 
@@ -66,12 +70,7 @@ class PackagesInstalled extends Component
         ];
         $response = Http::post($url, $data);
         $response = $response->json();
-        if ($response['status'] == 'success') {
-            $this->packages = $this->getPackages();
-            $this->emit('packageInstalled');
-        } else {
-            $this->emit('packageNotInstalled');
-        }
+
         $this->mount($this->server_id);
     }
 
@@ -82,13 +81,7 @@ class PackagesInstalled extends Component
             'package' => $package
         ];
         $response = Http::post($url, $data);
-        $response = $response->json();
-        if ($response['status'] == 'success') {
-            $this->packages = $this->getPackages();
-            $this->emit('packageUninstalled');
-        } else {
-            $this->emit('packageNotUninstalled');
-        }
+        dd($response->json());
         $this->mount($this->server_id);
     }
 
