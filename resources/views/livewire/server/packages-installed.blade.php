@@ -5,28 +5,18 @@
         {{-- <button class="btn btn-primary" wire:click="openInstaller">Install Package</button> --}}
     </div>   
     <div class="mt-8 flow-root">
-        <div>
+        <div class="mb-8">
             <div class="flex flex-wrap justify-between">
                 <div class="w-full flex-1">
                     <label for="search" class="sr-only">Search</label>
                     <div class="relative rounded-md shadow-sm">
-                        <input wire:model="search" type="text" name="search" id="search" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md" placeholder="Search">
+                        <input wire:model="search" type="text" name="search" id="search" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-4 sm:text-sm border-gray-300 rounded-md" placeholder="Search">
                         <div class="absolute inset-y-0 right-0 pl-8 flex items-center pointer-events-none">
                             <svg class="pointer-events-none absolute inset-y-0 left-0 h-full w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                 <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd"></path>
                             </svg>
                         </div>
 
-                    </div>
-                </div>
-                <div class="w-full flex-1 mt-4 sm:mt-0 sm:ml-4">
-                    <label for="filter" class="sr-only">Filter</label>
-                    <div class="relative rounded-md shadow-sm">
-                        <select wire:model="filter" id="filter" name="filter" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-3 pr-10 sm:text-sm border-gray-300 rounded-md">
-                            <option value="all">All</option>
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
-                        </select>
                     </div>
                 </div>
             </div>
@@ -63,7 +53,8 @@
                                     <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                                         @if($package['installed'] == 'false')
                                             <a wire:click="install('{{ $package['package'] }}')" class="text-indigo-600 hover:text-indigo-900">Install<span class="sr-only"></span></a>
-
+                                        @else
+                                            <a wire:click="uninstall('{{ $package['package'] }}')" class="text-red-700 hover:text-indigo-900">Uninstall<span class="sr-only"></span></a>
                                         @endif
                                     </td>
                                 </tr>

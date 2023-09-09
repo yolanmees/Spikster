@@ -66,20 +66,38 @@ class PackagesInstalled extends Component
         ];
         $response = Http::post($url, $data);
         $response = $response->json();
-        dd($response);
         if ($response['status'] == 'success') {
             $this->packages = $this->getPackages();
             $this->emit('packageInstalled');
         } else {
             $this->emit('packageNotInstalled');
         }
+        $this->mount($this->server_id);
+    }
+
+    public function uninstall($package)
+    {
+        $url = $this->server->ip . '/api/servers/' . $this->server->server_id . '/packages/uninstall/';
+        $data = [
+            'package' => $package
+        ];
+        $response = Http::post($url, $data);
+        $response = $response->json();
+        if ($response['status'] == 'success') {
+            $this->packages = $this->getPackages();
+            $this->emit('packageUninstalled');
+        } else {
+            $this->emit('packageNotUninstalled');
+        }
+        $this->mount($this->server_id);
     }
 
     public function installablePackages()
     {
         $this->installable_packages = [
+            "composer",
             "fail2ban",
-            "glance",
+            "glances",
             "nodejs",
             "php7.4-bcmath",
             "php7.4-cli",

@@ -1642,7 +1642,34 @@ class ServerController extends Controller
                 ], 500);
             }
             $ssh->setTimeout(360);
-            $packages = $ssh->exec("sudo apt-get install -y $package");
+            $packages = $ssh->exec("echo '". $server->password ."' | sudo -S apt-get install -y $package");
+            $ssh->exec('exit');
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => __('cipi.something_error_message'),
+                'errors' => __('cipi.error')
+            ], 500);
+        }
+
+        return response()->json([
+            $packages
+        ]);
+    }
+
+    public function uninstallPackage(string $server_id, Request $request)
+    {
+        $server = Server::where('server_id', $server_id)->where('status', 1)->first();
+        $package = $request->package;
+        try {
+            $ssh = new SSH2($server->ip, 22);
+            if (!$ssh->login('cipi', $server->password)) {
+                return response()->json([
+                    'message' => __('cipi.server_error_ssh_error_message').$server->server_id,
+                    'errors' => __('cipi.server_error')
+                ], 500);
+            }
+            $ssh->setTimeout(360);
+            $packages = $ssh->exec("echo '". $server->password ."' | sudo -S apt-get remove -y $package");
             $ssh->exec('exit');
         } catch (\Throwable $th) {
             return response()->json([

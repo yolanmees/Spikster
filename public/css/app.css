@@ -1200,6 +1200,9 @@ select {
 .mt-auto {
   margin-top: auto;
 }
+.mb-8 {
+  margin-bottom: 2rem;
+}
 .block {
   display: block;
 }
@@ -1739,6 +1742,9 @@ select {
 }
 .pt-6 {
   padding-top: 1.5rem;
+}
+.pl-0 {
+  padding-left: 0px;
 }
 .text-left {
   text-align: left;
