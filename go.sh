@@ -271,102 +271,6 @@ sleep 1s
 sudo add-apt-repository -y ppa:ondrej/php
 sudo apt-get update
 
-sudo apt-get -y install php7.4-fpm
-sudo apt-get -y install php7.4-common
-sudo apt-get -y install php7.4-curl
-sudo apt-get -y install php7.4-openssl
-sudo apt-get -y install php7.4-bcmath
-sudo apt-get -y install php7.4-mbstring
-sudo apt-get -y install php7.4-tokenizer
-sudo apt-get -y install php7.4-mysql
-sudo apt-get -y install php7.4-sqlite3
-sudo apt-get -y install php7.4-pgsql
-sudo apt-get -y install php7.4-redis
-sudo apt-get -y install php7.4-memcached
-sudo apt-get -y install php7.4-json
-sudo apt-get -y install php7.4-zip
-sudo apt-get -y install php7.4-xml
-sudo apt-get -y install php7.4-soap
-sudo apt-get -y install php7.4-gd
-sudo apt-get -y install php7.4-imagick
-sudo apt-get -y install php7.4-fileinfo
-sudo apt-get -y install php7.4-imap
-sudo apt-get -y install php7.4-cli
-PHPINI=/etc/php/7.4/fpm/conf.d/cipi.ini
-sudo touch $PHPINI
-sudo cat > "$PHPINI" <<EOF
-memory_limit = 256M
-upload_max_filesize = 256M
-post_max_size = 256M
-max_execution_time = 180
-max_input_time = 180
-EOF
-sudo service php7.4-fpm restart
-
-sudo apt-get -y install php8.0-fpm
-sudo apt-get -y install php8.0-common
-sudo apt-get -y install php8.0-curl
-sudo apt-get -y install php8.0-openssl
-sudo apt-get -y install php8.0-bcmath
-sudo apt-get -y install php8.0-mbstring
-sudo apt-get -y install php8.0-tokenizer
-sudo apt-get -y install php8.0-mysql
-sudo apt-get -y install php8.0-sqlite3
-sudo apt-get -y install php8.0-pgsql
-sudo apt-get -y install php8.0-redis
-sudo apt-get -y install php8.0-memcached
-sudo apt-get -y install php8.0-json
-sudo apt-get -y install php8.0-zip
-sudo apt-get -y install php8.0-xml
-sudo apt-get -y install php8.0-soap
-sudo apt-get -y install php8.0-gd
-sudo apt-get -y install php8.0-imagick
-sudo apt-get -y install php8.0-fileinfo
-sudo apt-get -y install php8.0-imap
-sudo apt-get -y install php8.0-cli
-PHPINI=/etc/php/8.0/fpm/conf.d/cipi.ini
-sudo touch $PHPINI
-sudo cat > "$PHPINI" <<EOF
-memory_limit = 256M
-upload_max_filesize = 256M
-post_max_size = 256M
-max_execution_time = 180
-max_input_time = 180
-EOF
-sudo service php8.0-fpm restart
-
-sudo apt-get -y install php8.1-fpm
-sudo apt-get -y install php8.1-common
-sudo apt-get -y install php8.1-curl
-sudo apt-get -y install php8.1-openssl
-sudo apt-get -y install php8.1-bcmath
-sudo apt-get -y install php8.1-mbstring
-sudo apt-get -y install php8.1-tokenizer
-sudo apt-get -y install php8.1-mysql
-sudo apt-get -y install php8.1-sqlite3
-sudo apt-get -y install php8.1-pgsql
-sudo apt-get -y install php8.1-redis
-sudo apt-get -y install php8.1-memcached
-sudo apt-get -y install php8.1-json
-sudo apt-get -y install php8.1-zip
-sudo apt-get -y install php8.1-xml
-sudo apt-get -y install php8.1-soap
-sudo apt-get -y install php8.1-gd
-sudo apt-get -y install php8.1-imagick
-sudo apt-get -y install php8.1-fileinfo
-sudo apt-get -y install php8.1-imap
-sudo apt-get -y install php8.1-cli
-PHPINI=/etc/php/8.1/fpm/conf.d/cipi.ini
-sudo touch $PHPINI
-sudo cat > "$PHPINI" <<EOF
-memory_limit = 256M
-upload_max_filesize = 256M
-post_max_size = 256M
-max_execution_time = 180
-max_input_time = 180
-EOF
-sudo service php8.1-fpm restart
-
 sudo apt-get -y install php8.2-fpm
 sudo apt-get -y install php8.2-common
 sudo apt-get -y install php8.2-curl
@@ -488,7 +392,7 @@ server {
     error_page 404 /index.php;
     location ~ \.php$ {
         include snippets/fastcgi-php.conf;
-        fastcgi_pass unix:/var/run/php/php8.0-fpm.sock;
+        fastcgi_pass unix:/var/run/php/php8.2-fpm.sock;
     }
     location ~ /\.(?!well-known).* {
         deny all;
