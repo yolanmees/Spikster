@@ -8,7 +8,7 @@
 
 
 @section('content')
-<livewire:server.packages-installed server_id="{{$server_id}}" />
+<livewire:server.packages-installed server_id={{$server_id}} />
 @endsection
 
 

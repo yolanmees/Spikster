@@ -48,23 +48,10 @@
     @yield('css')
 </head>
 <body>
-
-    <!--
-  This example requires updating your template:
-
-  ```
-  <html class="h-full bg-gray-900">
-  <body class="h-full">
-  ```
--->
     <div>
         @include('layouts.components.mobile-sidebar')
-
-
-   
  
         @include('layouts.components.sidebar')
-
 
         <div class="xl:pl-72">
             <!-- Sticky search header -->

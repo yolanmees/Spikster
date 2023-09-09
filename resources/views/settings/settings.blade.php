@@ -10,7 +10,7 @@
 
 @section('content')
 <div class="flex gap-x-4">
-    <div class="w-1/2">
+    {{-- <div class="w-1/2">
         <div class="card mb-4">
             <div class="card-header">
                 <i class="fas fa-user fs-fw mr-1"></i>
@@ -45,7 +45,7 @@
                 <div class="space"></div>
             </div>
         </div>
-    </div>
+    </div> --}}
 </div>
 <div class="row">
     <div class="col-xl-6">

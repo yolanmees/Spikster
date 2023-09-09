@@ -1629,10 +1629,10 @@ class ServerController extends Controller
         ]);
     }
 
-    public function installPackage(string $server_id, string $package)
+    public function installPackage(string $server_id, Request $request)
     {
         $server = Server::where('server_id', $server_id)->where('status', 1)->first();
-      
+        $package = $request->package;
         try {
             $ssh = new SSH2($server->ip, 22);
             if (!$ssh->login('cipi', $server->password)) {
