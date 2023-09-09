@@ -2,13 +2,13 @@
 
 ### Added Ubuntu 22.04/23.04 and PHP 8.2 support
 
-<img src="https://github.com/andreapollastri/cipi/blob/master/utility/design/banner.png?raw=true">
+<img src="https://github.com/yolanmees/Spikster/blob/master/utility/design/banner.png?raw=true">
 
-![GitHub stars](https://img.shields.io/github/stars/andreapollastri/cipi?style=social)
-![GitHub watchers](https://img.shields.io/github/watchers/andreapollastri/cipi?style=social)
-![GitHub issues](https://img.shields.io/github/issues/andreapollastri/cipi)
-![GitHub](https://img.shields.io/github/license/andreapollastri/cipi)
-![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/andreapollastri/cipi?label=version)
+![GitHub stars](https://img.shields.io/github/stars/yolanmees/Spikster?style=social)
+![GitHub watchers](https://img.shields.io/github/watchers/yolanmees/Spikster?style=social)
+![GitHub issues](https://img.shields.io/github/issues/yolanmees/Spikster)
+![GitHub](https://img.shields.io/github/license/yolanmees/Spikster)
+![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/yolanmees/Spikster?label=version)
 
 ## About
 Spikster is a Laravel based cloud server control panel that supports Digital Ocean, AWS, Vultr, Google Cloud, Linode, Azure and other VPS. It comes with nginx, Mysql, multi PHP-FPM versions, multi users, Supervisor, Composer, npm, free Let's Encrypt certificates, Git deployment, backups, ffmpeg, fail2ban, Redis, API and with a simple graphical interface useful to manage Laravel, Codeigniter, Symfony, WordPress or other PHP applications. With Spikster you don’t need to be a Sys Admin to deploy and manage websites and PHP applications powered by cloud VPS.
