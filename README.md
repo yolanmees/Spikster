@@ -95,7 +95,7 @@ Join our discord server: https://discord.gg/ne99uNEetG
 
 
 ## Contributing
-Thank you for considering contributing to the Spikster Project
+Thank you for considering contributing to the Spikster project
 
 #### ...anyway star this project on Github, Thank you ;)
 
