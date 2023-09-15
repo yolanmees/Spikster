@@ -19,8 +19,7 @@
         "laravel/sanctum": "^3.2",
         "laravel/tinker": "^2.8",
         "livewire/livewire": "^3.0@beta",
-        "phpseclib/phpseclib": "^3.0",
-        "unisharp/laravel-filemanager": "^2.6"
+        "phpseclib/phpseclib": "^3.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",
