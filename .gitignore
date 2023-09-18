@@ -13,3 +13,5 @@ npm-debug.log
 yarn-error.log
 .idea
 composer.lock
+.DS_Store
+.DS_Store
