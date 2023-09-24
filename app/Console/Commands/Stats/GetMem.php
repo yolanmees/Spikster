@@ -30,6 +30,7 @@ class GetMem extends Command
         Mem::create([
             "total" => $mem["total"],
             "available" => $mem["available"],
+            "percent" => $mem["percent"],
             "used" => $mem["used"],
             "free" => $mem["free"],
             "active" => $mem["active"],
