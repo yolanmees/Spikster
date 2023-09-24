@@ -187,9 +187,7 @@
                         $('#errorModal').modal();
                     });
                 }
-                if (error.status == 404) {
-                    window.location.replace('/error-file-not-found');
-                }
+
                 if (error.status == 500) {
                     $('#errorModal').modal();
                 }
@@ -293,6 +291,7 @@
 
     </script>
     @yield('js')
+    @stack('scripts')
 </body>
 </html>
 

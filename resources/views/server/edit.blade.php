@@ -39,31 +39,20 @@
 
 
 
-    <div class="flex gap-x-4" x-show="tab === 'monitor'">
-        <div class="w-1/2">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <i class="fas fa-microchip fs-fw mr-1"></i>
-                    {{ __('cipi.server_cpu_realtime_load') }}
-                </div>
-                <div class="card-body">
-                    <canvas id="cpuChart" width="100%" height="40"></canvas>
-                    <div class="space"></div>
-                </div>
-            </div>
+    <div class="grid grid-cols-2 gap-x-4" x-show="tab === 'monitor'">
+        <div class="">
+            @livewire('stats.cpu', ['server_id' => $server_id])
         </div>
-        <div class="w-1/2">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <i class="fas fa-memory fs-fw mr-1"></i>
-                    {{ __('cipi.server_ram_realtime_load') }}
-                </div>
-                <div class="card-body">
-                    <canvas id="ramChart" width="100%" height="40"></canvas>
-                    <div class="space"></div>
-                </div>
-            </div>
+        <div class="">
+            @livewire('stats.mem', ['server_id' => $server_id])
         </div>
+        <div class="">
+            @livewire('stats.load', ['server_id' => $server_id])
+        </div>
+        <div class="">
+            @livewire('stats.disk', ['server_id' => $server_id])
+        </div>
+
     </div>
     <div class="flex gap-x-4" x-show="tab === 'server'">
         <div class="w-1/3">
