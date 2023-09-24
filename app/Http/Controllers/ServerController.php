@@ -9,6 +9,9 @@ use App\Models\Server;
 use App\Jobs\PhpCliSSH;
 use phpseclib3\Net\SSH2;
 use App\Models\Stats\Cpu;
+use App\Models\Stats\Mem;
+use App\Models\Stats\Disk;
+use App\Models\Stats\Load;
 use App\Jobs\RootResetSSH;
 use Illuminate\Support\Str;
 use App\Models\Userdatabase;
@@ -1687,9 +1690,58 @@ class ServerController extends Controller
     public function statsCpu(Server $server)
     {
         $cpu = Cpu::orderBy('created_at', 'desc')->paginate(50);
+        $cpu = $cpu->sortBy('created_at');
         if ($cpu->count() > 0) {
             return response()->json([
                 'cpu' => $cpu
+            ]);
+        } else {
+            return response()->json([
+                'message' => __('cipi.something_error_message'),
+                'errors' => __('cipi.error')
+            ], 500);
+        }
+    }
+
+    public function statsMem(Server $server)
+    {
+        $mem = Mem::orderBy('created_at', 'desc')->paginate(50);
+        $mem = $mem->sortBy('created_at');
+        if ($mem->count() > 0) {
+            return response()->json([
+                'mem' => $mem
+            ]);
+        } else {
+            return response()->json([
+                'message' => __('cipi.something_error_message'),
+                'errors' => __('cipi.error')
+            ], 500);
+        }
+    }
+
+    public function statsLoad(Server $server)
+    {
+        $load = Load::orderBy('created_at', 'desc')->paginate(50);
+        $load = $load->sortBy('created_at');
+        if ($load->count() > 0) {
+            return response()->json([
+                'load' => $load
+            ]);
+        } else {
+            return response()->json([
+                'message' => __('cipi.something_error_message'),
+                'errors' => __('cipi.error')
+            ], 500);
+        }
+    }
+
+    public function statsDisk(Server $server)
+    {
+        $disk = Disk::orderBy('created_at', 'desc')->paginate(50);
+        $disk = $disk->sortBy('created_at');
+        if ($disk->count() > 0) {
+            return response()->json([
+                'disk' => $disk
             ]);
         } else {
             return response()->json([
