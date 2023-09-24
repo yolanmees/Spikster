@@ -8,6 +8,7 @@ use App\Jobs\CronSSH;
 use App\Models\Server;
 use App\Jobs\PhpCliSSH;
 use phpseclib3\Net\SSH2;
+use App\Models\Stats\Cpu;
 use App\Jobs\RootResetSSH;
 use Illuminate\Support\Str;
 use App\Models\Userdatabase;
@@ -1681,5 +1682,20 @@ class ServerController extends Controller
         return response()->json([
             $packages
         ]);
+    }
+
+    public function statsCpu(Server $server)
+    {
+        $cpu = Cpu::orderBy('created_at', 'desc')->paginate(50);
+        if ($cpu->count() > 0) {
+            return response()->json([
+                'cpu' => $cpu
+            ]);
+        } else {
+            return response()->json([
+                'message' => __('cipi.something_error_message'),
+                'errors' => __('cipi.error')
+            ], 500);
+        }
     }
 }
