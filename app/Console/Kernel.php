@@ -31,6 +31,10 @@ class Kernel extends ConsoleKernel
         $schedule->command('cipi:update')->dailyAt('12:05');
         $schedule->command('cipi:logrotate')->dailyAt('00:00');
         $schedule->command('cipi:activesetupcount')->dailyAt('03:03');
+        $schedule->command('spikster:stats-get-cpu')->everyMinute();
+        $schedule->command('spikster:stats-get-mem')->everyMinute();
+        $schedule->command('spikster:stats-get-load')->everyMinute();
+        $schedule->command('spikster:stats-get-disk')->everyMinute();
     }
 
     /**
