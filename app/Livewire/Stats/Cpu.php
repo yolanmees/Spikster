@@ -18,7 +18,7 @@ class Cpu extends Component
         // get CPU data via API call to {server_address}/api/servers/{server_id}/stats/cpu
         $this->server = Server::where('server_id', $server_id)->first();
         $cpu = Http::get($this->server->ip . '/api/servers/' . $this->server->server_id . '/stats/cpu');
-        $this->cpu = $cpu->json()['cpu']['data'];
+        $this->cpu = $cpu->json()['cpu'];
 
         $this->labels = $this->getLabels();
         $this->dataset = [

@@ -11,14 +11,16 @@ class Mem extends Component
     private $server;
     public array $dataset = [];
     public array $labels = [];
-    public $cpu;
+    public $total = [];
+    public $mem;
 
     public function mount($server_id)
     {
         $this->server = Server::where('server_id', $server_id)->first();
-        $cpu = Http::get($this->server->ip . '/api/servers/' . $this->server->server_id . '/stats/cpu');
-        $this->cpu = $cpu->json()['cpu']['data'];
-
+        $mem = Http::get($this->server->ip . '/api/servers/' . $this->server->server_id . '/stats/mem');
+        // dd($mem->json());
+        $this->mem = $mem->json()['mem'];
+        $this->total = $this->mem[0]['total'] / 1024 / 1024;
         $this->labels = $this->getLabels();
         $this->dataset = [
             [
@@ -27,16 +29,16 @@ class Mem extends Component
                 'borderColor' => 'rgba(15,64,97,255)',
             ],
         ];
-        foreach ($this->cpu as $key => $cpu) {
-            $this->dataset[0]['data'][] = $cpu['total'];
+        foreach ($this->mem as $key => $mem) {
+            $this->dataset[0]['data'][] = $mem['used'] / 1024 / 1024;
         }
     }
 
     private function getLabels()
     {
         $labels = [];
-        foreach ($this->cpu as $cpu) {
-            $labels[] = date('H:i', strtotime($cpu['created_at']));
+        foreach ($this->mem as $mem) {
+            $labels[] = date('H:i', strtotime($mem['created_at']));
         }
         return $labels;
     }

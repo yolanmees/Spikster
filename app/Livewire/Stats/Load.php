@@ -11,15 +11,15 @@ class Load extends Component
     private $server;
     public array $dataset = [];
     public array $labels = [];
-    public $cpu;
+    public $load;
 
     public function mount($server_id)
     {
-        // get CPU data via API call to {server_address}/api/servers/{server_id}/stats/cpu
+        // get load data via API call to {server_address}/api/servers/{server_id}/stats/load
         $this->server = Server::where('server_id', $server_id)->first();
-        $cpu = Http::get($this->server->ip . '/api/servers/' . $this->server->server_id . '/stats/cpu');
-        $this->cpu = $cpu->json()['cpu']['data'];
-
+        $load = Http::get($this->server->ip . '/api/servers/' . $this->server->server_id . '/stats/load');
+        $this->load = $load->json()['load'];
+        // dd($this->load);
         $this->labels = $this->getLabels();
         $this->dataset = [
             [
@@ -28,16 +28,16 @@ class Load extends Component
                 'borderColor' => 'rgba(15,64,97,255)',
             ],
         ];
-        foreach ($this->cpu as $key => $cpu) {
-            $this->dataset[0]['data'][] = $cpu['total'];
+        foreach ($this->load as $key => $load) {
+            $this->dataset[0]['data'][] = $load['min1'];
         }
     }
 
     private function getLabels()
     {
         $labels = [];
-        foreach ($this->cpu as $cpu) {
-            $labels[] = date('H:i', strtotime($cpu['created_at']));
+        foreach ($this->load as $load) {
+            $labels[] = date('H:i', strtotime($load['created_at']));
         }
         return $labels;
     }

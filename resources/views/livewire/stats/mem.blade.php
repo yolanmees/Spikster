@@ -36,8 +36,9 @@
                     }]
                     , yAxes: [{
                         ticks: {
-                            min: 0
-                            , maxTicksLimit: 5
+                            min: 0,
+                            max: {{ $total }},
+                            maxTicksLimit: 5
                         }
                         , gridLines: {
                             color: "rgba(0, 0, 0, .125)"
@@ -53,4 +54,3 @@
     </script>
     @endpush
 </div>
-
