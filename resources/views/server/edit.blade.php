@@ -54,6 +54,8 @@
         </div>
 
     </div>
+
+
     <div class="flex gap-x-4" x-show="tab === 'server'">
         <div class="w-1/3">
             <div class="card mb-4">

@@ -17,20 +17,25 @@ class Cpu extends Component
     {
         // get CPU data via API call to {server_address}/api/servers/{server_id}/stats/cpu
         $this->server = Server::where('server_id', $server_id)->first();
-        $cpu = Http::get($this->server->ip . '/api/servers/' . $this->server->server_id . '/stats/cpu');
-        $this->cpu = $cpu->json()['cpu'];
+        try {
+            $cpu = Http::get($this->server->ip . '/api/servers/' . $this->server->server_id . '/stats/cpu');
 
-        $this->labels = $this->getLabels();
-        $this->dataset = [
-            [
-                'label' => "Total",
-                'backgroundColor' => 'rgba(15,64,97,255)',
-                'borderColor' => 'rgba(15,64,97,255)',
-            ],
-        ];
-        foreach ($this->cpu as $key => $cpu) {
-            $this->dataset[0]['data'][] = $cpu['total'];
+            $this->cpu = $cpu->json()['cpu'];
+
+            $this->labels = $this->getLabels();
+            $this->dataset = [
+                [
+                    'label' => "Total",
+                    'backgroundColor' => 'rgba(15,64,97,255)',
+                    'borderColor' => 'rgba(15,64,97,255)',
+                ],
+            ];
+            foreach ($this->cpu as $key => $cpu) {
+                $this->dataset[0]['data'][] = $cpu['total'];
+            }
+        } catch (\Throwable $th) {
         }
+
     }
 
     private function getLabels()

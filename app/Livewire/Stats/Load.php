@@ -17,19 +17,22 @@ class Load extends Component
     {
         // get load data via API call to {server_address}/api/servers/{server_id}/stats/load
         $this->server = Server::where('server_id', $server_id)->first();
-        $load = Http::get($this->server->ip . '/api/servers/' . $this->server->server_id . '/stats/load');
-        $this->load = $load->json()['load'];
-        // dd($this->load);
-        $this->labels = $this->getLabels();
-        $this->dataset = [
-            [
-                'label' => "Total",
-                'backgroundColor' => 'rgba(15,64,97,255)',
-                'borderColor' => 'rgba(15,64,97,255)',
-            ],
-        ];
-        foreach ($this->load as $key => $load) {
-            $this->dataset[0]['data'][] = $load['min1'];
+        try {
+            $load = Http::get($this->server->ip . '/api/servers/' . $this->server->server_id . '/stats/load');
+            $this->load = $load->json()['load'];
+            // dd($this->load);
+            $this->labels = $this->getLabels();
+            $this->dataset = [
+                [
+                    'label' => "Total",
+                    'backgroundColor' => 'rgba(15,64,97,255)',
+                    'borderColor' => 'rgba(15,64,97,255)',
+                ],
+            ];
+            foreach ($this->load as $key => $load) {
+                $this->dataset[0]['data'][] = $load['min1'];
+            }
+        } catch (\Throwable $th) {
         }
     }
 

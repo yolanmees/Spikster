@@ -10,7 +10,11 @@
 
 @section('content')
     <div class="row">
-        <div class="col-xl-12">
+        <button class="btn btn-sm btn-secondary" id="newSite">
+            <i class="fas fa-plus mr-1"></i><b>{{ __('cipi.new_button', ['type' => __('cipi.site')]) }}</b>
+        </button>
+        @livewire('site.site-table')
+        <!-- <div class="col-xl-12">
             <div class="card mb-4">
                 <div class="card-header text-right">
                     <button class="btn btn-sm btn-secondary" id="newSite">
@@ -33,7 +37,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
     </div>
 @endsection
 

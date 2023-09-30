@@ -36,12 +36,12 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified' 
 
     Route::get('/servers', function () {
         return view('server.list');
-    });
+    })->name('server.list');
 
     Route::get('/servers/{server_id}', function ($server_id) {
         return view('server.edit', compact('server_id'));
-    });
-   
+    })->name('server.edit');
+
     Route::get('/servers/{server_id}/fail2ban', function ($server_id) {
         return view('server.fail2ban', compact('server_id'));
     })->name('server.fail2ban');
@@ -49,26 +49,26 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified' 
     Route::get('/servers/{server_id}/packages', function ($server_id) {
         return view('server.packages-installed', compact('server_id'));
     })->name('server.packages-installed');
-    
 
 
-    
+
+
 
     Route::get('/sites', function () {
         return view('site.list');
-    });
+    })->name('site.list');
 
     Route::get('/sites/{site_id}', function ($site_id) {
         return view('site.edit', compact('site_id'));
-    });
+    })->name('site.edit');
 
     Route::get('/settings', function () {
         return view('settings.settings');
-    });
+    })->name('settings.settings');
 
     Route::get('/design', function () {
         return view('design');
-    });
+    })->name('design');
 
     //phpmyadmin route
     Route::get('/pma', function () {
@@ -85,7 +85,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified' 
 
 
     Route::get('/pdf/{site_id}/{token}', [SiteController::class, 'pdf']);
-    
+
     Route::get('files/{folder_name?}', [FileManagerController::class,'index'])->where('folder_name', '(.*)')->name('files.index');
     Route::post('files/view', [FileManagerController::class, 'show'])->name('files.show');
     Route::post('files/edit', [FileManagerController::class, 'edit'])->name('files.edit');

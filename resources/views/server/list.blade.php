@@ -12,28 +12,10 @@
 @section('content')
 <div class="row">
     <div class="col-xl-12">
-        <div class="card mb-4">
-            <div class="card-header text-right">
-                <button class="btn btn-sm btn-secondary" id="newServer">
-                    <i class="fas fa-plus mr-1"></i><b>{{ __('cipi.new_button', ['type' => __('cipi.server')]) }}</b>
-                </button>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-bordered" id="dt" width="100%" cellspacing="0">
-                        <thead>
-                            <tr>
-                                <th class="text-center d-none d-md-table-cell">{{ __('cipi.name') }}</th>
-                                <th class="text-center">IP</th>
-                                <th class="text-center d-none d-lg-table-cell">{{ __('cipi.provider') }}</th>
-                                <th class="text-center d-none d-xl-table-cell">{{ __('cipi.location') }}</th>
-                                <th class="text-center">{{ __('cipi.actions') }}</th>
-                            </tr>
-                        </thead>
-                    </table>
-                </div>
-            </div>
-        </div>
+        <button class="btn btn-sm btn-secondary" id="newServer">
+            <i class="fas fa-plus mr-1"></i><b>{{ __('cipi.new_button', ['type' => __('cipi.server')]) }}</b>
+        </button>
+        @livewire('server.server-table')
     </div>
 </div>
 @endsection
@@ -41,62 +23,7 @@
 
 
 @section('extra')
-<dialog class="modal fade" id="newServerModal" tabindex="-1" role="dialog" aria-labelledby="newServerModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document" id="newserverdialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="newServerModalLabel">{{ __('cipi.create_server_title') }}</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div id="newserverform">
-                    <label for="newservername">{{ __('cipi.server_name') }}</label>
-                    <div class="input-group">
-                        <input class="form-control" type="text" id="newservername" placeholder="e.g. Production" autocomplete="off" />
-                    </div>
-                    <div class="space"></div>
-                    <label for="newserverip">{{ __('cipi.server_ip') }}</label>
-                    <div class="input-group">
-                        <input class="form-control" type="text" id="newserverip" placeholder="e.g. 123.45.67.89" autocomplete="off" />
-                    </div>
-                    <div class="space"></div>
-                    <label for="newserverprovider">{{ __('cipi.server_provider') }}</label>
-                    <div class="input-group">
-                        <input class="form-control" type="text" id="newserverprovider" placeholder="e.g. Digital Ocean" autocomplete="off" />
-                    </div>
-                    <div class="space"></div>
-                    <label for="newserverlocation">{{ __('cipi.server_location') }}</label>
-                    <div class="input-group">
-                        <input class="form-control" type="text" id="newserverlocation" placeholder="e.g. Amsterdam" autocomplete="off" />
-                    </div>
-                    <div class="space"></div>
-                    <div class="text-center">
-                        <button class="btn btn-primary" type="button" id="submit">{{ __('cipi.confirm') }} <i class="fas fa-circle-notch fa-spin d-none" id="loading"></i></button>
-                    </div>
-                </div>
-                <div id="newserverok" class="d-none">
-                    <p><b>{{ __('cipi.server_setup_title') }}</b>
-                    <ul>
-                        <li>{!! __('cipi.server_setup_step1') !!}</li>
-                        <li>{!! __('cipi.server_setup_step2') !!}<br>
-                            <code><i>ssh root@<span id="newserverssh"></span></i></code></li>
-                        <li>{!! __('cipi.server_setup_step3') !!}<br>
-                            <code><i>wget -O - {{ URL::to('/sh/setup/') }}/<span id="newserverid"></span> | bash</i></code></li>
-                        <li>{!! __('cipi.server_setup_step4') !!}</li>
-                        <li>{!! __('cipi.server_setup_step5') !!}</li>
-                        <li>{!! __('cipi.server_setup_step6') !!}</li>
-                        <li>{!! __('cipi.server_setup_step7') !!}</li>
-                        <li>{!! __('cipi.server_setup_step8') !!}</li>
-                    </ul>
-                    </p>
-                </div>
-                <div class="space"></div>
-            </div>
-        </div>
-    </div>
-</dialog>
+@livewire('server.new-server')
 <dialog class="modal fade" id="installServerModal" tabindex="-1" role="dialog" aria-labelledby="installServerModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -175,8 +102,8 @@
             'columns': [
                 { data: 'name' },
                 { data: 'ip' },
-                { data: 'provider' },
-                { data: 'location' },
+                // { data: 'provider' },
+                // { data: 'location' },
                 { data: {
                     'server_id': 'server_id',
                     'default': 'default',
@@ -194,14 +121,14 @@
                     'targets': 1,
                     'className': 'text-center',
                 },
-                {
-                    'targets': 2,
-                    'className': 'text-center d-none d-lg-table-cell',
-                },
-                {
-                    'targets': 3,
-                    'className': 'text-center d-none d-xl-table-cell',
-                },
+                // {
+                //     'targets': 2,
+                //     'className': 'text-center d-none d-lg-table-cell',
+                // },
+                // {
+                //     'targets': 3,
+                //     'className': 'text-center d-none d-xl-table-cell',
+                // },
                 {
                     'targets': 4,
                     'className': 'text-center',
@@ -323,7 +250,7 @@
         {{-- const newServerModal = document.getElementById('newServerModal');
         newServerModal.showModal(); --}}
         $('#newServerModal').modal();
-       
+
     });
 
     //New Server Validation

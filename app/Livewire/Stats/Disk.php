@@ -17,25 +17,28 @@ class Disk extends Component
     public function mount($server_id)
     {
         $this->server = Server::where('server_id', $server_id)->first();
-        $disk = Http::get($this->server->ip . '/api/servers/' . $this->server->server_id . '/stats/disk');
-        $this->disk = $disk->json()['disk'];
-        // dd($this->disk);
-        $this->labels = $this->getLabels();
-        $this->total = $this->disk[0]['write_bytes'] / 1024 / 1024;
-        // $this->dataset = [
-        //     [
-        //         'label' => "Total",
-        //         'backgroundColor' => 'rgba(15,64,97,255)',
-        //         'borderColor' => 'rgba(15,64,97,255)',
-        //     ],
-        // ];
-        foreach ($this->disk as $key => $disk) {
-            if (!isset($this->dataset[$disk['disk_name'] ])) {
-                $this->dataset[$disk['disk_name'] ]['label'] = $disk['disk_name'];
-                $this->dataset[$disk['disk_name'] ]['backgroundColor'] = 'rgba(15,64,97,255)';
-                $this->dataset[$disk['disk_name'] ]['borderColor'] = 'rgba(15,64,97,255)';
+        try {
+            $disk = Http::get($this->server->ip . '/api/servers/' . $this->server->server_id . '/stats/disk');
+            $this->disk = $disk->json()['disk'];
+            // dd($this->disk);
+            $this->labels = $this->getLabels();
+            $this->total = $this->disk[0]['write_bytes'] / 1024 / 1024;
+            // $this->dataset = [
+            //     [
+            //         'label' => "Total",
+            //         'backgroundColor' => 'rgba(15,64,97,255)',
+            //         'borderColor' => 'rgba(15,64,97,255)',
+            //     ],
+            // ];
+            foreach ($this->disk as $key => $disk) {
+                if (!isset($this->dataset[$disk['disk_name'] ])) {
+                    $this->dataset[$disk['disk_name'] ]['label'] = $disk['disk_name'];
+                    $this->dataset[$disk['disk_name'] ]['backgroundColor'] = 'rgba(15,64,97,255)';
+                    $this->dataset[$disk['disk_name'] ]['borderColor'] = 'rgba(15,64,97,255)';
+                }
+                $this->dataset[$disk['disk_name'] ]['data'][] = $disk['read_bytes'];
             }
-            $this->dataset[$disk['disk_name'] ]['data'][] = $disk['read_bytes'];
+        } catch (\Throwable $th) {
         }
     }
 
