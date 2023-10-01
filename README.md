@@ -71,11 +71,11 @@ To correctly manage remote servers Spikster has to be on a public IP address (IP
 
 ## Screenshots
 
-<img src="https://spikster.com/images/docs/dashboard.png"> 
-
 <img src="https://spikster.com/images/docs/server.png"> 
 
 <img src="https://spikster.com/images/docs/site.png"> 
+
+<img src="https://spikster.com/images/docs/cron.png"> 
 
 ## Why use Spikster?
 Spikster is easy, stable, powerful and free for any personal and commercial use and it's a perfect alternative to Cpanel, Plesk, Runcloud, CyberPanel, DirectAdmin, Forge and similar software...
