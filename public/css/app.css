@@ -691,14 +691,17 @@ select {
 }
 .btn-primary {
   border-radius: 0.5rem;
-  --tw-bg-opacity: 1;
-  background-color: rgb(59 130 246 / var(--tw-bg-opacity));
+  border-width: 2px;
+  --tw-border-opacity: 1;
+  border-color: rgb(17 24 39 / var(--tw-border-opacity));
   --tw-text-opacity: 1;
-  color: rgb(255 255 255 / var(--tw-text-opacity));
+  color: rgb(17 24 39 / var(--tw-text-opacity));
 }
 .btn-primary:hover {
+  --tw-border-opacity: 1;
+  border-color: rgb(31 41 55 / var(--tw-border-opacity));
   --tw-bg-opacity: 1;
-  background-color: rgb(29 78 216 / var(--tw-bg-opacity));
+  background-color: rgb(243 244 246 / var(--tw-bg-opacity));
 }
 .btn-primary:focus {
   outline: 2px solid transparent;
@@ -1064,23 +1067,14 @@ select {
   top: 0px;
   bottom: 0px;
 }
-.-top-px {
-  top: -1px;
-}
 .left-0 {
   left: 0px;
-}
-.left-6 {
-  left: 1.5rem;
 }
 .left-full {
   left: 100%;
 }
 .right-0 {
   right: 0px;
-}
-.right-6 {
-  right: 1.5rem;
 }
 .top-0 {
   top: 0px;
@@ -1265,9 +1259,6 @@ select {
 }
 .h-full {
   height: 100%;
-}
-.h-px {
-  height: 1px;
 }
 .min-h-screen {
   min-height: 100vh;
@@ -1625,14 +1616,6 @@ select {
 .bg-white {
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity));
-}
-.bg-red-900 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(127 29 29 / var(--tw-bg-opacity));
-}
-.bg-red-800 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(153 27 27 / var(--tw-bg-opacity));
 }
 .bg-opacity-25 {
   --tw-bg-opacity: 0.25;
@@ -2294,15 +2277,15 @@ select {
 }
 
 
-.disabled\:hover\:bg-white:hover:disabled {
-  --tw-bg-opacity: 1;
-  background-color: rgb(255 255 255 / var(--tw-bg-opacity));
-}
-
-
 .disabled\:hover\:bg-red-900:hover:disabled {
   --tw-bg-opacity: 1;
   background-color: rgb(127 29 29 / var(--tw-bg-opacity));
+}
+
+
+.disabled\:hover\:bg-white:hover:disabled {
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 255 255 / var(--tw-bg-opacity));
 }
 
 
@@ -2345,10 +2328,6 @@ select {
 
   .sm\:block {
     display: block;
-  }
-
-  .sm\:inline {
-    display: inline;
   }
 
   .sm\:flex {
@@ -2554,10 +2533,6 @@ select {
     display: table-cell;
   }
 
-  .lg\:hidden {
-    display: none;
-  }
-
   .lg\:w-96 {
     width: 24rem;
   }
@@ -2621,3 +2596,4 @@ select {
     padding-left: 18rem;
   }
 }
+

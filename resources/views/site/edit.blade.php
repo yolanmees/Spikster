@@ -33,7 +33,7 @@
                 </div>
                 <div class="space"></div>
                 <div class="text-center">
-                    <button class="btn btn-primary" type="button" id="updateSite">{{ __('cipi.update') }} <i class="fas fa-circle-notch fa-spin d-none" id="updateSiteloading"></i></button>
+                    <button class="btn btn-primary" type="button" id="updateSite">{{ __('cipi.update') }}</button>
                 </div>
                 <div class="space"></div>
             </div>
@@ -72,12 +72,12 @@
             </div>
             <div class="card-body">
                 <p>{{ __('cipi.ssl_security_text') }}:</p>
-                <button class="btn btn-success btn" type="button" id="sitessl">{{ __('cipi.ssl_generate') }} <i class="fas fa-circle-notch fa-spin d-none" id="sitesslloading"></i></button>
+                <button class="btn btn-primary btn" type="button" id="sitessl">{{ __('cipi.ssl_generate') }}</button>
                 <div class="space"></div>
                 <div class="space"></div>
                 <p>{{ __('cipi.password_resets') }}:</p>
-                <button class="btn btn-warning btn mr-3" type="button" id="sitesshreset">SSH</button>
-                <button class="btn btn-warning btn mr-3" type="button" id="sitemysqlreset">MySql</button>
+                <button class="btn btn-primary btn mr-3" type="button" id="sitesshreset">SSH</button>
+                <button class="btn btn-primary btn mr-3" type="button" id="sitemysqlreset">MySql</button>
                 <div class="space" style="min-height:38px"></div>
             </div>
         </div>
@@ -91,11 +91,11 @@
             <div class="card-body">
                 <p>{{ __('cipi.github_repository_setup') }}</p>
                 <div class="text-center">
-                    <button class="btn btn-warning" type="button" style="min-width:200px" id="sitesetrepo">{{ __('cipi.github_repository_config') }}</button>
+                    <button class="btn btn-primary" type="button" style="min-width:200px" id="sitesetrepo">{{ __('cipi.github_repository_config') }}</button>
                     <div class="space"></div>
                 </div>
                 <div class="text-center">
-                    <button class="btn btn-warning" type="button" style="min-width:200px" id="editdeploy">{{ __('cipi.github_repository_scripts') }}</button>
+                    <button class="btn btn-primary" type="button" style="min-width:200px" id="editdeploy">{{ __('cipi.github_repository_scripts') }}</button>
                     <div class="space"></div>
                 </div>
                 <p>
@@ -134,7 +134,7 @@
                 </div>
                 <div class="space"></div>
                 <div class="text-center">
-                    <button class="btn btn-primary" type="button" id="sitesupervisorupdate">{{ __('cipi.update') }} <i class="fas fa-circle-notch fa-spin d-none" id="sitesupervisorupdateloading"></i></button>
+                    <button class="btn btn-primary" type="button" id="sitesupervisorupdate">{{ __('cipi.update') }}</button>
                 </div>
                 <div class="space"></div>
             </div>
@@ -150,20 +150,11 @@
             </div>
             <div class="card-body text-center">
                 <div class="space"></div>
-                <div class="space"></div>
-                <div class="space"></div>
-                <div class="space"></div>
-                <div class="space"></div>
                 <form action="{{route('files.index')}}" method="get">
                     <input type="hidden" name="site-uuid" id="siteuuid">
-                    <input type="submit" value="Open Manager" class="btn btn-success">
+                    <input type="submit" value="Open Manager" class="btn btn-primary">
                 </form>
                 {{-- <form class="btn btn-primary" href="">File Manager</a> --}}
-                <div class="space"></div>
-                <div class="space"></div>
-                <div class="space"></div>
-                <div class="space"></div>
-                <div class="space"></div>
                 <div class="space"></div>
             </div>
         </div>
@@ -182,7 +173,7 @@
             <div class="card-body">
                 <p>Set up your database</p>
                 <div class="text-center">
-                    <button class="btn btn-warning" type="button" style="min-width:200px" id="sitesetrepo"> <a href="{{ url('/data') }}" class="btn btn-warning" style="min-width:200px">DATABASE</a></button>
+                    <button class="btn btn-primary" type="button" style="min-width:200px" id="sitesetrepo"> <a href="{{ url('/data') }}" style="min-width:200px">DATABASE</a></button>
                     <div class="space"></div>
                 </div>
 
@@ -190,7 +181,7 @@
 
                 <p>Manage your database</p>
                 <div class="text-center">
-                    <button class="btn btn-warning" type="button" style="min-width:200px" id="sitesetrepo"> <a href="{{ route('autopma', $site_id) }}" class="btn btn-warning" style="min-width:200px" target="_blank">phpMyAdmin</a></button>
+                    <button class="btn btn-primary" type="button" style="min-width:200px" id="sitesetrepo"> <a href="{{ route('autopma', $site_id) }}"  style="min-width:200px" target="_blank">phpMyAdmin</a></button>
                     <div class="space"></div>
                 </div>
 
@@ -206,11 +197,11 @@
             <div class="card-body">
                 <p>Manage your project</p>
                 <div class="text-center">
-                    <button class="btn btn-warning" type="button" style="min-width:200px" id="startNodejsButton">Setup App</button>
+                    <button class="btn btn-primary" type="button" style="min-width:200px" id="startNodejsButton">Setup App</button>
                     <div class="space"></div>
                 </div>
                 <div class="text-center">
-                    <button class="btn btn-danger" type="button" style="min-width:200px" id="stopNodeButton">Stop App</button>
+                    <button class="btn btn-primary" type="button" style="min-width:200px" id="stopNodeButton">Stop App</button>
                     <div class="space"></div>
                 </div>
 
@@ -251,7 +242,7 @@
                 </div>
                 <div class="space"></div>
                 <div class="text-center">
-                    <button class="btn btn-primary" type="button" id="repositorysubmit">{{ __('cipi.confirm') }} <i class="fas fa-circle-notch fa-spin d-none" id="repositoryloading"></i></button>
+                    <button class="btn btn-primary" type="button" id="repositorysubmit">{{ __('cipi.confirm') }} </button>
                 </div>
             </div>
         </div>
@@ -271,7 +262,7 @@
                 <div id="deploy" style="height:250px;width:100%;"></div>
                 <div class="space"></div>
                 <div class="text-center">
-                    <button class="btn btn-primary" type="button" id="deploysubmit">{{ __('cipi.save') }} <i class="fas fa-circle-notch fa-spin d-none" id="deployloading"></i></button>
+                    <button class="btn btn-primary" type="button" id="deploysubmit">{{ __('cipi.save') }} </button>
                 </div>
                 <div class="space"></div>
             </div>
@@ -291,7 +282,7 @@
                 <p>{{ __('cipi.require_ssh_password_reset_modal_text') }}</p>
                 <div class="space"></div>
                 <div class="text-center">
-                    <button class="btn btn-danger" type="button" id="sshresetsubmit">{{ __('cipi.confirm') }} <i class="fas fa-circle-notch fa-spin d-none" id="sshresetloading"></i></button>
+                    <button class="btn btn-danger" type="button" id="sshresetsubmit">{{ __('cipi.confirm') }}</button>
                 </div>
                 <div class="space"></div>
             </div>
@@ -311,7 +302,7 @@
                 <p>{{ __('cipi.require_mysql_password_reset_modal_text') }}</p>
                 <div class="space"></div>
                 <div class="text-center">
-                    <button class="btn btn-danger" type="button" id="mysqlresetsubmit">{{ __('cipi.confirm') }} <i class="fas fa-circle-notch fa-spin d-none" id="mysqlresetloading"></i></button>
+                    <button class="btn btn-danger" type="button" id="mysqlresetsubmit">{{ __('cipi.confirm') }} </button>
                 </div>
                 <div class="space"></div>
             </div>

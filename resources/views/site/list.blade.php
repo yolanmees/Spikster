@@ -81,7 +81,7 @@
                         </div>
                         <div class="space"></div>
                         <div class="text-center">
-                            <button class="btn btn-primary" type="button" id="submit">{{ __('cipi.confirm') }} <i class="fas fa-circle-notch fa-spin d-none" id="loading"></i></button>
+                            <button class="btn btn-primary" type="button" id="submit">{{ __('cipi.confirm') }} </button>
                         </div>
                     </div>
                     <div id="newsiteok" class="d-none container">

@@ -18,4 +18,11 @@ class ServerTable extends Component
     {
         $this->servers = Server::all();
     }
+
+    public function delete($server_id)
+    {
+        $server = Server::where('server_id', $server_id)->first();
+        $server->delete();
+        $this->servers = Server::all();
+    }
 }

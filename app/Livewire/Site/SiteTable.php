@@ -18,4 +18,11 @@ class SiteTable extends Component
         $this->sites = Site::all();
         // dd($this->sites);
     }
+
+    public function delete($site_id)
+    {
+        $site = Site::where('site_id', $site_id)->first();
+        $site->delete();
+        $this->sites = Site::all();
+    }
 }
