@@ -30,7 +30,7 @@ Spikster is a Laravel based cloud server control panel that supports Digital Oce
 
 
 ## Documentation
-For now u can use the Cipi Documentation at: https://spikster.com/
+Documentation at: https://spikster.com/
 
 ## Installation
 ```bash
