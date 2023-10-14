@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SiteController;
 use App\Http\Controllers\FileManagerController;
 use App\Http\Controllers\DatabaseController;
+use Illuminate\Http\Request;
 
 /*
 |--------------------------------------------------------------------------

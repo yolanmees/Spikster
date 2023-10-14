@@ -685,6 +685,8 @@ class ServerController extends Controller
             $newsite->database = 'Secret_123';
             $newsite->panel = true;
             $newsite->save();
+            // set config url 
+            $server->panel = $request->domain;
             PanelDomainAddSSH::dispatch($server)->delay(Carbon::now()->addSeconds(3));
         }
 
