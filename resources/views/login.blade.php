@@ -8,7 +8,7 @@
         <meta name="robots" content="noindex, nofollow">
         <meta name="googlebot" content="noindex">
         <meta name="cipi-version" content="{{ Storage::get('cipi/version.md') }}">
-        <title>{{ config('cipi.name') }} | {{ __('cipi.login') }}</title>
+        <title>{{ config('cipi.name') }} | {{ __('spikster.login') }}</title>
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/js/all.min.js"></script>
         <link rel="icon" type="image/png" href="/favicon.png" />
@@ -32,18 +32,18 @@
                                     <div class="card-body">
                                         <form>
                                             <div class="text-center">
-                                                <h1>{{ __('cipi.login') }}</h1>
+                                                <h1>{{ __('spikster.login') }}</h1>
                                             </div>
                                             <div class="form-group">
-                                                <label class="small mb-1" for="username">{{ __('cipi.username') }}</label>
+                                                <label class="small mb-1" for="username">{{ __('spikster.username') }}</label>
                                                 <input class="form-control py-4" id="username" type="email" placeholder="john.doe" />
                                             </div>
                                             <div class="form-group">
-                                                <label class="small mb-1" for="password">{{ __('cipi.password') }}</label>
+                                                <label class="small mb-1" for="password">{{ __('spikster.password') }}</label>
                                                 <input class="form-control py-4" id="password" type="password" placeholder="********" />
                                             </div>
                                             <div class="form-group d-flex justify-content-end mt-4 mb-0">
-                                                <a class="btn btn-primary" id="login">{{ __('cipi.login') }} <i class="fas fa-circle-notch fa-spin d-none" id="loading"></i></a>
+                                                <a class="btn btn-primary" id="login">{{ __('spikster.login') }} </a>
                                             </div>
                                         </form>
                                     </div>

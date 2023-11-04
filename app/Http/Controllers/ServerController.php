@@ -246,22 +246,22 @@ class ServerController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
-                'message' => __('cipi.bad_request'),
+                'message' => __('spikster.bad_request'),
                 'errors' => $validator->errors()->getMessages()
             ], 400);
         }
 
         if ($request->ip == $request->server('SERVER_ADDR')) {
             return response()->json([
-                'message' => __('cipi.server_conflict_ip_current_message'),
-                'errors' => __('cipi.server_conflict')
+                'message' => __('spikster.server_conflict_ip_current_message'),
+                'errors' => __('spikster.server_conflict')
             ], 409);
         }
 
         if (Server::where('ip', $request->ip)->first()) {
             return response()->json([
-                'message' => __('cipi.server_conflict_ip_duplicate_message'),
-                'errors' => __('cipi.server_conflict')
+                'message' => __('spikster.server_conflict_ip_duplicate_message'),
+                'errors' => __('spikster.server_conflict')
             ], 409);
         }
 
@@ -333,15 +333,15 @@ class ServerController extends Controller
 
         if (!$server) {
             return response()->json([
-                'message' => __('cipi.server_not_found_message_default'),
-                'errors' => __('cipi.server_not_found')
+                'message' => __('spikster.server_not_found_message_default'),
+                'errors' => __('spikster.server_not_found')
             ], 404);
         }
 
         if ($server->default) {
             return response()->json([
-                'message' => __('cipi.delete_default_server_message'),
-                'errors' => __('cipi.bad_request')
+                'message' => __('spikster.delete_default_server_message'),
+                'errors' => __('spikster.bad_request')
             ], 400);
         }
 
@@ -457,8 +457,8 @@ class ServerController extends Controller
 
         if (!$server) {
             return response()->json([
-                'message' => __('cipi.server_not_found_message'),
-                'errors' => __('cipi.server_not_found')
+                'message' => __('spikster.server_not_found_message'),
+                'errors' => __('spikster.server_not_found')
             ], 404);
         }
 
@@ -573,8 +573,8 @@ class ServerController extends Controller
 
         if (!$server) {
             return response()->json([
-                'message' => __('cipi.server_not_found_native_message'),
-                'errors' => __('cipi.server_not_found')
+                'message' => __('spikster.server_not_found_native_message'),
+                'errors' => __('spikster.server_not_found')
             ], 404);
         }
 
@@ -655,8 +655,8 @@ class ServerController extends Controller
 
         if (!$server) {
             return response()->json([
-                'message' => __('cipi.server_not_found_native_message'),
-                'errors' => __('cipi.server_not_found')
+                'message' => __('spikster.server_not_found_native_message'),
+                'errors' => __('spikster.server_not_found')
             ], 404);
         }
 
@@ -672,7 +672,7 @@ class ServerController extends Controller
             ]);
             if ($validator->fails()) {
                 return response()->json([
-                    'message' => __('cipi.bad_request'),
+                    'message' => __('spikster.bad_request'),
                     'errors' => $validator->errors()->getMessages()
                 ], 400);
             }
@@ -685,8 +685,6 @@ class ServerController extends Controller
             $newsite->database = 'Secret_123';
             $newsite->panel = true;
             $newsite->save();
-            // set config url 
-            $server->panel = $request->domain;
             PanelDomainAddSSH::dispatch($server)->delay(Carbon::now()->addSeconds(3));
         }
 
@@ -733,8 +731,8 @@ class ServerController extends Controller
 
         if (!$server) {
             return response()->json([
-                'message' => __('cipi.server_not_found_native_message'),
-                'errors' => __('cipi.server_not_found')
+                'message' => __('spikster.server_not_found_native_message'),
+                'errors' => __('spikster.server_not_found')
             ], 404);
         }
 
@@ -744,8 +742,8 @@ class ServerController extends Controller
             PanelDomainSslSSH::dispatch($server, $site)->delay(Carbon::now()->addSeconds(3));
         } else {
             return response()->json([
-                'message' => __('cipi.ssl_request_error_message'),
-                'errors' => __('cipi.bad_request')
+                'message' => __('spikster.ssl_request_error_message'),
+                'errors' => __('spikster.bad_request')
             ], 400);
         }
 
@@ -906,8 +904,8 @@ class ServerController extends Controller
 
         if (!$server) {
             return response()->json([
-                'message' => __('cipi.server_not_found_message'),
-                'errors' => __('cipi.server_not_found')
+                'message' => __('spikster.server_not_found_message'),
+                'errors' => __('spikster.server_not_found')
             ], 404);
         }
 
@@ -917,20 +915,20 @@ class ServerController extends Controller
             ]);
             if ($validator->fails()) {
                 return response()->json([
-                    'message' => __('cipi.bad_request'),
+                    'message' => __('spikster.bad_request'),
                     'errors' => $validator->errors()->getMessages()
                 ], 400);
             }
             if (!$server->default && $request->ip == str_replace("\n", '', file_get_contents('https://checkip.amazonaws.com'))) {
                 return response()->json([
-                    'message' => __('cipi.edit_server_current_ip_error_message'),
-                    'errors' => __('cipi.server_conflict')
+                    'message' => __('spikster.edit_server_current_ip_error_message'),
+                    'errors' => __('spikster.server_conflict')
                 ], 409);
             }
             if (Server::where('ip', $request->ip)->where('server_id', '<>', $server_id)->first()) {
                 return response()->json([
-                    'message' => __('cipi.server_conflict_ip_duplicate_message'),
-                    'errors' => __('cipi.server_conflict')
+                    'message' => __('spikster.server_conflict_ip_duplicate_message'),
+                    'errors' => __('spikster.server_conflict')
                 ], 409);
             }
             if ($server->default) {
@@ -946,7 +944,7 @@ class ServerController extends Controller
             ]);
             if ($validator->fails()) {
                 return response()->json([
-                    'message' => __('cipi.bad_request'),
+                    'message' => __('spikster.bad_request'),
                     'errors' => $validator->errors()->getMessages()
                 ], 400);
             }
@@ -970,7 +968,7 @@ class ServerController extends Controller
         if ($request->php) {
             if (!in_array($request->php, config('cipi.phpvers'))) {
                 return response()->json([
-                    'message' => __('cipi.bad_request'),
+                    'message' => __('spikster.bad_request'),
                     'errors' => 'Invalid PHP version.'
                 ], 400);
             }
@@ -1043,8 +1041,8 @@ class ServerController extends Controller
 
         if (!$server) {
             return response()->json([
-                'message' => __('cipi.server_not_found_message'),
-                'errors' => __('cipi.server_not_found')
+                'message' => __('spikster.server_not_found_message'),
+                'errors' => __('spikster.server_not_found')
             ], 404);
         }
 
@@ -1054,14 +1052,14 @@ class ServerController extends Controller
                 //
             } else {
                 return response()->json([
-                    'message' => __('cipi.server_unavailable_message'),
-                    'errors' => __('cipi.server_unavailable')
+                    'message' => __('spikster.server_unavailable_message'),
+                    'errors' => __('spikster.server_unavailable')
                 ], 503);
             }
         } catch (\Throwable $th) {
             return response()->json([
-                'message' => __('cipi.server_unavailable_message'),
-                'errors' => __('cipi.server_unavailable')
+                'message' => __('spikster.server_unavailable_message'),
+                'errors' => __('spikster.server_unavailable')
             ], 503);
         }
     }
@@ -1137,8 +1135,8 @@ class ServerController extends Controller
 
         if (!$server) {
             return response()->json([
-                'message' => __('cipi.server_not_found_message'),
-                'errors' => __('cipi.server_not_found')
+                'message' => __('spikster.server_not_found_message'),
+                'errors' => __('spikster.server_not_found')
             ], 404);
         }
 
@@ -1163,8 +1161,8 @@ class ServerController extends Controller
             $ssh = new SSH2($server->ip, 22);
             if (!$ssh->login('cipi', $server->password)) {
                 return response()->json([
-                    'message' => __('cipi.server_error_ssh_error_message').$server->server_id,
-                    'errors' => __('cipi.server_error')
+                    'message' => __('spikster.server_error_ssh_error_message').$server->server_id,
+                    'errors' => __('spikster.server_error')
                 ], 500);
             }
             $ssh->setTimeout(360);
@@ -1172,8 +1170,8 @@ class ServerController extends Controller
             $ssh->exec('exit');
         } catch (\Throwable $th) {
             return response()->json([
-                'message' => __('cipi.something_error_message'),
-                'errors' => __('cipi.error')
+                'message' => __('spikster.something_error_message'),
+                'errors' => __('spikster.error')
             ], 500);
         }
 
@@ -1238,8 +1236,8 @@ class ServerController extends Controller
         $server = Server::where('server_id', $server_id)->where('status', 1)->first();
         if (!$server) {
             return response()->json([
-                'message' => __('cipi.server_not_found_message'),
-                'errors' => __('cipi.server_not_found')
+                'message' => __('spikster.server_not_found_message'),
+                'errors' => __('spikster.server_not_found')
             ], 404);
         }
 
@@ -1311,16 +1309,16 @@ class ServerController extends Controller
     {
         if (!in_array($service, config('cipi.services'))) {
             return response()->json([
-                'message' => __('cipi.invalid_service_error_message'),
-                'errors' => __('cipi.bad_request')
+                'message' => __('spikster.invalid_service_error_message'),
+                'errors' => __('spikster.bad_request')
             ], 400);
         }
 
         $server = Server::where('server_id', $server_id)->where('status', 1)->first();
         if (!$server) {
             return response()->json([
-                'message' => __('cipi.server_not_found_message'),
-                'errors' => __('cipi.server_not_found')
+                'message' => __('spikster.server_not_found_message'),
+                'errors' => __('spikster.server_not_found')
             ], 404);
         }
 
@@ -1328,8 +1326,8 @@ class ServerController extends Controller
             $ssh = new SSH2($server->ip, 22);
             if (!$ssh->login('cipi', $server->password)) {
                 return response()->json([
-                    'message' => __('cipi.server_error_ssh_error_message').$server->server_id,
-                    'errors' => __('cipi.server_error')
+                    'message' => __('spikster.server_error_ssh_error_message').$server->server_id,
+                    'errors' => __('spikster.server_error')
                 ], 500);
             }
 
@@ -1363,8 +1361,8 @@ class ServerController extends Controller
             return response()->json([]);
         } catch (\Throwable $th) {
             return response()->json([
-                'message' => __('cipi.something_error_message'),
-                'errors' => __('cipi.error')
+                'message' => __('spikster.something_error_message'),
+                'errors' => __('spikster.error')
             ], 500);
         }
     }
@@ -1452,8 +1450,8 @@ class ServerController extends Controller
         $server = Server::where('server_id', $server_id)->where('status', 1)->first();
         if (!$server) {
             return response()->json([
-                'message' => __('cipi.server_not_found_message'),
-                'errors' => __('cipi.server_not_found')
+                'message' => __('spikster.server_not_found_message'),
+                'errors' => __('spikster.server_not_found')
             ], 404);
         }
 
@@ -1517,8 +1515,8 @@ class ServerController extends Controller
         $server = Server::where('server_id', $server_id)->where('status', 1)->first();
         if (!$server) {
             return response()->json([
-                'message' => __('cipi.server_not_found_message'),
-                'errors' => __('cipi.server_not_found')
+                'message' => __('spikster.server_not_found_message'),
+                'errors' => __('spikster.server_not_found')
             ], 404);
         }
 
@@ -1557,8 +1555,8 @@ class ServerController extends Controller
             $ssh = new SSH2($server->ip, 22);
             if (!$ssh->login('cipi', $server->password)) {
                 return response()->json([
-                    'message' => __('cipi.server_error_ssh_error_message').$server->server_id,
-                    'errors' => __('cipi.server_error')
+                    'message' => __('spikster.server_error_ssh_error_message').$server->server_id,
+                    'errors' => __('spikster.server_error')
                 ], 500);
             }
             $ssh->setTimeout(360);
@@ -1566,8 +1564,8 @@ class ServerController extends Controller
             $ssh->exec('exit');
         } catch (\Throwable $th) {
             return response()->json([
-                'message' => __('cipi.something_error_message'),
-                'errors' => __('cipi.error')
+                'message' => __('spikster.something_error_message'),
+                'errors' => __('spikster.error')
             ], 500);
         }
 
@@ -1593,8 +1591,8 @@ class ServerController extends Controller
             $ssh = new SSH2($server->ip, 22);
             if (!$ssh->login('cipi', $server->password)) {
                 return response()->json([
-                    'message' => __('cipi.server_error_ssh_error_message').$server->server_id,
-                    'errors' => __('cipi.server_error')
+                    'message' => __('spikster.server_error_ssh_error_message').$server->server_id,
+                    'errors' => __('spikster.server_error')
                 ], 500);
             }
             $ssh->setTimeout(360);
@@ -1602,8 +1600,8 @@ class ServerController extends Controller
             $ssh->exec('exit');
         } catch (\Throwable $th) {
             return response()->json([
-                'message' => __('cipi.something_error_message'),
-                'errors' => __('cipi.error')
+                'message' => __('spikster.something_error_message'),
+                'errors' => __('spikster.error')
             ], 500);
         }
 
@@ -1643,8 +1641,8 @@ class ServerController extends Controller
             $ssh = new SSH2($server->ip, 22);
             if (!$ssh->login('cipi', $server->password)) {
                 return response()->json([
-                    'message' => __('cipi.server_error_ssh_error_message').$server->server_id,
-                    'errors' => __('cipi.server_error')
+                    'message' => __('spikster.server_error_ssh_error_message').$server->server_id,
+                    'errors' => __('spikster.server_error')
                 ], 500);
             }
             $ssh->setTimeout(360);
@@ -1652,8 +1650,8 @@ class ServerController extends Controller
             $ssh->exec('exit');
         } catch (\Throwable $th) {
             return response()->json([
-                'message' => __('cipi.something_error_message'),
-                'errors' => __('cipi.error')
+                'message' => __('spikster.something_error_message'),
+                'errors' => __('spikster.error')
             ], 500);
         }
 
@@ -1670,8 +1668,8 @@ class ServerController extends Controller
             $ssh = new SSH2($server->ip, 22);
             if (!$ssh->login('cipi', $server->password)) {
                 return response()->json([
-                    'message' => __('cipi.server_error_ssh_error_message').$server->server_id,
-                    'errors' => __('cipi.server_error')
+                    'message' => __('spikster.server_error_ssh_error_message').$server->server_id,
+                    'errors' => __('spikster.server_error')
                 ], 500);
             }
             $ssh->setTimeout(360);
@@ -1679,8 +1677,8 @@ class ServerController extends Controller
             $ssh->exec('exit');
         } catch (\Throwable $th) {
             return response()->json([
-                'message' => __('cipi.something_error_message'),
-                'errors' => __('cipi.error')
+                'message' => __('spikster.something_error_message'),
+                'errors' => __('spikster.error')
             ], 500);
         }
 
@@ -1699,8 +1697,8 @@ class ServerController extends Controller
             ]);
         } else {
             return response()->json([
-                'message' => __('cipi.something_error_message'),
-                'errors' => __('cipi.error')
+                'message' => __('spikster.something_error_message'),
+                'errors' => __('spikster.error')
             ], 500);
         }
     }
@@ -1715,8 +1713,8 @@ class ServerController extends Controller
             ]);
         } else {
             return response()->json([
-                'message' => __('cipi.something_error_message'),
-                'errors' => __('cipi.error')
+                'message' => __('spikster.something_error_message'),
+                'errors' => __('spikster.error')
             ], 500);
         }
     }
@@ -1731,8 +1729,8 @@ class ServerController extends Controller
             ]);
         } else {
             return response()->json([
-                'message' => __('cipi.something_error_message'),
-                'errors' => __('cipi.error')
+                'message' => __('spikster.something_error_message'),
+                'errors' => __('spikster.error')
             ], 500);
         }
     }
@@ -1747,8 +1745,8 @@ class ServerController extends Controller
             ]);
         } else {
             return response()->json([
-                'message' => __('cipi.something_error_message'),
-                'errors' => __('cipi.error')
+                'message' => __('spikster.something_error_message'),
+                'errors' => __('spikster.error')
             ], 500);
         }
     }

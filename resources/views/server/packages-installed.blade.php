@@ -2,7 +2,7 @@
 
 
 @section('title')
-{{ __('cipi.titles.server') }}
+{{ __('spikster.titles.server') }}
 @endsection
 
 

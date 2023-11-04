@@ -2,7 +2,7 @@
 
 
 @section('title')
-    {{ __('cipi.titles.server') }}
+    {{ __('spikster.titles.server') }}
 @endsection
 
 
@@ -11,7 +11,7 @@
 <div x-data="{ tab: 'monitor' }">
     <ol class="breadcrumbs">
         <li class="breadcrumb-item active">IP:<b><span class="ml-1" id="serveriptop"></span></b></li>
-        <li class="breadcrumb-item active">{{ __('cipi.sites') }}:<b><span class="ml-1" id="serversites"></span></b></li>
+        <li class="breadcrumb-item active">{{ __('spikster.sites') }}:<b><span class="ml-1" id="serversites"></span></b></li>
         <li class="breadcrumb-item active">Ping:<b><span class="ml-1" id="serverping"><i class="fas fa-circle-notch fa-spin"></i></span></b></li>
     </ol>
 
@@ -61,31 +61,31 @@
             <div class="card mb-4">
                 <div class="card-header">
                     <i class="fas fa-info-circle fs-fw mr-1"></i>
-                    {{ __('cipi.server_information') }}
+                    {{ __('spikster.server_information') }}
                 </div>
                 <div class="card-body">
-                    <p>{{ __('cipi.server_name') }}:</p>
+                    <p>{{ __('spikster.server_name') }}:</p>
                     <div class="input-group">
                         <input class="form-control" type="text" placeholder="e.g. Production" id="servername" autocomplete="off" />
                     </div>
                     <div class="space"></div>
-                    <p>{{ __('cipi.server_ip') }}:</p>
+                    <p>{{ __('spikster.server_ip') }}:</p>
                     <div class="input-group">
                         <input class="form-control" type="text" placeholder="e.g. 123.123.123.123" id="serverip" autocomplete="off" />
                     </div>
                     <div class="space"></div>
-                    <p>{{ __('cipi.server_provider') }}:</p>
+                    <p>{{ __('spikster.server_provider') }}:</p>
                     <div class="input-group">
                         <input class="form-control" type="text" placeholder="e.g. Digital Ocean" id="serverprovider" autocomplete="off" />
                     </div>
                     <div class="space"></div>
-                    <p>{{ __('cipi.server_location') }}:</p>
+                    <p>{{ __('spikster.server_location') }}:</p>
                     <div class="input-group">
                         <input class="form-control" type="text" placeholder="e.g. Amsterdam" id="serverlocation" autocomplete="off" />
                     </div>
                     <div class="space"></div>
                     <div class="text-center">
-                        <button class="btn btn-primary" type="button" id="updateServer">{{ __('cipi.update') }}</button>
+                        <button class="btn btn-primary" type="button" id="updateServer">{{ __('spikster.update') }}</button>
                     </div>
                     <div class="space"></div>
                     <div class="space"></div>
@@ -97,32 +97,32 @@
             <div class="card mb-4">
                 <div class="card-header">
                     <i class="fas fa-power-off fs-fw mr-1"></i>
-                    {{ __('cipi.system_services') }}
+                    {{ __('spikster.system_services') }}
                 </div>
                 <div class="card-body">
                     <p>nginx</p>
                     <div class="text-center">
-                        <button class="btn btn-warning" type="button" id="restartnginx">{{ __('cipi.restart') }} <i class="fas fa-circle-notch fa-spin d-none" id="loadingnginx"></i></button>
+                        <button class="btn btn-warning" type="button" id="restartnginx">{{ __('spikster.restart') }} </button>
                     </div>
                     <div class="space"></div>
                     <p>PHP-FPM</p>
                     <div class="text-center">
-                        <button class="btn btn-warning" type="button" id="restartphp">{{ __('cipi.restart') }} <i class="fas fa-circle-notch fa-spin d-none" id="loadingphp"></i></button>
+                        <button class="btn btn-warning" type="button" id="restartphp">{{ __('spikster.restart') }} </button>
                     </div>
                     <div class="space"></div>
                     <p>MySql</p>
                     <div class="text-center">
-                        <button class="btn btn-warning" type="button" id="restartmysql">{{ __('cipi.restart') }} <i class="fas fa-circle-notch fa-spin d-none" id="loadingmysql"></i></button>
+                        <button class="btn btn-warning" type="button" id="restartmysql">{{ __('spikster.restart') }}</button>
                     </div>
                     <div class="space"></div>
                     <p>Redis</p>
                     <div class="text-center">
-                        <button class="btn btn-warning" type="button" id="restartredis">{{ __('cipi.restart') }} <i class="fas fa-circle-notch fa-spin d-none" id="loadingredis"></i></button>
+                        <button class="btn btn-warning" type="button" id="restartredis">{{ __('spikster.restart') }} </button>
                     </div>
                     <div class="space"></div>
                     <p>Supervisor</p>
                     <div class="text-center">
-                        <button class="btn btn-warning" type="button" id="restartsupervisor">{{ __('cipi.restart') }} <i class="fas fa-circle-notch fa-spin d-none" id="loadingsupervisor"></i></button>
+                        <button class="btn btn-warning" type="button" id="restartsupervisor">{{ __('spikster.restart') }} </button>
                     </div>
                     <div class="space"></div>
                 </div>
@@ -151,10 +151,10 @@
             <div class="card mb-4">
                 <div class="card-header">
                     <i class="fas fa-tools fs-fw mr-1"></i>
-                    {{ __('cipi.tools') }}
+                    {{ __('spikster.tools') }}
                 </div>
                 <div class="card-body">
-                    <p>{{ __('cipi.php_cli_version') }}:</p>
+                    <p>{{ __('spikster.php_cli_version') }}:</p>
                     <div class="input-group">
                         <select class="form-control" id="phpver">
                             <option value="8.2" id="php82">8.2</option>
@@ -166,25 +166,18 @@
                             <button class="btn btn-primary" type="button" id="changephp"><i class="fas fa-edit"></i></button>
                         </div>
                     </div>
-                    <div class="space"></div>
-                    <p>{{ __('cipi.manage_cron_jobs') }}:</p>
-                    <div>
-                        <button class="btn btn-primary" type="button" id="editcrontab">{{ __('cipi.edit_crontab') }}</button>
+                    <div class="mt-4">
+                        <p class="mb-2">{{ __('spikster.manage_cron_jobs') }}:</p>
+                        <button class="btn btn-primary" type="button" id="editcrontab">{{ __('spikster.edit_crontab') }}</button>
                     </div>
-                    <div class="space"></div>
-                    <p>{{ __('cipi.reset_cipi_password') }}:</p>
-                    <div>
-                        <button class="btn btn-danger" type="button" id="rootreset">{{ __('cipi.require_reset_cipi_password') }}</button>
+                    <div class="mt-4">
+                        <p class="mb-2">{{ __('spikster.reset_cipi_password') }}:</p>
+                        <button class="btn btn-danger" type="button" id="rootreset">{{ __('spikster.require_reset_cipi_password') }}</button>
+
                     </div>
-                    <div class="space"></div>
-                    <p>{{ __('cipi.hd_memory_usage') }}:</p>
-                    <div>
-                        <span class="btn" id="hd"><i class="fas fa-circle-notch fa-spin" title="{{ __('cipi.loading_data') }}"></i></span>
-                    </div>
-                    <div class="space"></div>
-                    <p>{{ __('cipi.cipi_build_version') }}:</p>
-                    <div>
-                        <span class="btn btn-secondary" id="serverbuild"><i class="fas fa-circle-notch fa-spin"></i></span>
+                    <div class="mt-4">
+                        <p class="mb-2">{{ __('spikster.cipi_build_version') }}:</p>
+                        <span class="btn btn-secondary" id="serverbuild"></span>
                     </div>
                     <div class="space"></div>
                 </div>
@@ -203,16 +196,16 @@
         <div class="modal-dialog" role="document" id="updateserverdialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="updateServerModalLabel">{{ __('cipi.update_server_modal_title') }}</h5>
+                    <h5 class="modal-title" id="updateServerModalLabel">{{ __('spikster.update_server_modal_title') }}</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <p>{{ __('cipi.update_server_modal_text') }}</p>
-                    <p class="d-none" id="ipnotice"><b>{!! __('cipi.update_server_modal_ip') !!}</b></p>
+                    <p>{{ __('spikster.update_server_modal_text') }}</p>
+                    <p class="d-none" id="ipnotice"><b>{!! __('spikster.update_server_modal_ip') !!}</b></p>
                     <div class="text-center">
-                        <button class="btn btn-primary" type="button" id="submit">{{ __('cipi.confirm') }} <i class="fas fa-circle-notch fa-spin d-none" id="loading"></i></button>
+                        <button class="btn btn-primary" type="button" id="submit">{{ __('spikster.confirm') }} </button>
                     </div>
                     <div class="space"></div>
                 </div>
@@ -223,17 +216,17 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="crontabModalLabel">{{ __('cipi.server_crontab') }}</h5>
+                    <h5 class="modal-title" id="crontabModalLabel">{{ __('spikster.server_crontab') }}</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <p>{{ __('cipi.server_crontab_edit') }}:</p>
+                    <p>{{ __('spikster.server_crontab_edit') }}:</p>
                     <div id="crontab" style="height:250px;width:100%;"></div>
                     <div class="space"></div>
                     <div class="text-center">
-                        <button class="btn btn-primary" type="button" id="crontabsubmit">{{ __('cipi.save') }} <i class="fas fa-circle-notch fa-spin d-none" id="crontableloading"></i></button>
+                        <button class="btn btn-primary" type="button" id="crontabsubmit">{{ __('spikster.save') }} <i class="fas fa-circle-notch fa-spin d-none" id="crontableloading"></i></button>
                     </div>
                     <div class="space"></div>
                 </div>
@@ -244,16 +237,16 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="rootresetModalLabel">{{ __('cipi.require_password_reset_modal_title') }}</h5>
+                    <h5 class="modal-title" id="rootresetModalLabel">{{ __('spikster.require_password_reset_modal_title') }}</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <p>{{ __('cipi.require_password_reset_modal_text') }}</p>
+                    <p>{{ __('spikster.require_password_reset_modal_text') }}</p>
                     <div class="space"></div>
                     <div class="text-center">
-                        <button class="btn btn-danger" type="button" id="rootresetsubmit">{{ __('cipi.confirm') }} <i class="fas fa-circle-notch fa-spin d-none" id="rootresetloading"></i></button>
+                        <button class="btn btn-danger" type="button" id="rootresetsubmit">{{ __('spikster.confirm') }} <i class="fas fa-circle-notch fa-spin d-none" id="rootresetloading"></i></button>
                     </div>
                     <div class="space"></div>
                 </div>
@@ -328,7 +321,7 @@
                 if(data.build) {
                     $('#serverbuild').html(data.build);
                 } else {
-                    $('#serverbuild').html('{{ __('cipi.unknown') }}');
+                    $('#serverbuild').html('{{ __('spikster.unknown') }}');
                 }
                 switch (data.php) {
                     case '8.2':
@@ -364,7 +357,7 @@
             type: 'GET',
             beforeSend: function() {
                 $('#serverping').empty();
-                $('#serverping').html('<i class="fas fa-circle-notch fa-spin" title="{{ __('cipi.loading_data') }}"></i>');
+                $('#serverping').html('<i class="fas fa-circle-notch fa-spin" title="{{ __('spikster.loading_data') }}"></i>');
             },
             success: function(data) {
                 $('#serverping').empty();
@@ -388,7 +381,7 @@
                 'php': $('#phpver').val(),
             }),
             beforeSend: function() {
-                $('#changephp').html('<i class="fas fa-circle-notch fa-spin" title="{{ __('cipi.loading_please_wait') }}"></i>');
+                $('#changephp').html('<i class="fas fa-circle-notch fa-spin" title="{{ __('spikster.loading_please_wait') }}"></i>');
             },
             success: function(data) {
                 $('#changephp').empty();
@@ -480,7 +473,7 @@
             url: '/api/servers/{{ $server_id }}/rootreset',
             type: 'POST',
             success: function(data) {
-                success('{{ __('cipi.new_password_success') }}:<br><b>'+data.password+'</b>');
+                success('{{ __('spikster.new_password_success') }}:<br><b>'+data.password+'</b>');
                 $(window).scrollTop(0);
                 $('#rootresetModal').modal('toggle');
             },

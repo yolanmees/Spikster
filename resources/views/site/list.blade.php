@@ -3,7 +3,7 @@
 
 
 @section('title')
-    {{ __('cipi.titles.sites') }}
+    {{ __('spikster.titles.sites') }}
 @endsection
 
 
@@ -11,14 +11,14 @@
 @section('content')
     <div class="row">
         <button class="btn btn-sm btn-secondary" id="newSite">
-            <i class="fas fa-plus mr-1"></i><b>{{ __('cipi.new_button', ['type' => __('cipi.site')]) }}</b>
+            <i class="fas fa-plus mr-1"></i><b>{{ __('spikster.new_button', ['type' => __('spikster.site')]) }}</b>
         </button>
         @livewire('site.site-table')
         <!-- <div class="col-xl-12">
             <div class="card mb-4">
                 <div class="card-header text-right">
                     <button class="btn btn-sm btn-secondary" id="newSite">
-                        <i class="fas fa-plus mr-1"></i><b>{{ __('cipi.new_button', ['type' => __('cipi.site')]) }}</b>
+                        <i class="fas fa-plus mr-1"></i><b>{{ __('spikster.new_button', ['type' => __('spikster.site')]) }}</b>
                     </button>
                 </div>
                 <div class="card-body">
@@ -26,11 +26,11 @@
                         <table class="table table-bordered" id="dt" width="100%" cellspacing="0">
                             <thead>
                             <tr>
-                                <th class="text-center">{{ __('cipi.domain') }}</th>
-                                <th class="text-center text-center d-none d-md-table-cell">{{ __('cipi.aliases') }}</th>
-                                <th class="text-center d-none d-lg-table-cell">{{ __('cipi.server') }}</th>
+                                <th class="text-center">{{ __('spikster.domain') }}</th>
+                                <th class="text-center text-center d-none d-md-table-cell">{{ __('spikster.aliases') }}</th>
+                                <th class="text-center d-none d-lg-table-cell">{{ __('spikster.server') }}</th>
                                 <th class="text-center d-none d-xl-table-cell">IP</th>
-                                <th class="text-center">{{ __('cipi.actions') }}</th>
+                                <th class="text-center">{{ __('spikster.actions') }}</th>
                             </tr>
                             </thead>
                         </table>
@@ -48,24 +48,24 @@
         <div class="modal-dialog" role="document" id="newsitedialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="newSiteModalLabel">{{ __('cipi.new_site_modal_title') }}</h5>
+                    <h5 class="modal-title" id="newSiteModalLabel">{{ __('spikster.new_site_modal_title') }}</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     <div id="newsiteform">
-                        <label for="newsitedomain">{{ __('cipi.site_domain') }}</label>
+                        <label for="newsitedomain">{{ __('spikster.site_domain') }}</label>
                         <div class="input-group">
                             <input class="form-control" type="text" id="newsitedomain" placeholder="e.g. domain.ltd" autocomplete="off" />
                         </div>
                         <div class="space"></div>
-                        <label for="newsiteserver">{{ __('cipi.server') }}</label>
+                        <label for="newsiteserver">{{ __('spikster.server') }}</label>
                         <div class="input-group">
                             <select class="form-control" id="newsiteserver"></select>
                         </div>
                         <div class="space"></div>
-                        <label for="newsiteprovider">{{ __('cipi.php_version') }}</label>
+                        <label for="newsiteprovider">{{ __('spikster.php_version') }}</label>
                         <div class="input-group">
                             <select class="form-control" id="newsitephp">
                                 <option value="8.2">8.2</option>
@@ -75,42 +75,42 @@
                             </select>
                         </div>
                         <div class="space"></div>
-                        <label for="newsitebasepath">{{ __('cipi.site_base_path') }}</label>
+                        <label for="newsitebasepath">{{ __('spikster.site_base_path') }}</label>
                         <div class="input-group">
                             <input class="form-control" type="text" id="newsitebasepath" placeholder="e.g. public" autocomplete="off" />
                         </div>
                         <div class="space"></div>
                         <div class="text-center">
-                            <button class="btn btn-primary" type="button" id="submit">{{ __('cipi.confirm') }} </button>
+                            <button class="btn btn-primary" type="button" id="submit">{{ __('spikster.confirm') }} </button>
                         </div>
                     </div>
                     <div id="newsiteok" class="d-none container">
                         <div class="row">
                             <div class="col-xs-12">
-                                <p><b>{{ __('cipi.site_ready_message') }}</b></b>
+                                <p><b>{{ __('spikster.site_ready_message') }}</b></b>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-xl-12">
-                                <p>{{ __('cipi.domain') }}:<br><b><span id="newsitedomainok"></b></b></p>
-                                <p>{{ __('cipi.server_ip') }}:<br><b><span id="newsiteip"></b></b></p>
-                                <p>SSH {{ __('cipi.username') }}:<br><b><span id="newsiteusername"></b></p>
-                                <p>SSH {{ __('cipi.password') }}:<br><b><span id="newsitepassword"></b></p>
-                                <p>MySQL {{ __('cipi.database') }}:<br><b><span id="newsitedbname"></b></p>
-                                <p>MySQL {{ __('cipi.username') }}:<br><b><span id="newsitedbusername"></b></p>
-                                <p>MySQL {{ __('cipi.password') }}:<br><b><span id="newsitedbpassword"></b></p>
+                                <p>{{ __('spikster.domain') }}:<br><b><span id="newsitedomainok"></b></b></p>
+                                <p>{{ __('spikster.server_ip') }}:<br><b><span id="newsiteip"></b></b></p>
+                                <p>SSH {{ __('spikster.username') }}:<br><b><span id="newsiteusername"></b></p>
+                                <p>SSH {{ __('spikster.password') }}:<br><b><span id="newsitepassword"></b></p>
+                                <p>MySQL {{ __('spikster.database') }}:<br><b><span id="newsitedbname"></b></p>
+                                <p>MySQL {{ __('spikster.username') }}:<br><b><span id="newsitedbusername"></b></p>
+                                <p>MySQL {{ __('spikster.password') }}:<br><b><span id="newsitedbpassword"></b></p>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-xl-12">
-                                <p>{{ __('cipi.document_root') }}:<br><b>/home/<span id="newsitebasepathuser"></span>/web/<span id="newsitebasepath"></b></p>
+                                <p>{{ __('spikster.document_root') }}:<br><b>/home/<span id="newsitebasepathuser"></span>/web/<span id="newsitebasepath"></b></p>
                             </div>
                         </div>
                         <div class="space"></div>
                         <div class="row">
                             <div class="col-xl-12 text-center">
                                 <a href="" target="_blank" id="newsitepdf">
-                                    <button class="btn btn-success" type="button"><i class="fas fa-file-pdf"></i> {{ __('cipi.download_site_data') }}</button>
+                                    <button class="btn btn-success" type="button"><i class="fas fa-file-pdf"></i> {{ __('spikster.download_site_data') }}</button>
                                 </a>
                             </div>
                         </div>
@@ -124,7 +124,7 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="deleteSiteModalLabel">{{ __('cipi.delete_site_modal_title') }}</h5>
+                    <h5 class="modal-title" id="deleteSiteModalLabel">{{ __('spikster.delete_site_modal_title') }}</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -135,7 +135,7 @@
                     <input type="hidden" id="deletesiteid" value="" />
                     <div class="space"></div>
                     <div class="text-center">
-                        <button class="btn btn-danger" type="button" id="delete">{{ __('cipi.delete') }} <i class="fas fa-circle-notch fa-spin d-none" id="loadingdelete"></i></button>
+                        <button class="btn btn-danger" type="button" id="delete">{{ __('spikster.delete') }} <i class="fas fa-circle-notch fa-spin d-none" id="loadingdelete"></i></button>
                     </div>
                     <div class="space"></div>
                 </div>

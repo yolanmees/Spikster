@@ -2,7 +2,7 @@
     <div class="card mb-4">
         <div class="card-header">
             <i class="fas fa-memory fs-fw mr-1"></i>
-            {{ __('cipi.server_ram_realtime_load') }}
+            {{ __('spikster.server_ram_realtime_load') }}
         </div>
         <div class="card-body">
             <canvas id="memChart" width="100%" height="40"></canvas>
