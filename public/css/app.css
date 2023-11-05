@@ -1089,6 +1089,9 @@ select {
 .col-span-6 {
   grid-column: span 6 / span 6;
 }
+.col-span-1 {
+  grid-column: span 1 / span 1;
+}
 .-m-2 {
   margin: -0.5rem;
 }
@@ -1132,6 +1135,10 @@ select {
 .my-4 {
   margin-top: 1rem;
   margin-bottom: 1rem;
+}
+.my-2 {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 .-ml-px {
   margin-left: -1px;
@@ -1289,6 +1296,9 @@ select {
 .h-full {
   height: 100%;
 }
+.h-10 {
+  height: 2.5rem;
+}
 .min-h-screen {
   min-height: 100vh;
 }
@@ -1352,6 +1362,9 @@ select {
 .w-full {
   width: 100%;
 }
+.w-10 {
+  width: 2.5rem;
+}
 .min-w-0 {
   min-width: 0px;
 }
@@ -1375,6 +1388,9 @@ select {
 }
 .flex-none {
   flex: none;
+}
+.flex-shrink-0 {
+  flex-shrink: 0;
 }
 .shrink-0 {
   flex-shrink: 0;
@@ -1438,6 +1454,9 @@ select {
 .grid-cols-6 {
   grid-template-columns: repeat(6, minmax(0, 1fr));
 }
+.grid-cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
 .flex-row {
   flex-direction: row;
 }
@@ -1452,6 +1471,9 @@ select {
 }
 .items-center {
   align-items: center;
+}
+.items-stretch {
+  align-items: stretch;
 }
 .justify-start {
   justify-content: flex-start;
@@ -1480,6 +1502,9 @@ select {
 .gap-6 {
   gap: 1.5rem;
 }
+.gap-4 {
+  gap: 1rem;
+}
 .gap-x-3 {
   -moz-column-gap: 0.75rem;
        column-gap: 0.75rem;
@@ -1500,6 +1525,12 @@ select {
 }
 .gap-y-7 {
   row-gap: 1.75rem;
+}
+.gap-y-3 {
+  row-gap: 0.75rem;
+}
+.gap-y-2 {
+  row-gap: 0.5rem;
 }
 .space-x-2 > :not([hidden]) ~ :not([hidden]) {
   --tw-space-x-reverse: 0;
@@ -2757,6 +2788,10 @@ select {
     width: 100%;
   }
 
+  .sm\:w-1\/2 {
+    width: 50%;
+  }
+
   .sm\:max-w-2xl {
     max-width: 42rem;
   }
@@ -2796,6 +2831,14 @@ select {
     --tw-scale-x: .95;
     --tw-scale-y: .95;
     transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+  }
+
+  .sm\:grid-cols-6 {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .sm\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .sm\:flex-row {
@@ -2903,6 +2946,14 @@ select {
     grid-column: span 2 / span 2;
   }
 
+  .md\:col-span-4 {
+    grid-column: span 4 / span 4;
+  }
+
+  .md\:col-span-3 {
+    grid-column: span 3 / span 3;
+  }
+
   .md\:mt-0 {
     margin-top: 0px;
   }
@@ -2911,8 +2962,20 @@ select {
     display: grid;
   }
 
+  .md\:w-1\/2 {
+    width: 50%;
+  }
+
   .md\:grid-cols-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .md\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .md\:grid-cols-6 {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
   }
 
   .md\:gap-6 {

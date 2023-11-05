@@ -36,7 +36,7 @@
                         </div>
                         <div class="flex flex-col">
                             <label for="newserverlocation">Server API key</label>
-                            <input class="form-control" type="text"  wire:model="serverApiKey" id="newserverapikey" placeholder="dseswdhnhbXXXXXXX" autocomplete="off" />
+                            <input class="form-control" type="text"  wire:model="serverApiKey" id="newserverapikey" placeholder="XXXXXXX" autocomplete="off" />
                         </div>
                         <div class="space"></div>
                         <div class="flex flex-col py-4">

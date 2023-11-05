@@ -9,8 +9,14 @@
 
 @section('content')
 <div clas="p-4">
-    <div id="dashboard"></div>
+    {{-- <div id="dashboard"></div> --}}
 </div>
+
+<div clas="grid grid-cols-6 space-x-4">
+    @livewire('dashboard.top-sites')
+</div>
+
+
 @endsection
 
 
