@@ -3,8 +3,8 @@
     return [
 
         // Panel Credential
-        'username'          => env('CIPI_USERNAME', 'administrator'),
-        'password'          => env('CIPI_PASSWORD', '12345678'),
+        'username'          => env('CIPI_USERNAME', 'admin@localhost'),
+        'password'          => env('CIPI_PASSWORD', 'password'),
 
         // JWT Settings
         'jwt_secret'        => env('JWT_SECRET', env('APP_KEY')),
@@ -14,9 +14,9 @@
         // Custom Vars
         'name'              => env('CIPI_NAME', 'Spikster Control Panel'),
         'website'           => env('CIPI_WEBSITE', 'https://github.com/yolanmees/Spikster'),
-        'activesetupcount'  => env('CIPI_ACTIVESETUPCOUNT', 'https://service.cipi.sh/setupcount'),
-        'documentation'     => env('CIPI_DOCUMENTATION', 'https://cipi.sh/docs.html'),
-        'app'               => env('CIPI_APP', 'https://play.google.com/store/apps/details?id=it.christiangiupponi.cipi'),
+        'activesetupcount'  => env('CIPI_ACTIVESETUPCOUNT', '/#'),
+        'documentation'     => env('CIPI_DOCUMENTATION', 'https://spikster.com/'),
+        'app'               => env('CIPI_APP', '/#'),
 
         // Global Settings
         'users_prefix'      => env('CIPI_USERS_PREFIX', 'cp'),
