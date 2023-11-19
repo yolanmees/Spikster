@@ -300,7 +300,7 @@ class SiteController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
-                'message' => __('cipi.bad_request'),
+                'message' => __('spikster.bad_request'),
                 'errors' => $validator->errors()->getMessages()
             ], 400);
         }
@@ -308,8 +308,8 @@ class SiteController extends Controller
         if ($request->php) {
             if (!in_array($request->php, config('cipi.phpvers'))) {
                 return response()->json([
-                    'message' => __('cipi.bad_request'),
-                    'errors' => __('cipi.invalid_php_version')
+                    'message' => __('spikster.bad_request'),
+                    'errors' => __('spikster.invalid_php_version')
                 ], 400);
             }
             $php = $request->php;
@@ -321,8 +321,8 @@ class SiteController extends Controller
 
         if (!$server) {
             return response()->json([
-                'message' => __('cipi.server_not_found_message'),
-                'errors' => __('cipi.server_not_found')
+                'message' => __('spikster.server_not_found_message'),
+                'errors' => __('spikster.server_not_found')
             ], 404);
         }
 
@@ -339,8 +339,8 @@ class SiteController extends Controller
         }
         if ($conflict) {
             return response()->json([
-                'message' => __('cipi.site_domain_conflict_message'),
-                'errors' => __('cipi.site_domain_conflict')
+                'message' => __('spikster.site_domain_conflict_message'),
+                'errors' => __('spikster.site_domain_conflict')
             ], 409);
         }
 
@@ -575,8 +575,8 @@ class SiteController extends Controller
 
         if (!$site) {
             return response()->json([
-                'message' => __('cipi.site_not_found_message'),
-                'errors' => __('cipi.site_not_found')
+                'message' => __('spikster.site_not_found_message'),
+                'errors' => __('spikster.site_not_found')
             ], 404);
         }
 
@@ -586,7 +586,7 @@ class SiteController extends Controller
             ]);
             if ($validator->fails()) {
                 return response()->json([
-                    'message' => __('cipi.bad_request'),
+                    'message' => __('spikster.bad_request'),
                     'errors' => $validator->errors()->getMessages()
                 ], 400);
             }
@@ -597,15 +597,15 @@ class SiteController extends Controller
                 foreach ($sites as $checksite) {
                     if (strtolower($request->domain) == $checksite->domain) {
                         return response()->json([
-                            'message' => __('cipi.server_conflict_domain_message'),
-                            'errors' => __('cipi.server_conflict')
+                            'message' => __('spikster.server_conflict_domain_message'),
+                            'errors' => __('spikster.server_conflict')
                         ], 409);
                     }
                     foreach ($checksite->aliases as $alias) {
                         if (strtolower($request->domain) == $alias->domain) {
                             return response()->json([
-                                'message' => __('cipi.server_conflict_alias_message'),
-                                'errors' => __('cipi.server_conflict')
+                                'message' => __('spikster.server_conflict_alias_message'),
+                                'errors' => __('spikster.server_conflict')
                             ], 409);
                         }
                     }
@@ -848,8 +848,8 @@ class SiteController extends Controller
 
         if (!$site) {
             return response()->json([
-                'message' => __('cipi.site_not_found_message'),
-                'errors' => __('cipi.site_not_found')
+                'message' => __('spikster.site_not_found_message'),
+                'errors' => __('spikster.site_not_found')
             ], 404);
         }
 
@@ -925,15 +925,15 @@ class SiteController extends Controller
 
         if (!$site) {
             return response()->json([
-                'message' => __('cipi.site_not_found_message'),
-                'errors' => __('cipi.site_not_found')
+                'message' => __('spikster.site_not_found_message'),
+                'errors' => __('spikster.site_not_found')
             ], 404);
         }
 
         if ($site->panel) {
             return response()->json([
-                'message' => __('cipi.bad_request_default_site_delete'),
-                'errors' => __('cipi.bad_request')
+                'message' => __('spikster.bad_request_default_site_delete'),
+                'errors' => __('spikster.bad_request')
             ], 400);
         }
 
@@ -985,8 +985,8 @@ class SiteController extends Controller
 
         if (!$site) {
             return response()->json([
-                'message' => __('cipi.site_not_found_message'),
-                'errors' => __('cipi.site_not_found')
+                'message' => __('spikster.site_not_found_message'),
+                'errors' => __('spikster.site_not_found')
             ], 404);
         }
 
@@ -1053,8 +1053,8 @@ class SiteController extends Controller
 
         if (!$site) {
             return response()->json([
-                'message' => __('cipi.site_not_found_message'),
-                'errors' => __('cipi.site_not_found')
+                'message' => __('spikster.site_not_found_message'),
+                'errors' => __('spikster.site_not_found')
             ], 404);
         }
 
@@ -1130,8 +1130,8 @@ class SiteController extends Controller
 
         if (!$site) {
             return response()->json([
-                'message' => __('cipi.site_not_found_message'),
-                'errors' => __('cipi.site_not_found')
+                'message' => __('spikster.site_not_found_message'),
+                'errors' => __('spikster.site_not_found')
             ], 404);
         }
 
@@ -1235,8 +1235,8 @@ class SiteController extends Controller
 
         if (!$site) {
             return response()->json([
-                'message' => __('cipi.site_not_found_message'),
-                'errors' => __('cipi.site_not_found')
+                'message' => __('spikster.site_not_found_message'),
+                'errors' => __('spikster.site_not_found')
             ], 404);
         }
 
@@ -1317,8 +1317,8 @@ class SiteController extends Controller
 
         if (!$site) {
             return response()->json([
-                'message' => __('cipi.site_not_found_message'),
-                'errors' => __('cipi.site_not_found')
+                'message' => __('spikster.site_not_found_message'),
+                'errors' => __('spikster.site_not_found')
             ], 404);
         }
 
@@ -1328,7 +1328,7 @@ class SiteController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
-                'message' => __('cipi.bad_request'),
+                'message' => __('spikster.bad_request'),
                 'errors' => $validator->errors()->getMessages()
             ], 400);
         }
@@ -1346,8 +1346,8 @@ class SiteController extends Controller
         }
         if ($conflict) {
             return response()->json([
-                'message' => __('cipi.site_domain_conflict_message'),
-                'errors' => __('cipi.site_domain_conflict')
+                'message' => __('spikster.site_domain_conflict_message'),
+                'errors' => __('spikster.site_domain_conflict')
             ], 409);
         }
 
@@ -1415,8 +1415,8 @@ class SiteController extends Controller
 
         if (!$site) {
             return response()->json([
-                'message' => __('cipi.site_not_found_message'),
-                'errors' => __('cipi.site_not_found')
+                'message' => __('spikster.site_not_found_message'),
+                'errors' => __('spikster.site_not_found')
             ], 404);
         }
 
@@ -1424,8 +1424,8 @@ class SiteController extends Controller
 
         if (!$alias) {
             return response()->json([
-                'message' => __('cipi.alias_not_found_message'),
-                'errors' => __('cipi.alias_not_found')
+                'message' => __('spikster.alias_not_found_message'),
+                'errors' => __('spikster.alias_not_found')
             ], 404);
         }
 

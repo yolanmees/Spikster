@@ -4,7 +4,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Cipi Translations
+    | Spikster Translations
     |--------------------------------------------------------------------------
     */
 
@@ -131,8 +131,8 @@ return [
     'server_setup_step4' => 'Installation may take up to thirty minutes depending on your server resources',
     'server_setup_step5' => 'Be sure that ports 22, 80 and 443 of your VPS firewall are open',
     'server_setup_step6' => 'AWS disables root login by default. Use command \'sudo -s\' to run as root',
-    'server_setup_step7' => 'Cipi doesn\'t work with NAT VPN and OpenVZ or in localhost',
-    'server_setup_step8' => 'Before install Cipi, please make sure your server is a clean Ubuntu 20.04 LTS VPS',
+    'server_setup_step7' => 'Spikster doesn\'t work with NAT VPN and OpenVZ or in localhost',
+    'server_setup_step8' => 'Before install Spikster, please make sure your server is a clean Ubuntu 20.04 LTS VPS',
     'create_server_title' => 'Add a New Server',
     'server_name' => 'Server Name',
     'server_ip' => 'Server IP',
@@ -148,18 +148,18 @@ return [
     'php_cli_version' => 'PHP CLI version',
     'manage_cron_jobs' => 'Manage Cron Jobs',
     'edit_crontab' => 'Edit Crontab',
-    'reset_cipi_password' => 'Reset Cipi user password',
+    'reset_cipi_password' => 'Reset Spikster user password',
     'require_reset_cipi_password' => 'Require Reset',
     'hd_memory_usage' => 'HD Memory Usage',
-    'cipi_build_version' => 'Cipi Build Version',
+    'cipi_build_version' => 'Spikster Build Version',
     'update_server_modal_title' => 'Update Server Information',
     'update_server_modal_text' => 'Are your sure to update server information?',
     'update_server_modal_ip' => 'YOU ARE UPDATING SERVER IP!<br>BE AWARE THAT IF NEW IP: <span id="newip" class="text-danger"></span> IS NOT CORRECT YOU COULD LOST YOUR SERVER CONNECTION!',
     'server_crontab' => 'Server Crontab',
     'server_crontab_edit' => 'Edit Server Crontab',
     'require_password_reset_modal_title' => 'Request Password Reset',
-    'require_password_reset_modal_text' => 'Are you sure to reset Cipi user password?',
-    'new_password_success' => 'New Cipi user password',
+    'require_password_reset_modal_text' => 'Are you sure to reset Spikster user password?',
+    'new_password_success' => 'New Spikster user password',
 
     // Sites
     'site' => 'Site',

@@ -2,7 +2,7 @@
     <div class="card mb-4">
         <div class="card-header">
             <i class="fas fa-microchip fs-fw mr-1"></i>
-            {{ __('cipi.server_cpu_realtime_load') }}
+            {{ __('spikster.server_cpu_realtime_load') }}
         </div>
         <div class="card-body">
             <canvas id="diskChart" width="100%" height="40"></canvas>

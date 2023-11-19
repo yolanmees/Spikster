@@ -4,6 +4,8 @@ namespace App\Livewire\Settings;
 
 use Livewire\Component;
 use Illuminate\Support\Facades\Http;
+use App\Models\Server;
+use App\Models\Site;
 
 class PanelDomain extends Component
 {
@@ -11,7 +13,14 @@ class PanelDomain extends Component
     
     public function mount()
     {
-        $this->panel_domain = config('app.url');
+        $server = Server::where('default', 1)->first();
+        $site = Site::where('server_id', $server->id)->where('panel', 1)->first();
+        if (!$site) {
+            $domain = '';
+        } else {
+            $domain = $site->domain;
+        }
+        $this->panel_domain = $domain;
     }
 
     public function render()
@@ -27,6 +36,6 @@ class PanelDomain extends Component
         ])->patch(config('app.url') . 'api/servers/panel/domain', [
             'domain' => $this->panel_domain,
         ]);
-        dd($response->json());
+        putenv("app.url=".$this->panel_domain);
     }
 }

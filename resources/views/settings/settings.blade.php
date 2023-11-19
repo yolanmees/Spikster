@@ -3,7 +3,7 @@
 
 
 @section('title')
-    {{ __('cipi.titles.settings') }}
+    {{ __('spikster.titles.settings') }}
 @endsection
 
 
@@ -15,7 +15,7 @@
         <div class="card mb-4">
             <div class="card-header">
                 <i class="fas fa-globe fs-fw mr-1"></i>
-                {{ __('cipi.panel_url') }}
+                {{ __('spikster.panel_url') }}
             </div>
             <div class="card-body">
                 @livewire('settings.panel-domain')
@@ -27,7 +27,7 @@
         <div class="card mb-4">
             <div class="card-header">
                 <i class="fas fa-code fs-fw mr-1"></i>
-                {{ __('cipi.panel_api') }}
+                {{ __('spikster.panel_api') }}
             </div>
             <div class="card-body">
                 @livewire('settings.api-key')

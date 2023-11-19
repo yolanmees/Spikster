@@ -26,8 +26,8 @@ class AuthController extends Controller
 
         if (!$user) {
             return response()->json([
-                'message' => __('cipi.invalid_login_message'),
-                'errors' => __('cipi.invalid_login')
+                'message' => __('spikster.invalid_login_message'),
+                'errors' => __('spikster.invalid_login')
             ], 401);
         }
 
@@ -52,8 +52,8 @@ class AuthController extends Controller
 
         if (!$user) {
             return response()->json([
-                'message' => __('cipi.invalid_login_message'),
-                'errors' => __('cipi.invalid_login')
+                'message' => __('spikster.invalid_login_message'),
+                'errors' => __('spikster.invalid_login')
             ], 401);
         }
 
@@ -91,8 +91,8 @@ class AuthController extends Controller
             ]);
         } else {
             return response()->json([
-                'message' => __('cipi.invalid_token_message'),
-                'errors' => __('cipi.invalid_token')
+                'message' => __('spikster.invalid_token_message'),
+                'errors' => __('spikster.invalid_token')
             ], 401);
         }
     }
@@ -113,8 +113,8 @@ class AuthController extends Controller
 
         if (!$user) {
             return response()->json([
-                'message' => __('cipi.invalid_login_message'),
-                'errors' => __('cipi.invalid_login')
+                'message' => __('spikster.invalid_login_message'),
+                'errors' => __('spikster.invalid_login')
             ], 401);
         }
 
@@ -129,8 +129,8 @@ class AuthController extends Controller
                 $user->username = $newuser;
             } else {
                 return response()->json([
-                    'message' => __('cipi.username_conflict_message'),
-                    'errors' => __('cipi.username_conflict')
+                    'message' => __('spikster.username_conflict_message'),
+                    'errors' => __('spikster.username_conflict')
                 ], 409);
             }
         }
@@ -174,8 +174,8 @@ class AuthController extends Controller
             $user->save();
         } else {
             return response()->json([
-                'message' => __('cipi.invalid_token_message'),
-                'errors' => __('cipi.invalid_token')
+                'message' => __('spikster.invalid_token_message'),
+                'errors' => __('spikster.invalid_token')
             ], 401);
         }
     }

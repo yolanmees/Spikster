@@ -4,7 +4,7 @@
        
 <ol class="breadcrumbs">
     <li class="ml-1 breadcrumb-item active">IP:<b><span class="ml-1" id="serveriptop"></span></b></li>
-    <li class="ml-1 breadcrumb-item active">{{ __('cipi.sites') }}:<b><span class="ml-1" id="serversites"></span></b></li>
+    <li class="ml-1 breadcrumb-item active">{{ __('spikster.sites') }}:<b><span class="ml-1" id="serversites"></span></b></li>
     <li class="ml-1 breadcrumb-item active">Ping:<b><span class="ml-1" id="serverping"><i class="fas fa-circle-notch fa-spin"></i></span></b></li>
 </ol>
 <div class="card">
@@ -48,7 +48,6 @@
         </nav>
     </div>
 </div>
-
 
 
 @endsection

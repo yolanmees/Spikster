@@ -4,7 +4,7 @@
 
 
 @section('title')
-    {{ __('cipi.titles.servers') }}
+    {{ __('spikster.titles.servers') }}
 @endsection
 
 
@@ -13,7 +13,7 @@
 <div class="row">
     <div class="col-xl-12">
         <button class="btn btn-sm btn-secondary" id="newServer">
-            <i class="fas fa-plus mr-1"></i><b>{{ __('cipi.new_button', ['type' => __('cipi.server')]) }}</b>
+            <i class="fas fa-plus mr-1"></i><b>{{ __('spikster.new_button', ['type' => __('spikster.server')]) }}</b>
         </button>
         @livewire('server.server-table')
     </div>
@@ -28,24 +28,24 @@
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="installServerModalLabel">{{ __('cipi.server_setup') }}</h5>
+                <h5 class="modal-title" id="installServerModalLabel">{{ __('spikster.server_setup') }}</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <p><b>{{ __('cipi.server_setup_title') }}</b>
+                <p><b>{{ __('spikster.server_setup_title') }}</b>
                     <ul>
-                        <li>{!! __('cipi.server_setup_step1') !!}</li>
-                        <li>{!! __('cipi.server_setup_step2') !!}<br>
+                        <li>{!! __('spikster.server_setup_step1') !!}</li>
+                        <li>{!! __('spikster.server_setup_step2') !!}<br>
                             <code><i>ssh root@<span id="installserverssh"></span></i></code></li>
-                        <li>{!! __('cipi.server_setup_step3') !!}<br>
+                        <li>{!! __('spikster.server_setup_step3') !!}<br>
                             <code><i>wget -O - {{ URL::to('/sh/setup/') }}/<span id="installserverid"></span> | bash</i></code></li>
-                        <li>{!! __('cipi.server_setup_step4') !!}</li>
-                        <li>{!! __('cipi.server_setup_step5') !!}</li>
-                        <li>{!! __('cipi.server_setup_step6') !!}</li>
-                        <li>{!! __('cipi.server_setup_step7') !!}</li>
-                        <li>{!! __('cipi.server_setup_step8') !!}</li>
+                        <li>{!! __('spikster.server_setup_step4') !!}</li>
+                        <li>{!! __('spikster.server_setup_step5') !!}</li>
+                        <li>{!! __('spikster.server_setup_step6') !!}</li>
+                        <li>{!! __('spikster.server_setup_step7') !!}</li>
+                        <li>{!! __('spikster.server_setup_step8') !!}</li>
                     </ul>
                 </p>
                 <div class="space"></div>
@@ -57,22 +57,22 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="deleteServerModalLabel">{{ __('cipi.delete_server') }}</h5>
+                <h5 class="modal-title" id="deleteServerModalLabel">{{ __('spikster.delete_server') }}</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeDialog()">
                 <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <p>{{ __('cipi.delete_server_confirmation') }} <b><span id="deleteservername"></span></b>?</p>
+                <p>{{ __('spikster.delete_server_confirmation') }} <b><span id="deleteservername"></span></b>?</p>
                 <div class="space"></div>
-                <label for="deleteserverip">{{ __('cipi.delete_server_confirmation_ip') }}: <i><span id="deleteserveriptocopy"></span></i></label>
+                <label for="deleteserverip">{{ __('spikster.delete_server_confirmation_ip') }}: <i><span id="deleteserveriptocopy"></span></i></label>
                 <div class="input-group">
                     <input class="form-control" type="text" id="deleteserverip" autocomplete="off" />
                 </div>
                 <input type="hidden" id="deleteserverid" value="" />
                 <div class="space"></div>
                 <div class="text-center">
-                    <button class="btn btn-danger" type="button" id="delete">{{ __('cipi.delete') }} <i class="fas fa-circle-notch fa-spin d-none" id="loadingdelete"></i></button>
+                    <button class="btn btn-danger" type="button" id="delete">{{ __('spikster.delete') }} <i class="fas fa-circle-notch fa-spin d-none" id="loadingdelete"></i></button>
                 </div>
                 <div class="space"></div>
             </div>

@@ -2,7 +2,7 @@
 
 
 @section('title')
-    {{ __('cipi.titles.site') }}
+    {{ __('spikster.titles.site') }}
 @endsection
 
 
@@ -10,43 +10,40 @@
 @section('content')
 <ol class="breadcrumbs mb-4">
     <li class="breadcrumb-item active">IP:<b><span class="ml-1" id="siteip"></span></b></li>
-    <li class="breadcrumb-item active">{{ __('cipi.aliases') }}:<b><span class="ml-1" id="sitealiases"></span></b></li>
+    <li class="breadcrumb-item active">{{ __('spikster.aliases') }}:<b><span class="ml-1" id="sitealiases"></span></b></li>
     <li class="breadcrumb-item active">PHP:<b><span class="ml-1" id="sitephp"></span></b></li>
-    <li class="breadcrumb-item active">{{ __('cipi.site_base_path') }}:<b><span class="ml-1">/home/</span><span id="siteuserinfo"></span>/web/<span id="sitebasepathinfo"></span></b></li>
+    <li class="breadcrumb-item active">{{ __('spikster.site_base_path') }}:<b><span class="ml-1">/home/</span><span id="siteuserinfo"></span>/web/<span id="sitebasepathinfo"></span></b></li>
 </ol>
-<div class="flex gap-x-4">
-    <div class="w-1/2">
-        <div class="card mb-4">
+<div class="grid md:grid-cols-6 grid-cols-1 gap-4">
+    <div class="md:col-span-3 col-span-1">
+        <div class="card h-full">
             <div class="card-header">
                 <i class="fas fa-info-circle fs-fw mr-1"></i>
-                {{ __('cipi.basic_information') }}
+                {{ __('spikster.basic_information') }}
             </div>
             <div class="card-body">
-                <p>{{ __('cipi.domain') }}:</p>
-                <div class="input-group">
+                <div class="mb-4">
+                    <p class="mb-2">{{ __('spikster.domain') }}:</p>
                     <input class="form-control" type="text" placeholder="e.g. domain.ltd" id="sitedomain" autocomplete="off" />
                 </div>
-                <div class="space"></div>
-                <p>{{ __('cipi.site_base_path') }}:</p>
-                <div class="input-group">
+                <div class="mb-4">
+                    <p class="mb-2">{{ __('spikster.site_base_path') }}:</p>
                     <input class="form-control" type="text" placeholder="e.g. public" id="sitebasepath" autocomplete="off" />
                 </div>
-                <div class="space"></div>
                 <div class="text-center">
-                    <button class="btn btn-primary" type="button" id="updateSite">{{ __('cipi.update') }}</button>
+                    <button class="btn btn-primary" type="button" id="updateSite">{{ __('spikster.update') }}</button>
                 </div>
-                <div class="space"></div>
             </div>
         </div>
     </div>
-    <div class="w-1/2">
-        <div class="card mb-4">
+    <div class="md:col-span-3 col-span-1">
+        <div class="card h-full">
             <div class="card-header">
                 <i class="fas fa-globe fs-fw mr-1"></i>
-                {{ __('cipi.manage_aliases') }}
+                {{ __('spikster.manage_aliases') }}
             </div>
             <div class="card-body">
-                <p>{{ __('cipi.add_alias') }}:</p>
+                <p class="mb-2">{{ __('spikster.add_alias') }}:</p>
                 <div class="input-group">
                     <input class="form-control" type="text" placeholder="e.g. www.domain.ltd" id="siteaddalias" autocomplete="off" />
                     <div class="input-group-append">
@@ -54,52 +51,49 @@
                     </div>
                 </div>
                 <div class="space"></div>
-                <div style="min-height:135px">
-                    <p>{{ __('cipi.aliases') }}:</p>
+                <div>
+                    <p class="mb-2">{{ __('spikster.aliases') }}:</p>
                     <div id="sitealiaseslist"></div>
                 </div>
-                <div class="space"></div>
             </div>
         </div>
     </div>
-</div>
-<div class="flex gap-x-4">
-    <div class="w-1/3">
-        <div class="card mb-4">
+    <div class="md:col-span-2 col-span-1">
+        <div class="card h-full">
             <div class="card-header">
                 <i class="fas fa-lock fs-fw mr-1"></i>
-                {{ __('cipi.ssl_security') }}
+                {{ __('spikster.ssl_security') }}
             </div>
             <div class="card-body">
-                <p>{{ __('cipi.ssl_security_text') }}:</p>
-                <button class="btn btn-primary btn" type="button" id="sitessl">{{ __('cipi.ssl_generate') }}</button>
+                <p class="mb-2">{{ __('spikster.ssl_security_text') }}:</p>
+                <button class="btn btn-primary" type="button" id="sitessl">{{ __('spikster.ssl_generate') }}</button>
                 <div class="space"></div>
                 <div class="space"></div>
-                <p>{{ __('cipi.password_resets') }}:</p>
-                <button class="btn btn-primary btn mr-3" type="button" id="sitesshreset">SSH</button>
-                <button class="btn btn-primary btn mr-3" type="button" id="sitemysqlreset">MySql</button>
+                <p class="mb-2">{{ __('spikster.password_resets') }}:</p>
+                <button class="btn btn-primary mr-3" type="button" id="sitesshreset">SSH</button>
+                <button class="btn btn-primary  mr-3" type="button" id="sitemysqlreset">MySql</button>
                 <div class="space" style="min-height:38px"></div>
             </div>
         </div>
     </div>
-    <div class="w-1/3">
-        <div class="card mb-4">
+    <div class="md:col-span-2 col-span-1">
+        <div class="card h-full">
             <div class="card-header">
                 <i class="fab fa-github fs-fw mr-1"></i>
-                {{ __('cipi.github_repository') }}
+                {{ __('spikster.github_repository') }}
             </div>
             <div class="card-body">
-                <p>{{ __('cipi.github_repository_setup') }}</p>
+                <p class="mb-2">{{ __('spikster.github_repository_setup') }}</p>
                 <div class="text-center">
-                    <button class="btn btn-primary" type="button" style="min-width:200px" id="sitesetrepo">{{ __('cipi.github_repository_config') }}</button>
+                    <button class="btn btn-primary" type="button" style="min-width:200px" id="sitesetrepo">{{ __('spikster.github_repository_config') }}</button>
                     <div class="space"></div>
                 </div>
                 <div class="text-center">
-                    <button class="btn btn-primary" type="button" style="min-width:200px" id="editdeploy">{{ __('cipi.github_repository_scripts') }}</button>
+                    <button class="btn btn-primary" type="button" style="min-width:200px" id="editdeploy">{{ __('spikster.github_repository_scripts') }}</button>
                     <div class="space"></div>
                 </div>
-                <p>
-                    {{ __('cipi.github_repository_deploy') }}:
+                <p class="mb-2">
+                    {{ __('spikster.github_repository_deploy') }}:
                     <ul style="font-size:14px;">
                         <li>ssh <span id="repodeployinfouser1"></span>@<span id="repodeployinfoip"></span></li>
                         <li>sh /home/<span id="repodeployinfouser2"></span>/git/deploy.sh</li>
@@ -108,14 +102,14 @@
             </div>
         </div>
     </div>
-    <div class="w-1/3">
-        <div class="card mb-4">
+    <div class="md:col-span-2 col-span-1">
+        <div class="card h-full">
             <div class="card-header">
                 <i class="fas fa-tools fs-fw mr-1"></i>
-                {{ __('cipi.tools') }}
+                {{ __('spikster.tools') }}
             </div>
             <div class="card-body">
-                <p>{{ __('cipi.php_fpm_version') }}:</p>
+                <p class="mb-2">{{ __('spikster.php_fpm_version') }}:</p>
                 <div class="input-group">
                     <select class="form-control" id="sitephpver">
                         <option value="8.2" id="php82">8.2</option>
@@ -128,22 +122,20 @@
                     </div>
                 </div>
                 <div class="space"></div>
-                <p>Supervisor script:</p>
+                <p class="mb-2">Supervisor script:</p>
                 <div class="input-group">
                     <input class="form-control" type="text" id="sitesupervisor" autocomplete="off" />
                 </div>
                 <div class="space"></div>
                 <div class="text-center">
-                    <button class="btn btn-primary" type="button" id="sitesupervisorupdate">{{ __('cipi.update') }}</button>
+                    <button class="btn btn-primary" type="button" id="sitesupervisorupdate">{{ __('spikster.update') }}</button>
                 </div>
                 <div class="space"></div>
             </div>
         </div>
     </div>
-</div>
-<div class="flex gap-x-4">
-    <div class="w-1/3">
-        <div class="card mb-4">
+    <div class="md:col-span-2 col-span-1">
+        <div class="card h-full">
             <div class="card-header">
                 <i class="fas fa-rocket fs-fw mr-1"></i>
                 File Manager
@@ -159,8 +151,8 @@
             </div>
         </div>
     </div>
-    <div class="w-1/3">
-        <div class="card mb-4">
+    <div class="md:col-span-2 col-span-1">
+        <div class="card h-full">
             <div class="card-header flex">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-database h-5 w-5 mr-2">
                     <ellipse cx="12" cy="5" rx="9" ry="3" />
@@ -171,7 +163,7 @@
                 MYSQL
             </div>
             <div class="card-body">
-                <p>Set up your database</p>
+                <p class="mb-2">Set up your database</p>
                 <div class="text-center">
                     <button class="btn btn-primary" type="button" style="min-width:200px" id="sitesetrepo"> <a href="{{ url('/data') }}" style="min-width:200px">DATABASE</a></button>
                     <div class="space"></div>
@@ -179,7 +171,7 @@
 
                 <div class="space"></div>
 
-                <p>Manage your database</p>
+                <p class="mb-2">Manage your database</p>
                 <div class="text-center">
                     <button class="btn btn-primary" type="button" style="min-width:200px" id="sitesetrepo"> <a href="{{ route('autopma', $site_id) }}"  style="min-width:200px" target="_blank">phpMyAdmin</a></button>
                     <div class="space"></div>
@@ -188,14 +180,14 @@
             </div>
         </div>
     </div>
-    <div id="nodejsManager" class="w-1/3 d-none">
-        <div class="card mb-4">
+    <div id="nodejsManager" class="md:col-span-2 col-span-1 d-none">
+        <div class="card h-full">
             <div class="card-header">
                 <i class="fab fa-github fs-fw mr-1"></i>
                 Nodejs Manager
             </div>
             <div class="card-body">
-                <p>Manage your project</p>
+                <p class="mb-2">Manage your project</p>
                 <div class="text-center">
                     <button class="btn btn-primary" type="button" style="min-width:200px" id="startNodejsButton">Setup App</button>
                     <div class="space"></div>
@@ -220,29 +212,29 @@
     <div class="modal-dialog" role="document" id="repositorydialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="repositoryModalLabel">{{ __('cipi.github_repository') }}</h5>
+                <h5 class="modal-title" id="repositoryModalLabel">{{ __('spikster.github_repository') }}</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <label for="repositoryproject">{{ __('cipi.repository_project') }}</label>
+                <label for="repositoryproject">{{ __('spikster.repository_project') }}</label>
                 <div class="input-group">
                     <input class="form-control" type="text" id="repositoryproject" placeholder="e.g. johndoe/helloworld" autocomplete="off" />
                 </div>
                 <div class="space"></div>
-                <label for="repositorybranch">{{ __('cipi.repository_branch') }}</label>
+                <label for="repositorybranch">{{ __('spikster.repository_branch') }}</label>
                 <div class="input-group">
                     <input class="form-control" type="text" id="repositorybranch" placeholder="e.g. develop" autocomplete="off" />
                 </div>
                 <div class="space"></div>
-                <label for="deploykey">{{ __('cipi.repository_deploy_key') }} {!! __('cipi.repository_deploy_key_info') !!}</label>
+                <label for="deploykey">{{ __('spikster.repository_deploy_key') }} {!! __('spikster.repository_deploy_key_info') !!}</label>
                 <div class="input-group">
                     <textarea id="deploykey" readonly style="width:100%;height:150px;font-size:10px;"></textarea>
                 </div>
                 <div class="space"></div>
                 <div class="text-center">
-                    <button class="btn btn-primary" type="button" id="repositorysubmit">{{ __('cipi.confirm') }} </button>
+                    <button class="btn btn-primary" type="button" id="repositorysubmit">{{ __('spikster.confirm') }} </button>
                 </div>
             </div>
         </div>
@@ -252,17 +244,17 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="deployModalLabel">{{ __('cipi.deploy_scripts') }}</h5>
+                <h5 class="modal-title" id="deployModalLabel">{{ __('spikster.deploy_scripts') }}</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <p>{{ __('cipi.github_repository_scripts') }}:</p>
+                <p class="mb-2">{{ __('spikster.github_repository_scripts') }}:</p>
                 <div id="deploy" style="height:250px;width:100%;"></div>
                 <div class="space"></div>
                 <div class="text-center">
-                    <button class="btn btn-primary" type="button" id="deploysubmit">{{ __('cipi.save') }} </button>
+                    <button class="btn btn-primary" type="button" id="deploysubmit">{{ __('spikster.save') }} </button>
                 </div>
                 <div class="space"></div>
             </div>
@@ -273,16 +265,16 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="sshresetModalLabel">{{ __('cipi.require_password_reset_modal_title') }}</h5>
+                <h5 class="modal-title" id="sshresetModalLabel">{{ __('spikster.require_password_reset_modal_title') }}</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <p>{{ __('cipi.require_ssh_password_reset_modal_text') }}</p>
+                <p class="mb-2">{{ __('spikster.require_ssh_password_reset_modal_text') }}</p>
                 <div class="space"></div>
                 <div class="text-center">
-                    <button class="btn btn-danger" type="button" id="sshresetsubmit">{{ __('cipi.confirm') }}</button>
+                    <button class="btn btn-danger" type="button" id="sshresetsubmit">{{ __('spikster.confirm') }}</button>
                 </div>
                 <div class="space"></div>
             </div>
@@ -293,16 +285,16 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="mysqlresetModalLabel">{{ __('cipi.require_password_reset_modal_title') }}</h5>
+                <h5 class="modal-title" id="mysqlresetModalLabel">{{ __('spikster.require_password_reset_modal_title') }}</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <p>{{ __('cipi.require_mysql_password_reset_modal_text') }}</p>
+                <p class="mb-2">{{ __('spikster.require_mysql_password_reset_modal_text') }}</p>
                 <div class="space"></div>
                 <div class="text-center">
-                    <button class="btn btn-danger" type="button" id="mysqlresetsubmit">{{ __('cipi.confirm') }} </button>
+                    <button class="btn btn-danger" type="button" id="mysqlresetsubmit">{{ __('spikster.confirm') }} </button>
                 </div>
                 <div class="space"></div>
             </div>
@@ -403,7 +395,7 @@
                 $('#sshresetloading').removeClass('d-none');
             },
             success: function(data) {
-                success('{{ __('cipi.new_ssh_password_success') }}:<br><b>'+data.password+'</b><br><a href="'+data.pdf+'" target="_blank" style="color:#ffffff">{{ __('cipi.download_site_data') }}</a>');
+                success('{{ __('spikster.new_ssh_password_success') }}:<br><b>'+data.password+'</b><br><a href="'+data.pdf+'" target="_blank" style="color:#ffffff">{{ __('spikster.download_site_data') }}</a>');
                 $('#sshresetloading').addClass('d-none');
                 $('#sshresetModal').modal('toggle');
                 $(window).scrollTop(0);
@@ -423,7 +415,7 @@
                 $('#mysqlresetloading').removeClass('d-none');
             },
             success: function(data) {
-                success('{{ __('cipi.new_mysql_password_success') }}:<br><b>'+data.password+'</b><br><a href="'+data.pdf+'" target="_blank" style="color:#ffffff">{{ __('cipi.download_site_data') }}</a>');
+                success('{{ __('spikster.new_mysql_password_success') }}:<br><b>'+data.password+'</b><br><a href="'+data.pdf+'" target="_blank" style="color:#ffffff">{{ __('spikster.download_site_data') }}</a>');
                 $('#mysqlresetloading').addClass('d-none');
                 $('#mysqlresetModal').modal('toggle');
                 $(window).scrollTop(0);

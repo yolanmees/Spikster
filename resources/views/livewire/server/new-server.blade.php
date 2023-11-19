@@ -3,7 +3,7 @@
         <div class="modal-dialog" role="document" id="newserverdialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="newServerModalLabel">{{ __('cipi.create_server_title') }}</h5>
+                    <h5 class="modal-title" id="newServerModalLabel">{{ __('spikster.create_server_title') }}</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                     </button>
@@ -11,11 +11,11 @@
                 <div class="modal-body">
                     <div class="grid grid-cols-1 md:grid-cols-2 space-x-4" id="newserverform">
                         <div class="flex flex-col ml-4">
-                            <label for="newservername">{{ __('cipi.server_name') }}</label>
+                            <label for="newservername">{{ __('spikster.server_name') }}</label>
                             <input class="form-control"  type="text"  wire:model="serverName" id="newservername" placeholder="e.g. Production" autocomplete="off" />
                         </div>
                         <div class="flex flex-col">
-                            <label for="newserverip">{{ __('cipi.server_ip') }}</label>
+                            <label for="newserverip">{{ __('spikster.server_ip') }}</label>
                             <input class="form-control" type="text"  wire:model="serverIp" id="newserverip" placeholder="e.g. 123.45.67.89" autocomplete="off" />
                         </div>
                         <div class="flex flex-col">
@@ -27,20 +27,20 @@
                             <input class="form-control" type="text" wire:model="serverSshPassword" autocomplete="off" />
                         </div>
                         <div class="flex flex-col">
-                            <label for="newserverprovider">{{ __('cipi.server_provider') }}</label>
+                            <label for="newserverprovider">{{ __('spikster.server_provider') }}</label>
                             <input class="form-control" type="text" wire:model="serverProvider" id="newserverprovider" placeholder="e.g. Digital Ocean" autocomplete="off" />
                         </div>
                         <div class="flex flex-col">
-                            <label for="newserverlocation">{{ __('cipi.server_location') }}</label>
+                            <label for="newserverlocation">{{ __('spikster.server_location') }}</label>
                             <input class="form-control" type="text"  wire:model="serverLocation" id="newserverlocation" placeholder="e.g. Amsterdam" autocomplete="off" />
                         </div>
                         <div class="flex flex-col">
                             <label for="newserverlocation">Server API key</label>
-                            <input class="form-control" type="text"  wire:model="serverApiKey" id="newserverapikey" placeholder="dseswdhnhbXXXXXXX" autocomplete="off" />
+                            <input class="form-control" type="text"  wire:model="serverApiKey" id="newserverapikey" placeholder="XXXXXXX" autocomplete="off" />
                         </div>
                         <div class="space"></div>
                         <div class="flex flex-col py-4">
-                            <button wire:click="submit()" class="btn btn-primary" type="button" id="submit">{{ __('cipi.confirm') }} </button>
+                            <button wire:click="submit()" class="btn btn-primary" type="button" id="submit">{{ __('spikster.confirm') }} </button>
                         </div>
                     </div>
                 </div>
