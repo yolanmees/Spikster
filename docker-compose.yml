@@ -5,10 +5,10 @@ networks:
 
 
 services:
-  app:
+  nginx:
     build:
-      context: .
-      dockerfile: ./dockerfiles/nginx.dockerfile
+      context: ./dockerfiles
+      dockerfile: nginx.dockerfile
       args:
         - UID=${UID:-1000}
         - GID=${GID:-1000}
@@ -29,28 +29,26 @@ services:
     restart: unless-stopped
     tty: true
     ports:
-      - "3306:3306"
+      - "3306:${DB_PORT}"
     environment:
-      MYSQL_DATABASE: laravel_db
-      MYSQL_USER: laravel
-      MYSQL_PASSWORD: laravel
-      MYSQL_ROOT_PASSWORD: laravel
+      MYSQL_DATABASE: "${DB_DATABASE}"
+      MYSQL_USER: "${DB_USERNAME}"
+      MYSQL_PASSWORD: "${DB_PASSWORD}"
+      MYSQL_ROOT_PASSWORD: "${DB_PASSWORD}"
       SERVICE_TAGS: dev
-      SERVICE_NAME: mysql
+      SERVICE_NAME: "${DB_CONNECTION}"
     networks:
       - laravel
 
   php:
     build:
-      context: ./dockerfiles
-      dockerfile: php.dockerfile
+      context: .
+      dockerfile: ./dockerfiles/php.dockerfile
       args:
         - UID=${UID:-1000}
         - GID=${GID:-1000}
     ports:
       - "9000:9000"
-    expose:
-      - 9000
     volumes:
       - .:/var/www/html:delegated
     networks:
@@ -66,8 +64,8 @@ services:
 
   composer:
     build:
-      context: ./dockerfiles
-      dockerfile: php.dockerfile
+      context: .
+      dockerfile: ./dockerfiles/php.dockerfile
       args:
         - UID=${UID:-1000}
         - GID=${GID:-1000}
@@ -96,8 +94,8 @@ services:
 
   artisan:
     build:
-      context: ./dockerfiles
-      dockerfile: php.dockerfile
+      context: .
+      dockerfile: ./dockerfiles/php.dockerfile
       args:
         - UID=${UID:-1000}
         - GID=${GID:-1000}
