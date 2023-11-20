@@ -176,3 +176,4 @@ go.sh
 .editorconfig
 .gitattributes
 .gitignore
+.github/
