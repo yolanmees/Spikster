@@ -1,7 +1,6 @@
 # Created by https://www.toptal.com/developers/gitignore/api/node,laravel
 
 ### Laravel ###
-/vendor/
 node_modules/
 npm-debug.log
 yarn-error.log
