@@ -12,15 +12,13 @@ RUN apt-get update && \
     zip
 
 RUN mkdir -p /var/www/html
-
 WORKDIR /var/www/html
-
-COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
-
 
 RUN groupadd --gid ${GID} --system laravel
 RUN useradd --system -s /bin/sh -u ${UID} -g ${GID} laravel
 
+COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
+COPY --chown=laravel:laravel . /var/www/html/
 
 RUN sed -i "s/user = www-data/user = laravel/g" /usr/local/etc/php-fpm.d/www.conf
 RUN sed -i "s/group = www-data/group = laravel/g" /usr/local/etc/php-fpm.d/www.conf
@@ -33,6 +31,11 @@ RUN curl -L https://github.com/phpredis/phpredis/archive/refs/tags/5.3.7.tar.gz 
 RUN echo 'redis' >> /usr/src/php-available-exts \
     && docker-php-ext-install redis
 
+EXPOSE 9000
+
 USER laravel
+
+RUN composer update
+
 
 CMD ["php-fpm", "-y", "/usr/local/etc/php-fpm.conf", "-R"]
