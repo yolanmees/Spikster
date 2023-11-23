@@ -6,6 +6,4 @@ COPY ../resources/ /var/www/html/resources
 
 RUN npm install
 
-EXPOSE 9000
-
 CMD npm run dev
