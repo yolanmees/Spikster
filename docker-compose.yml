@@ -15,7 +15,8 @@ services:
     ports:
       - "80:80"
     volumes:
-      - .:/var/www/html:delegated
+      - .:/var/www/html
+      - ./dockerfiles/nginx/:/etc/nginx/conf.d/
     depends_on:
       - php
       - redis
@@ -47,20 +48,15 @@ services:
       args:
         - UID=${UID:-1000}
         - GID=${GID:-1000}
+    restart: unless-stopped
     ports:
       - "9000:9000"
+    expose:
+      - 9000
     volumes:
-      - .:/var/www/html:delegated
+      - .:/var/www/html
     depends_on:
       - mysql
-    command:
-      - /bin/bash
-      - -c
-      - |
-        php /var/www/html/artisan key:generate
-        php /var/www/html/artisan migrate --seed --force
-        php /var/www/html/artisan storage:link
-        php-fpm -y /usr/local/etc/php-fpm.conf -R
 
     networks:
       - laravel

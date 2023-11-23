@@ -31,11 +31,19 @@ RUN curl -L https://github.com/phpredis/phpredis/archive/refs/tags/5.3.7.tar.gz 
 RUN echo 'redis' >> /usr/src/php-available-exts \
     && docker-php-ext-install redis
 
+
+# Copy the initialization script into the image
+COPY init.sh /usr/local/bin/init.sh
+
+# Grant execution permissions to the script
+RUN chmod +x /usr/local/bin/init.sh
+
 EXPOSE 9000
 
 USER laravel
 
 RUN composer update
 
+ENTRYPOINT [ "/usr/local/bin/init.sh" ]
 
 CMD ["php-fpm", "-y", "/usr/local/etc/php-fpm.conf", "-R"]
