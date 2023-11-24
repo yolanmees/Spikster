@@ -19,9 +19,6 @@ services:
       - ./dockerfiles/nginx/:/etc/nginx/conf.d/
     depends_on:
       - php
-      - redis
-      - mysql
-      - mailhog
     networks:
       - laravel
 
@@ -48,6 +45,7 @@ services:
       args:
         - UID=${UID:-1000}
         - GID=${GID:-1000}
+        - APP_DEBUG=${APP_DEBUG:-false}
     restart: unless-stopped
     ports:
       - "9000:9000"
@@ -68,7 +66,6 @@ services:
       - "6379:6379"
     networks:
       - laravel
-
   composer:
     build:
       context: .
