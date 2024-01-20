@@ -121,8 +121,8 @@ echo "Base setup..."
 echo "${reset}"
 sleep 1s
 
-sudo apt-get update
-sudo apt-get -y install software-properties-common curl wget nano vim rpl sed zip unzip openssl expect dirmngr apt-transport-https lsb-release ca-certificates dnsutils dos2unix zsh htop ffmpeg
+apt-get update
+apt-get -y install software-properties-common curl wget nano vim rpl sed zip unzip openssl expect dirmngr apt-transport-https lsb-release ca-certificates dnsutils dos2unix zsh htop ffmpeg
 
 
 # GET IP
@@ -144,8 +144,8 @@ echo "${reset}"
 sleep 1s
 
 WELCOME=/etc/motd
-sudo touch $WELCOME
-sudo cat > "$WELCOME" <<EOF
+touch $WELCOME
+cat > "$WELCOME" <<EOF
 
 ███████╗██████╗ ██╗██╗  ██╗███████╗████████╗███████╗██████╗ 
 ██╔════╝██╔══██╗██║██║ ██╔╝██╔════╝╚══██╔══╝██╔════╝██╔══██╗
@@ -167,9 +167,9 @@ echo "Memory SWAP..."
 echo "${reset}"
 sleep 1s
 
-sudo /bin/dd if=/dev/zero of=/var/swap.1 bs=1M count=1024
-sudo /sbin/mkswap /var/swap.1
-sudo /sbin/swapon /var/swap.1
+/bin/dd if=/dev/zero of=/var/swap.1 bs=1M count=1024
+/sbin/mkswap /var/swap.1
+/sbin/swapon /var/swap.1
 
 
 
@@ -192,10 +192,10 @@ echo "Spikster directories..."
 echo "${reset}"
 sleep 1s
 
-sudo mkdir /etc/spikster/
-sudo chmod o-r /etc/spikster
-sudo mkdir /var/spikster/
-sudo chmod o-r /var/spikster
+mkdir /etc/spikster/
+chmod o-r /etc/spikster
+mkdir /var/spikster/
+chmod o-r /var/spikster
 
 
 
@@ -206,12 +206,12 @@ echo "Spikster root user..."
 echo "${reset}"
 sleep 1s
 
-sudo pam-auth-update --package
-sudo mount -o remount,rw /
-sudo chmod 640 /etc/shadow
-sudo useradd -m -s /bin/bash cipi
-echo "cipi:$PASS"|sudo chpasswd
-sudo usermod -aG sudo cipi
+pam-auth-update --package
+mount -o remount,rw /
+chmod 640 /etc/shadow
+useradd -m -s /bin/bash cipi
+echo "cipi:$PASS"|chpasswd
+usermod -aG cipi
 
 
 # NGINX
@@ -221,11 +221,11 @@ echo "nginx setup..."
 echo "${reset}"
 sleep 1s
 
-sudo apt-get -y install nginx-core
-sudo systemctl start nginx.service
-sudo rpl -i -w "http {" "http { limit_req_zone \$binary_remote_addr zone=one:10m rate=1r/s; fastcgi_read_timeout 300;" /etc/nginx/nginx.conf
-sudo rpl -i -w "http {" "http { limit_req_zone \$binary_remote_addr zone=one:10m rate=1r/s; fastcgi_read_timeout 300;" /etc/nginx/nginx.conf
-sudo systemctl enable nginx.service
+apt-get -y install nginx-core
+systemctl start nginx.service
+rpl -i -w "http {" "http { limit_req_zone \$binary_remote_addr zone=one:10m rate=1r/s; fastcgi_read_timeout 300;" /etc/nginx/nginx.conf
+rpl -i -w "http {" "http { limit_req_zone \$binary_remote_addr zone=one:10m rate=1r/s; fastcgi_read_timeout 300;" /etc/nginx/nginx.conf
+systemctl enable nginx.service
 
 
 
@@ -238,11 +238,11 @@ echo "fail2ban setup..."
 echo "${reset}"
 sleep 1s
 
-sudo apt-get -y install fail2ban
+apt-get -y install fail2ban
 JAIL=/etc/fail2ban/jail.local
-sudo unlink JAIL
-sudo touch $JAIL
-sudo cat > "$JAIL" <<EOF
+unlink JAIL
+touch $JAIL
+cat > "$JAIL" <<EOF
 [DEFAULT]
 bantime = 3600
 banaction = iptables-multiport
@@ -250,12 +250,12 @@ banaction = iptables-multiport
 enabled = true
 logpath  = /var/log/auth.log
 EOF
-sudo systemctl restart fail2ban
-sudo ufw --force enable
-sudo ufw allow ssh
-sudo ufw allow http
-sudo ufw allow https
-sudo ufw allow "Nginx Full"
+systemctl restart fail2ban
+ufw --force enable
+ufw allow ssh
+ufw allow http
+ufw allow https
+ufw allow "Nginx Full"
 
 
 
@@ -268,43 +268,43 @@ echo "${reset}"
 sleep 1s
 
 
-sudo add-apt-repository -y ppa:ondrej/php
-sudo apt-get update
+add-apt-repository -y ppa:ondrej/php
+apt-get update
 
-sudo apt-get -y install php8.2-fpm
-sudo apt-get -y install php8.2-common
-sudo apt-get -y install php8.2-curl
-sudo apt-get -y install php8.2-openssl
-sudo apt-get -y install php8.2-bcmath
-sudo apt-get -y install php8.2-mbstring
-sudo apt-get -y install php8.2-tokenizer
-sudo apt-get -y install php8.2-mysql
-sudo apt-get -y install php8.2-sqlite3
-sudo apt-get -y install php8.2-pgsql
-sudo apt-get -y install php8.2-redis
-sudo apt-get -y install php8.2-memcached
-sudo apt-get -y install php8.2-json
-sudo apt-get -y install php8.2-zip
-sudo apt-get -y install php8.2-xml
-sudo apt-get -y install php8.2-soap
-sudo apt-get -y install php8.2-gd
-sudo apt-get -y install php8.2-imagick
-sudo apt-get -y install php8.2-fileinfo
-sudo apt-get -y install php8.2-imap
-sudo apt-get -y install php8.2-cli
+apt-get -y install php8.2-fpm
+apt-get -y install php8.2-common
+apt-get -y install php8.2-curl
+apt-get -y install php8.2-openssl
+apt-get -y install php8.2-bcmath
+apt-get -y install php8.2-mbstring
+apt-get -y install php8.2-tokenizer
+apt-get -y install php8.2-mysql
+apt-get -y install php8.2-sqlite3
+apt-get -y install php8.2-pgsql
+apt-get -y install php8.2-redis
+apt-get -y install php8.2-memcached
+apt-get -y install php8.2-json
+apt-get -y install php8.2-zip
+apt-get -y install php8.2-xml
+apt-get -y install php8.2-soap
+apt-get -y install php8.2-gd
+apt-get -y install php8.2-imagick
+apt-get -y install php8.2-fileinfo
+apt-get -y install php8.2-imap
+apt-get -y install php8.2-cli
 PHPINI=/etc/php/8.2/fpm/conf.d/cipi.ini
-sudo touch $PHPINI
-sudo cat > "$PHPINI" <<EOF
+touch $PHPINI
+cat > "$PHPINI" <<EOF
 memory_limit = 256M
 upload_max_filesize = 256M
 post_max_size = 256M
 max_execution_time = 180
 max_input_time = 180
 EOF
-sudo service php8.2-fpm restart
+service php8.2-fpm restart
 
 # PHP EXTRA
-sudo apt-get -y install php-dev php-pear
+apt-get -y install php-dev php-pear
 
 
 # PHP CLI
@@ -314,7 +314,7 @@ echo "PHP CLI configuration..."
 echo "${reset}"
 sleep 1s
 
-sudo update-alternatives --set php /usr/bin/php8.2
+update-alternatives --set php /usr/bin/php8.2
 
 
 
@@ -341,8 +341,8 @@ echo "GIT setup..."
 echo "${reset}"
 sleep 1s
 
-sudo apt-get -y install git
-sudo ssh-keygen -t rsa -C "git@github.com" -f /etc/spikster/github -q -P ""
+apt-get -y install git
+ssh-keygen -t rsa -C "git@github.com" -f /etc/spikster/github -q -P ""
 
 
 
@@ -353,7 +353,7 @@ echo "Supervisor setup..."
 echo "${reset}"
 sleep 1s
 
-sudo apt-get -y install supervisor
+apt-get -y install supervisor
 service supervisor restart
 
 
@@ -367,10 +367,10 @@ sleep 1s
 
 NGINX=/etc/nginx/sites-available/default
 if test -f "$NGINX"; then
-    sudo unlink NGINX
+    unlink NGINX
 fi
-sudo touch $NGINX
-sudo cat > "$NGINX" <<EOF
+touch $NGINX
+cat > "$NGINX" <<EOF
 server {
     listen 80 default_server;
     listen [::]:80 default_server;
@@ -399,8 +399,8 @@ server {
     }
 }
 EOF
-sudo mkdir /etc/nginx/spikster/
-sudo systemctl restart nginx.service
+mkdir /etc/nginx/spikster/
+systemctl restart nginx.service
 
 
 
@@ -414,7 +414,7 @@ echo "${reset}"
 sleep 1s
 
 
-sudo apt-get install -y mysql-server
+apt-get install -y mysql-server
 SECURE_MYSQL=$(expect -c "
 set timeout 10
 spawn mysql_secure_installation
@@ -451,9 +451,9 @@ echo "Redis setup..."
 echo "${reset}"
 sleep 1s
 
-sudo apt install -y redis-server
-sudo rpl -i -w "supervised no" "supervised systemd" /etc/redis/redis.conf
-sudo systemctl restart redis.service
+apt install -y redis-server
+rpl -i -w "supervised no" "supervised systemd" /etc/redis/redis.conf
+systemctl restart redis.service
 
 
 
@@ -464,8 +464,8 @@ echo "Let's Encrypt setup..."
 echo "${reset}"
 sleep 1s
 
-sudo apt-get install -y certbot
-sudo apt-get install -y python3-certbot-nginx
+apt-get install -y certbot
+apt-get install -y python3-certbot-nginx
 
 
 
@@ -476,18 +476,18 @@ echo "Node/npm setup..."
 echo "${reset}"
 sleep 1s
 
-curl -s https://deb.nodesource.com/gpgkey/nodesource.gpg.key | sudo apt-key add -
-curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+curl -s https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add -
+curl -sL https://deb.nodesource.com/setup_16.x | -E bash -
 NODE=/etc/apt/sources.list.d/nodesource.list
-sudo unlink NODE
-sudo touch $NODE
-sudo cat > "$NODE" <<EOF
+unlink NODE
+touch $NODE
+cat > "$NODE" <<EOF
 deb https://deb.nodesource.com/node_16.x focal main
 deb-src https://deb.nodesource.com/node_16.x focal main
 EOF
-sudo apt-get update
-sudo apt -y install nodejs
-sudo apt -y install npm
+apt-get update
+apt -y install nodejs
+apt -y install npm
 
 
 
@@ -504,27 +504,27 @@ sleep 1s
 CREATE DATABASE IF NOT EXISTS cipi;
 EOF
 clear
-sudo rm -rf /var/www/html
+rm -rf /var/www/html
 cd /var/www && git clone https://github.com/yolanmees/Spikster.git html
 cd /var/www/html && git pull
 cd /var/www/html && git checkout $BRANCH
 cd /var/www/html && git pull
-cd /var/www/html && sudo unlink .env
-cd /var/www/html && sudo cp .env.example .env
+cd /var/www/html && unlink .env
+cd /var/www/html && cp .env.example .env
 cd /var/www/html && php artisan key:generate
-sudo rpl -i -w "DB_USERNAME=dbuser" "DB_USERNAME=cipi" /var/www/html/.env
-sudo rpl -i -w "DB_PASSWORD=dbpass" "DB_PASSWORD=$DBPASS" /var/www/html/.env
-sudo rpl -i -w "DB_DATABASE=dbname" "DB_DATABASE=cipi" /var/www/html/.env
-sudo rpl -i -w "APP_URL=http://localhost" "APP_URL=http://$IP" /var/www/html/.env
-sudo rpl -i -w "APP_ENV=local" "APP_ENV=production" /var/www/html/.env
-sudo rpl -i -w "CIPISERVERID" $SERVERID /var/www/html/database/seeders/DatabaseSeeder.php
-sudo rpl -i -w "CIPIIP" $IP /var/www/html/database/seeders/DatabaseSeeder.php
-sudo rpl -i -w "CIPIPASS" $PASS /var/www/html/database/seeders/DatabaseSeeder.php
-sudo rpl -i -w "CIPIDB" $DBPASS /var/www/html/database/seeders/DatabaseSeeder.php
-sudo chmod -R o+w /var/www/html/storage
-sudo chmod -R 777 /var/www/html/storage
-sudo chmod -R o+w /var/www/html/bootstrap/cache
-sudo chmod -R 777 /var/www/html/bootstrap/cache
+rpl -i -w "DB_USERNAME=dbuser" "DB_USERNAME=cipi" /var/www/html/.env
+rpl -i -w "DB_PASSWORD=dbpass" "DB_PASSWORD=$DBPASS" /var/www/html/.env
+rpl -i -w "DB_DATABASE=dbname" "DB_DATABASE=cipi" /var/www/html/.env
+rpl -i -w "APP_URL=http://localhost" "APP_URL=http://$IP" /var/www/html/.env
+rpl -i -w "APP_ENV=local" "APP_ENV=production" /var/www/html/.env
+rpl -i -w "CIPISERVERID" $SERVERID /var/www/html/database/seeders/DatabaseSeeder.php
+rpl -i -w "CIPIIP" $IP /var/www/html/database/seeders/DatabaseSeeder.php
+rpl -i -w "CIPIPASS" $PASS /var/www/html/database/seeders/DatabaseSeeder.php
+rpl -i -w "CIPIDB" $DBPASS /var/www/html/database/seeders/DatabaseSeeder.php
+chmod -R o+w /var/www/html/storage
+chmod -R 777 /var/www/html/storage
+chmod -R o+w /var/www/html/bootstrap/cache
+chmod -R 777 /var/www/html/bootstrap/cache
 cd /var/www/html && composer update --no-interaction
 cd /var/www/html && composer require guzzlehttp/psr7:1.5.2
 cd /var/www/html && php artisan key:generate
@@ -533,28 +533,28 @@ cd /var/www/html && php artisan storage:link
 cd /var/www/html && php artisan view:cache
 cd /var/www/html && php artisan cipi:activesetupcount
 CIPIBULD=/var/www/html/public/build_$SERVERID.php
-sudo touch $CIPIBULD
-sudo cat > $CIPIBULD <<EOF
+touch $CIPIBULD
+cat > $CIPIBULD <<EOF
 $BUILD
 EOF
 CIPIPING=/var/www/html/public/ping_$SERVERID.php
-sudo touch $CIPIPING
-sudo cat > $CIPIPING <<EOF
+touch $CIPIPING
+cat > $CIPIPING <<EOF
 Up
 EOF
 PUBKEYGH=/var/www/html/public/ghkey_$SERVERID.php
-sudo touch $PUBKEYGH
-sudo cat > $PUBKEYGH <<EOF
+touch $PUBKEYGH
+cat > $PUBKEYGH <<EOF
 <?php
 echo exec("cat /etc/cipi/github.pub");
 EOF
 cd /var/www/html && php artisan migrate --seed --force
 cd /var/www/html && php artisan config:cache
-sudo chmod -R o+w /var/www/html/storage
-sudo chmod -R 775 /var/www/html/storage
-sudo chmod -R o+w /var/www/html/bootstrap/cache
-sudo chmod -R 775 /var/www/html/bootstrap/cache
-sudo chown -R www-data:cipi /var/www/html
+chmod -R o+w /var/www/html/storage
+chmod -R 775 /var/www/html/storage
+chmod -R o+w /var/www/html/bootstrap/cache
+chmod -R 775 /var/www/html/bootstrap/cache
+chown -R www-data:cipi /var/www/html
 
 
 
@@ -565,31 +565,31 @@ echo "Last steps..."
 echo "${reset}"
 sleep 1s
 
-sudo chown www-data:cipi -R /var/www/html
-sudo chmod -R 750 /var/www/html
-sudo echo 'DefaultStartLimitIntervalSec=1s' >> /usr/lib/systemd/system/user@.service
-sudo echo 'DefaultStartLimitBurst=50' >> /usr/lib/systemd/system/user@.service
-sudo echo 'StartLimitBurst=0' >> /usr/lib/systemd/system/user@.service
-sudo systemctl daemon-reload
+chown www-data:cipi -R /var/www/html
+chmod -R 750 /var/www/html
+echo 'DefaultStartLimitIntervalSec=1s' >> /usr/lib/systemd/system/user@.service
+echo 'DefaultStartLimitBurst=50' >> /usr/lib/systemd/system/user@.service
+echo 'StartLimitBurst=0' >> /usr/lib/systemd/system/user@.service
+systemctl daemon-reload
 
 TASK=/etc/cron.d/cipi.crontab
 touch $TASK
 cat > "$TASK" <<EOF
 10 4 * * 7 certbot renew --nginx --non-interactive --post-hook "systemctl restart nginx.service"
 20 4 * * 7 apt-get -y update
-40 4 * * 7 DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical sudo apt-get -q -y -o "Dpkg::Options::=--force-confdef" -o "Dpkg::Options::=--force-confold" dist-upgrade
+40 4 * * 7 DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical apt-get -q -y -o "Dpkg::Options::=--force-confdef" -o "Dpkg::Options::=--force-confold" dist-upgrade
 20 5 * * 7 apt-get clean && apt-get autoclean
 50 5 * * * echo 3 > /proc/sys/vm/drop_caches && swapoff -a && swapon -a
 * * * * * cd /var/www/html && php artisan schedule:run >> /dev/null 2>&1
 5 2 * * * cd /var/www/html/utility/cipi-update && sh run.sh >> /dev/null 2>&1
 EOF
 crontab $TASK
-sudo systemctl restart nginx.service
-sudo rpl -i -w "#PasswordAuthentication" "PasswordAuthentication" /etc/ssh/sshd_config
-sudo rpl -i -w "# PasswordAuthentication" "PasswordAuthentication" /etc/ssh/sshd_config
-sudo rpl -i -w "PasswordAuthentication no" "PasswordAuthentication yes" /etc/ssh/sshd_config
-sudo rpl -i -w "PermitRootLogin yes" "PermitRootLogin no" /etc/ssh/sshd_config
-sudo service sshd restart
+systemctl restart nginx.service
+rpl -i -w "#PasswordAuthentication" "PasswordAuthentication" /etc/ssh/sshd_config
+rpl -i -w "# PasswordAuthentication" "PasswordAuthentication" /etc/ssh/sshd_config
+rpl -i -w "PasswordAuthentication no" "PasswordAuthentication yes" /etc/ssh/sshd_config
+rpl -i -w "PermitRootLogin yes" "PermitRootLogin no" /etc/ssh/sshd_config
+service sshd restart
 TASK=/etc/supervisor/conf.d/cipi.conf
 touch $TASK
 cat > "$TASK" <<EOF
@@ -606,10 +606,10 @@ redirect_stderr=true
 stdout_logfile=/var/www/worker.log
 stopwaitsecs=3600
 EOF
-sudo supervisorctl reread
-sudo supervisorctl update
-sudo supervisorctl start all
-sudo service supervisor restart
+supervisorctl reread
+supervisorctl update
+supervisorctl start all
+service supervisor restart
 
 # COMPLETE
 clear
