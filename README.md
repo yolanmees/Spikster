@@ -33,6 +33,14 @@ Spikster is a Laravel based cloud server control panel that supports Digital Oce
 Documentation at: https://spikster.com/
 
 ## Installation
+
+If you are using Ubuntu version 22.04 or a later version, you should execute the following command before proceeding
+
+```bash
+export DEBIAN_FRONTEND=noninteractive
+``` 
+
+
 ```bash
 wget -O - https://raw.githubusercontent.com/yolanmees/Spikster/master/go.sh | bash
 ```
