@@ -37,9 +37,11 @@ Documentation at: https://spikster.com/
 If you are using Ubuntu version 22.04 or a later version, you should execute the following command before proceeding
 
 ```bash
+// ubuntu 22.04 or higher
 export DEBIAN_FRONTEND=noninteractive
 ``` 
 
+Install Spikster
 
 ```bash
 wget -O - https://raw.githubusercontent.com/yolanmees/Spikster/master/go.sh | bash
