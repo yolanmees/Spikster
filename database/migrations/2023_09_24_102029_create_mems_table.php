@@ -13,16 +13,16 @@ return new class extends Migration
     {
         Schema::create('stats_mems', function (Blueprint $table) {
             $table->id();
-            $table->float('total');
-            $table->float('available');
-            $table->float('percent');
-            $table->float('used');
-            $table->float('free');
-            $table->float('active');
-            $table->float('inactive');
-            $table->float('buffers');
-            $table->float('cached');
-            $table->float('shared');
+            $table->float('total', 12, 2);
+            $table->float('available', 12, 2);
+            $table->float('percent', 12, 2);
+            $table->float('used', 12, 2);
+            $table->float('free', 12, 2);
+            $table->float('active', 12, 2);
+            $table->float('inactive', 12, 2);
+            $table->float('buffers', 12, 2);
+            $table->float('cached', 12, 2);
+            $table->float('shared', 12, 2);
             $table->timestamps();
         });
     }

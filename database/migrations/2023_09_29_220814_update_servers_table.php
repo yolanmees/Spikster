@@ -13,8 +13,6 @@ return new class extends Migration
     {
         // update servers table
         Schema::table('servers', function (Blueprint $table) {
-            $table->string('api_key')->nullable();
-            $table->integer('ssh_port')->nullable();
         });
     }
 

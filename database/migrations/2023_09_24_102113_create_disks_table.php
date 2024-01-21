@@ -17,8 +17,8 @@ return new class extends Migration
             $table->string('disk_name');
             $table->float('read_count');
             $table->float('write_count');
-            $table->float('read_bytes');
-            $table->float('write_bytes');
+            $table->float('read_bytes', 10, 2);
+            $table->float('write_bytes', 10, 2);
             $table->string('key');
             $table->timestamps();
         });
