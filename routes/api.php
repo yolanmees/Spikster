@@ -7,6 +7,7 @@ use App\Http\Controllers\SiteController;
 use App\Http\Controllers\ServerController;
 use App\Http\Controllers\FileManagerController;
 use App\Http\Controllers\DatabaseController;
+use App\Http\Controllers\Api\LogManagerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -86,3 +87,6 @@ Route::post('files/delete', [FileManagerController::class, 'destroy'])->name('fi
 
 Route::get('download_file_object/{id}', [FileManagerController::class, 'downloadObject']);
 Route::get('show-media-file/{id}', [FileManagerController::class, 'showMediaFile']);
+
+Route::get('logs', [LogManagerController::class, 'index'])->name('logs');
+Route::get('logs/{log}', [LogManagerController::class, 'show'])->name('logs.show');
