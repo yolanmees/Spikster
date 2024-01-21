@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SiteController;
 use App\Http\Controllers\FileManagerController;
 use App\Http\Controllers\DatabaseController;
+use App\Http\Controllers\LogManagerController;
 use Illuminate\Http\Request;
 
 /*
@@ -51,6 +52,8 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified' 
         return view('server.packages-installed', compact('server_id'));
     })->name('server.packages-installed');
 
+    Route::get('/servers/{server_id}/logs', [LogManagerController::class, 'index'])->name('logs');
+    Route::get('/servers/{server_id}/logs/{log}', [LogManagerController::class, 'show'])->name('logs.show');
 
 
 

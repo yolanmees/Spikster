@@ -128,6 +128,17 @@
                 </div>
             </div>
         </div>
+        <div class="w-1/3">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-power-off fs-fw mr-1"></i>
+                    {{ __('spikster.logs') }}
+                </div>
+                <div class="card-body">
+                    <a href="{{route('logs', $server_id)}}" class="btn btn-primary" type="button" id="">Open Logs</a>
+                </div>
+            </div>
+        </div>
     </div>
     <div class="flex gap-x-4" x-show="tab === 'security'">
         <div class="w-1/2">

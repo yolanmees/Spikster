@@ -88,5 +88,5 @@ Route::post('files/delete', [FileManagerController::class, 'destroy'])->name('fi
 Route::get('download_file_object/{id}', [FileManagerController::class, 'downloadObject']);
 Route::get('show-media-file/{id}', [FileManagerController::class, 'showMediaFile']);
 
-Route::get('logs', [LogManagerController::class, 'index'])->name('logs');
-Route::get('logs/{log}', [LogManagerController::class, 'show'])->name('logs.show');
+Route::get('logs', [LogManagerController::class, 'index'])->name('api.logs');
+Route::get('logs/{log}', [LogManagerController::class, 'show'])->name('api.logs.show');
