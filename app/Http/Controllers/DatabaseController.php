@@ -2,61 +2,60 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Mysqluser;
-use App\Models\Userdatabase;
+use App\Models\Database;
+use App\Models\DatabaseUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use App\Services\DatabaseService;
 
 class DatabaseController extends Controller
 {
+    protected $databaseService;
 
-    public function viewdatabase()
+    public function __construct(DatabaseService $databaseService)
     {
-        $mysqluser = Mysqluser::all();
-        $userdata = Userdatabase::all();
-        return view('database', compact('mysqluser', 'userdata'));
+        $this->databaseService = $databaseService;
     }
 
-    public function createdatabase(Request $request)
+    public function viewdatabase($siteId): \Illuminate\View\View
     {
-        // dd($request->all());
-        $database = new Userdatabase();
-            $database->user_id = 1;
-            $database->database_name = $request->data_name;
-            $database->save();
-            if ($database->save()) {
-                return redirect()->back()->with('success', 'You have successfully Created database!');
+        $databases = Database::with('users')->where(['site_id' => $siteId])->get();
+        $databaseUsers = DatabaseUser::all();
 
-            } else {
-                return redirect()->back()->with('failed', 'Unable to Create database!');
-            }
+        return view('site.database.index', compact('databases', 'databaseUsers', 'siteId'));
     }
 
-    public function createuser(Request $request)
+    public function createdatabase(Request $request, $site_id): \Illuminate\Http\RedirectResponse
     {
-        $mysql = new Mysqluser();
-        $mysql->user_id = 1;
-        $mysql->username = $request->username;
-        $mysql->password = Hash::make($request->password);
-        // $mysql->save();
-         if ($request->password === $request->conf_password) {
-            if($mysql->save()){
-                return redirect()->back()->with('success', 'You have successfully added User!');
-            } else {
-                return redirect()->back()->with('failed', 'Unable to add User!');
-            }
-            } else {
-            return redirect()->back()->with('failed', 'Confirm Password does not match!');
+        $response = $this->databaseService->createDatabase($request->input('database_name'), $site_id);
+
+        if ($response['success']) {
+            return \Redirect::back()->with('success', $response['message']);
+        } else {
+            return \Redirect::back()->with('failed', $response['message']);
         }
     }
 
-
-    public function linkdatabaseuser(Request $request)
+    public function createuser(Request $request, $site_id): \Illuminate\Http\RedirectResponse
     {
-        $mysqluserid = $request->username;
-        $databaseId = $request->database;
-        Userdatabase::where('id', $databaseId)->update(['mysqluser_id' => $mysqluserid]);
-        return redirect()->back()->with('success', 'You have successfully add User to Database!');
+        $response = $this->databaseService->createUser($request->input('username'), $request->input('password'), $site_id);
+
+        if ($response['success']) {
+            return \Redirect::back()->with('success', $response['message']);
+        } else {
+            return \Redirect::back()->with('failed', $response['message']);
+        }
+    }
+
+    public function linkdatabaseuser(Request $request, $site_id): \Illuminate\Http\RedirectResponse
+    {
+        $response = $this->databaseService->linkDatabaseUser($request->input('username'), $request->input('database'), $site_id);
+
+        if ($response['success']) {
+            return \Redirect::back()->with('success', $response['message']);
+        } else {
+            return \Redirect::back()->with('failed', $response['message']);
+        }
     }
 }

@@ -66,9 +66,20 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified' 
         return view('site.edit', compact('site_id'));
     })->name('site.edit');
 
+      //database
+    Route::get('/site/{site_id}/database', [DatabaseController::class, 'viewdatabase'])->name('site.database');
+    Route::post('/site/{site_id}/database/create/database', [DatabaseController::class,'createdatabase'])->name('site.database.create.database');
+    Route::post('/site/{site_id}/database/create/user', [DatabaseController::class,'createuser'])->name('site.database.create.user');
+    Route::post('/site/{site_id}/database/create/link', [DatabaseController::class,'linkdatabaseuser'])->name('site.database.create.link');
+
+    
+
+
     Route::get('/settings', function () {
         return view('settings.settings');
     })->name('settings.settings');
+
+
 
     Route::get('/design', function () {
         return view('design');
@@ -81,11 +92,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified' 
 
     //phpmyadmin route with autologin
     Route::get('/autopma/{site_id}', [NodejsController::class, 'autoLoginPMA'])->name('autopma');
-    //database
-    Route::get('/data', [DatabaseController::class, 'viewdatabase'])->name('data');
-    Route::post('/createdatab', [DatabaseController::class,'createdatabase'])->name('createdatab');
-    Route::post('/createuser', [DatabaseController::class,'createuser'])->name('createuser');
-    Route::post('/linkdatabuser', [DatabaseController::class,'linkdatabaseuser'])->name('linkdatabuser');
+  
 
 
     Route::get('/pdf/{site_id}/{token}', [SiteController::class, 'pdf']);

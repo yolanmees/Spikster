@@ -165,22 +165,22 @@
             <div class="card-body">
                 <p class="mb-2">Set up your database</p>
                 <div class="text-center">
-                    <button class="btn btn-primary" type="button" style="min-width:200px" id="sitesetrepo"> <a href="{{ url('/data') }}" style="min-width:200px">DATABASE</a></button>
+                    <a href="{{ route('site.database', $site_id) }}" style="min-width:200px"> <button class="btn btn-primary" type="button" style="min-width:200px" id="sitesetrepo"> DATABASE </button></a>
                     <div class="space"></div>
                 </div>
 
                 <div class="space"></div>
 
-                <p class="mb-2">Manage your database</p>
+                {{-- <p class="mb-2">Manage your database</p>
                 <div class="text-center">
                     <button class="btn btn-primary" type="button" style="min-width:200px" id="sitesetrepo"> <a href="{{ route('autopma', $site_id) }}"  style="min-width:200px" target="_blank">phpMyAdmin</a></button>
                     <div class="space"></div>
-                </div>
+                </div> --}}
 
             </div>
         </div>
     </div>
-    <div id="nodejsManager" class="md:col-span-2 col-span-1 d-none">
+    {{-- <div id="nodejsManager" class="md:col-span-2 col-span-1 d-none">
         <div class="card h-full">
             <div class="card-header">
                 <i class="fab fa-github fs-fw mr-1"></i>
@@ -199,7 +199,7 @@
 
             </div>
         </div>
-    </div>
+    </div> --}}
 </div>
 @endsection
 
