@@ -271,28 +271,28 @@ sleep 1s
 add-apt-repository -y ppa:ondrej/php
 apt-get update
 
-apt-get -y install php8.2-fpm
-apt-get -y install php8.2-common
-apt-get -y install php8.2-curl
-apt-get -y install php8.2-openssl
-apt-get -y install php8.2-bcmath
-apt-get -y install php8.2-mbstring
-apt-get -y install php8.2-tokenizer
-apt-get -y install php8.2-mysql
-apt-get -y install php8.2-sqlite3
-apt-get -y install php8.2-pgsql
-apt-get -y install php8.2-redis
-apt-get -y install php8.2-memcached
-apt-get -y install php8.2-json
-apt-get -y install php8.2-zip
-apt-get -y install php8.2-xml
-apt-get -y install php8.2-soap
-apt-get -y install php8.2-gd
-apt-get -y install php8.2-imagick
-apt-get -y install php8.2-fileinfo
-apt-get -y install php8.2-imap
-apt-get -y install php8.2-cli
-PHPINI=/etc/php/8.2/fpm/conf.d/cipi.ini
+apt-get -y install php8.3-fpm
+apt-get -y install php8.3-common
+apt-get -y install php8.3-curl
+apt-get -y install php8.3-openssl
+apt-get -y install php8.3-bcmath
+apt-get -y install php8.3-mbstring
+apt-get -y install php8.3-tokenizer
+apt-get -y install php8.3-mysql
+apt-get -y install php8.3-sqlite3
+apt-get -y install php8.3-pgsql
+apt-get -y install php8.3-redis
+apt-get -y install php8.3-memcached
+apt-get -y install php8.3-json
+apt-get -y install php8.3-zip
+apt-get -y install php8.3-xml
+apt-get -y install php8.3-soap
+apt-get -y install php8.3-gd
+apt-get -y install php8.3-imagick
+apt-get -y install php8.3-fileinfo
+apt-get -y install php8.3-imap
+apt-get -y install php8.3-cli
+PHPINI=/etc/php/8.3/fpm/conf.d/cipi.ini
 touch $PHPINI
 cat > "$PHPINI" <<EOF
 memory_limit = 256M
@@ -301,7 +301,7 @@ post_max_size = 256M
 max_execution_time = 180
 max_input_time = 180
 EOF
-service php8.2-fpm restart
+service php8.3-fpm restart
 
 # PHP EXTRA
 apt-get -y install php-dev php-pear
@@ -314,7 +314,7 @@ echo "PHP CLI configuration..."
 echo "${reset}"
 sleep 1s
 
-update-alternatives --set php /usr/bin/php8.2
+update-alternatives --set php /usr/bin/php8.3
 
 
 
@@ -392,7 +392,7 @@ server {
     error_page 404 /index.php;
     location ~ \.php$ {
         include snippets/fastcgi-php.conf;
-        fastcgi_pass unix:/var/run/php/php8.2-fpm.sock;
+        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
     }
     location ~ /\.(?!well-known).* {
         deny all;
