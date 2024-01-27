@@ -94,3 +94,4 @@ sudo cp /etc/spikster/github /home/$USER_NAME/git/deploy
 sudo chown -R $USER_NAME:$USER_NAME /home/$USER_NAME/.cache
 sudo chown -R $USER_NAME:$USER_NAME /home/$USER_NAME/git
 sudo chown -R $USER_NAME:$USER_NAME /home/$USER_NAME/web
+sudo chown -R www-data:www-data /home/$USER_NAME/web
