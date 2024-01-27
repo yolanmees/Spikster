@@ -5,6 +5,7 @@ use App\Http\Controllers\SiteController;
 use App\Http\Controllers\FileManagerController;
 use App\Http\Controllers\DatabaseController;
 use App\Http\Controllers\LogManagerController;
+use App\Http\Controllers\Site\WordPressController;
 use Illuminate\Http\Request;
 
 /*
@@ -72,6 +73,9 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified' 
     Route::post('/site/{site_id}/database/create/user', [DatabaseController::class,'createuser'])->name('site.database.create.user');
     Route::post('/site/{site_id}/database/create/link', [DatabaseController::class,'linkdatabaseuser'])->name('site.database.create.link');
 
+    //wordpress
+    Route::get('/site/{site_id}/wordpress', [WordPressController::class, 'index'])->name('site.wordpress');
+    Route::post('/site/{site_id}/wordpress/create', [WordPressController::class, 'create'])->name('site.wordpress.create');
     
 
 

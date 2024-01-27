@@ -20,7 +20,7 @@
                         Create new Wordpress
                     </div>
                     <div class="card-body">
-                        <form action="{{ route('wordpress.create') }}" method="POST">
+                        <form action="{{ route('site.wordpress.create', $site_id) }}" method="POST">
                             @csrf
                             <div class="form-group">
                                 <label for="path">Installatiepad:</label>

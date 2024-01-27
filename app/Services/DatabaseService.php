@@ -42,7 +42,7 @@ class DatabaseService
             $database->site_id = $siteId;
             $database->save();
 
-            return ['success' => true, 'message' => 'Database created successfully.'];
+            return ['success' => true, 'message' => 'Database created successfully.', 'database' => $database];
         } catch (PDOException $e) {
             return ['success' => false, 'message' => "Unable to create database. Error: " . $e->getMessage()];
         }
@@ -68,7 +68,7 @@ class DatabaseService
             $databaseUser->site_id = $siteId;
             $databaseUser->save();
 
-            return ['success' => true, 'message' => 'User added successfully.'];
+            return ['success' => true, 'message' => 'User added successfully.', 'user' => $databaseUser];
         } catch (PDOException $e) {
             return ['success' => false, 'message' => "Unable to add user. Error: " . $e->getMessage()];
         }
@@ -90,7 +90,7 @@ class DatabaseService
             $link->database_user_id = $databseUser->id;
             $link->save();
 
-            return ['success' => true, 'message' => 'Database and user linked successfully.'];
+            return ['success' => true, 'message' => 'Database and user linked successfully.', 'link' => $link];
         } catch (PDOException $e) {
             return ['success' => false, 'message' => "Unable to link database and user. Error: " . $e->getMessage()];
         }

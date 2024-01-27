@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Site;
 use App\Http\Controllers\Controller;
 use App\Services\WordPressService;
 use Illuminate\Http\Request;
+use App\Models\Site;
 
 class WordPressController extends Controller
 {
@@ -15,33 +16,36 @@ class WordPressController extends Controller
         $this->wordpressService = $wordpressService;
     }
 
-    public function index(): \Illuminate\View\View
+    public function index($site_id): \Illuminate\View\View
     {
-        return view('site.wordpress.index');
+        return view('site.wordpress.index', compact('site_id'));
     }
 
-    public function create(Request $request): \Illuminate\Http\RedirectResponse
+    public function create(Request $request, $site_id): \Illuminate\Http\RedirectResponse
     {
-        // Valideer het binnenkomende verzoek
         $request->validate([
-            'path'     => 'required|string', // Zorg ervoor dat dit path veilig is en correct gevalideerd wordt!
+            'path'     => 'required|string',
             'username' => 'required|string|min:3|max:255',
             'password' => 'required|string|min:8',
         ]);
 
-        // Roep de WordPress service aan om de installatie uit te voeren
+        $site = Site::where(['site_id' => $site_id])->first();
+        if (!$site) {
+            return back()->withErrors(['Site not found']);
+        }
+
+        $path = $site->rootpath . '/' . $request->input('path');
+
         $response = $this->wordpressService->deployWordPress(
-            $request->input('path'),
+            $path,
             $request->input('username'),
-            $request->input('password')
+            $request->input('password'),
+            $site_id
         );
 
-        // Check de response van de service en reageer dienovereenkomstig
         if ($response['success']) {
-            // Succes response - terugkeren naar een succespagina of een andere route
-            return redirect()->route('some.route.name')->with('success', $response['message']);
+            return redirect()->route('site.wordpress')->with('success', $response['message']);
         } else {
-            // Fout response - terugkeren naar de oorspronkelijke pagina met foutgegevens
             return back()->withErrors(['Deployment failed' => $response['message']]);
         }
     }
