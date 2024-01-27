@@ -58,4 +58,40 @@ class DatabaseController extends Controller
             return \Redirect::back()->with('failed', $response['message']);
         }
     }
+
+    public function deleteDatabase(Request $request, $site_id)
+    {
+        $databaseId = $request->input('database_id');
+        $response = $this->databaseService->deleteDatabase($databaseId);
+
+        if ($response['success']) {
+            return redirect()->back()->with('success', $response['message']);
+        } else {
+            return redirect()->back()->with('failed', $response['message']);
+        }
+    }
+
+    public function deleteUser(Request $request, $site_id)
+    {
+        $userId = $request->input('user_id');
+        $response = $this->databaseService->deleteUser($userId);
+
+        if ($response['success']) {
+            return redirect()->back()->with('success', $response['message']);
+        } else {
+            return redirect()->back()->with('failed', $response['message']);
+        }
+    }
+
+    public function unlinkDatabaseUser(Request $request, $site_id)
+    {
+        $linkId = $request->input('link_id');
+        $response = $this->databaseService->unlinkDatabaseUser($linkId);
+
+        if ($response['success']) {
+            return redirect()->back()->with('success', $response['message']);
+        } else {
+            return redirect()->back()->with('failed', $response['message']);
+        }
+    }
 }

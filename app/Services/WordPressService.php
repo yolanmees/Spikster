@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Services\DatabaseService;
 use Illuminate\Support\Str; 
+use App\Models\Wordpress;
 
 class WordPressService
 {
@@ -45,8 +46,8 @@ class WordPressService
             return ['success' => false, 'message' => 'Cannot open WordPress archive'];
         }
 
-        $wpConfigSamplePath = $path . '/wp-config-sample.php';
-        $wpConfigPath = $path . '/wp-config.php';
+        $wpConfigSamplePath = $path . '/wordpress/wp-config-sample.php';
+        $wpConfigPath = $path . '/wordpress/wp-config.php';
 
         $wpConfigSampleFile = fopen($wpConfigSamplePath, 'r');
         $wpConfigFile = fopen($wpConfigPath, 'w');

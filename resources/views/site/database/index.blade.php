@@ -98,19 +98,26 @@
                         List of MYSQL Users
                     </div>
                     <div class="card-body">
-                        <table class="table">
+                        <table class="table w-full">
                             <thead>
                                 <tr>
-                                    {{-- <th scope="col">#</th> --}}
-                                    <th scope="col">Username</th>
+                                    <th class="border" scope="col">Username</th>
+                                    <th class="border" scope="col">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($databaseUsers as $user)
-                                    <tr>
-                                        <td>{{ $user->username }}</td>
+                                    <tr class="border hover:bg-gray-100"> 
+                                        <td class="text-center">{{ $user->username }}</td>
+                                        <td class="border text-center">
+                                            <form action="{{ route('site.database.delete.user', $siteId) }}" method="post">
+                                                @csrf
+                                                @method('DELETE')
+                                                <input type="hidden" name="user_id" value="{{ $user->id }}">
+                                                <button class="btn btn-danger">Delete</button>
+                                            </form>
+                                        </td>
                                     </tr>
-                                    {{-- <option value="{{ $user->id }}">{{ $user->username }}</option> --}}
                                 @endforeach
 
                             </tbody>
@@ -130,13 +137,13 @@
                                 <tr>
                                     <th class="border" scope="col">Database Name</th>
                                     <th class="border" scope="col">Database Usernames</th>
-                                    {{-- <th scope="col">Handle</th> --}}
+                                    <th class="border" scope="col">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @if ($databases->count() > 0)
                                     @foreach ($databases as $database)
-                                        <tr>
+                                        <tr class="border hover:bg-gray-100">
                                             <td class="border text-center">
                                                 @if (!$database->database_name == "")
                                                     {{ $database->database_name }}
@@ -154,9 +161,15 @@
                                                 @endif
 
                                             </td>
-                                            {{-- <td>@mdo</td> --}}
+                                            <td class="border text-center">
+                                                <form action="{{ route('site.database.delete.database', $siteId) }}" method="post">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <input type="hidden" name="database_id" value="{{ $database->id }}">
+                                                    <button class="btn btn-danger">Delete</button>
+                                                </form>
+                                            </td>
                                         </tr>
-                                        {{-- <option value="{{ $user->id }}">{{ $user->username }}</option> --}}
                                     @endforeach
                                 @endif
 

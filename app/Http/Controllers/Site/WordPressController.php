@@ -44,7 +44,7 @@ class WordPressController extends Controller
         );
 
         if ($response['success']) {
-            return redirect()->route('site.wordpress')->with('success', $response['message']);
+            return redirect()->route('site.wordpress', $site_id)->with('success', $response['message']);
         } else {
             return back()->withErrors(['Deployment failed' => $response['message']]);
         }

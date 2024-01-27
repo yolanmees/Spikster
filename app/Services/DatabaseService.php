@@ -95,4 +95,70 @@ class DatabaseService
             return ['success' => false, 'message' => "Unable to link database and user. Error: " . $e->getMessage()];
         }
     }
+
+       public function deleteDatabase($databaseId)
+    {
+        $pdo = $this->pdoConnect();
+
+        $database = Database::find($databaseId);
+
+        if(!$database) {
+            return ['success' => false, 'message' => 'Database not found.'];
+        }
+
+        $databaseName = $database->database_name;
+
+        try {
+            $pdo->exec("DROP DATABASE IF EXISTS `$databaseName`;");
+            $database->delete();
+            return ['success' => true, 'message' => 'Database deleted successfully.'];
+        } catch (PDOException $e) {
+            return ['success' => false, 'message' => "Unable to delete database. Error: " . $e->getMessage()];
+        }
+    }
+
+    public function deleteUser($userId)
+    {
+        $pdo = $this->pdoConnect();
+
+        $databaseUser = DatabaseUser::find($userId);
+
+        if(!$databaseUser) {
+            return ['success' => false, 'message' => 'User not found.'];
+        }
+
+        $username = $databaseUser->username;
+
+        try {
+            $pdo->exec("DROP USER '$username'@'%';");
+            $pdo->exec("FLUSH PRIVILEGES;");
+            $databaseUser->delete();
+            return ['success' => true, 'message' => 'User deleted successfully.'];
+        } catch (PDOException $e) {
+            return ['success' => false, 'message' => "Unable to delete user. Error: " . $e->getMessage()];
+        }
+    }
+
+    public function unlinkDatabaseUser($linkId)
+    {
+        $pdo = $this->pdoConnect();
+
+        $link = DatabaseUserLink::find($linkId);
+
+        if(!$link) {
+            return ['success' => false, 'message' => 'Link not found.'];
+        }
+
+        $userName = $link->databaseUser->username;
+        $dbName = $link->database->database_name;
+
+        try {
+            $pdo->exec("REVOKE ALL PRIVILEGES ON `$dbName`.* FROM '$userName'@'%';");
+            $pdo->exec("FLUSH PRIVILEGES;");
+            $link->delete();
+            return ['success' => true, 'message' => 'Database and user unlinked successfully.'];
+        } catch (PDOException $e) {
+            return ['success' => false, 'message' => "Unable to unlink database and user. Error: " . $e->getMessage()];
+        }
+    }
 }
