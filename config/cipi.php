@@ -20,8 +20,8 @@
 
         // Global Settings
         'users_prefix'      => env('CIPI_USERS_PREFIX', 'cp'),
-        'phpvers'           => ['8.2', '8.1','8.0','7.4'],
+        'phpvers'           => ['8.3', '8.2', '8.1','8.0','7.4'],
         'services'          => ['nginx','php','mysql','redis','supervisor'],
-        'default_php'       => '8.2',
+        'default_php'       => '8.3',
 
     ];
