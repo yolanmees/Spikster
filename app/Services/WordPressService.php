@@ -64,7 +64,15 @@ class WordPressService
             return ['success' => false, 'message' => 'Failed to open files'];
         }
         
+        $wordpress = new Wordpress();
+        $wordpress->path = $path;
+        $wordpress->username = $username;
+        $wordpress->password = $password;
+        $wordpress->site_id = $site_id;
+        $wordpress->database_id = $databaseResponse['database']->id;
+        $wordpress->database_user_id = $userResponse['user']->id;
+        $wordpress->save();
 
-        return ['success' => true, 'message' => 'WordPress deployed successfully with database ' . $dbName];
+        return ['success' => true, 'message' => 'WordPress deployed successfully with database ' . $dbName, 'wordpress' => $wordpress];
     }
 }

@@ -168,6 +168,7 @@
                     <p>{{ __('spikster.php_cli_version') }}:</p>
                     <div class="input-group">
                         <select class="form-control" id="phpver">
+                            <option value="8.3" id="php83">8.3</option>
                             <option value="8.2" id="php82">8.2</option>
                             <option value="8.1" id="php81">8.1</option>
                             <option value="8.0" id="php80">8.0</option>
@@ -335,6 +336,9 @@
                     $('#serverbuild').html('{{ __('spikster.unknown') }}');
                 }
                 switch (data.php) {
+                    case '8.3':
+                        $('#php83').attr("selected","selected");
+                        break;
                     case '8.2':
                         $('#php82').attr("selected","selected");
                         break;

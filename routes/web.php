@@ -79,7 +79,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified' 
     //wordpress
     Route::get('/site/{site_id}/wordpress', [WordPressController::class, 'index'])->name('site.wordpress');
     Route::post('/site/{site_id}/wordpress/create', [WordPressController::class, 'create'])->name('site.wordpress.create');
-    
+    Route::delete('/site/{site_id}/wordpress/delete', [WordPressController::class, 'delete'])->name('site.wordpress.delete');
 
 
     Route::get('/settings', function () {

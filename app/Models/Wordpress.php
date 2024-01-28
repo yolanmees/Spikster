@@ -15,6 +15,7 @@ class Wordpress extends Model
         'password',
         'site_id',
         'database_id',
+        'database_user_id',
     ];
 
     public function site()

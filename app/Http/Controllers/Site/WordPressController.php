@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Site;
 use App\Http\Controllers\Controller;
 use App\Services\WordPressService;
 use Illuminate\Http\Request;
+use App\Models\Wordpress;
 use App\Models\Site;
 
 class WordPressController extends Controller
@@ -18,7 +19,8 @@ class WordPressController extends Controller
 
     public function index($site_id): \Illuminate\View\View
     {
-        return view('site.wordpress.index', compact('site_id'));
+        $wordpresses = Wordpress::with('database')->where(['site_id' => $site_id])->paginate(10);
+        return view('site.wordpress.index', compact('site_id', 'wordpresses'));
     }
 
     public function create(Request $request, $site_id): \Illuminate\Http\RedirectResponse

@@ -112,6 +112,7 @@
                 <p class="mb-2">{{ __('spikster.php_fpm_version') }}:</p>
                 <div class="input-group">
                     <select class="form-control" id="sitephpver">
+                        <option value="8.3" id="php83">8.3</option>
                         <option value="8.2" id="php82">8.2</option>
                         <option value="8.1" id="php81">8.1</option>
                         <option value="8.0" id="php80">8.0</option>
@@ -134,7 +135,7 @@
             </div>
         </div>
     </div>
-    <div class="md:col-span-2 col-span-1">
+    {{-- <div class="md:col-span-2 col-span-1">
         <div class="card h-full">
             <div class="card-header">
                 <i class="fas fa-rocket fs-fw mr-1"></i>
@@ -146,11 +147,10 @@
                     <input type="hidden" name="site-uuid" id="siteuuid">
                     <input type="submit" value="Open Manager" class="btn btn-primary">
                 </form>
-                {{-- <form class="btn btn-primary" href="">File Manager</a> --}}
                 <div class="space"></div>
             </div>
         </div>
-    </div>
+    </div> --}}
     <div class="md:col-span-2 col-span-1">
         <div class="card h-full">
             <div class="card-header flex">
@@ -177,6 +177,22 @@
                     <div class="space"></div>
                 </div> --}}
 
+            </div>
+        </div>
+    </div>
+
+    <div class="md:col-span-2 col-span-1">
+        <div class="card h-full">
+            <div class="card-header flex">
+                <i class="fab fa-wordpress fs-fw mr-1 mt-1"></i>
+                Wordpress Manager
+            </div>
+            <div class="card-body">
+                <p class="mb-2">Manage your project</p>
+                <div class="text-center">
+                    <a href="{{ route('site.wordpress', $site_id) }}" style="min-width:200px"> <button class="btn btn-primary" type="button" style="min-width:200px" id="sitesetrepo"> Wordpress Manager </button></a>
+                    <div class="space"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -344,6 +360,9 @@
                 deploy.session.setValue(data.deploy);
                 getDataNoDT('/api/servers/'+data.server_id+'/domains');
                 switch (data.php) {
+                    case '8.3':
+                        $('#php83').attr("selected","selected");
+                        break;
                     case '8.2':
                         $('#php82').attr("selected","selected");
                         break;

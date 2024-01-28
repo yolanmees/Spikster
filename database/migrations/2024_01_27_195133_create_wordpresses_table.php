@@ -16,8 +16,9 @@ return new class extends Migration
             $table->string('path');
             $table->string('username');
             $table->string('password');
-            $table->foreignId('site_id')->constrained();
+            $table->string('site_id');
             $table->foreignId('database_id')->constrained();
+            $table->foreignId('database_user_id')->constrained();
             $table->timestamps();
         });
     }
