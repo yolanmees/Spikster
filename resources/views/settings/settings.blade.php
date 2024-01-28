@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.settings')
 
 
 
@@ -8,7 +8,7 @@
 
 
 
-@section('content')
+@section('settings-content')
 <div class="row">
     
     <div class="col-xl-6">
