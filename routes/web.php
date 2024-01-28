@@ -33,61 +33,6 @@ Route::get('/', function () {
 
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified' ])->group(function () {
 
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    });
-
-    Route::get('/servers', function () {
-        return view('server.list');
-    })->name('server.list');
-
-    Route::get('/servers/{server_id}', function ($server_id) {
-        return view('server.edit', compact('server_id'));
-    })->name('server.edit');
-
-    Route::get('/servers/{server_id}/fail2ban', function ($server_id) {
-        return view('server.fail2ban', compact('server_id'));
-    })->name('server.fail2ban');
-
-    Route::get('/servers/{server_id}/packages', function ($server_id) {
-        return view('server.packages-installed', compact('server_id'));
-    })->name('server.packages-installed');
-
-    Route::get('/servers/{server_id}/logs', [LogManagerController::class, 'index'])->name('logs');
-    Route::get('/servers/{server_id}/logs/{log}', [LogManagerController::class, 'show'])->name('logs.show');
-
-
-
-
-    Route::get('/sites', function () {
-        return view('site.list');
-    })->name('site.list');
-
-    Route::get('/sites/{site_id}', function ($site_id) {
-        return view('site.edit', compact('site_id'));
-    })->name('site.edit');
-
-      //database
-    Route::get('/site/{site_id}/database', [DatabaseController::class, 'viewdatabase'])->name('site.database');
-    Route::post('/site/{site_id}/database/create/database', [DatabaseController::class,'createdatabase'])->name('site.database.create.database');
-    Route::post('/site/{site_id}/database/create/user', [DatabaseController::class,'createuser'])->name('site.database.create.user');
-    Route::post('/site/{site_id}/database/create/link', [DatabaseController::class,'linkdatabaseuser'])->name('site.database.create.link');
-    Route::delete('/site/{site_id}/database/delete/database', [DatabaseController::class,'deleteDatabase'])->name('site.database.delete.database');
-    Route::delete('/site/{site_id}/database/delete/user', [DatabaseController::class,'deleteUser'])->name('site.database.delete.user');
-    Route::delete('/site/{site_id}/database/delete/link', [DatabaseController::class,'deleteLink'])->name('site.database.delete.link');
-
-    //wordpress
-    Route::get('/site/{site_id}/wordpress', [WordPressController::class, 'index'])->name('site.wordpress');
-    Route::post('/site/{site_id}/wordpress/create', [WordPressController::class, 'create'])->name('site.wordpress.create');
-    Route::delete('/site/{site_id}/wordpress/delete', [WordPressController::class, 'delete'])->name('site.wordpress.delete');
-
-
-    Route::get('/settings', function () {
-        return view('settings.settings');
-    })->name('settings.settings');
-
-
-
     Route::get('/design', function () {
         return view('design');
     })->name('design');

@@ -11,7 +11,7 @@
 @section('content')
 <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
 
-    <div class="col-span-1 bg-white rounded-lg">
+    <div class="col-span-1 bg-white border border-gray-400 rounded-lg">
         <h5 class="font-bold text-gray-600 px-4 py-4">{{ __('spikster.titles.settings') }}</h5>
         <ul class="list-group list-group-flush mb-4">
             <a href="{{ route('settings.general') }}" class="text-decoration-none">
@@ -21,7 +21,7 @@
             </a>
             <a href="{{ route('settings.users') }}" class="text-decoration-none">   
                 <li class="list-group-item hover:bg-gray-100 text-sm px-4 py-1 @if (request()->routeIs('settings.users')) font-bold @endif">
-                        Users
+                    Users
                 </li>
             </a>
     </div>
