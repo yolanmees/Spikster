@@ -14,7 +14,7 @@ Spikster is a Laravel based cloud server control panel that supports Digital Oce
 
 - Server Management: manage one or more servers in as easy as a few clicks without be a LEMP Guru.
 
-- Perfect stack for PHP devs: Spikster comes with nginx, PHP, MySql, Composer, npm and Supervisor.
+- Perfect stack for PHP devs: Spikster comes with nginx, PHP, MySql, Bind9(DNS), Composer, npm and Supervisor.
 
 - Multi-PHP: Run simultaneous PHP versions at your ease & convenience.
 
@@ -26,7 +26,9 @@ Spikster is a Laravel based cloud server control panel that supports Digital Oce
 
 - Real-time servers stats: Keep an eye on everything through an awesome dashboard.
 
-- Always up to date: Spikster installs last versions of LTS dists and supports Ubuntu 23.04 LTS 
+- Always up to date: Spikster installs last versions of LTS dists and supports Ubuntu 23.04 LTS
+
+- Easylly manage your Domains, DNS, Hosting, SSL, Databases, Logs, and more.
 
 
 ## Documentation
