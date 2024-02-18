@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DatabaseController;
 use App\Http\Controllers\Site\WordPressController;
 use App\Http\Controllers\SiteController;
+use App\Http\Controllers\DnsRecordsController;
 
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified' ])->group(function () {
 
@@ -28,6 +29,14 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified' 
     Route::get('/site/{site_id}/wordpress', [WordPressController::class, 'index'])->name('site.wordpress');
     Route::post('/site/{site_id}/wordpress/create', [WordPressController::class, 'create'])->name('site.wordpress.create');
     Route::delete('/site/{site_id}/wordpress/delete', [WordPressController::class, 'delete'])->name('site.wordpress.delete');
+
+    //dns
+    Route::get('/site/{site_id}/dns', [DnsRecordsController::class, 'index'])->name('site.dns');
+    Route::get('/site/{site_id}/dns/new', [DnsRecordsController::class, 'new'])->name('site.dns.new');
+    Route::post('/site/{site_id}/dns/create', [DnsRecordsController::class, 'create'])->name('site.dns.create');
+    Route::get('/site/{site_id}/dns/{dns_id}', [DnsRecordsController::class, 'edit'])->name('site.dns.edit');
+    Route::put('/site/{site_id}/dns/{dns_id}', [DnsRecordsController::class, 'update'])->name('site.dns.update');
+    Route::delete('/site/{site_id}/dns/{dns_id}/delete', [DnsRecordsController::class, 'delete'])->name('site.dns.delete');
 
     // pdf after creation
     Route::get('/pdf/{site_id}/{token}', [SiteController::class, 'pdf']);
