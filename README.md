@@ -71,6 +71,11 @@ Hardware Requirement: More than 1GB of HD / At least 1 core processor / 512MB mi
 
 Installation may take up to about 30 minutes which may also depend on your server's internet speed. After the installation is completed, you are ready to use Cipi to manage your servers.
 
+> [!IMPORTANT]
+> At the end of the installation you are given all the credentials you need for spikster / mysql.
+> 
+> The default login for the spikster dashboard is administrator@localhost / password
+
 To correctly manage remote servers Spikster has to be on a public IP address (IPv4). Do not use it in localhost!
 
 ## Spikster LEMP environment
