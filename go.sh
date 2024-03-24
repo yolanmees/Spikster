@@ -610,6 +610,13 @@ supervisorctl reread
 supervisorctl update
 supervisorctl start all
 service supervisor restart
+apt install bind9 bind9utils bind9-doc
+
+apt install python3-pip
+pip install glances
+pip install bottle
+
+glances -w --disable-webui
 
 # COMPLETE
 clear
@@ -617,8 +624,6 @@ echo "${bggreen}${black}${bold}"
 echo "Spikster installation has been completed..."
 echo "${reset}"
 sleep 1s
-
-sudo apt install bind9 bind9utils bind9-doc
 
 
 # SETUP COMPLETE MESSAGE
