@@ -33,15 +33,15 @@ class DatabaseSeeder extends Seeder
         ]);
 
         Server::create([
-            'server_id' => strtolower('$SERVERID'),
+            'server_id' => strtolower('CIPISERVERID'),
             'name' => 'This VPS!',
-            'ip' => '$IP',
-            'password' => strtolower('$PASS'),
-            'database' => strtolower('$DBPASS'),
+            'ip' => 'CIPIIP',
+            'password' => strtolower('CIPIPASS'),
+            'database' => strtolower('CIPIDB'),
             'default' => 1,
             'cron' => ' '
         ]);
-
+        
         return true;
     }
 }
