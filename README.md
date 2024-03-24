@@ -46,7 +46,8 @@ export DEBIAN_FRONTEND=noninteractive
 Install Spikster
 
 ```bash
-wget -O - https://raw.githubusercontent.com/yolanmees/Spikster/master/go.sh | bash
+wget https://raw.githubusercontent.com/yolanmees/Spikster/master/go.sh
+bash go.sh
 ```
 #### Installation on AWS
 AWS by default disables root login. To login as root inside AWS, login as default user and then use command sudo -s.
