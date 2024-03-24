@@ -3,6 +3,7 @@
 /public/storage
 /storage/*.key
 /vendor
+/database/seeders/DatabaseSeeder.php
 .env
 .env.backup
 .phpunit.result.cache
