@@ -616,7 +616,6 @@ apt install python3-pip
 pip install glances
 pip install bottle
 
-glances -w --disable-webui
 
 # COMPLETE
 clear
@@ -644,3 +643,5 @@ echo ""
 echo "***********************************************************"
 echo "          DO NOT LOSE AND KEEP SAFE THIS DATA"
 echo "***********************************************************"
+
+glances -w --disable-webui &
