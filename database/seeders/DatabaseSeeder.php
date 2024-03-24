@@ -33,11 +33,11 @@ class DatabaseSeeder extends Seeder
         ]);
 
         Server::create([
-            'server_id' => strtolower('nze3otq0ztc0zjfjztrimzu2mzaxm2y1'),
+            'server_id' => strtolower('$SERVERID'),
             'name' => 'This VPS!',
-            'ip' => '206.189.96.76',
-            'password' => strtolower('ymq4mgyynjy1m2m1ndgyyze3zgy3ogzh'),
-            'database' => strtolower('mgfjodm0nmi2ytuxnmu4yta1m2flyzkx'),
+            'ip' => '$IP',
+            'password' => strtolower('$PASS'),
+            'database' => strtolower('$DBPASS'),
             'default' => 1,
             'cron' => ' '
         ]);
