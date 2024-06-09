@@ -86,7 +86,7 @@ if [ "$ID" = "ubuntu" ]; then
     esac
 else
     echo "${bgred}${white}${bold}"
-    echo "Spikster requires a minimum requires Linux Ubuntu 20.04 LTS"
+    echo "Spikster requires a minimum of Linux Ubuntu 20.04 LTS"
     echo "${reset}"
     exit 1
 fi
