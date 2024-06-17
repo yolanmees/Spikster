@@ -76,6 +76,9 @@ if [ "$ID" = "ubuntu" ]; then
         23.04)
             break
             ;;
+        24.04)
+            break
+            ;;
         *)
             echo "${bgred}${white}${bold}"
             echo "Spikster requires a minimum of Linux Ubuntu 20.04 LTS"
@@ -615,7 +618,7 @@ apt install bind9 bind9utils bind9-doc
 apt install python3-pip
 pip install glances
 pip install bottle
-
+pip install fastapi
 
 # COMPLETE
 clear
