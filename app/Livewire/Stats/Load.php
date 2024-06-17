@@ -15,12 +15,10 @@ class Load extends Component
 
     public function mount($server_id)
     {
-        // get load data via API call to {server_address}/api/servers/{server_id}/stats/load
         $this->server = Server::where('server_id', $server_id)->first();
         try {
             $load = Http::get($this->server->ip . '/api/servers/' . $this->server->server_id . '/stats/load');
             $this->load = $load->json()['load'];
-            // dd($this->load);
             $this->labels = $this->getLabels();
             $this->dataset = [
                 [

@@ -13,6 +13,8 @@ return [
     |
     */
 
+    'asset_url' => '/livewire/livewire.js',
+
     'class_namespace' => 'App\\Livewire',
 
     /*
@@ -128,6 +130,7 @@ return [
 
     'navigate' => [
         'show_progress_bar' => true,
+        'progress_bar_color' => '#2299dd',
     ],
 
     /*

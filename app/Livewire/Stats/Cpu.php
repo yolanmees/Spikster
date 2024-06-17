@@ -15,7 +15,6 @@ class Cpu extends Component
 
     public function mount($server_id)
     {
-        // get CPU data via API call to {server_address}/api/servers/{server_id}/stats/cpu
         $this->server = Server::where('server_id', $server_id)->first();
         try {
             $cpu = Http::get($this->server->ip . '/api/servers/' . $this->server->server_id . '/stats/cpu');

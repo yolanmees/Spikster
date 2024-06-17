@@ -14,127 +14,81 @@
     <li class="breadcrumb-item active">PHP:<b><span class="ml-1" id="sitephp"></span></b></li>
     <li class="breadcrumb-item active">{{ __('spikster.site_base_path') }}:<b><span class="ml-1">/home/</span><span id="siteuserinfo"></span>/web/<span id="sitebasepathinfo"></span></b></li>
 </ol>
-<div class="grid md:grid-cols-6 grid-cols-1 gap-4">
-    <div class="md:col-span-3 col-span-1">
-        <div class="card h-full">
-            <div class="card-header">
-                <i class="fas fa-info-circle fs-fw mr-1"></i>
-                {{ __('spikster.basic_information') }}
-            </div>
-            <div class="card-body">
-                <div class="mb-4">
-                    <p class="mb-2">{{ __('spikster.domain') }}:</p>
-                    <input class="form-control" type="text" placeholder="e.g. domain.ltd" id="sitedomain" autocomplete="off" />
-                </div>
-                <div class="mb-4">
-                    <p class="mb-2">{{ __('spikster.site_base_path') }}:</p>
-                    <input class="form-control" type="text" placeholder="e.g. public" id="sitebasepath" autocomplete="off" />
-                </div>
-                <div class="text-center">
-                    <button class="btn btn-primary" type="button" id="updateSite">{{ __('spikster.update') }}</button>
-                </div>
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+    <x-card header="{{ __('spikster.basic_information') }}" size="md" dark="false">
+            <x-input label="{{ __('spikster.domain') }}:" type="text" placeholder="e.g. domain.ltd" id="sitedomain" autocomplete="off" />
+            <x-input label="{{ __('spikster.site_base_path') }}:" type="text" placeholder="e.g. public" id="sitebasepath" autocomplete="off" />
+            <x-button class="btn btn-primary" type="button" id="updateSite">{{ __('spikster.update') }}</x-button>
+    </x-card>
+    <x-card header="{{ __('spikster.manage_aliases') }}" size="md" dark="false">
+        <p class="mb-2">{{ __('spikster.add_alias') }}:</p>
+        <div class="input-group">
+            <input class="form-control" type="text" placeholder="e.g. www.domain.ltd" id="siteaddalias" autocomplete="off" />
+            <div class="input-group-append">
+                <button class="btn btn-primary" type="button" id="siteaddaliassubmit"><i class="fas fa-plus"></i></button>
             </div>
         </div>
-    </div>
-    <div class="md:col-span-3 col-span-1">
-        <div class="card h-full">
-            <div class="card-header">
-                <i class="fas fa-globe fs-fw mr-1"></i>
-                {{ __('spikster.manage_aliases') }}
-            </div>
-            <div class="card-body">
-                <p class="mb-2">{{ __('spikster.add_alias') }}:</p>
-                <div class="input-group">
-                    <input class="form-control" type="text" placeholder="e.g. www.domain.ltd" id="siteaddalias" autocomplete="off" />
-                    <div class="input-group-append">
-                        <button class="btn btn-primary" type="button" id="siteaddaliassubmit"><i class="fas fa-plus"></i></button>
-                    </div>
-                </div>
-                <div class="space"></div>
-                <div>
-                    <p class="mb-2">{{ __('spikster.aliases') }}:</p>
-                    <div id="sitealiaseslist"></div>
-                </div>
+        <div>
+            <p class="mb-2">{{ __('spikster.aliases') }}:</p>
+            <div id="sitealiaseslist"></div>
+        </div>
+    </x-card>
+    <x-card header="{!! __('spikster.ssl_security') !!}" size="md" dark="false">
+        <p class="mb-2">{{ __('spikster.ssl_security_text') }}:</p>
+        <div class="flex gap-4 mb-4">
+            <x-button type="button" id="sitessl">{{ __('spikster.ssl_generate') }}</x-button>
+        </div>
+        <p class="mb-2">{{ __('spikster.password_resets') }}:</p>
+        <div class="flex gap-4">
+            <x-button type="button" id="sitesshreset">SSH</x-button>
+            <x-button type="button" id="sitemysqlreset">MySql</x-button>
+        </div>
+    </x-card>
+    <x-card header="{{ __('spikster.github_repository') }}" size="md" dark="false">
+        <p class="mb-2">{{ __('spikster.github_repository_setup') }}</p>
+        <div class="flex gap-4 mb-4">
+            <x-button type="button" style="min-width:200px" id="sitesetrepo">{{ __('spikster.github_repository_config') }}</x-button>
+            <x-button type="button" style="min-width:200px" id="editdeploy">{{ __('spikster.github_repository_scripts') }}</x-button>
+        </div>
+        <p class="mb-2">{{ __('spikster.github_repository_deploy') }}:</p>
+        <div class="border p-2">
+            <code>
+                ssh <span id="repodeployinfouser1"></span>@<span id="repodeployinfoip"></span> <br/>
+                sh /home/<span id="repodeployinfouser2"></span>/git/deploy.sh
+            </code>
+        </div>
+    </x-card>
+    <x-card header="{{ __('spikster.tools') }}" size="md" dark="false">
+        <p class="mb-2">{{ __('spikster.php_fpm_version') }}:</p>
+        <div class="input-group">
+            <select class="form-control" id="sitephpver">
+                <option value="8.3" id="php83">8.3</option>
+                <option value="8.2" id="php82">8.2</option>
+                <option value="8.1" id="php81">8.1</option>
+                <option value="8.0" id="php80">8.0</option>
+                <option value="7.4" id="php74">7.4</option>
+            </select>
+            <div class="input-group-append">
+                <button class="btn btn-primary" type="button" id="sitephpversubmit"><i class="fas fa-edit"></i></button>
             </div>
         </div>
-    </div>
-    <div class="md:col-span-2 col-span-1">
-        <div class="card h-full">
-            <div class="card-header">
-                <i class="fas fa-lock fs-fw mr-1"></i>
-                {{ __('spikster.ssl_security') }}
-            </div>
-            <div class="card-body">
-                <p class="mb-2">{{ __('spikster.ssl_security_text') }}:</p>
-                <button class="btn btn-primary" type="button" id="sitessl">{{ __('spikster.ssl_generate') }}</button>
-                <div class="space"></div>
-                <div class="space"></div>
-                <p class="mb-2">{{ __('spikster.password_resets') }}:</p>
-                <button class="btn btn-primary mr-3" type="button" id="sitesshreset">SSH</button>
-                <button class="btn btn-primary  mr-3" type="button" id="sitemysqlreset">MySql</button>
-                <div class="space" style="min-height:38px"></div>
-            </div>
-        </div>
-    </div>
-    <div class="md:col-span-2 col-span-1">
-        <div class="card h-full">
-            <div class="card-header">
-                <i class="fab fa-github fs-fw mr-1"></i>
-                {{ __('spikster.github_repository') }}
-            </div>
-            <div class="card-body">
-                <p class="mb-2">{{ __('spikster.github_repository_setup') }}</p>
-                <div class="text-center">
-                    <button class="btn btn-primary" type="button" style="min-width:200px" id="sitesetrepo">{{ __('spikster.github_repository_config') }}</button>
-                    <div class="space"></div>
-                </div>
-                <div class="text-center">
-                    <button class="btn btn-primary" type="button" style="min-width:200px" id="editdeploy">{{ __('spikster.github_repository_scripts') }}</button>
-                    <div class="space"></div>
-                </div>
-                <p class="mb-2">
-                    {{ __('spikster.github_repository_deploy') }}:
-                    <ul style="font-size:14px;">
-                        <li>ssh <span id="repodeployinfouser1"></span>@<span id="repodeployinfoip"></span></li>
-                        <li>sh /home/<span id="repodeployinfouser2"></span>/git/deploy.sh</li>
-                    </ul>
-                </p>
-            </div>
-        </div>
-    </div>
-    <div class="md:col-span-2 col-span-1">
-        <div class="card h-full">
-            <div class="card-header">
-                <i class="fas fa-tools fs-fw mr-1"></i>
-                {{ __('spikster.tools') }}
-            </div>
-            <div class="card-body">
-                <p class="mb-2">{{ __('spikster.php_fpm_version') }}:</p>
-                <div class="input-group">
-                    <select class="form-control" id="sitephpver">
-                        <option value="8.3" id="php83">8.3</option>
-                        <option value="8.2" id="php82">8.2</option>
-                        <option value="8.1" id="php81">8.1</option>
-                        <option value="8.0" id="php80">8.0</option>
-                        <option value="7.4" id="php74">7.4</option>
-                    </select>
-                    <div class="input-group-append">
-                        <button class="btn btn-primary" type="button" id="sitephpversubmit"><i class="fas fa-edit"></i></button>
-                    </div>
-                </div>
-                <div class="space"></div>
-                <p class="mb-2">Supervisor script:</p>
-                <div class="input-group">
-                    <input class="form-control" type="text" id="sitesupervisor" autocomplete="off" />
-                </div>
-                <div class="space"></div>
-                <div class="text-center">
-                    <button class="btn btn-primary" type="button" id="sitesupervisorupdate">{{ __('spikster.update') }}</button>
-                </div>
-                <div class="space"></div>
-            </div>
-        </div>
-    </div>
+        <p class="mb-2">Supervisor script:</p>
+        <x-input class="form-control" type="text" id="sitesupervisor" autocomplete="off" />
+        <x-button class="btn btn-primary" type="button" id="sitesupervisorupdate">{{ __('spikster.update') }}</x-button>
+    </x-card>
+    <x-card header="MYSQL" size="md" dark="false">
+        <p class="mb-2">Set up your database</p>
+        <a href="{{ route('site.database', $site_id) }}"> 
+            <x-button class="btn btn-primary" type="button"  id="sitesetrepo"> DATABASE </x-button>
+        </a>
+    </x-card>
+    <x-card header="Wordpress Manager" size="md" dark="false">
+        <p class="mb-2">Manage your project</p>
+        <a href="{{ route('site.wordpress', $site_id) }}"> 
+            <x-button class="btn btn-primary" type="button" id="sitesetrepo"> Wordpress Manager </x-button>
+        </a>
+    </x-card>
+
     {{-- <div class="md:col-span-2 col-span-1">
         <div class="card h-full">
             <div class="card-header">
@@ -151,51 +105,7 @@
             </div>
         </div>
     </div> --}}
-    <div class="md:col-span-2 col-span-1">
-        <div class="card h-full">
-            <div class="card-header flex">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-database h-5 w-5 mr-2">
-                    <ellipse cx="12" cy="5" rx="9" ry="3" />
-                    <path d="M3 5V19A9 3 0 0 0 21 19V5" />
-                    <path d="M3 12A9 3 0 0 0 21 12" />
-                </svg>
 
-                MYSQL
-            </div>
-            <div class="card-body">
-                <p class="mb-2">Set up your database</p>
-                <div class="text-center">
-                    <a href="{{ route('site.database', $site_id) }}" style="min-width:200px"> <button class="btn btn-primary" type="button" style="min-width:200px" id="sitesetrepo"> DATABASE </button></a>
-                    <div class="space"></div>
-                </div>
-
-                <div class="space"></div>
-
-                {{-- <p class="mb-2">Manage your database</p>
-                <div class="text-center">
-                    <button class="btn btn-primary" type="button" style="min-width:200px" id="sitesetrepo"> <a href="{{ route('autopma', $site_id) }}"  style="min-width:200px" target="_blank">phpMyAdmin</a></button>
-                    <div class="space"></div>
-                </div> --}}
-
-            </div>
-        </div>
-    </div>
-
-    <div class="md:col-span-2 col-span-1">
-        <div class="card h-full">
-            <div class="card-header flex">
-                <i class="fab fa-wordpress fs-fw mr-1 mt-1"></i>
-                Wordpress Manager
-            </div>
-            <div class="card-body">
-                <p class="mb-2">Manage your project</p>
-                <div class="text-center">
-                    <a href="{{ route('site.wordpress', $site_id) }}" style="min-width:200px"> <button class="btn btn-primary" type="button" style="min-width:200px" id="sitesetrepo"> Wordpress Manager </button></a>
-                    <div class="space"></div>
-                </div>
-            </div>
-        </div>
-    </div>
     {{-- <div id="nodejsManager" class="md:col-span-2 col-span-1 d-none">
         <div class="card h-full">
             <div class="card-header">

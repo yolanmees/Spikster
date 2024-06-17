@@ -1,15 +1,8 @@
 <div>
-    <div class="card mb-4">
-        <div class="card-header">
-            <i class="fas fa-memory fs-fw mr-1"></i>
-            {{ __('spikster.server_ram_realtime_load') }}
-        </div>
-        <div class="card-body">
-            <canvas id="memChart" width="100%" height="40"></canvas>
-            <div class="space"></div>
-        </div>
-    </div>
-
+    <x-card header="{{ __('spikster.server_cpu_realtime_load') }}" size="md" dark="false">
+        <canvas id="memChart" width="100%" height="40"></canvas>
+        <div class="space"></div>
+    </x-card>
     @push('scripts')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
     <script>

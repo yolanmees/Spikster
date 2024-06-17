@@ -19,7 +19,6 @@ class Mem extends Component
         $this->server = Server::where('server_id', $server_id)->first();
         try {
             $mem = Http::get($this->server->ip . '/api/servers/' . $this->server->server_id . '/stats/mem');
-            // dd($mem->json());
             $this->mem = $mem->json()['mem'];
             $this->total = $this->mem[0]['total'] / 1024 / 1024;
             $this->labels = $this->getLabels();

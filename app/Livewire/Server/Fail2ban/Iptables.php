@@ -22,7 +22,6 @@ class Iptables extends Component
         $this->server_id = $server_id;
         $this->server = Server::where(['server_id' => $server_id])->first();
         $this->iptables = $this->getIptables();
-        // dd($this->iptables);
     }
 
     public function getIptables()

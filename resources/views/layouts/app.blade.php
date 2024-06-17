@@ -14,10 +14,9 @@
     <link href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap4.min.css" rel="stylesheet" />
     {{-- <link href="https://cdn.datatables.net/responsive/2.2.7/css/responsive.bootstrap4.min.css" rel="stylesheet" /> --}}
     <link rel="icon" type="image/png" href="/favicon.png" />
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link href="/css/app.css" rel="stylesheet" />
-    @livewireStyles
-
-
+    
     <style>
         .space {
             min-height: 20px;
@@ -43,19 +42,19 @@
             margin-top: 100px;
             z-index: 100000;
         }
-
     </style>
     @yield('css')
 </head>
-<body x-data="{ sidebarOpen: false }" class="bg-gray-100">
+<body x-data="{ sidebarOpen: false, darkMode: false }"
+      x-init="darkMode = JSON.parse(localStorage.getItem('darkMode')) || false; $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+      x-bind:class="{ 'dark': darkMode }" class="bg-gray-100 dark:bg-gray-900 dark:text-white">
     <div>
         @include('layouts.components.mobile-sidebar')
- 
         @include('layouts.components.sidebar')
 
         <div class="xl:pl-72">
             <!-- Sticky search header -->
-            <div class="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-6 border-b border-white/5 bg-gray-900 px-4 shadow-sm sm:px-6 lg:px-8">
+            <div class="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-6 border-b border-white/5 bg-gray-900 dark:bg-gray-800 px-4 shadow-sm sm:px-6 lg:px-8">
                 <button x-on:click="sidebarOpen = true" type="button" class="-m-2.5 p-2.5 text-white xl:hidden">
                     <span class="sr-only">Open sidebar</span>
                     <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -63,17 +62,20 @@
                     </svg>
                 </button>
 
+
                 <div class="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
                     <form class="flex flex-1" action="#" method="GET">
                         <label for="search-field" class="sr-only">Search</label>
                         <div class="relative w-full">
-                            <svg class="pointer-events-none absolute inset-y-0 left-0 h-full w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <svg class="pointer-events-none absolute inset-y-0 left-0 h-full w-5 text-gray-500 dark:text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                 <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
                             </svg>
-                            <input id="search-field" class="block h-full w-full border-0 bg-transparent py-0 pl-8 pr-0 text-white focus:ring-0 sm:text-sm" placeholder="Search..." type="search" name="search">
+                            <input id="search-field" class="block h-full w-full border-0 bg-transparent py-0 pl-8 pr-0 text-white dark:bg-gray-800 dark:text-gray-300 focus:ring-0 sm:text-sm" placeholder="Search..." type="search" name="search">
                         </div>
                     </form>
                 </div>
+                
+          
             </div>
 
             <main class="m-4">
@@ -82,28 +84,8 @@
             <div class="grid place-items-center"> 
                 @yield('extra')
             </div>
-            <!-- Activity feed -->
-            {{-- <aside class="bg-black/10 lg:fixed lg:bottom-0 lg:right-0 lg:top-16 lg:w-96 lg:overflow-y-auto lg:border-l lg:border-white/5">
-                <header class="flex items-center justify-between border-b border-white/5 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
-                    <h2 class="text-base font-semibold leading-7 text-white">Activity feed</h2>
-                    <a href="#" class="text-sm font-semibold leading-6 text-indigo-400">View all</a>
-                </header>
-                <ul role="list" class="divide-y divide-white/5">
-                    <li class="px-4 py-4 sm:px-6 lg:px-8">
-                        <div class="flex items-center gap-x-3">
-                            <img src="https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="" class="h-6 w-6 flex-none rounded-full bg-gray-800">
-                            <h3 class="flex-auto truncate text-sm font-semibold leading-6 text-white">Michael Foster</h3>
-                            <time datetime="2023-01-23T11:00" class="flex-none text-xs text-gray-600">1h</time>
-                        </div>
-                        <p class="mt-3 truncate text-sm text-gray-500">Pushed to <span class="text-gray-400">ios-app</span> (<span class="font-mono text-gray-400">2d89f0c8</span> on <span class="text-gray-400">main</span>)</p>
-                    </li>
-
-                    <!-- More items... -->
-                </ul>
-            </aside> --}}
         </div>
     </div>
-    @livewireScripts
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/assets/js/app.js"></script>
@@ -112,7 +94,6 @@
     <script src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap4.min.js"></script>
     <script src="https://cdn.datatables.net/responsive/2.2.7/js/dataTables.responsive.min.js"></script>
     <script src="https://cdn.datatables.net/responsive/2.2.7/js/responsive.bootstrap4.min.js"></script>
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js'></script>
     <script>
         //Init Datatable Data
         localStorage.dtdata = '';

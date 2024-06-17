@@ -9,31 +9,15 @@
 
 
 @section('settings-content')
-<div class="row">
+<div class="flex flex-col gap-4">
     
-    <div class="col-xl-6">
-        <div class="card mb-4">
-            <div class="card-header">
-                <i class="fas fa-globe fs-fw mr-1"></i>
-                {{ __('spikster.panel_url') }}
-            </div>
-            <div class="card-body">
+        <x-card header="{{ __('spikster.panel_url') }}" size="md" dark="false">
                 @livewire('settings.panel-domain')
-            </div>
-        </div>
-    </div>
+        </x-card>
 
-    <div class="col-xl-6">
-        <div class="card mb-4">
-            <div class="card-header">
-                <i class="fas fa-code fs-fw mr-1"></i>
-                {{ __('spikster.panel_api') }}
-            </div>
-            <div class="card-body">
+        <x-card header="{{ __('spikster.panel_api') }}" size="md" dark="false">
                 @livewire('settings.api-key')
-            </div>
-        </div>
-    </div>
+        </x-card>
 
 </div>
-@endsection
+@endsection        

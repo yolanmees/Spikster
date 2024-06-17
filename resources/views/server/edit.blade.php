@@ -39,161 +39,96 @@
 
 
 
-    <div class="grid grid-cols-2 gap-x-4" x-show="tab === 'monitor'">
-        <div class="">
+    <div class="grid grid-cols-2 gap-4" x-show="tab === 'monitor'">
             @livewire('stats.cpu', ['server_id' => $server_id])
-        </div>
-        <div class="">
             @livewire('stats.mem', ['server_id' => $server_id])
-        </div>
-        <div class="">
             @livewire('stats.load', ['server_id' => $server_id])
-        </div>
-        <div class="">
             @livewire('stats.disk', ['server_id' => $server_id])
-        </div>
-
     </div>
 
 
-    <div class="flex gap-x-4" x-show="tab === 'server'">
-        <div class="w-1/3">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <i class="fas fa-info-circle fs-fw mr-1"></i>
-                    {{ __('spikster.server_information') }}
-                </div>
-                <div class="card-body">
-                    <p>{{ __('spikster.server_name') }}:</p>
-                    <div class="input-group">
-                        <input class="form-control" type="text" placeholder="e.g. Production" id="servername" autocomplete="off" />
-                    </div>
-                    <div class="space"></div>
-                    <p>{{ __('spikster.server_ip') }}:</p>
-                    <div class="input-group">
-                        <input class="form-control" type="text" placeholder="e.g. 123.123.123.123" id="serverip" autocomplete="off" />
-                    </div>
-                    <div class="space"></div>
-                    <p>{{ __('spikster.server_provider') }}:</p>
-                    <div class="input-group">
-                        <input class="form-control" type="text" placeholder="e.g. Digital Ocean" id="serverprovider" autocomplete="off" />
-                    </div>
-                    <div class="space"></div>
-                    <p>{{ __('spikster.server_location') }}:</p>
-                    <div class="input-group">
-                        <input class="form-control" type="text" placeholder="e.g. Amsterdam" id="serverlocation" autocomplete="off" />
-                    </div>
-                    <div class="space"></div>
-                    <div class="text-center">
-                        <button class="btn btn-primary" type="button" id="updateServer">{{ __('spikster.update') }}</button>
-                    </div>
-                    <div class="space"></div>
-                    <div class="space"></div>
-                    <div class="space"></div>
-                </div>
-            </div>
-        </div>
-        <div class="w-1/3">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <i class="fas fa-power-off fs-fw mr-1"></i>
-                    {{ __('spikster.system_services') }}
-                </div>
-                <div class="card-body">
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4" x-show="tab === 'server'">
+        <x-card header="{{ __('spikster.server_information') }}" size="md" dark="false">
+            {{-- <canvas id="cpuChart" width="100%" height="40"></canvas> --}}
+            <x-input type="text" label="{{ __('spikster.server_name') }}:" placeholder="e.g. Production" id="servername" autocomplete="off" />
+            <x-input type="text" label="{{ __('spikster.server_ip') }}:" placeholder="e.g. 123.123.123.123" id="serverip" autocomplete="off" />
+            <x-input type="text" label="{{ __('spikster.server_provider') }}:" placeholder="e.g. Digital Ocean" id="serverprovider" autocomplete="off" />
+            <x-input type="text" label="{{ __('spikster.server_location') }}:" placeholder="e.g. Amsterdam" id="serverlocation" autocomplete="off" />
+            <x-button type="button" id="updateServer">{{ __('spikster.update') }}</x-button>
+        </x-card>
+        <x-card header="{{ __('spikster.system_services') }}" size="md" dark="false">
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                <div class="flex justify-between gap-4">
                     <p>nginx</p>
-                    <div class="text-center">
-                        <button class="btn btn-warning" type="button" id="restartnginx">{{ __('spikster.restart') }} </button>
-                    </div>
-                    <div class="space"></div>
+                    <x-button type="button" variant="warning" id="restartnginx">{{ __('spikster.restart') }} </x-button>
+                </div>
+                <div class="flex justify-between gap-4">
                     <p>PHP-FPM</p>
-                    <div class="text-center">
-                        <button class="btn btn-warning" type="button" id="restartphp">{{ __('spikster.restart') }} </button>
-                    </div>
-                    <div class="space"></div>
+                    <x-button type="button" variant="warning" id="restartphp">{{ __('spikster.restart') }} </x-button>
+                </div>
+                <div class="flex justify-between gap-4">
                     <p>MySql</p>
-                    <div class="text-center">
-                        <button class="btn btn-warning" type="button" id="restartmysql">{{ __('spikster.restart') }}</button>
-                    </div>
-                    <div class="space"></div>
+                    <x-button type="button" variant="warning" id="restartmysql">{{ __('spikster.restart') }}</x-button>
+                </div>
+                <div class="flex justify-between gap-4">
                     <p>Redis</p>
-                    <div class="text-center">
-                        <button class="btn btn-warning" type="button" id="restartredis">{{ __('spikster.restart') }} </button>
-                    </div>
-                    <div class="space"></div>
+                    <x-button type="button" variant="warning" id="restartredis">{{ __('spikster.restart') }} </x-button>
+                </div>
+                <div class="flex justify-between gap-4">
                     <p>Supervisor</p>
-                    <div class="text-center">
-                        <button class="btn btn-warning" type="button" id="restartsupervisor">{{ __('spikster.restart') }} </button>
-                    </div>
-                    <div class="space"></div>
+                    <x-button type="button" variant="warning" id="restartsupervisor">{{ __('spikster.restart') }} </x-button>
                 </div>
             </div>
-        </div>
-        <div class="w-1/3">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <i class="fas fa-power-off fs-fw mr-1"></i>
-                    {{ __('spikster.logs') }}
-                </div>
-                <div class="card-body">
-                    <a href="{{route('logs', $server_id)}}" class="btn btn-primary" type="button" id="">Open Logs</a>
-                </div>
-            </div>
-        </div>
+        </x-card>
+        <x-card header="Logs" size="md" dark="false">
+            <a href="{{route('logs', $server_id)}}">
+                <x-button>
+                    Open Logs
+                </x-button>
+            </a>
+        </x-card>
     </div>
     <div class="flex gap-x-4" x-show="tab === 'security'">
         <div class="w-1/2">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <i class="fas fa-shield-alt fs-fw mr-1"></i>
-                    Security
+            <x-card header="Security" size="md" dark="false">
+                <p>Fail2ban</p>
+                <div>
+                    <a href="{{route('server.fail2ban', $server_id)}}" class="btn btn-primary" type="button" id="">Open Fail2ban</a>
                 </div>
-                <div class="card-body">
-                    <p>Fail2ban</p>
-                    <div>
-                        <a href="{{route('server.fail2ban', $server_id)}}" class="btn btn-primary" type="button" id="">Open Fail2ban</a>
-                    </div>
-                    
-                </div>
-            </div>
+            </x-card>
         </div>
     </div>
     <div class="flex gap-x-4" x-show="tab === 'tools'">
         <div class="w-1/3">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <i class="fas fa-tools fs-fw mr-1"></i>
-                    {{ __('spikster.tools') }}
+            <x-card header="{{ __('spikster.tools') }}" size="md" dark="false">
+                <p>{{ __('spikster.php_cli_version') }}:</p>
+                <div class="input-group">
+                    <select class="form-control" id="phpver">
+                        <option value="8.3" id="php83">8.3</option>
+                        <option value="8.2" id="php82">8.2</option>
+                        <option value="8.1" id="php81">8.1</option>
+                        <option value="8.0" id="php80">8.0</option>
+                        <option value="7.4" id="php74">7.4</option>
+                    </select>
+                    <div class="input-group-append">
+                        <button class="btn btn-primary" type="button" id="changephp"><i class="fas fa-edit"></i></button>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <p>{{ __('spikster.php_cli_version') }}:</p>
-                    <div class="input-group">
-                        <select class="form-control" id="phpver">
-                            <option value="8.3" id="php83">8.3</option>
-                            <option value="8.2" id="php82">8.2</option>
-                            <option value="8.1" id="php81">8.1</option>
-                            <option value="8.0" id="php80">8.0</option>
-                            <option value="7.4" id="php74">7.4</option>
-                        </select>
-                        <div class="input-group-append">
-                            <button class="btn btn-primary" type="button" id="changephp"><i class="fas fa-edit"></i></button>
-                        </div>
-                    </div>
-                    <div class="mt-4">
-                        <p class="mb-2">{{ __('spikster.manage_cron_jobs') }}:</p>
-                        <button class="btn btn-primary" type="button" id="editcrontab">{{ __('spikster.edit_crontab') }}</button>
-                    </div>
-                    <div class="mt-4">
-                        <p class="mb-2">{{ __('spikster.reset_cipi_password') }}:</p>
-                        <button class="btn btn-danger" type="button" id="rootreset">{{ __('spikster.require_reset_cipi_password') }}</button>
+                <div class="mt-4">
+                    <p class="mb-2">{{ __('spikster.manage_cron_jobs') }}:</p>
+                    <button class="btn btn-primary" type="button" id="editcrontab">{{ __('spikster.edit_crontab') }}</button>
+                </div>
+                <div class="mt-4">
+                    <p class="mb-2">{{ __('spikster.reset_cipi_password') }}:</p>
+                    <button class="btn btn-danger" type="button" id="rootreset">{{ __('spikster.require_reset_cipi_password') }}</button>
 
-                    </div>
-                    <div class="mt-4">
-                        <p class="mb-2">{{ __('spikster.cipi_build_version') }}:</p>
-                        <span class="btn btn-secondary" id="serverbuild"></span>
-                    </div>
-                    <div class="space"></div>
                 </div>
-            </div>
+                <div class="mt-4">
+                    {{-- <p class="mb-2">{{ __('spikster.cipi_build_version') }}:</p>
+                    <span class="btn btn-secondary" id="serverbuild"></span> --}}
+                </div>
+                <div class="space"></div>
+            </x-card>
         </div>
        
 
