@@ -92,10 +92,7 @@ To correctly manage remote servers Spikster has to be on a public IP address (IP
 Spikster is easy, stable, powerful and free for any personal and commercial use and it's a perfect alternative to Cpanel, Plesk, Runcloud, CyberPanel, DirectAdmin, Forge and similar software...
 
 ## Spikster Roadmap... what's next? 
-- Update all packages since Cipi v3 ✔️
-- Tailwindcss design ✔️
-- Livewire 3 components ✔️
-- Package & Update manager
+- User roles and permissions
 - New install process
 - Apps installer
 - Backups
