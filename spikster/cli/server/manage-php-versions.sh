@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Function to display usage
-usage() {
+usage_php() {
     echo "Usage: $0 --format {json|csv|table|list} [options]"
     echo "Options:"
     echo "  --set-default {php_version}         Set the default PHP version"
@@ -17,7 +17,7 @@ usage() {
 }
 
 # Log Function
-log_message() {
+log_message_php() {
     echo "$(date +'%Y-%m-%d %H:%M:%S') - $1" >>/var/log/spikster_manage_php.log
 }
 
@@ -78,7 +78,7 @@ manage_php() {
             done
             ;;
         *)
-            usage
+            usage_php
             ;;
         esac
     }
@@ -88,17 +88,17 @@ manage_php() {
         local php_version="$1"
         if [[ -z $(update-alternatives --list php | grep $php_version) ]]; then
             echo "Error: PHP version '$php_version' not found."
-            log_message "Error: PHP version '$php_version' not found."
+            log_message_php "Error: PHP version '$php_version' not found."
             exit 1
         fi
 
         sudo update-alternatives --set php /usr/bin/$php_version
         if [ $? -eq 0 ]; then
             echo "Default PHP version set to '$php_version'."
-            log_message "Default PHP version set to '$php_version'."
+            log_message_php "Default PHP version set to '$php_version'."
         else
             echo "Error: Failed to set default PHP version to '$php_version'."
-            log_message "Error: Failed to set default PHP version to '$php_version'."
+            log_message_php "Error: Failed to set default PHP version to '$php_version'."
             exit 1
         fi
     }
@@ -110,10 +110,10 @@ manage_php() {
         sudo apt install -y $php_version $php_version-cli $php_version-fpm $php_version-mysql $php_version-curl $php_version-xml $php_version-mbstring $php_version-zip $php_version-bcmath
         if [ $? -eq 0 ]; then
             echo "PHP version '$php_version' installed successfully."
-            log_message "PHP version '$php_version' installed successfully."
+            log_message_php "PHP version '$php_version' installed successfully."
         else
             echo "Error: Failed to install PHP version '$php_version'."
-            log_message "Error: Failed to install PHP version '$php_version'."
+            log_message_php "Error: Failed to install PHP version '$php_version'."
             exit 1
         fi
     }
@@ -124,10 +124,10 @@ manage_php() {
         sudo apt remove -y $php_version $php_version-cli $php_version-fpm $php_version-mysql $php_version-curl $php_version-xml $php_version-mbstring $php_version-zip $php_version-bcmath
         if [ $? -eq 0 ]; then
             echo "PHP version '$php_version' removed successfully."
-            log_message "PHP version '$php_version' removed successfully."
+            log_message_php "PHP version '$php_version' removed successfully."
         else
             echo "Error: Failed to remove PHP version '$php_version'."
-            log_message "Error: Failed to remove PHP version '$php_version'."
+            log_message_php "Error: Failed to remove PHP version '$php_version'."
             exit 1
         fi
     }
@@ -137,7 +137,7 @@ manage_php() {
         local php_version="$1"
         if [[ -z $(update-alternatives --list php | grep $php_version) ]]; then
             echo "Error: PHP version '$php_version' not found."
-            log_message "Error: PHP version '$php_version' not found."
+            log_message_php "Error: PHP version '$php_version' not found."
             exit 1
         fi
         sudo a2dismod php*
@@ -145,10 +145,10 @@ manage_php() {
         sudo systemctl restart apache2
         if [ $? -eq 0 ]; then
             echo "PHP version '$php_version' set for Apache successfully."
-            log_message "PHP version '$php_version' set for Apache successfully."
+            log_message_php "PHP version '$php_version' set for Apache successfully."
         else
             echo "Error: Failed to set PHP version '$php_version' for Apache."
-            log_message "Error: Failed to set PHP version '$php_version' for Apache."
+            log_message_php "Error: Failed to set PHP version '$php_version' for Apache."
             exit 1
         fi
     }
@@ -158,7 +158,7 @@ manage_php() {
         local php_version="$1"
         if [[ -z $(update-alternatives --list php | grep $php_version) ]]; then
             echo "Error: PHP version '$php_version' not found."
-            log_message "Error: PHP version '$php_version' not found."
+            log_message_php "Error: PHP version '$php_version' not found."
             exit 1
         fi
         sudo update-alternatives --set php /usr/bin/$php_version
@@ -166,21 +166,21 @@ manage_php() {
         sudo systemctl restart nginx
         if [ $? -eq 0 ]; then
             echo "PHP version '$php_version' set for Nginx successfully."
-            log_message "PHP version '$php_version' set for Nginx successfully."
+            log_message_php "PHP version '$php_version' set for Nginx successfully."
         else
             echo "Error: Failed to set PHP version '$php_version' for Nginx."
-            log_message "Error: Failed to set PHP version '$php_version' for Nginx."
+            log_message_php "Error: Failed to set PHP version '$php_version' for Nginx."
             exit 1
         fi
     }
 
     # Parse arguments
     if [ $# -lt 2 ]; then
-        usage
+        usage_php
     fi
 
     if [ "$1" != "--format" ]; then
-        usage
+        usage_php
     fi
 
     OUTPUT_FORMAT=$2
@@ -210,7 +210,7 @@ manage_php() {
             shift 2
             ;;
         *)
-            usage
+            usage_php
             ;;
         esac
     done

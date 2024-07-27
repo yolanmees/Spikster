@@ -1,14 +1,14 @@
 #!/bin/bash
 
-# Function to display usage
-usage() {
+# Function to display usage for manage-services
+usage_services() {
     echo "Usage: $0 --format {json|csv|table|list} {start|stop|restart} [services...]"
     echo "Example: $0 --format table start nginx php8.3-fpm mysql"
     exit 1
 }
 
-# Log Function
-log_message() {
+# Log Function for manage-services
+log_message_services() {
     echo "$(date +'%Y-%m-%d %H:%M:%S') - $1" >>/var/log/spikster_manage.log
 }
 
@@ -47,7 +47,7 @@ manage_services() {
                 fi
                 ;;
             *)
-                usage
+                usage_services
                 ;;
             esac
         elif [[ " ${PROCESSES[@]} " =~ " ${service} " ]]; then
@@ -78,16 +78,16 @@ manage_services() {
                 fi
                 ;;
             *)
-                usage
+                usage_services
                 ;;
             esac
         elif [[ " ${PACKAGES[@]} " =~ " ${service} " ]]; then
             echo "$service:PACKAGE-NO-ACTION"
-            log_message "$service is a package and cannot be started, stopped, or restarted"
+            log_message_services "$service is a package and cannot be started, stopped, or restarted"
             return 2
         else
             echo "$service:INVALID"
-            log_message "$service is not a valid service, process, or package"
+            log_message_services "$service is not a valid service, process, or package"
             return 3
         fi
     }
@@ -116,11 +116,11 @@ manage_services() {
 
     # Parse arguments
     if [[ $# -lt 3 ]]; then
-        usage
+        usage_services
     fi
 
     if [[ $1 != "--format" ]]; then
-        usage
+        usage_services
     fi
 
     OUTPUT_FORMAT=$2
@@ -174,7 +174,7 @@ manage_services() {
             done
             ;;
         *)
-            usage
+            usage_services
             ;;
         esac
     }
@@ -182,5 +182,5 @@ manage_services() {
     # Run the output generation
     generate_output
 
-    log_message "Service action '$ACTION' performed and status displayed in $OUTPUT_FORMAT format."
+    log_message_services "Service action '$ACTION' performed and status displayed in $OUTPUT_FORMAT format."
 }

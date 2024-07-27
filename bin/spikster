@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Get the directory of the current script
+SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
+
+# Display usage information
 usage() {
     echo "Usage: spikster <command> [options]"
     echo "Commands:"
@@ -11,11 +15,13 @@ usage() {
     exit 1
 }
 
-source ../spikster/cli/server/list-services.sh
-source ../spikster/cli/server/manage-services.sh
-source ../spikster/cli/server/manage-php-version.sh
-source ../spikster/cli/server/manage-cronjobs.sh
+# Include the scripts as functions
+source "$SCRIPT_DIR/../cli/server/list-services.sh"
+source "$SCRIPT_DIR/../cli/server/manage-services.sh"
+source "$SCRIPT_DIR/../cli/server/manage-php-versions.sh"
+source "$SCRIPT_DIR/../cli/server/manage-cronjobs.sh"
 
+# Main command dispatcher
 if [ $# -lt 1 ]; then
     usage
 fi
