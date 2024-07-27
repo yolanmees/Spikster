@@ -16,10 +16,10 @@ usage() {
 }
 
 # Include the scripts as functions
-source "$SCRIPT_DIR/../cli/server/list-services.sh"
-source "$SCRIPT_DIR/../cli/server/manage-services.sh"
-source "$SCRIPT_DIR/../cli/server/manage-php-versions.sh"
-source "$SCRIPT_DIR/../cli/server/manage-cronjobs.sh"
+source "$SCRIPT_DIR/../spikster/cli/server/list-services.sh"
+source "$SCRIPT_DIR/../spikster/cli/server/manage-services.sh"
+source "$SCRIPT_DIR/../spikster/cli/server/manage-php-versions.sh"
+source "$SCRIPT_DIR/../spikster/cli/server/manage-cronjobs.sh"
 
 # Main command dispatcher
 if [ $# -lt 1 ]; then
