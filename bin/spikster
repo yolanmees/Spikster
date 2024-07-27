@@ -1,0 +1,46 @@
+#!/bin/bash
+
+usage() {
+    echo "Usage: spikster <command> [options]"
+    echo "Commands:"
+    echo "  manage-php                  Manage PHP versions"
+    echo "  manage-cronjobs             Manage cron jobs"
+    echo "  list-services               List services and their statuses"
+    echo "  manage-services             Manage service actions (start, stop, restart)"
+    echo "  -h, --help                  Show this help message"
+    exit 1
+}
+
+source ../spikster/cli/server/list-services.sh
+source ../spikster/cli/server/manage-services.sh
+source ../spikster/cli/server/manage-php-version.sh
+source ../spikster/cli/server/manage-cronjobs.sh
+
+if [ $# -lt 1 ]; then
+    usage
+fi
+
+main_command=$1
+shift
+
+case "$main_command" in
+manage-php)
+    manage_php "$@"
+    ;;
+manage-cronjobs)
+    manage_cronjobs "$@"
+    ;;
+list-services)
+    list_services "$@"
+    ;;
+manage-services)
+    manage_services "$@"
+    ;;
+-h | --help)
+    usage
+    ;;
+*)
+    echo "Unknown command: $main_command"
+    usage
+    ;;
+esac

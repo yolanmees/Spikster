@@ -1,5 +1,5 @@
 <div>
-    <x-card header="{{ __('spikster.server_cpu_realtime_load') }}" size="md" dark="false">
+    <x-card header="{{ 'Realtime Load' }}" size="md" dark="false">
         <canvas id="loadChart" width="100%" height="40"></canvas>
         <div class="space"></div>
     </x-card>
