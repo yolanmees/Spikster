@@ -26,7 +26,7 @@ class GetDisk extends Command
      */
     public function handle()
     {
-        $disks = json_decode(file_get_contents('http://localhost:61208/api/3/diskio'), true);
+        $disks = json_decode(file_get_contents('http://localhost:61208/api/4/diskio'), true);
         foreach ($disks as $disk) {
             Disk::create([
                 "time_since_update" => $disk["time_since_update"],

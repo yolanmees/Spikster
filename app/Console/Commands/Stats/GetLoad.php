@@ -26,7 +26,7 @@ class GetLoad extends Command
      */
     public function handle()
     {
-        $load = json_decode(file_get_contents('http://localhost:61208/api/3/load'), true);
+        $load = json_decode(file_get_contents('http://localhost:61208/api/4/load'), true);
         Load::create([
             "min1" => $load["min1"],
             "min5" => $load["min5"],

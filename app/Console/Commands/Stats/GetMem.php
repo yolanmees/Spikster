@@ -26,7 +26,7 @@ class GetMem extends Command
      */
     public function handle()
     {
-        $mem = json_decode(file_get_contents('http://localhost:61208/api/3/mem'), true);
+        $mem = json_decode(file_get_contents('http://localhost:61208/api/4/mem'), true);
         Mem::create([
             "total" => $mem["total"],
             "available" => $mem["available"],

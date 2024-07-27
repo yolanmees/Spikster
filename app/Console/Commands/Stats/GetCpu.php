@@ -26,7 +26,7 @@ class GetCpu extends Command
      */
     public function handle()
     {
-        $cpu = json_decode(file_get_contents('http://localhost:61208/api/3/cpu'), true);
+        $cpu = json_decode(file_get_contents('http://localhost:61208/api/4/cpu'), true);
         Cpu::create([
             "total" => $cpu["total"],
             "user" => $cpu["user"],
