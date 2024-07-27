@@ -1,13 +1,13 @@
 #!/bin/bash
 
-# Function to display usage
+# Function to display usage for list-services
 usage_list_services() {
-    echo "Usage: $0 --format {json|csv|table|list} [services...]"
-    echo "Example: $0 --format table nginx php8.3-fpm mysql"
+    echo "Usage: spikster list-services --format {json|csv|table|list} [services...]"
+    echo "Example: spikster list-services --format table nginx php8.3-fpm mysql"
     exit 1
 }
 
-# Log Function
+# Log Function for list-services
 log_message_services() {
     echo "$(date +'%Y-%m-%d %H:%M:%S') - $1" >>/var/log/spikster_cli.log
 }
@@ -38,11 +38,11 @@ list_services() {
 
     # Parse arguments
     if [[ $# -lt 2 ]]; then
-        usage
+        usage_list_services
     fi
 
     if [[ $1 != "--format" ]]; then
-        usage
+        usage_list_services
     fi
 
     OUTPUT_FORMAT=$2
@@ -54,7 +54,7 @@ list_services() {
 
     # Check and store service statuses
     declare -A SERVICE_STATUSES PROCESS_STATUSES PACKAGE_STATUSES
-    # Check systemd services and processes
+
     for service in "${SERVICES[@]}"; do
         SERVICE_STATUSES[$service]=$(check_service_status $service)
     done
@@ -63,7 +63,6 @@ list_services() {
         PROCESS_STATUSES[$process]=$(check_service_status $process)
     done
 
-    # Check packages
     for package in "${PACKAGES[@]}"; do
         if dpkg -l | grep -qw "$package"; then
             PACKAGE_STATUSES[$package]="INSTALLED"
@@ -113,8 +112,8 @@ list_services() {
             done
             ;;
         table)
-            printf "%-10s %-20s %-15s\n" "Type" "Service" "Status"
-            printf "%-10s %-20s %-15s\n" "----" "-------" "------"
+            printf "%-10s %-20s %-15s\n" "Type" "Name" "Status"
+            printf "%-10s %-20s %-15s\n" "----" "----" "------"
             for service in "${!SERVICE_STATUSES[@]}"; do
                 printf "%-10s %-20s %-15s\n" "Service" "$service" "${SERVICE_STATUSES[$service]}"
             done
@@ -137,7 +136,7 @@ list_services() {
             done
             ;;
         *)
-            usage
+            usage_list_services
             ;;
         esac
     }
@@ -145,5 +144,5 @@ list_services() {
     # Run the output generation
     generate_output
 
-    log_message "Service, process, and package list displayed in $OUTPUT_FORMAT format."
+    log_message_services "Service, process, and package list displayed in $OUTPUT_FORMAT format."
 }
