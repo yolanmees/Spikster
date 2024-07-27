@@ -1,14 +1,14 @@
 #!/bin/bash
 
 # Function to display usage
-usage() {
+usage_list_services() {
     echo "Usage: $0 --format {json|csv|table|list} [services...]"
     echo "Example: $0 --format table nginx php8.3-fpm mysql"
     exit 1
 }
 
 # Log Function
-log_message() {
+log_message_services() {
     echo "$(date +'%Y-%m-%d %H:%M:%S') - $1" >>/var/log/spikster_cli.log
 }
 
