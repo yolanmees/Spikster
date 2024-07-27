@@ -36,13 +36,6 @@ Documentation at: https://spikster.com/
 
 ## Installation
 
-If you are using Ubuntu version 22.04 or a later version, you should execute the following command before proceeding
-
-```bash
-// ubuntu 22.04 or higher
-export DEBIAN_FRONTEND=noninteractive
-``` 
-
 Install Spikster
 
 ```bash
@@ -99,10 +92,7 @@ To correctly manage remote servers Spikster has to be on a public IP address (IP
 Spikster is easy, stable, powerful and free for any personal and commercial use and it's a perfect alternative to Cpanel, Plesk, Runcloud, CyberPanel, DirectAdmin, Forge and similar software...
 
 ## Spikster Roadmap... what's next? 
-- Update all packages since Cipi v3 ✔️
-- Tailwindcss design ✔️
-- Livewire 3 components ✔️
-- Package & Update manager
+- User roles and permissions
 - New install process
 - Apps installer
 - Backups
@@ -118,7 +108,8 @@ Thank you for considering contributing to the Spikster project
 #### ...anyway star this project on Github, Thank you ;)
 
 ## Licence
-Spikster is an open-source software licensed under the MIT license.
+Spikster is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License. See the [LICENSE](./LICENSE) file for details.
+
 
 ## Need support with Spikster?
 Please open an issue here: https://github.com/yolanmees/Spikster/issues.
