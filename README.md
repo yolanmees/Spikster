@@ -56,7 +56,7 @@ Before you can use Spikster, please make sure your server fulfils these requirem
 
 Hardware Requirement: At least 1 core processor / 512MB minimum RAM / At least 1 public IP  Address (IPv6 and NAT VPS are not supported) / For VPS providers such as AWS, those providers already include an external firewall for your VPS. 
 
-Installation may take up to about 30 minutes which may also depend on your server's internet speed. After the installation is completed, you are ready to use Cipi to manage your servers.
+Installation may take up to about 30 minutes which may also depend on your server's internet speed. After the installation is completed, you are ready to use Spikster to manage your servers.
 
 > [!IMPORTANT]
 > At the end of the installation you are given all the credentials you need for spikster / mysql.
