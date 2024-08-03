@@ -358,7 +358,6 @@ class SiteController extends Controller
         $site->password   = Str::random(24);
         $site->database   = Str::random(24);
         $site->deploy     = ' ';
-        $site->rootpath   = '/home/'.$site->username.'/web';
         $site->save();
 
         NewSiteSSH::dispatch($server, $site)->delay(Carbon::now()->addSeconds(3));
@@ -376,7 +375,6 @@ class SiteController extends Controller
             'server_ip'         => $server->ip,
             'php'               => $site->php,
             'basepath'          => $site->basepath,
-            'rootpath'          => $site->rootpath,
             'pdf'               => URL::to('/pdf/'.$site_id.'/'. $pdftoken)
         ]);
     }

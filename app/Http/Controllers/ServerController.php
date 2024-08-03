@@ -1162,7 +1162,7 @@ class ServerController extends Controller
 
         try {
             $ssh = new SSH2($server->ip, 22);
-            if (!$ssh->login('cipi', $server->password)) {
+            if (!$ssh->login('spikster', $server->password)) {
                 return response()->json([
                     'message' => __('spikster.server_error_ssh_error_message').$server->server_id,
                     'errors' => __('spikster.server_error')
@@ -1327,7 +1327,7 @@ class ServerController extends Controller
 
     //     try {
     //         $ssh = new SSH2($server->ip, 22);
-    //         if (!$ssh->login('cipi', $server->password)) {
+    //         if (!$ssh->login('spikster', $server->password)) {
     //             return response()->json([
     //                 'message' => __('spikster.server_error_ssh_error_message').$server->server_id,
     //                 'errors' => __('spikster.server_error')
@@ -1557,7 +1557,7 @@ class ServerController extends Controller
 
         try {
             $ssh = new SSH2($server->ip, 22);
-            if (!$ssh->login('cipi', $server->password)) {
+            if (!$ssh->login('spikster', $server->password)) {
                 return response()->json([
                     'message' => __('spikster.server_error_ssh_error_message').$server->server_id,
                     'errors' => __('spikster.server_error')
@@ -1593,7 +1593,7 @@ class ServerController extends Controller
 
         try {
             $ssh = new SSH2($server->ip, 22);
-            if (!$ssh->login('cipi', $server->password)) {
+            if (!$ssh->login('spikster', $server->password)) {
                 return response()->json([
                     'message' => __('spikster.server_error_ssh_error_message').$server->server_id,
                     'errors' => __('spikster.server_error')
@@ -1643,7 +1643,7 @@ class ServerController extends Controller
         $package = $request->package;
         try {
             $ssh = new SSH2($server->ip, 22);
-            if (!$ssh->login('cipi', $server->password)) {
+            if (!$ssh->login('spikster', $server->password)) {
                 return response()->json([
                     'message' => __('spikster.server_error_ssh_error_message').$server->server_id,
                     'errors' => __('spikster.server_error')
@@ -1670,7 +1670,7 @@ class ServerController extends Controller
         $package = $request->package;
         try {
             $ssh = new SSH2($server->ip, 22);
-            if (!$ssh->login('cipi', $server->password)) {
+            if (!$ssh->login('spikster', $server->password)) {
                 return response()->json([
                     'message' => __('spikster.server_error_ssh_error_message').$server->server_id,
                     'errors' => __('spikster.server_error')

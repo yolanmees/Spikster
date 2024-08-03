@@ -44,7 +44,7 @@ class CipiUpdate extends Command
 
         foreach ($servers as $server) {
             $ssh = new SSH2($server->ip, 22);
-            $ssh->login('cipi', $server->password);
+            $ssh->login('spikster', $server->password);
             $ssh->setTimeout(360);
             $ssh->exec('echo '.$server->password.' | sudo -S sudo wget '.config('app.url').'/sh/client-patch/202112181');
             $ssh->exec('echo '.$server->password.' | sudo -S sudo dos2unix 202112181');
@@ -59,7 +59,7 @@ class CipiUpdate extends Command
         $server = Server::where('default', 1)->first();
 
         $ssh = new SSH2($server->ip, 22);
-        $ssh->login('cipi', $server->password);
+        $ssh->login('spikster', $server->password);
         $ssh->setTimeout(360);
         $ssh->exec('echo '.$server->password.' | sudo -s cd /var/www/html/utility/cipi-update && sh run.sh');
         $ssh->exec('exit');

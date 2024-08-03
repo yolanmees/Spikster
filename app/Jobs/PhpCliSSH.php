@@ -36,7 +36,7 @@ class PhpCliSSH implements ShouldQueue
     public function handle()
     {
         $ssh = new SSH2($this->server->ip, 22);
-        $ssh->login('cipi', $this->server->password);
+        $ssh->login('spikster', $this->server->password);
         $ssh->setTimeout(360);
         $ssh->exec('echo '.$this->server->password.' | sudo -S sudo update-alternatives --set php /usr/bin/php'.$this->php);
         $ssh->exec('exit');

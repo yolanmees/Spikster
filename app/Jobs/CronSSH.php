@@ -34,7 +34,7 @@ class CronSSH implements ShouldQueue
     public function handle()
     {
         $ssh = new SSH2($this->server->ip, 22);
-        $ssh->login('cipi', $this->server->password);
+        $ssh->login('spikster', $this->server->password);
         $ssh->setTimeout(360);
         $ssh->exec('echo '.$this->server->password.' | sudo -S sudo unlink /etc/cron.d/cipi.crontab');
         $ssh->exec('echo '.$this->server->password.' | sudo -S sudo wget '.config('app.url').'/conf/cron/'.$this->server->server_id.' -O /etc/cron.d/cipi.crontab');

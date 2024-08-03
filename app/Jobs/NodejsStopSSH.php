@@ -35,7 +35,7 @@ class NodejsStopSSH implements ShouldQueue
     public function handle()
     {
         $ssh = new SSH2($this->site->server->ip, 22);
-        $ssh->login('cipi', $this->site->server->password);
+        $ssh->login('spikster', $this->site->server->password);
         $ssh->setTimeout(360);
         $ssh->exec('echo '.$this->site->server->password.' | sudo -S sudo unlink newnodejs');
         $ssh->exec('echo '.$this->site->server->password.' | sudo -S sudo wget -O newnodejs  '.config('app.url').'/sh/stop_nodejs');

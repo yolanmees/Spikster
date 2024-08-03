@@ -34,7 +34,7 @@ class PanelDomainAddSSH implements ShouldQueue
     public function handle()
     {
         $ssh = new SSH2($this->server->ip, 22);
-        $ssh->login('cipi', $this->server->password);
+        $ssh->login('spikster', $this->server->password);
         $ssh->setTimeout(360);
         $ssh->exec('echo '.$this->server->password.' | sudo -S sudo wget '.config('app.url').'/conf/panel -O /etc/nginx/sites-available/panel.conf');
         $ssh->exec('echo '.$this->server->password.' | sudo -S sudo dos2unix /etc/nginx/sites-available/panel.conf');
