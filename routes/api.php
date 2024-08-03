@@ -43,8 +43,8 @@ Route::get('/servers/{server_id}/fail2ban', [ServerController::class, 'fail2ban'
 Route::get('/servers/{server_id}/packages', [ServerController::class, 'packages']);
 Route::post('/servers/{server_id}/packages/install', [ServerController::class, 'installPackage']);
 Route::post('/servers/{server_id}/packages/uninstall', [ServerController::class, 'uninstallPackage']);
-Route::get('/services', [ServerController::class, 'listServices']);
-Route::post('/services/manage', [ServerController::class, 'manageService']);
+Route::get('/servers/{server_id}/services', [ServerController::class, 'listServices']);
+Route::post('/servers/{server_id}/services/manage', [ServerController::class, 'manageService']);
 
 //Sites
 Route::get('/sites', [SiteController::class, 'index']);

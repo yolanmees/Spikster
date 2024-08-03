@@ -19,11 +19,12 @@ use Illuminate\Http\Request;
 use App\Jobs\PanelDomainAddSSH;
 use App\Jobs\PanelDomainSslSSH;
 use App\Jobs\PanelDomainRemoveSSH;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Validator;
 use Symfony\Component\Process\Process;
+use Illuminate\Support\Facades\Validator;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 
 class ServerController extends Controller
@@ -1763,6 +1764,8 @@ class ServerController extends Controller
         $process->run();
 
         if (!$process->isSuccessful()) {
+            $errorOutput = $process->getErrorOutput();
+            Log::error("Error executing spikster: ".$errorOutput);
             return response()->json(['result' => 'error', 'message' => 'Failed to list services'], 500);
         }
 
@@ -1784,6 +1787,8 @@ class ServerController extends Controller
         $process->run();
 
         if (!$process->isSuccessful()) {
+            $errorOutput = $process->getErrorOutput();
+            Log::error("Error executing spikster: ".$errorOutput);
             return response()->json(['result' => 'error', 'message' => 'Failed to manage service'], 500);
         }
 

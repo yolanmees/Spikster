@@ -21,7 +21,7 @@ class ManageService extends Component
 
     public function fetchServicesStatus()
     {
-        $response = Http::get('http://'.$this->server->ip.'/api/services', [
+        $response = Http::get('http://'.$this->server->ip.'/api/server/'.$this->server_id.'/services', [
             'format' => 'json'
         ]);
 
@@ -34,7 +34,7 @@ class ManageService extends Component
 
     public function restartService($service)
     {
-        $response = Http::post('http://'.$this->server->ip.'/api/services/manage', [
+        $response = Http::post('http://'.$this->server->ip.'/api/server/'.$this->server_id.'/services/manage', [
             'format' => 'json',
             'action' => 'restart',
             'service' => $service,
