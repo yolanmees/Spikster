@@ -2,9 +2,9 @@
 
 namespace App\Livewire\Stats;
 
-use Http;
 use App\Models\Server;
 use Livewire\Component;
+use Illuminate\Support\Facades\Http;
 
 class Disk extends Component
 {
@@ -22,7 +22,7 @@ class Disk extends Component
             $this->disk = $disk->json()['disk'];
             $this->labels = $this->getLabels();
             $this->total = $this->disk[0]['write_bytes'] / 1024 / 1024;
-            
+
             foreach ($this->disk as $key => $disk) {
                 if (!isset($this->dataset[$disk['disk_name'] ])) {
                     $this->dataset[$disk['disk_name'] ]['label'] = $disk['disk_name'];

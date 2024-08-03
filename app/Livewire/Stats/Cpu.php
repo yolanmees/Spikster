@@ -2,9 +2,9 @@
 
 namespace App\Livewire\Stats;
 
-use Http;
 use App\Models\Server;
 use Livewire\Component;
+use Illuminate\Support\Facades\Http;
 
 class Cpu extends Component
 {
