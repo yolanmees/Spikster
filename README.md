@@ -38,17 +38,10 @@ Documentation at: https://spikster.com/
 
 Install Spikster
 
-```bash
-wget https://raw.githubusercontent.com/yolanmees/Spikster/master/go.sh
-bash go.sh
 ```
-#### Installation on AWS
-AWS by default disables root login. To login as root inside AWS, login as default user and then use command sudo -s.
-
-```
-$ ssh ubuntu@<your server IP address>
-$ ubuntu@aws:~$ sudo -s
-$ root@aws:~# wget -O - https://raw.githubusercontent.com/yolanmees/Spikster/master/go.sh | bash
+ssh ubuntu@<your server IP address>
+sudo -s
+wget -O - https://raw.githubusercontent.com/yolanmees/Spikster/master/go.sh | bash
 ```
 Remember to open ports: 22, 80 and 443!
 
