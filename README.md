@@ -52,11 +52,11 @@ Before you can use Spikster, please make sure your server fulfils these requirem
   - 22.04 x86_64 LTS (Recommended)
   - 23.04 x86_64
   - 24.04 x86_64 LTS
-- If the server is virtual (VPS)
+- 10GB free disk space
 
-Hardware Requirement: More than 1GB of HD / At least 1 core processor / 512MB minimum RAM / At least 1 public IP  Address (IPv6 and NAT VPS are not supported) / For VPS providers such as AWS, those providers already include an external firewall for your VPS. Please open port 22, 80 and 443 to install Cipi.
+Hardware Requirement: At least 1 core processor / 512MB minimum RAM / At least 1 public IP  Address (IPv6 and NAT VPS are not supported) / For VPS providers such as AWS, those providers already include an external firewall for your VPS. 
 
-Installation may take up to about 30 minutes which may also depend on your server's internet speed. After the installation is completed, you are ready to use Cipi to manage your servers.
+Installation may take up to about 30 minutes which may also depend on your server's internet speed. After the installation is completed, you are ready to use Spikster to manage your servers.
 
 > [!IMPORTANT]
 > At the end of the installation you are given all the credentials you need for spikster / mysql.
