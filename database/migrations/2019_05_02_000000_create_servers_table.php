@@ -27,7 +27,7 @@ class CreateServersTable extends Migration
             $table->text('cron')->nullable();
             $table->boolean('default')->default(false);
             $table->integer('build')->nullable();
-            $table->integer('status')->default('0');
+            $table->integer('status')->default('1');
             $table->timestamps();
         });
     }

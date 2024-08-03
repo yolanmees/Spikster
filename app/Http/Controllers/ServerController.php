@@ -20,8 +20,11 @@ use App\Jobs\PanelDomainAddSSH;
 use App\Jobs\PanelDomainSslSSH;
 use App\Jobs\PanelDomainRemoveSSH;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
+use Symfony\Component\Process\Process;
+use Symfony\Component\Process\Exception\ProcessFailedException;
 
 class ServerController extends Controller
 {
@@ -1305,68 +1308,68 @@ class ServerController extends Controller
      *      ),
      * )
     */
-    public function servicerestart(string $server_id, string $service)
-    {
-        if (!in_array($service, config('cipi.services'))) {
-            return response()->json([
-                'message' => __('spikster.invalid_service_error_message'),
-                'errors' => __('spikster.bad_request')
-            ], 400);
-        }
+    // public function servicerestart(string $server_id, string $service)
+    // {
+    //     if (!in_array($service, config('cipi.services'))) {
+    //         return response()->json([
+    //             'message' => __('spikster.invalid_service_error_message'),
+    //             'errors' => __('spikster.bad_request')
+    //         ], 400);
+    //     }
 
-        $server = Server::where('server_id', $server_id)->where('status', 1)->first();
-        if (!$server) {
-            return response()->json([
-                'message' => __('spikster.server_not_found_message'),
-                'errors' => __('spikster.server_not_found')
-            ], 404);
-        }
+    //     $server = Server::where('server_id', $server_id)->where('status', 1)->first();
+    //     if (!$server) {
+    //         return response()->json([
+    //             'message' => __('spikster.server_not_found_message'),
+    //             'errors' => __('spikster.server_not_found')
+    //         ], 404);
+    //     }
 
-        try {
-            $ssh = new SSH2($server->ip, 22);
-            if (!$ssh->login('cipi', $server->password)) {
-                return response()->json([
-                    'message' => __('spikster.server_error_ssh_error_message').$server->server_id,
-                    'errors' => __('spikster.server_error')
-                ], 500);
-            }
+    //     try {
+    //         $ssh = new SSH2($server->ip, 22);
+    //         if (!$ssh->login('cipi', $server->password)) {
+    //             return response()->json([
+    //                 'message' => __('spikster.server_error_ssh_error_message').$server->server_id,
+    //                 'errors' => __('spikster.server_error')
+    //             ], 500);
+    //         }
 
-            $ssh->setTimeout(360);
-            switch ($service) {
-                case 'nginx':
-                    $ssh->exec('sudo systemctl restart nginx.service');
-                    break;
-                case 'php':
-                    $ssh->exec('sudo service php8.3-fpm restart');
-                    $ssh->exec('sudo service php8.2-fpm restart');
-                    $ssh->exec('sudo service php8.1-fpm restart');
-                    $ssh->exec('sudo service php8.0-fpm restart');
-                    $ssh->exec('sudo service php7.4-fpm restart');
-                    $ssh->exec('sudo service php7.3-fpm restart');
-                    break;
-                case 'mysql':
-                    $ssh->exec('sudo service mysql restart');
-                    break;
-                case 'redis':
-                    $ssh->exec('sudo systemctl restart redis.service');
-                    break;
-                case 'supervisor':
-                    $ssh->exec('service supervisor restart');
-                    break;
-                default:
-                    //
-                    break;
-            }
-            $ssh->exec('exit');
+    //         $ssh->setTimeout(360);
+    //         switch ($service) {
+    //             case 'nginx':
+    //                 $ssh->exec('sudo systemctl restart nginx.service');
+    //                 break;
+    //             case 'php':
+    //                 $ssh->exec('sudo service php8.3-fpm restart');
+    //                 $ssh->exec('sudo service php8.2-fpm restart');
+    //                 $ssh->exec('sudo service php8.1-fpm restart');
+    //                 $ssh->exec('sudo service php8.0-fpm restart');
+    //                 $ssh->exec('sudo service php7.4-fpm restart');
+    //                 $ssh->exec('sudo service php7.3-fpm restart');
+    //                 break;
+    //             case 'mysql':
+    //                 $ssh->exec('sudo service mysql restart');
+    //                 break;
+    //             case 'redis':
+    //                 $ssh->exec('sudo systemctl restart redis.service');
+    //                 break;
+    //             case 'supervisor':
+    //                 $ssh->exec('service supervisor restart');
+    //                 break;
+    //             default:
+    //                 //
+    //                 break;
+    //         }
+    //         $ssh->exec('exit');
 
-            return response()->json([]);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'message' => __('spikster.something_error_message'),
-                'errors' => __('spikster.error')
-            ], 500);
-        }
-    }
+    //         return response()->json([]);
+    //     } catch (\Throwable $th) {
+    //         return response()->json([
+    //             'message' => __('spikster.something_error_message'),
+    //             'errors' => __('spikster.error')
+    //         ], 500);
+    //     }
+    // }
 
 
     /**
@@ -1551,7 +1554,7 @@ class ServerController extends Controller
     public function fail2ban(string $server_id)
     {
         $server = Server::where('server_id', $server_id)->where('status', 1)->first();
-      
+
         try {
             $ssh = new SSH2($server->ip, 22);
             if (!$ssh->login('cipi', $server->password)) {
@@ -1587,7 +1590,7 @@ class ServerController extends Controller
     public function packages(string $server_id)
     {
         $server = Server::where('server_id', $server_id)->where('status', 1)->first();
-      
+
         try {
             $ssh = new SSH2($server->ip, 22);
             if (!$ssh->login('cipi', $server->password)) {
@@ -1750,5 +1753,41 @@ class ServerController extends Controller
                 'errors' => __('spikster.error')
             ], 500);
         }
+    }
+
+
+    public function listServices(Request $request)
+    {
+        $format = $request->get('format', 'json');
+        $process = new Process(['bin/spikster', 'list-services', '--format', $format]);
+        $process->run();
+
+        if (!$process->isSuccessful()) {
+            return response()->json(['result' => 'error', 'message' => 'Failed to list services'], 500);
+        }
+
+        $output = $process->getOutput();
+        return response()->json(json_decode($output, true));
+    }
+
+    public function manageService(Request $request)
+    {
+        $action = $request->get('action');
+        $service = $request->get('service');
+        $format = $request->get('format', 'json');
+
+        if (!$action || !$service) {
+            return response()->json(['result' => 'error', 'message' => 'Invalid request parameters'], 400);
+        }
+
+        $process = new Process(['bin/spikster', 'manage-services', '--format', $format, $action, $service]);
+        $process->run();
+
+        if (!$process->isSuccessful()) {
+            return response()->json(['result' => 'error', 'message' => 'Failed to manage service'], 500);
+        }
+
+        $output = $process->getOutput();
+        return response()->json(json_decode($output, true));
     }
 }

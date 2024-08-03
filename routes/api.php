@@ -36,14 +36,15 @@ Route::get('/servers/{server_id}/stats/mem', [ServerController::class, 'statsMem
 Route::get('/servers/{server_id}/stats/load', [ServerController::class, 'statsLoad']);
 Route::get('/servers/{server_id}/stats/disk', [ServerController::class, 'statsDisk']);
 Route::post('/servers/{server_id}/rootreset', [ServerController::class, 'rootreset']);
-Route::post('/servers/{server_id}/servicerestart/{service}', [ServerController::class, 'servicerestart']);
+// Route::post('/servers/{server_id}/servicerestart/{service}', [ServerController::class, 'servicerestart']);
 Route::get('/servers/{server_id}/sites', [ServerController::class, 'sites']);
 Route::get('/servers/{server_id}/domains', [ServerController::class, 'domains']);
 Route::get('/servers/{server_id}/fail2ban', [ServerController::class, 'fail2ban']);
 Route::get('/servers/{server_id}/packages', [ServerController::class, 'packages']);
 Route::post('/servers/{server_id}/packages/install', [ServerController::class, 'installPackage']);
 Route::post('/servers/{server_id}/packages/uninstall', [ServerController::class, 'uninstallPackage']);
-
+Route::get('/services', [ServerController::class, 'listServices']);
+Route::post('/services/manage', [ServerController::class, 'manageService']);
 
 //Sites
 Route::get('/sites', [SiteController::class, 'index']);
