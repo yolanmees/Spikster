@@ -13,23 +13,22 @@ return new class extends Migration
     {
         Schema::create('stats_cpus', function (Blueprint $table) {
             $table->id();
-            $table->float('total');
-            $table->float('user');
-            $table->float('nice');
-            $table->float('system');
-            $table->float('idle');
-            $table->float('iowait');
-            $table->float('irq');
-            $table->float('softirq');
-            $table->float('steal');
-            $table->float('guest');
-            $table->float('guest_nice');
-            $table->float('time_since_update');
-            $table->integer('cpucore');
-            $table->integer('ctx_switches');
-            $table->integer('interrupts');
-            $table->integer('soft_interrupts');
-            $table->integer('syscalls');
+            $table->decimal('total', 8, 2);
+            $table->decimal('user', 8, 2)->nullable();
+            $table->decimal('nice', 8, 2)->nullable();
+            $table->decimal('system', 8, 2)->nullable();
+            $table->decimal('idle', 8, 2)->nullable();
+            $table->decimal('iowait', 8, 2)->nullable();
+            $table->decimal('irq', 8, 2)->nullable();
+            $table->decimal('steal', 8, 2)->nullable();
+            $table->decimal('guest', 8, 2)->nullable();
+            $table->decimal('guest_nice', 8, 2)->nullable();
+            $table->decimal('time_since_update', 8, 2)->nullable();
+            $table->integer('cpucore')->nullable();
+            $table->integer('ctx_switches')->nullable();
+            $table->integer('interrupts')->nullable();
+            $table->integer('soft_interrupts')->nullable();
+            $table->integer('syscalls')->nullable();
             $table->timestamps();
         });
     }
