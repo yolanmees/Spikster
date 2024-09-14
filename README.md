@@ -26,8 +26,6 @@ Spikster is a Laravel based cloud server control panel that supports Digital Oce
 
 - Real-time servers stats: Keep an eye on everything through an awesome dashboard.
 
-- Always up to date: Spikster installs last versions of LTS dists and supports Ubuntu 23.04 LTS
-
 - Easylly manage your Domains, DNS, Hosting, SSL, Databases, Logs, and more.
 
 
@@ -38,17 +36,10 @@ Documentation at: https://spikster.com/
 
 Install Spikster
 
-```bash
-wget https://raw.githubusercontent.com/yolanmees/Spikster/master/go.sh
-bash go.sh
 ```
-#### Installation on AWS
-AWS by default disables root login. To login as root inside AWS, login as default user and then use command sudo -s.
-
-```
-$ ssh ubuntu@<your server IP address>
-$ ubuntu@aws:~$ sudo -s
-$ root@aws:~# wget -O - https://raw.githubusercontent.com/yolanmees/Spikster/master/go.sh | bash
+ssh ubuntu@<your server IP address>
+sudo -s
+wget -O - https://raw.githubusercontent.com/yolanmees/Spikster/master/go.sh | bash
 ```
 Remember to open ports: 22, 80 and 443!
 
@@ -56,14 +47,14 @@ Remember to open ports: 22, 80 and 443!
 Before you can use Spikster, please make sure your server fulfils these requirements:
 
 - Ubuntu version:
-  - 20.04 x86_64 LTS
-  - 22.04.2 x86_64 LTS (Recommended)
-  - 23.04 x86_64 
-- If the server is virtual (VPS)
+  - 22.04 x86_64 LTS (Recommended)
+  - 23.04 x86_64
+  - 24.04 x86_64 LTS
+- 10GB free disk space
 
-Hardware Requirement: More than 1GB of HD / At least 1 core processor / 512MB minimum RAM / At least 1 public IP  Address (IPv6 and NAT VPS are not supported) / For VPS providers such as AWS, those providers already include an external firewall for your VPS. Please open port 22, 80 and 443 to install Cipi.
+Hardware Requirement: At least 1 core processor / 512MB minimum RAM / At least 1 public IP  Address (IPv6 and NAT VPS are not supported) / For VPS providers such as AWS, those providers already include an external firewall for your VPS. 
 
-Installation may take up to about 30 minutes which may also depend on your server's internet speed. After the installation is completed, you are ready to use Cipi to manage your servers.
+Installation may take up to about 30 minutes which may also depend on your server's internet speed. After the installation is completed, you are ready to use Spikster to manage your servers.
 
 > [!IMPORTANT]
 > At the end of the installation you are given all the credentials you need for spikster / mysql.

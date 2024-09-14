@@ -44,7 +44,7 @@ class LogRotate extends Command
         foreach ($servers as $server) {
             foreach ($server->sites as $site) {
                 $ssh = new SSH2($server->ip, 22);
-                $ssh->login('cipi', $server->password);
+                $ssh->login('spikster', $server->password);
                 $ssh->setTimeout(360);
                 $ssh->exec('echo '.$server->password.' | sudo -S sudo unlink /home/'.$site->username.'/log/access_bk_'.date('N').'.log');
                 $ssh->exec('echo '.$server->password.' | sudo -S sudo mv /home/'.$site->username.'/log/access.log /home/'.$site->username.'/log/access_bk_'.date('N').'.log');

@@ -15,7 +15,7 @@ class CreateDatabasesTable extends Migration
     {
         Schema::create('databases', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('site_id');
+            $table->uuid('site_id');
             $table->unsignedBigInteger('user_id');
             $table->string('database_name');
             $table->timestamps();

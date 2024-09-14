@@ -34,7 +34,7 @@ class EditSiteDeploySSH implements ShouldQueue
     public function handle()
     {
         $ssh = new SSH2($this->site->server->ip, 22);
-        $ssh->login('cipi', $this->site->server->password);
+        $ssh->login('spikster', $this->site->server->password);
         $ssh->setTimeout(360);
         $ssh->exec('echo '.$this->site->server->password.' | sudo -S sudo unlink /home/'.$this->site->username.'/git/deploy.sh');
         $ssh->exec('echo '.$this->site->server->password.' | sudo -S sudo wget '.config('app.url').'/sh/deploy/'.$this->site->site_id.' -O /home/'.$this->site->username.'/git/deploy.sh');

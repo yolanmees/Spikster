@@ -16,7 +16,7 @@ class DatabaseService
     protected function pdoConnect() {
         $host = env('DB_HOST', '127.0.0.1');
         $port = env('DB_PORT', '3306');
-        $root = env('DB_USER', 'cipi');
+        $root = env('DB_USERNAME', 'spikster');
         $password = env('DB_PASSWORD', 'mgfjodm0nmi2ytuxnmu4yta1m2flyzkx');
 
         try {
@@ -32,7 +32,7 @@ class DatabaseService
     public function createDatabase($databaseName, $siteId)
     {
         $pdo = $this->pdoConnect();
-        
+
         try {
             $pdo->exec("CREATE DATABASE IF NOT EXISTS `$databaseName`;");
 
@@ -51,18 +51,18 @@ class DatabaseService
     public function createUser($username, $password, $siteId)
     {
         $pdo = $this->pdoConnect();
-        
+
         try {
             $stmt = $pdo->query("SELECT user FROM mysql.user WHERE user = '$username';");
             if ($stmt->rowCount() > 0) {
                 return ['success' => false, 'message' => "User '$username' already exists."];
             }
-            
+
             $pdo->exec("CREATE USER '$username'@'%' IDENTIFIED BY '$password';");
             $pdo->exec("FLUSH PRIVILEGES;");
-            
+
             $databaseUser = new DatabaseUser();
-            $databaseUser->user_id = Auth::id(); 
+            $databaseUser->user_id = Auth::id();
             $databaseUser->username = $username;
             $databaseUser->password = Hash::make($password);
             $databaseUser->site_id = $siteId;
@@ -80,7 +80,7 @@ class DatabaseService
 
         $databseUser = DatabaseUser::where('id', $user)->first();
         $database = Database::where('id', $database)->first();
-        
+
         try {
             $pdo->exec("GRANT ALL PRIVILEGES ON `$database->database_name`.* TO '$databseUser->username'@'%';");
             $pdo->exec("FLUSH PRIVILEGES;");

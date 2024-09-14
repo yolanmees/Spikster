@@ -37,7 +37,7 @@ class EditSiteDomainSSH implements ShouldQueue
     public function handle()
     {
         $ssh = new SSH2($this->site->server->ip, 22);
-        $ssh->login('cipi', $this->site->server->password);
+        $ssh->login('spikster', $this->site->server->password);
         $ssh->setTimeout(360);
         $ssh->exec('echo '.$this->site->server->password.' | sudo -S sudo rpl -i -w "server_name '.$this->olddomain.'" "server_name '.$this->site->domain.'" /etc/nginx/sites-available/'.$this->site->username.'.conf');
         $ssh->exec('echo '.$this->site->server->password.' | sudo -S sudo rpl -i -w "server_name '.$this->olddomain.'" "server_name '.$this->site->domain.'" /etc/nginx/sites-enabled/'.$this->site->username.'.conf');

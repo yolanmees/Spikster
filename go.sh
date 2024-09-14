@@ -565,6 +565,7 @@ sleep 1s
 
 apt-get install -y certbot
 apt-get install -y python3-certbot-nginx
+apt-get install -y pyenv
 
 # NODE
 clear
@@ -881,8 +882,10 @@ service supervisor restart || handle_error "restarting supervisor"
 log_message "Supervisor configured"
 
 # Additional installations
-apt install -y bind9 bind9utils bind9-doc python3-pip || handle_error "installing bind9 and pip"
-pip install glances bottle fastapi || handle_error "installing Python packages"
+apt install -y bind9 bind9utils bind9-doc || handle_error "installing bind9"
+apt install -y python3-pip || handle_error "installing Python3 pip"
+
+pip install glances bottle fastapi uvicorn || handle_error "installing Python packages"
 log_message "Additional packages installed: bind9, glances, bottle, fastapi"
 
 # Complete
