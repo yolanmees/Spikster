@@ -2,9 +2,9 @@
 
 namespace App\Livewire\Server;
 
-use Livewire\Component;
 use App\Models\Server;
-use Http;
+use Livewire\Component;
+use Illuminate\Support\Facades\Http;
 
 class PackagesInstalled extends Component
 {
@@ -29,7 +29,7 @@ class PackagesInstalled extends Component
 
     public function getInstalledPackages()
     {
-        $url = $this->server->ip . '/api/servers/' . $this->server->server_id . '/packages';
+        $url = $this->server->ip . '/api/servers/' . $this->server->server_id . '/services';
         $response = Http::get($url);
         $response = $response->json()[0];
         foreach ($response as $key => $value) {
