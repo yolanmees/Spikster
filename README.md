@@ -65,7 +65,7 @@ To correctly manage remote servers Spikster has to be on a public IP address (IP
 
 ## Spikster LEMP environment
 - nginx: 1.18
-- PHP-FPM: 8.2, 8.1, 8.0, 7.4
+- PHP-FPM: 8.3, 8.2, 8.1, 8.0, 7.4
 - MySql: 8
 - node: 16
 - npm: 8
