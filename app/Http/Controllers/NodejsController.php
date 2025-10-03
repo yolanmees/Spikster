@@ -4,32 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Jobs\NodejsSetupSSH;
 use App\Jobs\NodejsStopSSH;
-use Carbon\Carbon;
-use App\Models\Site;
-use App\Models\Alias;
-use Firebase\JWT\JWT;
 use App\Models\Server;
-use App\Jobs\NewSiteSSH;
-use App\Jobs\SslSiteSSH;
-use App\Jobs\NewAliasSSH;
-use App\Jobs\SiteDbPwdSSH;
-use App\Jobs\DeleteSiteSSH;
-use Illuminate\Support\Str;
-use App\Jobs\DeleteAliasSSH;
-use App\Jobs\EditSitePhpSSH;
-use App\Jobs\SiteUserPwdSSH;
+use App\Models\Site;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
-use App\Jobs\EditSiteDeploySSH;
-use App\Jobs\EditSiteDomainSSH;
-use App\Jobs\EditSiteBasepathSSH;
-use Barryvdh\DomPDF\Facade as PDF;
-use App\Jobs\EditSiteSupervisorSSH;
-use Illuminate\Support\Facades\URL;
-use Illuminate\Support\Facades\Validator;
 
 class NodejsController extends Controller
 {
-
     /**
      * Setup Nodejs information
      *
@@ -38,25 +19,32 @@ class NodejsController extends Controller
      *      summary="Setup Nodejs information",
      *      tags={"Nodejs", "Sites"},
      *      description="Setup Nodejs information by site_id.",
+     *
      *      @OA\Parameter(
      *          name="Authorization",
      *          description="Use Apikey prefix (e.g. Authorization: Apikey XYZ)",
      *          required=true,
      *          in="header",
+     *
      *          @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\Parameter(
      *          name="site_id",
      *          description="The id of the site to setup nodejs for.",
      *          required=true,
      *          in="path",
+     *
      *          @OA\Schema(type="string")
      *      ),
+     *
      *     @OA\RequestBody(
      *        required = true,
      *        description = "Site nodejs payload",
+     *
      *        @OA\JsonContent(
      *             type="object",
+     *
      *             @OA\Property(
      *                  property="path",
      *                  description="Js script to start",
@@ -65,10 +53,13 @@ class NodejsController extends Controller
      *             )
      *          )
      *     ),
+     *
      *     @OA\Response(
      *          response=200,
      *          description="Successful request",
+     *
      *          @OA\JsonContent(
+     *
      *                @OA\Property(
      *                    property="site_id",
      *                    description="Site unique ID",
@@ -164,6 +155,7 @@ class NodejsController extends Controller
      *                ),
      *          )
      *      ),
+     *
      *      @OA\Response(
      *          response=404,
      *          description="Site not found"
@@ -181,18 +173,17 @@ class NodejsController extends Controller
      *          description="Site domain conflict"
      *      ),
      * )
-    */
+     */
     public function setup(Request $request, string $site_id)
     {
         $site = Site::where('site_id', $site_id)->first();
 
-        if (!$site) {
+        if (! $site) {
             return response()->json([
                 'message' => 'Required site does not exists into panel.',
-                'errors' => 'Site not found.'
+                'errors' => 'Site not found.',
             ], 404);
         }
-
 
         $site->node_script = $request->path;
         $site->node_status = 1;
@@ -201,26 +192,25 @@ class NodejsController extends Controller
         NodejsSetupSSH::dispatch($site)->delay(Carbon::now()->addSeconds(1));
 
         return response()->json([
-            'site_id'           => $site->site_id,
-            'domain'            => $site->domain,
-            'username'          => $site->username,
-            'database'          => $site->username,
+            'site_id' => $site->site_id,
+            'domain' => $site->domain,
+            'username' => $site->username,
+            'database' => $site->username,
             'database_username' => $site->username,
-            'server_id'         => $site->server->server_id,
-            'server_name'       => $site->server->name,
-            'server_ip'         => $site->server->ip,
-            'php'               => $site->php,
-            'basepath'          => $site->basepath,
-            'repository'        => $site->repository,
-            'branch'            => $site->branch,
-            'deploy'            => $site->deploy,
-            'deploy_key'        => $site->server->github_key,
-            'supervisor'        => $site->supervisor,
-            'node_script'       => $site->node_script,
-            'aliases'           => count($site->aliases)
+            'server_id' => $site->server->server_id,
+            'server_name' => $site->server->name,
+            'server_ip' => $site->server->ip,
+            'php' => $site->php,
+            'basepath' => $site->basepath,
+            'repository' => $site->repository,
+            'branch' => $site->branch,
+            'deploy' => $site->deploy,
+            'deploy_key' => $site->server->github_key,
+            'supervisor' => $site->supervisor,
+            'node_script' => $site->node_script,
+            'aliases' => count($site->aliases),
         ]);
     }
-
 
     /**
      * Stop Nodejs information
@@ -230,25 +220,32 @@ class NodejsController extends Controller
      *      summary="Setup Nodejs information",
      *      tags={"Nodejs", "Sites"},
      *      description="Stop Nodejs information by site_id.",
+     *
      *      @OA\Parameter(
      *          name="Authorization",
      *          description="Use Apikey prefix (e.g. Authorization: Apikey XYZ)",
      *          required=true,
      *          in="header",
+     *
      *          @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\Parameter(
      *          name="site_id",
      *          description="The id of the site to setup nodejs for.",
      *          required=true,
      *          in="path",
+     *
      *          @OA\Schema(type="string")
      *      ),
+     *
      *     @OA\RequestBody(
      *        required = true,
      *        description = "Site nodejs payload",
+     *
      *        @OA\JsonContent(
      *             type="object",
+     *
      *             @OA\Property(
      *                  property="path",
      *                  description="Js script to start",
@@ -257,10 +254,13 @@ class NodejsController extends Controller
      *             )
      *          )
      *     ),
+     *
      *     @OA\Response(
      *          response=200,
      *          description="Successful request",
+     *
      *          @OA\JsonContent(
+     *
      *                @OA\Property(
      *                    property="site_id",
      *                    description="Site unique ID",
@@ -356,6 +356,7 @@ class NodejsController extends Controller
      *                ),
      *          )
      *      ),
+     *
      *      @OA\Response(
      *          response=404,
      *          description="Site not found"
@@ -373,18 +374,17 @@ class NodejsController extends Controller
      *          description="Site domain conflict"
      *      ),
      * )
-    */
+     */
     public function stop(Request $request, string $site_id)
     {
         $site = Site::where('site_id', $site_id)->first();
 
-        if (!$site) {
+        if (! $site) {
             return response()->json([
                 'message' => 'Required site does not exists into panel.',
-                'errors' => 'Site not found.'
+                'errors' => 'Site not found.',
             ], 404);
         }
-
 
         $site->node_status = 0;
         $site->save();
@@ -392,23 +392,23 @@ class NodejsController extends Controller
         NodejsStopSSH::dispatch($site)->delay(Carbon::now()->addSeconds(1));
 
         return response()->json([
-            'site_id'           => $site->site_id,
-            'domain'            => $site->domain,
-            'username'          => $site->username,
-            'database'          => $site->username,
+            'site_id' => $site->site_id,
+            'domain' => $site->domain,
+            'username' => $site->username,
+            'database' => $site->username,
             'database_username' => $site->username,
-            'server_id'         => $site->server->server_id,
-            'server_name'       => $site->server->name,
-            'server_ip'         => $site->server->ip,
-            'php'               => $site->php,
-            'basepath'          => $site->basepath,
-            'repository'        => $site->repository,
-            'branch'            => $site->branch,
-            'deploy'            => $site->deploy,
-            'deploy_key'        => $site->server->github_key,
-            'supervisor'        => $site->supervisor,
-            'node_script'       => $site->node_script,
-            'aliases'           => count($site->aliases)
+            'server_id' => $site->server->server_id,
+            'server_name' => $site->server->name,
+            'server_ip' => $site->server->ip,
+            'php' => $site->php,
+            'basepath' => $site->basepath,
+            'repository' => $site->repository,
+            'branch' => $site->branch,
+            'deploy' => $site->deploy,
+            'deploy_key' => $site->server->github_key,
+            'supervisor' => $site->supervisor,
+            'node_script' => $site->node_script,
+            'aliases' => count($site->aliases),
         ]);
     }
 }

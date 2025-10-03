@@ -3,14 +3,17 @@
 namespace App\Livewire;
 
 use App\Models\Server;
-use Livewire\Component;
 use Illuminate\Support\Facades\Http;
+use Livewire\Component;
 
 class ManageService extends Component
 {
     public $server_id;
+
     public $services = [];
+
     public $message;
+
     private $server;
 
     public function mount()
@@ -22,7 +25,7 @@ class ManageService extends Component
     public function fetchServicesStatus()
     {
         $response = Http::get('http://'.$this->server->ip.'/api/server/'.$this->server_id.'/services', [
-            'format' => 'json'
+            'format' => 'json',
         ]);
 
         if ($response->successful()) {

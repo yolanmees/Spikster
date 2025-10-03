@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Dashboard;
 
-use Livewire\Component;
 use App\Models\Site;
+use Livewire\Component;
 
 class TopSites extends Component
 {

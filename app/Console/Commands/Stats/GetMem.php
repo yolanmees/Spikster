@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands\Stats;
 
-use Illuminate\Console\Command;
 use App\Models\Stats\Mem;
+use Illuminate\Console\Command;
 
 class GetMem extends Command
 {
@@ -28,16 +28,16 @@ class GetMem extends Command
     {
         $mem = json_decode(file_get_contents('http://localhost:61208/api/4/mem'), true);
         Mem::create([
-            "total" => $mem["total"],
-            "available" => $mem["available"],
-            "percent" => $mem["percent"],
-            "used" => $mem["used"],
-            "free" => $mem["free"],
-            "active" => $mem["active"],
-            "inactive" => $mem["inactive"],
-            "buffers" => $mem["buffers"],
-            "cached" => $mem["cached"],
-            "shared" => $mem["shared"]
+            'total' => $mem['total'],
+            'available' => $mem['available'],
+            'percent' => $mem['percent'],
+            'used' => $mem['used'],
+            'free' => $mem['free'],
+            'active' => $mem['active'],
+            'inactive' => $mem['inactive'],
+            'buffers' => $mem['buffers'],
+            'cached' => $mem['cached'],
+            'shared' => $mem['shared'],
         ]);
     }
 }

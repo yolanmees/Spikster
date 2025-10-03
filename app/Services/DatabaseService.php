@@ -2,18 +2,18 @@
 
 namespace App\Services;
 
-use PDO;
-use PDOException;
 use App\Models\Database;
 use App\Models\DatabaseUser;
 use App\Models\DatabaseUserLink;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use PDO;
+use PDOException;
 
 class DatabaseService
 {
-
-    protected function pdoConnect() {
+    protected function pdoConnect()
+    {
         $host = env('DB_HOST', '127.0.0.1');
         $port = env('DB_PORT', '3306');
         $root = env('DB_USERNAME', 'spikster');
@@ -25,7 +25,7 @@ class DatabaseService
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
             ]);
         } catch (PDOException $e) {
-            die("DB ERROR: " . $e->getMessage());
+            exit('DB ERROR: '.$e->getMessage());
         }
     }
 
@@ -36,7 +36,7 @@ class DatabaseService
         try {
             $pdo->exec("CREATE DATABASE IF NOT EXISTS `$databaseName`;");
 
-            $database = new Database();
+            $database = new Database;
             $database->user_id = 1;
             $database->database_name = $databaseName;
             $database->site_id = $siteId;
@@ -44,7 +44,7 @@ class DatabaseService
 
             return ['success' => true, 'message' => 'Database created successfully.', 'database' => $database];
         } catch (PDOException $e) {
-            return ['success' => false, 'message' => "Unable to create database. Error: " . $e->getMessage()];
+            return ['success' => false, 'message' => 'Unable to create database. Error: '.$e->getMessage()];
         }
     }
 
@@ -59,9 +59,9 @@ class DatabaseService
             }
 
             $pdo->exec("CREATE USER '$username'@'%' IDENTIFIED BY '$password';");
-            $pdo->exec("FLUSH PRIVILEGES;");
+            $pdo->exec('FLUSH PRIVILEGES;');
 
-            $databaseUser = new DatabaseUser();
+            $databaseUser = new DatabaseUser;
             $databaseUser->user_id = Auth::id();
             $databaseUser->username = $username;
             $databaseUser->password = Hash::make($password);
@@ -70,7 +70,7 @@ class DatabaseService
 
             return ['success' => true, 'message' => 'User added successfully.', 'user' => $databaseUser];
         } catch (PDOException $e) {
-            return ['success' => false, 'message' => "Unable to add user. Error: " . $e->getMessage()];
+            return ['success' => false, 'message' => 'Unable to add user. Error: '.$e->getMessage()];
         }
     }
 
@@ -83,26 +83,26 @@ class DatabaseService
 
         try {
             $pdo->exec("GRANT ALL PRIVILEGES ON `$database->database_name`.* TO '$databseUser->username'@'%';");
-            $pdo->exec("FLUSH PRIVILEGES;");
+            $pdo->exec('FLUSH PRIVILEGES;');
 
-            $link = new DatabaseUserLink();
+            $link = new DatabaseUserLink;
             $link->database_id = $database->id;
             $link->database_user_id = $databseUser->id;
             $link->save();
 
             return ['success' => true, 'message' => 'Database and user linked successfully.', 'link' => $link];
         } catch (PDOException $e) {
-            return ['success' => false, 'message' => "Unable to link database and user. Error: " . $e->getMessage()];
+            return ['success' => false, 'message' => 'Unable to link database and user. Error: '.$e->getMessage()];
         }
     }
 
-       public function deleteDatabase($databaseId)
+    public function deleteDatabase($databaseId)
     {
         $pdo = $this->pdoConnect();
 
         $database = Database::find($databaseId);
 
-        if(!$database) {
+        if (! $database) {
             return ['success' => false, 'message' => 'Database not found.'];
         }
 
@@ -111,9 +111,10 @@ class DatabaseService
         try {
             $pdo->exec("DROP DATABASE IF EXISTS `$databaseName`;");
             $database->delete();
+
             return ['success' => true, 'message' => 'Database deleted successfully.'];
         } catch (PDOException $e) {
-            return ['success' => false, 'message' => "Unable to delete database. Error: " . $e->getMessage()];
+            return ['success' => false, 'message' => 'Unable to delete database. Error: '.$e->getMessage()];
         }
     }
 
@@ -123,7 +124,7 @@ class DatabaseService
 
         $databaseUser = DatabaseUser::find($userId);
 
-        if(!$databaseUser) {
+        if (! $databaseUser) {
             return ['success' => false, 'message' => 'User not found.'];
         }
 
@@ -131,11 +132,12 @@ class DatabaseService
 
         try {
             $pdo->exec("DROP USER '$username'@'%';");
-            $pdo->exec("FLUSH PRIVILEGES;");
+            $pdo->exec('FLUSH PRIVILEGES;');
             $databaseUser->delete();
+
             return ['success' => true, 'message' => 'User deleted successfully.'];
         } catch (PDOException $e) {
-            return ['success' => false, 'message' => "Unable to delete user. Error: " . $e->getMessage()];
+            return ['success' => false, 'message' => 'Unable to delete user. Error: '.$e->getMessage()];
         }
     }
 
@@ -145,7 +147,7 @@ class DatabaseService
 
         $link = DatabaseUserLink::find($linkId);
 
-        if(!$link) {
+        if (! $link) {
             return ['success' => false, 'message' => 'Link not found.'];
         }
 
@@ -154,11 +156,12 @@ class DatabaseService
 
         try {
             $pdo->exec("REVOKE ALL PRIVILEGES ON `$dbName`.* FROM '$userName'@'%';");
-            $pdo->exec("FLUSH PRIVILEGES;");
+            $pdo->exec('FLUSH PRIVILEGES;');
             $link->delete();
+
             return ['success' => true, 'message' => 'Database and user unlinked successfully.'];
         } catch (PDOException $e) {
-            return ['success' => false, 'message' => "Unable to unlink database and user. Error: " . $e->getMessage()];
+            return ['success' => false, 'message' => 'Unable to unlink database and user. Error: '.$e->getMessage()];
         }
     }
 }

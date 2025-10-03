@@ -2,17 +2,23 @@
 
 namespace App\Livewire\Server;
 
-use Livewire\Component;
 use App\Models\Server;
+use Livewire\Component;
 
 class NewServer extends Component
 {
     public $serverName;
+
     public $serverIp;
+
     public $serverProvider;
+
     public $serverApiKey;
+
     public $serverLocation;
+
     public $serverSshPort = 22;
+
     public $serverSshPassword;
 
     public function render()

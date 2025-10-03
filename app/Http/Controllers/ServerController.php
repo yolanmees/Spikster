@@ -2,34 +2,32 @@
 
 namespace App\Http\Controllers;
 
-use Carbon\Carbon;
-use App\Models\Site;
 use App\Jobs\CronSSH;
-use App\Models\Server;
+use App\Jobs\PanelDomainAddSSH;
+use App\Jobs\PanelDomainRemoveSSH;
+use App\Jobs\PanelDomainSslSSH;
 use App\Jobs\PhpCliSSH;
-use phpseclib3\Net\SSH2;
+use App\Jobs\RootResetSSH;
+use App\Models\Server;
+use App\Models\Site;
 use App\Models\Stats\Cpu;
-use App\Models\Stats\Mem;
 use App\Models\Stats\Disk;
 use App\Models\Stats\Load;
-use App\Jobs\RootResetSSH;
-use Illuminate\Support\Str;
+use App\Models\Stats\Mem;
 use App\Models\Userdatabase;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
-use App\Jobs\PanelDomainAddSSH;
-use App\Jobs\PanelDomainSslSSH;
-use App\Jobs\PanelDomainRemoveSSH;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
-use Symfony\Component\Process\Process;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
-use Symfony\Component\Process\Exception\ProcessFailedException;
+use Illuminate\Support\Str;
+use phpseclib3\Net\SSH2;
+use Symfony\Component\Process\Process;
 
 class ServerController extends Controller
 {
-
     /**
      * List all servers
      *
@@ -38,19 +36,25 @@ class ServerController extends Controller
      *      summary="List all servers",
      *      tags={"Servers"},
      *      description="List all servers managed by panel.",
+     *
      *      @OA\Parameter(
      *          name="Authorization",
      *          description="Use Apikey prefix (e.g. Authorization: Apikey XYZ)",
      *          required=true,
      *          in="header",
+     *
      *          @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\Response(
      *          response=200,
      *          description="Successful request",
+     *
      *          @OA\JsonContent(
      *              type="array",
+     *
      *              @OA\Items(
+     *
      *                @OA\Property(
      *                    property="server_id",
      *                    description="Server unique ID",
@@ -108,12 +112,13 @@ class ServerController extends Controller
      *              )
      *          )
      *      ),
+     *
      *      @OA\Response(
      *          response=401,
      *          description="Unauthorized access error"
      *      )
      * )
-    */
+     */
     public function index()
     {
         $servers = Server::all();
@@ -122,20 +127,19 @@ class ServerController extends Controller
         foreach ($servers as $server) {
             $data = [
                 'server_id' => $server->server_id,
-                'name'      => $server->name,
-                'ip'        => $server->ip,
-                'provider'  => $server->provider,
-                'location'  => $server->location,
-                'default'   => $server->default,
-                'status'    => $server->status,
-                'sites'     => count($server->sites)
+                'name' => $server->name,
+                'ip' => $server->ip,
+                'provider' => $server->provider,
+                'location' => $server->location,
+                'default' => $server->default,
+                'status' => $server->status,
+                'sites' => count($server->sites),
             ];
             array_push($response, $data);
         }
 
         return response()->json($response, 200);
     }
-
 
     /**
      * Add a new server
@@ -145,18 +149,23 @@ class ServerController extends Controller
      *      summary="Add a new Server",
      *      tags={"Servers"},
      *      description="Add a new server to manage with panel.",
+     *
      *      @OA\Parameter(
      *          name="Authorization",
      *          description="Use Apikey prefix (e.g. Authorization: Apikey XYZ)",
      *          required=true,
      *          in="header",
+     *
      *          @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\RequestBody(
      *        required = true,
      *        description = "Server creation payload",
+     *
      *        @OA\JsonContent(
      *             type="object",
+     *
      *             @OA\Property(
      *                  property="ip",
      *                  description="Server IP",
@@ -185,10 +194,13 @@ class ServerController extends Controller
      *             required={"ip","name"}
      *          )
      *     ),
+     *
      *     @OA\Response(
      *          response=200,
      *          description="Successful server creation",
+     *
      *          @OA\JsonContent(
+     *
      *              @OA\Property(
      *                  property="server_id",
      *                  description="Server unique ID",
@@ -227,6 +239,7 @@ class ServerController extends Controller
      *              ),
      *          )
      *      ),
+     *
      *      @OA\Response(
      *          response=409,
      *          description="Server conflict"
@@ -240,56 +253,55 @@ class ServerController extends Controller
      *          description="Unauthorized access error"
      *      )
      * )
-    */
+     */
     public function create(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'ip'    => 'required|ip',
-            'name'  => 'required|min:3',
+            'ip' => 'required|ip',
+            'name' => 'required|min:3',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'message' => __('spikster.bad_request'),
-                'errors' => $validator->errors()->getMessages()
+                'errors' => $validator->errors()->getMessages(),
             ], 400);
         }
 
         if ($request->ip == $request->server('SERVER_ADDR')) {
             return response()->json([
                 'message' => __('spikster.server_conflict_ip_current_message'),
-                'errors' => __('spikster.server_conflict')
+                'errors' => __('spikster.server_conflict'),
             ], 409);
         }
 
         if (Server::where('ip', $request->ip)->first()) {
             return response()->json([
                 'message' => __('spikster.server_conflict_ip_duplicate_message'),
-                'errors' => __('spikster.server_conflict')
+                'errors' => __('spikster.server_conflict'),
             ], 409);
         }
 
-        $server = new Server();
-        $server->ip         = $request->ip;
-        $server->name       = $request->name;
-        $server->provider   = $request->provider;
-        $server->location   = $request->location;
-        $server->password   = Str::random(24);
-        $server->database   = Str::random(24);
-        $server->server_id  = Str::uuid();
-        $server->cron       = ' ';
+        $server = new Server;
+        $server->ip = $request->ip;
+        $server->name = $request->name;
+        $server->provider = $request->provider;
+        $server->location = $request->location;
+        $server->password = Str::random(24);
+        $server->database = Str::random(24);
+        $server->server_id = Str::uuid();
+        $server->cron = ' ';
         $server->save();
 
         return response()->json([
-            'server_id'     => $server->server_id,
-            'name'          => $request->name,
-            'provider'      => $request->provider,
-            'location'      => $request->location,
-            'ip'            => $request->ip,
-            'setup'         => URL::to('/sh/setup/'.$server->server_id)
+            'server_id' => $server->server_id,
+            'name' => $request->name,
+            'provider' => $request->provider,
+            'location' => $request->location,
+            'ip' => $request->ip,
+            'setup' => URL::to('/sh/setup/'.$server->server_id),
         ]);
     }
-
 
     /**
      * Delete a server
@@ -299,20 +311,25 @@ class ServerController extends Controller
      *      summary="Delete a Server",
      *      tags={"Servers"},
      *      description="Delete a server from panel.",
+     *
      *      @OA\Parameter(
      *          name="Authorization",
      *          description="Use Apikey prefix (e.g. Authorization: Apikey XYZ)",
      *          required=true,
      *          in="header",
+     *
      *          @OA\Schema(type="string")
      *      ),
+     *
      *      @OA\Parameter(
      *          name="server_id",
      *          description="The id of the server to delete.",
      *          required=true,
      *          in="path",
+     *
      *          @OA\Schema(type="string")
      *      ),
+     *
      *      @OA\Response(
      *          response=200,
      *          description="Successful server deleted",
@@ -330,22 +347,22 @@ class ServerController extends Controller
      *          description="Unauthorized access error"
      *      )
      * )
-    */
+     */
     public function destroy(string $server_id)
     {
         $server = Server::where('server_id', $server_id)->first();
 
-        if (!$server) {
+        if (! $server) {
             return response()->json([
                 'message' => __('spikster.server_not_found_message_default'),
-                'errors' => __('spikster.server_not_found')
+                'errors' => __('spikster.server_not_found'),
             ], 404);
         }
 
         if ($server->default) {
             return response()->json([
                 'message' => __('spikster.delete_default_server_message'),
-                'errors' => __('spikster.bad_request')
+                'errors' => __('spikster.bad_request'),
             ], 400);
         }
 
@@ -353,7 +370,6 @@ class ServerController extends Controller
 
         return response()->json([]);
     }
-
 
     /**
      * Server information
@@ -363,24 +379,31 @@ class ServerController extends Controller
      *      summary="Server information",
      *      tags={"Servers"},
      *      description="Get server information.",
+     *
      *      @OA\Parameter(
      *          name="Authorization",
      *          description="Use Apikey prefix (e.g. Authorization: Apikey XYZ)",
      *          required=true,
      *          in="header",
+     *
      *          @OA\Schema(type="string")
      *     ),
+     *
      *      @OA\Parameter(
      *          name="server_id",
      *          description="The id of the server.",
      *          required=true,
      *          in="path",
+     *
      *          @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\Response(
      *          response=200,
      *          description="Successful server information",
+     *
      *          @OA\JsonContent(
+     *
      *              @OA\Property(
      *                  property="server_id",
      *                  description="Server unique ID",
@@ -441,6 +464,7 @@ class ServerController extends Controller
      *                ),
      *          )
      *     ),
+     *
      *      @OA\Response(
      *          response=404,
      *          description="Server not found or not installed"
@@ -454,33 +478,32 @@ class ServerController extends Controller
      *          description="Unauthorized access error"
      *      )
      * )
-    */
+     */
     public function show(string $server_id)
     {
         $server = Server::where('server_id', $server_id)->where('status', 1)->first();
 
-        if (!$server) {
+        if (! $server) {
             return response()->json([
                 'message' => __('spikster.server_not_found_message'),
-                'errors' => __('spikster.server_not_found')
+                'errors' => __('spikster.server_not_found'),
             ], 404);
         }
 
         return response()->json([
-            'sever_id'  => $server->server_id,
-            'name'      => $server->name,
-            'ip'        => $server->ip,
-            'location'  => $server->location,
-            'provider'  => $server->provider,
-            'default'   => $server->default,
-            'php'       => $server->php,
-            'github_key'=> $server->github_key,
-            'build'     => $server->build,
-            'cron'      => $server->cron,
-            'sites'     => count($server->sites)
+            'sever_id' => $server->server_id,
+            'name' => $server->name,
+            'ip' => $server->ip,
+            'location' => $server->location,
+            'provider' => $server->provider,
+            'default' => $server->default,
+            'php' => $server->php,
+            'github_key' => $server->github_key,
+            'build' => $server->build,
+            'cron' => $server->cron,
+            'sites' => count($server->sites),
         ]);
     }
-
 
     /**
      * Panel server information
@@ -490,17 +513,22 @@ class ServerController extends Controller
      *      summary="Panel server information",
      *      tags={"Servers"},
      *      description="Get panel server information.",
+     *
      *      @OA\Parameter(
      *          name="Authorization",
      *          description="Use Apikey prefix (e.g. Authorization: Apikey XYZ)",
      *          required=true,
      *          in="header",
+     *
      *          @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\Response(
      *          response=200,
      *          description="Successful server information",
+     *
      *          @OA\JsonContent(
+     *
      *              @OA\Property(
      *                  property="server_id",
      *                  description="Server unique ID",
@@ -561,6 +589,7 @@ class ServerController extends Controller
      *                ),
      *          )
      *     ),
+     *
      *      @OA\Response(
      *          response=401,
      *          description="Unauthorized access error"
@@ -570,42 +599,40 @@ class ServerController extends Controller
      *          description="Server not found"
      *      ),
      * )
-    */
+     */
     public function panel()
     {
         $server = Server::where('default', 1)->first();
 
-        if (!$server) {
+        if (! $server) {
             return response()->json([
                 'message' => __('spikster.server_not_found_native_message'),
-                'errors' => __('spikster.server_not_found')
+                'errors' => __('spikster.server_not_found'),
             ], 404);
         }
 
         $site = Site::where('server_id', $server->id)->where('panel', 1)->first();
 
-        if (!$site) {
+        if (! $site) {
             $domain = '';
         } else {
             $domain = $site->domain;
         }
 
         return response()->json([
-            'sever_id'  => $server->server_id,
-            'name'      => $server->name,
-            'ip'        => $server->ip,
-            'location'  => $server->location,
-            'provider'  => $server->provider,
-            'domain'    => $domain,
-            'php'       => $server->php,
-            'github_key'=> $server->github_key,
-            'build'     => $server->build,
-            'cron'      => $server->cron,
-            'sites'     => count($server->sites)
+            'sever_id' => $server->server_id,
+            'name' => $server->name,
+            'ip' => $server->ip,
+            'location' => $server->location,
+            'provider' => $server->provider,
+            'domain' => $domain,
+            'php' => $server->php,
+            'github_key' => $server->github_key,
+            'build' => $server->build,
+            'cron' => $server->cron,
+            'sites' => count($server->sites),
         ]);
     }
-
-
 
     /**
      * Add a domain / subdomain to panel
@@ -615,18 +642,23 @@ class ServerController extends Controller
      *      summary="Add a domain / subdomain to panel",
      *      tags={"Servers"},
      *      description="Add a domain / subdomain to panel.",
+     *
      *      @OA\Parameter(
      *          name="Authorization",
      *          description="Use Apikey prefix (e.g. Authorization: Apikey XYZ)",
      *          required=true,
      *          in="header",
+     *
      *          @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\RequestBody(
      *        required = true,
      *        description = "Panel domain payload",
+     *
      *        @OA\JsonContent(
      *             type="object",
+     *
      *             @OA\Property(
      *                  property="domain",
      *                  description="Panel domain",
@@ -635,6 +667,7 @@ class ServerController extends Controller
      *             ),
      *          )
      *      ),
+     *
      *     @OA\Response(
      *          response=200,
      *          description="Successful panel domain update",
@@ -652,15 +685,15 @@ class ServerController extends Controller
      *          description="Server not found"
      *      ),
      * )
-    */
+     */
     public function paneldomain(Request $request)
     {
         $server = Server::where('default', 1)->first();
 
-        if (!$server) {
+        if (! $server) {
             return response()->json([
                 'message' => __('spikster.server_not_found_native_message'),
-                'errors' => __('spikster.server_not_found')
+                'errors' => __('spikster.server_not_found'),
             ], 404);
         }
 
@@ -672,12 +705,12 @@ class ServerController extends Controller
 
         if ($request->domain && $request->domain != '') {
             $validator = Validator::make($request->all(), [
-                'domain'    => 'required'
+                'domain' => 'required',
             ]);
             if ($validator->fails()) {
                 return response()->json([
                     'message' => __('spikster.bad_request'),
-                    'errors' => $validator->errors()->getMessages()
+                    'errors' => $validator->errors()->getMessages(),
                 ], 400);
             }
             $newsite = new Site;
@@ -695,7 +728,6 @@ class ServerController extends Controller
         return response()->json([]);
     }
 
-
     /**
      * Require SSL for panel
      *
@@ -704,13 +736,16 @@ class ServerController extends Controller
      *      summary="Require SSL for panel",
      *      tags={"Servers"},
      *      description="Require SSL for panel domain / subdomain.",
+     *
      *      @OA\Parameter(
      *          name="Authorization",
      *          description="Use Apikey prefix (e.g. Authorization: Apikey XYZ)",
      *          required=true,
      *          in="header",
+     *
      *          @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\Response(
      *          response=200,
      *          description="Successful SSL generation"
@@ -728,15 +763,15 @@ class ServerController extends Controller
      *          description="Server not found"
      *      ),
      * )
-    */
+     */
     public function panelssl()
     {
         $server = Server::where('default', 1)->first();
 
-        if (!$server) {
+        if (! $server) {
             return response()->json([
                 'message' => __('spikster.server_not_found_native_message'),
-                'errors' => __('spikster.server_not_found')
+                'errors' => __('spikster.server_not_found'),
             ], 404);
         }
 
@@ -747,13 +782,12 @@ class ServerController extends Controller
         } else {
             return response()->json([
                 'message' => __('spikster.ssl_request_error_message'),
-                'errors' => __('spikster.bad_request')
+                'errors' => __('spikster.bad_request'),
             ], 400);
         }
 
         return response()->json([]);
     }
-
 
     /**
      * Server edit
@@ -763,25 +797,32 @@ class ServerController extends Controller
      *      summary="Server edit",
      *      tags={"Servers"},
      *      description="Edit server information.",
+     *
      *      @OA\Parameter(
      *          name="Authorization",
      *          description="Use Apikey prefix (e.g. Authorization: Apikey XYZ)",
      *          required=true,
      *          in="header",
+     *
      *          @OA\Schema(type="string")
      *     ),
+     *
      *      @OA\Parameter(
      *          name="server_id",
      *          description="The id of the server to edit.",
      *          required=true,
      *          in="path",
+     *
      *          @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\RequestBody(
      *        required = true,
      *        description = "Server creation payload",
+     *
      *        @OA\JsonContent(
      *             type="object",
+     *
      *             @OA\Property(
      *                  property="ip",
      *                  description="Server IP",
@@ -820,10 +861,13 @@ class ServerController extends Controller
      *             ),
      *          )
      *     ),
+     *
      *     @OA\Response(
      *          response=200,
      *          description="Successful server editing",
+     *
      *          @OA\JsonContent(
+     *
      *              @OA\Property(
      *                  property="server_id",
      *                  description="Server unique ID",
@@ -884,6 +928,7 @@ class ServerController extends Controller
      *              ),
      *          )
      *     ),
+     *
      *      @OA\Response(
      *          response=404,
      *          description="Server not found or not installed"
@@ -901,38 +946,38 @@ class ServerController extends Controller
      *          description="Server conflict"
      *      ),
      * )
-    */
+     */
     public function edit(Request $request, string $server_id)
     {
         $server = Server::where('server_id', $server_id)->where('status', 1)->first();
 
-        if (!$server) {
+        if (! $server) {
             return response()->json([
                 'message' => __('spikster.server_not_found_message'),
-                'errors' => __('spikster.server_not_found')
+                'errors' => __('spikster.server_not_found'),
             ], 404);
         }
 
         if ($request->ip) {
             $validator = Validator::make($request->all(), [
-                'ip'    => 'required|ip'
+                'ip' => 'required|ip',
             ]);
             if ($validator->fails()) {
                 return response()->json([
                     'message' => __('spikster.bad_request'),
-                    'errors' => $validator->errors()->getMessages()
+                    'errors' => $validator->errors()->getMessages(),
                 ], 400);
             }
-            if (!$server->default && $request->ip == str_replace("\n", '', file_get_contents('https://checkip.amazonaws.com'))) {
+            if (! $server->default && $request->ip == str_replace("\n", '', file_get_contents('https://checkip.amazonaws.com'))) {
                 return response()->json([
                     'message' => __('spikster.edit_server_current_ip_error_message'),
-                    'errors' => __('spikster.server_conflict')
+                    'errors' => __('spikster.server_conflict'),
                 ], 409);
             }
             if (Server::where('ip', $request->ip)->where('server_id', '<>', $server_id)->first()) {
                 return response()->json([
                     'message' => __('spikster.server_conflict_ip_duplicate_message'),
-                    'errors' => __('spikster.server_conflict')
+                    'errors' => __('spikster.server_conflict'),
                 ], 409);
             }
             if ($server->default) {
@@ -944,12 +989,12 @@ class ServerController extends Controller
 
         if ($request->name) {
             $validator = Validator::make($request->all(), [
-                'name'   => 'required|min:3'
+                'name' => 'required|min:3',
             ]);
             if ($validator->fails()) {
                 return response()->json([
                     'message' => __('spikster.bad_request'),
-                    'errors' => $validator->errors()->getMessages()
+                    'errors' => $validator->errors()->getMessages(),
                 ], 400);
             }
             $server->name = $request->name;
@@ -970,10 +1015,10 @@ class ServerController extends Controller
         }
 
         if ($request->php) {
-            if (!in_array($request->php, config('cipi.phpvers'))) {
+            if (! in_array($request->php, config('cipi.phpvers'))) {
                 return response()->json([
                     'message' => __('spikster.bad_request'),
-                    'errors' => 'Invalid PHP version.'
+                    'errors' => 'Invalid PHP version.',
                 ], 400);
             }
             PhpCliSSH::dispatch($server, $request->php)->delay(Carbon::now()->addSeconds(3));
@@ -983,21 +1028,19 @@ class ServerController extends Controller
         $server->save();
 
         return response()->json([
-            'sever_id'  => $server->server_id,
-            'name'      => $server->name,
-            'ip'        => $server->ip,
-            'location'  => $server->location,
-            'provider'  => $server->provider,
-            'default'   => $server->default,
-            'status'    => $server->status,
-            'php'       => $server->php,
-            'github_key'=> $server->github_key,
-            'build'     => $server->build,
-            'cron'      => $server->cron
+            'sever_id' => $server->server_id,
+            'name' => $server->name,
+            'ip' => $server->ip,
+            'location' => $server->location,
+            'provider' => $server->provider,
+            'default' => $server->default,
+            'status' => $server->status,
+            'php' => $server->php,
+            'github_key' => $server->github_key,
+            'build' => $server->build,
+            'cron' => $server->cron,
         ]);
     }
-
-
 
     /**
      * Server ping
@@ -1007,20 +1050,25 @@ class ServerController extends Controller
      *      summary="Server ping",
      *      tags={"Servers"},
      *      description="Check real time server ping.",
+     *
      *      @OA\Parameter(
      *          name="Authorization",
      *          description="Use Apikey prefix (e.g. Authorization: Apikey XYZ)",
      *          required=true,
      *          in="header",
+     *
      *          @OA\Schema(type="string")
      *     ),
+     *
      *      @OA\Parameter(
      *          name="server_id",
      *          description="The id of the server to check.",
      *          required=true,
      *          in="path",
+     *
      *          @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\Response(
      *          response=200,
      *          description="Successful server ping check",
@@ -1038,15 +1086,15 @@ class ServerController extends Controller
      *          description="Server unavailable"
      *      ),
      * )
-    */
+     */
     public function ping(string $server_id)
     {
         $server = Server::where('server_id', $server_id)->where('status', 1)->first();
 
-        if (!$server) {
+        if (! $server) {
             return response()->json([
                 'message' => __('spikster.server_not_found_message'),
-                'errors' => __('spikster.server_not_found')
+                'errors' => __('spikster.server_not_found'),
             ], 404);
         }
 
@@ -1057,17 +1105,16 @@ class ServerController extends Controller
             } else {
                 return response()->json([
                     'message' => __('spikster.server_unavailable_message'),
-                    'errors' => __('spikster.server_unavailable')
+                    'errors' => __('spikster.server_unavailable'),
                 ], 503);
             }
         } catch (\Throwable $th) {
             return response()->json([
                 'message' => __('spikster.server_unavailable_message'),
-                'errors' => __('spikster.server_unavailable')
+                'errors' => __('spikster.server_unavailable'),
             ], 503);
         }
     }
-
 
     /**
      * Server healthy
@@ -1077,24 +1124,31 @@ class ServerController extends Controller
      *      summary="Server healthy",
      *      tags={"Servers"},
      *      description="Check real time server healthy.",
+     *
      *      @OA\Parameter(
      *          name="Authorization",
      *          description="Use Apikey prefix (e.g. Authorization: Apikey XYZ)",
      *          required=true,
      *          in="header",
+     *
      *          @OA\Schema(type="string")
      *     ),
+     *
      *      @OA\Parameter(
      *          name="server_id",
      *          description="The id of the server to check.",
      *          required=true,
      *          in="path",
+     *
      *          @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\Response(
      *          response=200,
      *          description="Successful server healthy check",
+     *
      *          @OA\JsonContent(
+     *
      *              @OA\Property(
      *                  property="cpu",
      *                  description="Current usage of CPU in %",
@@ -1115,6 +1169,7 @@ class ServerController extends Controller
      *              ),
      *          )
      *     ),
+     *
      *      @OA\Response(
      *          response=404,
      *          description="Server not found or not installed"
@@ -1132,15 +1187,15 @@ class ServerController extends Controller
      *          description="SSH server connection issue"
      *      ),
      * )
-    */
+     */
     public function healthy(string $server_id)
     {
         $server = Server::where('server_id', $server_id)->where('status', 1)->first();
 
-        if (!$server) {
+        if (! $server) {
             return response()->json([
                 'message' => __('spikster.server_not_found_message'),
-                'errors' => __('spikster.server_not_found')
+                'errors' => __('spikster.server_not_found'),
             ], 404);
         }
 
@@ -1150,23 +1205,23 @@ class ServerController extends Controller
                 return response()->json([
                     'cpu' => '0',
                     'ram' => '0',
-                    'hdd' => '0'
+                    'hdd' => '0',
                 ]);
             }
         } catch (\Throwable $th) {
             return response()->json([
                 'cpu' => '0',
                 'ram' => '0',
-                'hdd' => '0'
+                'hdd' => '0',
             ]);
         }
 
         try {
             $ssh = new SSH2($server->ip, 22);
-            if (!$ssh->login('spikster', $server->password)) {
+            if (! $ssh->login('spikster', $server->password)) {
                 return response()->json([
                     'message' => __('spikster.server_error_ssh_error_message').$server->server_id,
-                    'errors' => __('spikster.server_error')
+                    'errors' => __('spikster.server_error'),
                 ], 500);
             }
             $ssh->setTimeout(360);
@@ -1175,7 +1230,7 @@ class ServerController extends Controller
         } catch (\Throwable $th) {
             return response()->json([
                 'message' => __('spikster.something_error_message'),
-                'errors' => __('spikster.error')
+                'errors' => __('spikster.error'),
             ], 500);
         }
 
@@ -1187,7 +1242,7 @@ class ServerController extends Controller
         return response()->json([
             'cpu' => $api[0],
             'ram' => $api[1],
-            'hdd' => $api[2]
+            'hdd' => $api[2],
         ]);
     }
 
@@ -1199,24 +1254,31 @@ class ServerController extends Controller
      *      summary="Server root password reset",
      *      tags={"Servers"},
      *      description="Reset server root password (for cipi user).",
+     *
      *      @OA\Parameter(
      *          name="Authorization",
      *          description="Use Apikey prefix (e.g. Authorization: Apikey XYZ)",
      *          required=true,
      *          in="header",
+     *
      *          @OA\Schema(type="string")
      *     ),
+     *
      *      @OA\Parameter(
      *          name="server_id",
      *          description="The id of the server.",
      *          required=true,
      *          in="path",
+     *
      *          @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\Response(
      *          response=200,
      *          description="Successful password reset",
+     *
      *          @OA\JsonContent(
+     *
      *              @OA\Property(
      *                  property="password",
      *                  description="New assigned password for cipi root user",
@@ -1225,6 +1287,7 @@ class ServerController extends Controller
      *              ),
      *          )
      *     ),
+     *
      *      @OA\Response(
      *          response=404,
      *          description="Server not found or not installed"
@@ -1234,14 +1297,14 @@ class ServerController extends Controller
      *          description="Unauthorized access error"
      *      ),
      * )
-    */
+     */
     public function rootreset(string $server_id)
     {
         $server = Server::where('server_id', $server_id)->where('status', 1)->first();
-        if (!$server) {
+        if (! $server) {
             return response()->json([
                 'message' => __('spikster.server_not_found_message'),
-                'errors' => __('spikster.server_not_found')
+                'errors' => __('spikster.server_not_found'),
             ], 404);
         }
 
@@ -1253,10 +1316,9 @@ class ServerController extends Controller
         RootResetSSH::dispatch($server, $new_password, $last_password)->delay(Carbon::now()->addSeconds(1));
 
         return response()->json([
-            'password' => $server->password
+            'password' => $server->password,
         ]);
     }
-
 
     /**
      * Server service restart
@@ -1266,27 +1328,34 @@ class ServerController extends Controller
      *      summary="Server service restart",
      *      tags={"Servers"},
      *      description="Restart a server server (nginx, php, mysql, redis or supervisor).",
+     *
      *      @OA\Parameter(
      *          name="Authorization",
      *          description="Use Apikey prefix (e.g. Authorization: Apikey XYZ)",
      *          required=true,
      *          in="header",
+     *
      *          @OA\Schema(type="string")
      *     ),
+     *
      *      @OA\Parameter(
      *          name="server_id",
      *          description="The id of the server.",
      *          required=true,
      *          in="path",
+     *
      *          @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\Parameter(
      *          name="service",
      *          description="The service to restart.",
      *          required=true,
      *          in="path",
+     *
      *          @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\Response(
      *          response=200,
      *          description="Successful service restart"
@@ -1308,7 +1377,7 @@ class ServerController extends Controller
      *          description="SSH server connection issue"
      *      ),
      * )
-    */
+     */
     // public function servicerestart(string $server_id, string $service)
     // {
     //     if (!in_array($service, config('cipi.services'))) {
@@ -1372,7 +1441,6 @@ class ServerController extends Controller
     //     }
     // }
 
-
     /**
      * List all server sites
      *
@@ -1381,26 +1449,34 @@ class ServerController extends Controller
      *      summary="List all server sites",
      *      tags={"Servers"},
      *      description="List all sites in required server.",
+     *
      *      @OA\Parameter(
      *          name="Authorization",
      *          description="Use Apikey prefix (e.g. Authorization: Apikey XYZ)",
      *          required=true,
      *          in="header",
+     *
      *          @OA\Schema(type="string")
      *     ),
+     *
      *      @OA\Parameter(
      *          name="server_id",
      *          description="The id of the server.",
      *          required=true,
      *          in="path",
+     *
      *          @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\Response(
      *          response=200,
      *          description="Successful request",
+     *
      *          @OA\JsonContent(
      *              type="array",
+     *
      *              @OA\Items(
+     *
      *                @OA\Property(
      *                    property="site_id",
      *                    description="Site unique ID",
@@ -1440,6 +1516,7 @@ class ServerController extends Controller
      *              )
      *          )
      *      ),
+     *
      *      @OA\Response(
      *          response=404,
      *          description="Server not found or not installed"
@@ -1449,14 +1526,14 @@ class ServerController extends Controller
      *          description="Unauthorized access error"
      *      )
      * )
-    */
+     */
     public function sites(string $server_id)
     {
         $server = Server::where('server_id', $server_id)->where('status', 1)->first();
-        if (!$server) {
+        if (! $server) {
             return response()->json([
                 'message' => __('spikster.server_not_found_message'),
-                'errors' => __('spikster.server_not_found')
+                'errors' => __('spikster.server_not_found'),
             ], 404);
         }
 
@@ -1465,19 +1542,18 @@ class ServerController extends Controller
 
         foreach ($sites as $site) {
             $data = [
-                'site_id'       => $site->site_id,
-                'domain'        => $site->domain,
-                'username'      => $site->username,
-                'php'           => $site->php,
-                'basepath'      => $site->basepath,
-                'aliases'       => count($site->aliases)
+                'site_id' => $site->site_id,
+                'domain' => $site->domain,
+                'username' => $site->username,
+                'php' => $site->php,
+                'basepath' => $site->basepath,
+                'aliases' => count($site->aliases),
             ];
             array_push($response, $data);
         }
 
         return response()->json($response);
     }
-
 
     /**
      * List all server domains
@@ -1487,20 +1563,25 @@ class ServerController extends Controller
      *      summary="List all server domains",
      *      tags={"Servers"},
      *      description="List all domains hosted in required server.",
+     *
      *      @OA\Parameter(
      *          name="Authorization",
      *          description="Use Apikey prefix (e.g. Authorization: Apikey XYZ)",
      *          required=true,
      *          in="header",
+     *
      *          @OA\Schema(type="string")
      *     ),
+     *
      *      @OA\Parameter(
      *          name="server_id",
      *          description="The id of the server.",
      *          required=true,
      *          in="path",
+     *
      *          @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\Response(
      *          response=200,
      *          description="Successfull response (Domain list array)"
@@ -1514,14 +1595,14 @@ class ServerController extends Controller
      *          description="Unauthorized access error"
      *      )
      * )
-    */
+     */
     public function domains(string $server_id)
     {
         $server = Server::where('server_id', $server_id)->where('status', 1)->first();
-        if (!$server) {
+        if (! $server) {
             return response()->json([
                 'message' => __('spikster.server_not_found_message'),
-                'errors' => __('spikster.server_not_found')
+                'errors' => __('spikster.server_not_found'),
             ], 404);
         }
 
@@ -1537,10 +1618,9 @@ class ServerController extends Controller
         return response()->json($response);
     }
 
-
     public function createdatabase(Request $request)
     {
-        $database = new Userdatabase();
+        $database = new Userdatabase;
         $database->user_id = Auth::user()->id;
         $database->database_name = $request->database_name;
 
@@ -1551,17 +1631,16 @@ class ServerController extends Controller
         }
     }
 
-
     public function fail2ban(string $server_id)
     {
         $server = Server::where('server_id', $server_id)->where('status', 1)->first();
 
         try {
             $ssh = new SSH2($server->ip, 22);
-            if (!$ssh->login('spikster', $server->password)) {
+            if (! $ssh->login('spikster', $server->password)) {
                 return response()->json([
                     'message' => __('spikster.server_error_ssh_error_message').$server->server_id,
-                    'errors' => __('spikster.server_error')
+                    'errors' => __('spikster.server_error'),
                 ], 500);
             }
             $ssh->setTimeout(360);
@@ -1570,21 +1649,21 @@ class ServerController extends Controller
         } catch (\Throwable $th) {
             return response()->json([
                 'message' => __('spikster.something_error_message'),
-                'errors' => __('spikster.error')
+                'errors' => __('spikster.error'),
             ], 500);
         }
 
         $iptables = explode("\n", $iptables);
         foreach ($iptables as $i => $iprow) {
-            if ($iprow == "") {
+            if ($iprow == '') {
                 unset($iptables[$i]);
             } else {
-                $iptables[$i] = explode("|", $iprow);
+                $iptables[$i] = explode('|', $iprow);
             }
         }
 
         return response()->json([
-            $iptables
+            $iptables,
         ]);
     }
 
@@ -1594,31 +1673,31 @@ class ServerController extends Controller
 
         try {
             $ssh = new SSH2($server->ip, 22);
-            if (!$ssh->login('spikster', $server->password)) {
+            if (! $ssh->login('spikster', $server->password)) {
                 return response()->json([
                     'message' => __('spikster.server_error_ssh_error_message').$server->server_id,
-                    'errors' => __('spikster.server_error')
+                    'errors' => __('spikster.server_error'),
                 ], 500);
             }
             $ssh->setTimeout(360);
-            $packages = $ssh->exec("dpkg --get-selections");
+            $packages = $ssh->exec('dpkg --get-selections');
             $ssh->exec('exit');
         } catch (\Throwable $th) {
             return response()->json([
                 'message' => __('spikster.something_error_message'),
-                'errors' => __('spikster.error')
+                'errors' => __('spikster.error'),
             ], 500);
         }
 
         $packages = explode("\n", $packages);
         foreach ($packages as $i => $package) {
-            if ($package == "") {
+            if ($package == '') {
                 unset($packages[$i]);
             } else {
                 $k = 0;
                 $packages[$i] = explode("\t", $package);
                 foreach ($packages[$i] as $j => $item) {
-                    if ($item == "") {
+                    if ($item == '') {
                         unset($packages[$i][$j]);
                     } else {
                         if ($k == 0) {
@@ -1634,7 +1713,7 @@ class ServerController extends Controller
         }
 
         return response()->json([
-            $packages
+            $packages,
         ]);
     }
 
@@ -1644,24 +1723,24 @@ class ServerController extends Controller
         $package = $request->package;
         try {
             $ssh = new SSH2($server->ip, 22);
-            if (!$ssh->login('spikster', $server->password)) {
+            if (! $ssh->login('spikster', $server->password)) {
                 return response()->json([
                     'message' => __('spikster.server_error_ssh_error_message').$server->server_id,
-                    'errors' => __('spikster.server_error')
+                    'errors' => __('spikster.server_error'),
                 ], 500);
             }
             $ssh->setTimeout(360);
-            $packages = $ssh->exec("echo '". $server->password ."' | sudo -S apt-get install -y $package");
+            $packages = $ssh->exec("echo '".$server->password."' | sudo -S apt-get install -y $package");
             $ssh->exec('exit');
         } catch (\Throwable $th) {
             return response()->json([
                 'message' => __('spikster.something_error_message'),
-                'errors' => __('spikster.error')
+                'errors' => __('spikster.error'),
             ], 500);
         }
 
         return response()->json([
-            $packages
+            $packages,
         ]);
     }
 
@@ -1671,24 +1750,24 @@ class ServerController extends Controller
         $package = $request->package;
         try {
             $ssh = new SSH2($server->ip, 22);
-            if (!$ssh->login('spikster', $server->password)) {
+            if (! $ssh->login('spikster', $server->password)) {
                 return response()->json([
                     'message' => __('spikster.server_error_ssh_error_message').$server->server_id,
-                    'errors' => __('spikster.server_error')
+                    'errors' => __('spikster.server_error'),
                 ], 500);
             }
             $ssh->setTimeout(360);
-            $packages = $ssh->exec("echo '". $server->password ."' | sudo -S apt-get remove -y $package");
+            $packages = $ssh->exec("echo '".$server->password."' | sudo -S apt-get remove -y $package");
             $ssh->exec('exit');
         } catch (\Throwable $th) {
             return response()->json([
                 'message' => __('spikster.something_error_message'),
-                'errors' => __('spikster.error')
+                'errors' => __('spikster.error'),
             ], 500);
         }
 
         return response()->json([
-            $packages
+            $packages,
         ]);
     }
 
@@ -1698,12 +1777,12 @@ class ServerController extends Controller
         $cpu = $cpu->sortBy('created_at');
         if ($cpu->count() > 0) {
             return response()->json([
-                'cpu' => $cpu
+                'cpu' => $cpu,
             ]);
         } else {
             return response()->json([
                 'message' => __('spikster.something_error_message'),
-                'errors' => __('spikster.error')
+                'errors' => __('spikster.error'),
             ], 500);
         }
     }
@@ -1714,12 +1793,12 @@ class ServerController extends Controller
         $mem = $mem->sortBy('created_at');
         if ($mem->count() > 0) {
             return response()->json([
-                'mem' => $mem
+                'mem' => $mem,
             ]);
         } else {
             return response()->json([
                 'message' => __('spikster.something_error_message'),
-                'errors' => __('spikster.error')
+                'errors' => __('spikster.error'),
             ], 500);
         }
     }
@@ -1730,12 +1809,12 @@ class ServerController extends Controller
         $load = $load->sortBy('created_at');
         if ($load->count() > 0) {
             return response()->json([
-                'load' => $load
+                'load' => $load,
             ]);
         } else {
             return response()->json([
                 'message' => __('spikster.something_error_message'),
-                'errors' => __('spikster.error')
+                'errors' => __('spikster.error'),
             ], 500);
         }
     }
@@ -1746,31 +1825,32 @@ class ServerController extends Controller
         $disk = $disk->sortBy('created_at');
         if ($disk->count() > 0) {
             return response()->json([
-                'disk' => $disk
+                'disk' => $disk,
             ]);
         } else {
             return response()->json([
                 'message' => __('spikster.something_error_message'),
-                'errors' => __('spikster.error')
+                'errors' => __('spikster.error'),
             ], 500);
         }
     }
 
-
     public function listServices(Request $request)
     {
         $format = $request->get('format', 'json');
-        $process = new Process(['bin/spikster', 'list-services', '--format', $format]);
-        $process->run();
+        $process = new Process(['sudo', '/var/www/html/bin/spikster', 'list-services', '--format', $format]);
 
-        if (!$process->isSuccessful()) {
-            $errorOutput = $process->getErrorOutput();
-            Log::error("Error executing spikster: ".$errorOutput);
-            return response()->json(['result' => 'error', 'message' => 'Failed to list services'], 500);
+        $process->run();
+        if (! $process->isSuccessful()) {
+            Log::error('Error executing spikster: '.$process->getErrorOutput());
+
+            return response()->json(['result' => 'error', 'message' => 'Failed to list services', 'details' => $process->getErrorOutput()], 500);
         }
 
         $output = $process->getOutput();
-        return response()->json(json_decode($output, true));
+        $output = preg_replace('/\\\\n/', ' ', $output);
+
+        return response($output)->header('Content-Type', 'application/json');
     }
 
     public function manageService(Request $request)
@@ -1779,20 +1859,22 @@ class ServerController extends Controller
         $service = $request->get('service');
         $format = $request->get('format', 'json');
 
-        if (!$action || !$service) {
+        if (! $action || ! $service) {
             return response()->json(['result' => 'error', 'message' => 'Invalid request parameters'], 400);
         }
 
         $process = new Process(['bin/spikster', 'manage-services', '--format', $format, $action, $service]);
         $process->run();
 
-        if (!$process->isSuccessful()) {
+        if (! $process->isSuccessful()) {
             $errorOutput = $process->getErrorOutput();
-            Log::error("Error executing spikster: ".$errorOutput);
+            Log::error('Error executing spikster: '.$errorOutput);
+
             return response()->json(['result' => 'error', 'message' => 'Failed to manage service'], 500);
         }
 
         $output = $process->getOutput();
+
         return response()->json(json_decode($output, true));
     }
 }

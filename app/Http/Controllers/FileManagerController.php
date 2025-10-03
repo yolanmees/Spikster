@@ -3,16 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Services\FileManager;
-use Carbon\Carbon;
 use Exception;
-use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class FileManagerController extends Controller
 {
-
     /**
      * List all Server files and Directory contents.
      *
@@ -21,13 +19,18 @@ class FileManagerController extends Controller
      *      summary="List all files and Directory contents",
      *      tags={"FileManager"},
      *      description="List all all server contents.",
+     *
      * @OA\Parameter(in="header", required=false, name="application_id", @OA\Schema(type="integer")),
      *      @OA\Parameter(in="query", required=false, name="site-uuid", @OA\Schema(type="string")),
+     *
      *      @OA\Response(response=200,
      *          description="Successful request",
+     *
      *           @OA\JsonContent(
      *              type="array",
+     *
      *              @OA\Items(
+     *
      *                @OA\Property(
      *                    property="pathContents",
      *                    description="server content(files and directory)",
@@ -56,18 +59,19 @@ class FileManagerController extends Controller
      *               ),
      * ),
      * ),
+     *
      *      @OA\Response(response=422, description="Invalid payload"),
      *      @OA\Response(response=401, description="Unauthorized")
      *
      * )
-    */
+     */
     public function index(FileManager $fileManager, $params = null)
     {
         $path = request('site-uuid');
         $queryPath = $_SERVER['QUERY_STRING'];
 
         extract($fileManager->fetchServerContents($params, $path, $queryPath));
-       
+
         return view('file_manager.index', compact('pathContents', 'params', 'path', 'queryPath', 'headers'));
     }
 
@@ -89,31 +93,33 @@ class FileManagerController extends Controller
      *      summary="files and Directory contents",
      *      tags={"FileManager"},
      *      description="update or store to a server file.",
+     *
      * @OA\Parameter(in="header", required=false, name="application_id", @OA\Schema(type="integer")),
      *      @OA\Parameter(in="query", required=false, name="site-uuid", @OA\Schema(type="string")),
+     *
      *      @OA\Response(response=201, description="Created request"),
      *      @OA\Response(response=422, description="Invalid payload"),
      *      @OA\Response(response=401, description="Unauthorized")
      *
      * )
-    */
+     */
     public function store(Request $request, FileManager $fileManager)
     {
-        $isStored =   $fileManager->storeFile(
+        $isStored = $fileManager->storeFile(
             $request->validate([
                 'content' => 'required|json',
-                'data' => 'required'
+                'data' => 'required',
             ])
         );
-       
-        if (!$isStored) {
+
+        if (! $isStored) {
             return redirect()->back()->with('success', 'Failed to fail file Content.');
         }
 
         return redirect()->back()->with('success', 'File saved Successfully');
     }
 
-      /**
+    /**
      * View specific file content.
      *
      * @OA\Post(
@@ -121,18 +127,20 @@ class FileManagerController extends Controller
      *      summary="view files contents",
      *      tags={"FileManager"},
      *      description="view file manager file in readonly mode.",
+     *
      *      @OA\Parameter(in="header", required=false, name="application_id", @OA\Schema(type="integer")),
      *      @OA\Parameter(in="query", required=false, name="site-uuid", @OA\Schema(type="string")),
+     *
      *      @OA\Response(response=200, description="Successful request"),
      *      @OA\Response(response=422, description="Invalid payload"),
      *      @OA\Response(response=401, description="Unauthorized")
      *
      * )
-    */
+     */
     public function show()
     {
         $validated = request()->validate([
-            'pathName' => 'required|string'
+            'pathName' => 'required|string',
         ]);
 
         $pathName = $validated['pathName'];
@@ -156,11 +164,11 @@ class FileManagerController extends Controller
             'f4p',
             'svi',
             'f4a',
-            'f4b'
+            'f4b',
         ])) {
-            return response()->json(['nonmedia'=> File::get($pathName)]);
+            return response()->json(['nonmedia' => File::get($pathName)]);
         } else {
-            return 'download_file_object/'. encrypt($pathName);
+            return 'download_file_object/'.encrypt($pathName);
         }
     }
 
@@ -181,20 +189,22 @@ class FileManagerController extends Controller
      *      summary="Edit file contents",
      *      tags={"FileManager"},
      *      description="edit file manager file and update.",
+     *
      *      @OA\Parameter(in="header", required=false, name="application_id", @OA\Schema(type="integer")),
      *      @OA\Parameter(in="query", required=false, name="site-uuid", @OA\Schema(type="string")),
+     *
      *      @OA\Response(response=200, description="Successful request"),
      *      @OA\Response(response=422, description="Invalid payload"),
      *      @OA\Response(response=401, description="Unauthorized")
      *
      * )
-    */
+     */
     public function edit()
     {
         $validated = request()->validate([
-            'pathName' => 'required|string'
+            'pathName' => 'required|string',
         ]);
-        
+
         $pathName = $validated['pathName'];
         $ext = Str::afterLast($pathName, '.');
 
@@ -216,7 +226,7 @@ class FileManagerController extends Controller
             'f4p',
             'svi',
             'f4a',
-            'f4b'
+            'f4b',
         ])) {
             return File::get($pathName);
         }
@@ -225,7 +235,6 @@ class FileManagerController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
@@ -242,25 +251,28 @@ class FileManagerController extends Controller
      *      summary="Edit file contents",
      *      tags={"FileManager"},
      *      description="delete file",
+     *
      *      @OA\Parameter(in="header", required=false, name="application_id", @OA\Schema(type="integer")),
      *      @OA\Parameter(in="query", required=false, name="site-uuid", @OA\Schema(type="string")),
+     *
      *      @OA\Response(response=204, description="No content"),
      *      @OA\Response(response=422, description="Invalid payload"),
      *      @OA\Response(response=401, description="Unauthorized")
      *
      * )
-    */
+     */
     public function destroy()
     {
         $validated = request()->validate([
-            'pathName' => 'required|string'
+            'pathName' => 'required|string',
         ]);
-        
+
         $pathName = $validated['pathName'];
+
         return unlink($pathName);
     }
 
-     /**
+    /**
      * Download specific file content.
      *
      * @OA\Post(
@@ -268,24 +280,26 @@ class FileManagerController extends Controller
      *      summary="Download file contents",
      *      tags={"FileManager"},
      *      description="download file",
+     *
      *      @OA\Parameter(in="header", required=false, name="application_id", @OA\Schema(type="integer")),
      *      @OA\Parameter(in="query", required=false, name="site-uuid", @OA\Schema(type="string")),
+     *
      *      @OA\Response(response=200, description="Successful content"),
      *      @OA\Response(response=422, description="Invalid payload"),
      *      @OA\Response(response=401, description="Unauthorized")
      *
      * )
-    */
+     */
     public function download()
     {
         $validated = request()->validate([
-            'pathName' => 'required|string'
+            'pathName' => 'required|string',
         ]);
-        
-        $path = $validated['pathName'];
-        return 'download_file_object/'. encrypt($path);
-    }
 
+        $path = $validated['pathName'];
+
+        return 'download_file_object/'.encrypt($path);
+    }
 
     public function downloadObject($id)
     {
@@ -296,7 +310,7 @@ class FileManagerController extends Controller
         }
     }
 
-         /**
+    /**
      * Create a directory on the Server
      *
      * @OA\Post(
@@ -304,25 +318,26 @@ class FileManagerController extends Controller
      *      summary="create a new folder",
      *      tags={"FileManager"},
      *      description="create a new folder",
+     *
      *      @OA\Parameter(in="header", required=false, name="application_id", @OA\Schema(type="integer")),
      *      @OA\Parameter(in="query", required=false, name="site-uuid", @OA\Schema(type="string")),
+     *
      *      @OA\Response(response=200, description="Successful content"),
      *      @OA\Response(response=422, description="Invalid payload"),
      *      @OA\Response(response=401, description="Unauthorized")
      *
      * )
-    */
-
+     */
     public function createDirectory(FileManager $fileManager)
     {
         $validated = request()->validate([
             'path' => 'required',
-            'new-directory-name' => 'required'
+            'new-directory-name' => 'required',
         ]);
-       
-        if (!$fileManager->createDirectory($validated)) {
+
+        if (! $fileManager->createDirectory($validated)) {
             return redirect()->back()->with('success', 'Failed to create Directory!');
-        };
+        }
 
         return redirect()->back()->with('success', 'Directory created successfully');
     }
@@ -335,29 +350,30 @@ class FileManagerController extends Controller
      *      summary="create a new file",
      *      tags={"FileManager"},
      *      description="create a new file",
+     *
      *      @OA\Parameter(in="header", required=false, name="application_id", @OA\Schema(type="integer")),
      *      @OA\Parameter(in="query", required=false, name="site-uuid", @OA\Schema(type="string")),
+     *
      *      @OA\Response(response=201, description="Created content"),
      *      @OA\Response(response=422, description="Invalid payload"),
      *      @OA\Response(response=401, description="Unauthorized")
      * )
-    */
+     */
     public function createFile(FileManager $fileManager)
     {
         $validated = request()->validate([
             'path' => 'required',
-            'new-file-name' => 'required'
+            'new-file-name' => 'required',
         ]);
 
-        if (!$fileManager->createFile($validated)) {
+        if (! $fileManager->createFile($validated)) {
             return redirect()->back()->with('success', 'Failed to create File');
         }
+
         return redirect()->back()->with('success', 'File created successfully');
     }
 
-
-
-       /**
+    /**
      * Rename a file on the Server
      *
      * @OA\Post(
@@ -365,28 +381,31 @@ class FileManagerController extends Controller
      *      summary="Rename a new file",
      *      tags={"FileManager"},
      *      description="Rename a file",
+     *
      *      @OA\Parameter(in="header", required=false, name="application_id", @OA\Schema(type="integer")),
      *      @OA\Parameter(in="query", required=false, name="site-uuid", @OA\Schema(type="string")),
+     *
      *      @OA\Response(response=201, description="Created content"),
      *      @OA\Response(response=422, description="Invalid payload"),
      *      @OA\Response(response=401, description="Unauthorized")
      *
      * )
-    */
+     */
     public function renameFile(FileManager $fileManager)
     {
         $validated = request()->validate([
             'content' => 'required|json',
-            'rename-file-name' => 'required'
+            'rename-file-name' => 'required',
         ]);
-        
-        if (!$fileManager->renameFile($validated)) {
+
+        if (! $fileManager->renameFile($validated)) {
             return redirect()->back()->with('success', 'Failed to rename file ');
         }
-            return redirect()->back()->with('success', 'File renamed Successfully');
+
+        return redirect()->back()->with('success', 'File renamed Successfully');
     }
 
-       /**
+    /**
      * Copy a file in the Server
      *
      * @OA\Post(
@@ -394,23 +413,24 @@ class FileManagerController extends Controller
      *      summary="copy a file to the same or different directory on the server",
      *      tags={"FileManager"},
      *      description="copy a file to the same or different directory on the server",
+     *
      *      @OA\Parameter(in="header", required=false, name="application_id", @OA\Schema(type="integer")),
      *      @OA\Parameter(in="query", required=false, name="site-uuid", @OA\Schema(type="string")),
+     *
      *      @OA\Response(response=201, description="Created content"),
      *      @OA\Response(response=422, description="Invalid payload"),
      *      @OA\Response(response=401, description="Unauthorized")
      *
      * )
-    */
-
+     */
     public function copy(FileManager $fileManager)
     {
         $validated = request()->validate([
             'content' => 'required|json',
-            'copy-file-path' => 'required'
+            'copy-file-path' => 'required',
         ]);
 
-        if (!$fileManager->copyFile($validated)) {
+        if (! $fileManager->copyFile($validated)) {
             return redirect()->back()->with('success', 'Failed to copy File copied');
         }
 
@@ -425,36 +445,36 @@ class FileManagerController extends Controller
      *      summary="Move a file to a specific location on the server",
      *      tags={"FileManager"},
      *      description="create a new file",
+     *
      *      @OA\Parameter(in="header", required=false, name="application_id", @OA\Schema(type="integer")),
      *      @OA\Parameter(in="query", required=false, name="site-uuid", @OA\Schema(type="string")),
+     *
      *      @OA\Response(response=201, description="Created content"),
      *      @OA\Response(response=422, description="Invalid payload"),
      *      @OA\Response(response=401, description="Unauthorized")
      *
      * )
-    */
+     */
     public function move(FileManager $fileManager)
     {
         $validated = request()->validate([
             'content' => 'required|json',
-            'move-file-path' => 'required'
+            'move-file-path' => 'required',
         ]);
 
-        if (!$fileManager->moveFile($validated)) {
+        if (! $fileManager->moveFile($validated)) {
             return redirect()->back()->with('success', 'failed to move file successfully');
         }
 
         return redirect()->back()->with('success', 'File moved successfully');
     }
 
-
-    
     public function getSlashByOS()
     {
         if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-            return "\\";
+            return '\\';
         }
 
-        return "/";
+        return '/';
     }
 }

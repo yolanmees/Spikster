@@ -2,16 +2,18 @@
 
 namespace App\Livewire\Server\Fail2ban;
 
-use Livewire\Component;
 use App\Models\Server;
 use Http;
+use Livewire\Component;
 
 class Iptables extends Component
 {
     public $server_id;
+
     public $server;
+
     public $iptables;
-    
+
     public function render()
     {
         return view('livewire.server.fail2ban.iptables');
@@ -26,8 +28,9 @@ class Iptables extends Component
 
     public function getIptables()
     {
-        $url = $this->server->ip . '/api/servers/' . $this->server->server_id . '/fail2ban';
+        $url = $this->server->ip.'/api/servers/'.$this->server->server_id.'/fail2ban';
         $response = Http::get($url);
+
         return $response->json();
     }
 }

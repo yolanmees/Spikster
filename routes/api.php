@@ -1,13 +1,12 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\SiteController;
-use App\Http\Controllers\ServerController;
-use App\Http\Controllers\FileManagerController;
-use App\Http\Controllers\DatabaseController;
 use App\Http\Controllers\Api\LogManagerController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DatabaseController;
+use App\Http\Controllers\FileManagerController;
+use App\Http\Controllers\ServerController;
+use App\Http\Controllers\SiteController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,7 +19,7 @@ use App\Http\Controllers\Api\LogManagerController;
 |
 */
 
-//Servers
+// Servers
 Route::get('/servers', [ServerController::class, 'index']);
 Route::post('/servers', [ServerController::class, 'create']);
 Route::get('/servers/panel', [ServerController::class, 'panel']);
@@ -46,7 +45,7 @@ Route::post('/servers/{server_id}/packages/uninstall', [ServerController::class,
 Route::get('/servers/{server_id}/services', [ServerController::class, 'listServices']);
 Route::post('/servers/{server_id}/services/manage', [ServerController::class, 'manageService']);
 
-//Sites
+// Sites
 Route::get('/sites', [SiteController::class, 'index']);
 Route::post('/sites', [SiteController::class, 'create']);
 Route::patch('/sites/{site_id}', [SiteController::class, 'edit']);
@@ -63,18 +62,18 @@ Route::delete('/sites/{site_id}/aliases/{alias_id}', [SiteController::class, 'de
 Route::post('/login', [AuthController::class, 'appLogin'])->middleware('throttle:10,3');
 
 Route::middleware('api')->group(function () {
-    //phpmyadmin route
+    // phpmyadmin route
     Route::get('/pma', function () {
         return redirect()->to('mysecureadmin/index.php');
     });
-    //database
+    // database
     Route::get('/data', [DatabaseController::class, 'viewdatabase'])->name('data');
-    Route::post('/createdatab', [DatabaseController::class,'createdatabase'])->name('createdatab');
-    Route::post('/createuser', [DatabaseController::class,'createuser'])->name('createuser');
-    Route::post('/linkdatabuser', [DatabaseController::class,'linkdatabaseuser'])->name('linkdatabuser');
+    Route::post('/createdatab', [DatabaseController::class, 'createdatabase'])->name('createdatab');
+    Route::post('/createuser', [DatabaseController::class, 'createuser'])->name('createuser');
+    Route::post('/linkdatabuser', [DatabaseController::class, 'linkdatabaseuser'])->name('linkdatabuser');
 });
 
-Route::get('files/{folder_name?}', [FileManagerController::class,'index'])->where('folder_name', '(.*)')->name('files.index');
+Route::get('files/{folder_name?}', [FileManagerController::class, 'index'])->where('folder_name', '(.*)')->name('files.index');
 Route::post('files/view', [FileManagerController::class, 'show'])->name('files.show');
 Route::post('files/edit', [FileManagerController::class, 'edit'])->name('files.edit');
 Route::post('files/store', [FileManagerController::class, 'store'])->name('files.store');

@@ -12,8 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         // update servers table
-        Schema::table('servers', function (Blueprint $table) {
-        });
+        Schema::table('servers', function (Blueprint $table) {});
     }
 
     /**

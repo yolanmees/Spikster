@@ -8,7 +8,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-(no unreleased versions)
+## [4.0.0] - 2025-10-03
+
+### Changed - MAJOR VERSION UPGRADE
+- **Laravel Framework upgraded from 10.x to 12.32.5**
+- **PHP minimum requirement upgraded from 8.1 to 8.2** (tested on PHP 8.4.6)
+- Jetstream upgraded from 4.0 to 5.3.8
+- Livewire upgraded from 3.0 to 3.6.4
+- Sanctum upgraded from 3.2 to 4.2.0
+- PHPUnit upgraded from 10.1 to 11.5.42
+- Collision upgraded from 7.0 to 8.8.2
+- L5-Swagger upgraded from 8.5 to 8.6.5
+- DomPDF upgraded from 2.0 to 3.1.1
+- Firebase JWT upgraded from 5.2 to 6.11.1
+- Carbon upgraded from 2.x to 3.10.3
+- All Symfony components upgraded to 7.3.x
+- All other dependencies updated to latest compatible versions
+
+### Fixed
+- Local filesystem disk now uses `storage/app/private` instead of `storage/app` (Laravel 12 default)
+- Firebase JWT v6 API compatibility (encode/decode signature changes)
+- DomPDF Facade namespace updated to `Barryvdh\DomPDF\Facade\Pdf`
+- Added missing NodejsController import in web routes
+- JWT encode calls updated with algorithm parameter
+- JWT decode calls updated to use Key object
+
+### Migration Notes
+- **Breaking Change**: This is a MAJOR version upgrade
+- Ensure PHP 8.2 or higher is installed before upgrading
+- Run `composer install` to update dependencies
+- Run `php artisan config:clear && php artisan cache:clear && php artisan view:clear` after upgrade
+- Review Firebase JWT usage if you have custom JWT implementations
+
 ## [3.1.15] - 2021-12-26
 
 ### Fixed

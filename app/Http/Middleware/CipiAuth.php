@@ -2,21 +2,19 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Auth;
 use Closure;
 use Exception;
-use App\Models\Auth;
-use Firebase\JWT\JWT;
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
 use Firebase\JWT\ExpiredException;
+use Firebase\JWT\JWT;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class CipiAuth
 {
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
      * @return mixed
      */
     public function handle(Request $request, Closure $next)

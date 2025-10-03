@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands\Stats;
 
-use Illuminate\Console\Command;
 use App\Models\Stats\Disk;
+use Illuminate\Console\Command;
 
 class GetDisk extends Command
 {
@@ -29,13 +29,13 @@ class GetDisk extends Command
         $disks = json_decode(file_get_contents('http://localhost:61208/api/4/diskio'), true);
         foreach ($disks as $disk) {
             Disk::create([
-                "time_since_update" => $disk["time_since_update"],
-                "disk_name" => $disk["disk_name"],
-                "read_count" => $disk["read_count"],
-                "write_count" => $disk["write_count"],
-                "read_bytes" => $disk["read_bytes"],
-                "write_bytes" => $disk["write_bytes"],
-                "key" => $disk["key"]
+                'time_since_update' => $disk['time_since_update'],
+                'disk_name' => $disk['disk_name'],
+                'read_count' => $disk['read_count'],
+                'write_count' => $disk['write_count'],
+                'read_bytes' => $disk['read_bytes'],
+                'write_bytes' => $disk['write_bytes'],
+                'key' => $disk['key'],
             ]);
         }
     }

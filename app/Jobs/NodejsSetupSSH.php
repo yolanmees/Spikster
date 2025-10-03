@@ -3,7 +3,6 @@
 namespace App\Jobs;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -13,7 +12,6 @@ use phpseclib3\Net\SSH2;
 class NodejsSetupSSH implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
 
     protected $site;
 
@@ -40,7 +38,7 @@ class NodejsSetupSSH implements ShouldQueue
         $ssh->exec('echo '.$this->site->server->password.' | sudo -S sudo unlink newnodejs');
         $ssh->exec('echo '.$this->site->server->password.' | sudo -S sudo wget -O newnodejs  '.config('app.url').'/sh/start_nodejs');
         $ssh->exec('echo '.$this->site->server->password.' | sudo -S sudo dos2unix newnodejs');
-        $ssh->exec('echo '.$this->site->server->password.' | sudo -S sudo bash newnodejs -u '.$this->site->username.' -p '.str_pad($this->site->id,4,0,STR_PAD_RIGHT).' -r '.$this->site->node_script);
+        $ssh->exec('echo '.$this->site->server->password.' | sudo -S sudo bash newnodejs -u '.$this->site->username.' -p '.str_pad($this->site->id, 4, 0, STR_PAD_RIGHT).' -r '.$this->site->node_script);
         $ssh->exec('echo '.$this->site->server->password.' | sudo -S sudo unlink newnodejs');
         $ssh->exec('exit');
     }

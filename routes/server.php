@@ -1,9 +1,9 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LogManagerController;
+use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified' ])->group(function () {
+Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])->group(function () {
 
     Route::get('/servers', function () {
         return view('server.list');

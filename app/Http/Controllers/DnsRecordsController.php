@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\DnsRecord;
-use App\Services\DnsService;
 use App\Models\Site;
+use App\Services\DnsService;
+use Illuminate\Http\Request;
 
 class DnsRecordsController extends Controller
 {
@@ -21,6 +21,7 @@ class DnsRecordsController extends Controller
     {
         // $dns = $this->dnsService->getDnsRecords($site_id);
         $dnsRecords = DnsRecord::where('site_id', $site_id)->get();
+
         return view('site.dns.index', compact('site_id', 'dnsRecords'));
     }
 
@@ -40,7 +41,7 @@ class DnsRecordsController extends Controller
         ]);
 
         try {
-            $this->dnsService->addRecord($site->domain , $request->zone, $request->type, $request->value, $request->ttl);
+            $this->dnsService->addRecord($site->domain, $request->zone, $request->type, $request->value, $request->ttl);
         } catch (\Exception $e) {
             dd($e->getMessage());
         }
@@ -59,6 +60,7 @@ class DnsRecordsController extends Controller
     public function edit($site_id, $dns_id)
     {
         $dnsRecord = DnsRecord::where('site_id', $site_id)->where('id', $dns_id)->first();
+
         return view('site.dns.edit', compact('site_id', 'dnsRecord'));
     }
 

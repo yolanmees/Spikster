@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Server;
 
-use Livewire\Component;
 use App\Models\Server;
+use Livewire\Component;
 
 class ServerTable extends Component
 {

@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands\Stats;
 
-use Illuminate\Console\Command;
 use App\Models\Stats\Load;
+use Illuminate\Console\Command;
 
 class GetLoad extends Command
 {
@@ -28,10 +28,10 @@ class GetLoad extends Command
     {
         $load = json_decode(file_get_contents('http://localhost:61208/api/4/load'), true);
         Load::create([
-            "min1" => $load["min1"],
-            "min5" => $load["min5"],
-            "min15" => $load["min15"],
-            "cpucore" => $load["cpucore"],
+            'min1' => $load['min1'],
+            'min5' => $load['min5'],
+            'min15' => $load['min15'],
+            'cpucore' => $load['cpucore'],
         ]);
     }
 }

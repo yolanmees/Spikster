@@ -2,20 +2,20 @@
 
 namespace App\Livewire\Settings;
 
-use Livewire\Component;
-use Illuminate\Support\Facades\Http;
 use App\Models\Server;
 use App\Models\Site;
+use Illuminate\Support\Facades\Http;
+use Livewire\Component;
 
 class PanelDomain extends Component
 {
     public $panel_domain;
-    
+
     public function mount()
     {
         $server = Server::where('default', 1)->first();
         $site = Site::where('server_id', $server->id)->where('panel', 1)->first();
-        if (!$site) {
+        if (! $site) {
             $domain = '';
         } else {
             $domain = $site->domain;
@@ -32,10 +32,10 @@ class PanelDomain extends Component
     {
         // send update over api to server
         $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . auth()->user()->tokens->first()->token,
-        ])->patch(config('app.url') . 'api/servers/panel/domain', [
+            'Authorization' => 'Bearer '.auth()->user()->tokens->first()->token,
+        ])->patch(config('app.url').'api/servers/panel/domain', [
             'domain' => $this->panel_domain,
         ]);
-        putenv("app.url=".$this->panel_domain);
+        putenv('app.url='.$this->panel_domain);
     }
 }

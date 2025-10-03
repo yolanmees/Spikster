@@ -1,12 +1,9 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\SiteController;
 use App\Http\Controllers\FileManagerController;
-use App\Http\Controllers\DatabaseController;
-use App\Http\Controllers\LogManagerController;
-use App\Http\Controllers\Site\WordPressController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\NodejsController;
+use App\Http\Controllers\SiteController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,15 +20,15 @@ Route::get('/', function () {
     if (filter_var(request()->getHttpHost(), FILTER_VALIDATE_IP) || request()->getHttpHost() == \App\Models\Site::where(['panel' => 1])->pluck('domain')->first()) {
         return view('welcome');
     }
+
     return 'Domain/Subdomain not configured on this Server!';
 });
-
 
 // Route::get('/login', function () {
 //     return view('login');
 // })->name('login');
 
-Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified' ])->group(function () {
+Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])->group(function () {
 
     Route::get('/dashboard', function () {
         return view('dashboard');
@@ -41,19 +38,17 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified' 
         return view('design');
     })->name('design');
 
-    //phpmyadmin route
+    // phpmyadmin route
     Route::get('/pma', function () {
         return redirect()->to('mysecureadmin/index.php');
     });
 
-    //phpmyadmin route with autologin
+    // phpmyadmin route with autologin
     Route::get('/autopma/{site_id}', [NodejsController::class, 'autoLoginPMA'])->name('autopma');
-  
-
 
     Route::get('/pdf/{site_id}/{token}', [SiteController::class, 'pdf']);
 
-    Route::get('files/{folder_name?}', [FileManagerController::class,'index'])->where('folder_name', '(.*)')->name('files.index');
+    Route::get('files/{folder_name?}', [FileManagerController::class, 'index'])->where('folder_name', '(.*)')->name('files.index');
     Route::post('files/view', [FileManagerController::class, 'show'])->name('files.show');
     Route::post('files/edit', [FileManagerController::class, 'edit'])->name('files.edit');
     Route::post('files/store', [FileManagerController::class, 'store'])->name('files.store');

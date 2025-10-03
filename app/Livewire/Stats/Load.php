@@ -3,26 +3,29 @@
 namespace App\Livewire\Stats;
 
 use App\Models\Server;
-use Livewire\Component;
 use Illuminate\Support\Facades\Http;
+use Livewire\Component;
 
 class Load extends Component
 {
     private $server;
+
     public array $dataset = [];
+
     public array $labels = [];
+
     public $load;
 
     public function mount($server_id)
     {
         $this->server = Server::where('server_id', $server_id)->first();
         try {
-            $load = Http::get($this->server->ip . '/api/servers/' . $this->server->server_id . '/stats/load');
+            $load = Http::get($this->server->ip.'/api/servers/'.$this->server->server_id.'/stats/load');
             $this->load = $load->json()['load'];
             $this->labels = $this->getLabels();
             $this->dataset = [
                 [
-                    'label' => "Total",
+                    'label' => 'Total',
                     'backgroundColor' => 'rgba(15,64,97,255)',
                     'borderColor' => 'rgba(15,64,97,255)',
                 ],
@@ -40,6 +43,7 @@ class Load extends Component
         foreach ($this->load as $load) {
             $labels[] = date('H:i', strtotime($load['created_at']));
         }
+
         return $labels;
     }
 

@@ -2,12 +2,13 @@
 
 namespace App\Livewire\Site;
 
-use Livewire\Component;
 use App\Models\Site;
+use Livewire\Component;
 
 class SiteTable extends Component
 {
     public $sites;
+
     public function render()
     {
         return view('livewire.site.site-table');

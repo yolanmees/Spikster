@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands\Stats;
 
-use Illuminate\Console\Command;
 use App\Models\Stats\Cpu;
+use Illuminate\Console\Command;
 
 class GetCpu extends Command
 {
@@ -28,21 +28,21 @@ class GetCpu extends Command
     {
         $cpu = json_decode(file_get_contents('http://localhost:61208/api/4/cpu'), true);
         Cpu::create([
-            "total" => $cpu["total"],
-            "user" => $cpu["user"],
-            "nice" => $cpu["nice"],
-            "system" => $cpu["system"],
-            "idle" => $cpu["idle"],
-            "iowait" => $cpu["iowait"],
-            "irq" => $cpu["irq"],
-            "steal" => $cpu["steal"],
-            "guest" => $cpu["guest"],
-            "time_since_update" => $cpu["time_since_update"],
-            "cpucore" => $cpu["cpucore"],
-            "ctx_switches" => $cpu["ctx_switches"],
-            "interrupts" => $cpu["interrupts"],
-            "soft_interrupts" => $cpu["soft_interrupts"],
-            "syscalls" => $cpu["syscalls"]
+            'total' => $cpu['total'],
+            'user' => $cpu['user'],
+            'nice' => $cpu['nice'],
+            'system' => $cpu['system'],
+            'idle' => $cpu['idle'],
+            'iowait' => $cpu['iowait'],
+            'irq' => $cpu['irq'],
+            'steal' => $cpu['steal'],
+            'guest' => $cpu['guest'],
+            'time_since_update' => $cpu['time_since_update'],
+            'cpucore' => $cpu['cpucore'],
+            'ctx_switches' => $cpu['ctx_switches'],
+            'interrupts' => $cpu['interrupts'],
+            'soft_interrupts' => $cpu['soft_interrupts'],
+            'syscalls' => $cpu['syscalls'],
         ]);
     }
 }
