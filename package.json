@@ -11,11 +11,12 @@
     },
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.4",
-        "autoprefixer": "10.4.5",
-        "axios": "^0.21",
+        "@tailwindcss/typography": "^0.5.19",
+        "autoprefixer": "^10.4.20",
+        "axios": "^1.7.9",
         "laravel-mix": "^6.0.6",
-        "lodash": "^4.17.19",
-        "postcss": "^8.4.28",
-        "tailwindcss": "^3.3.3"
+        "lodash": "^4.17.21",
+        "postcss": "^8.4.49",
+        "tailwindcss": "^3.4.17"
     }
 }

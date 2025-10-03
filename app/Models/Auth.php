@@ -10,6 +10,28 @@ class Auth extends Model
 {
     use HasFactory;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'username',
+        'password',
+        'apikey',
+        'jwt',
+    ];
+
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array<int, string>
+     */
+    protected $hidden = [
+        'password',
+        'jwt',
+    ];
+
     public static function attempt($username, $password)
     {
         $user = self::where('username', $username)->first();

@@ -1,0 +1,16 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    paths:
+        - app/
+
+    # Level 0 is the loosest and level 9 is the strictest
+    level: 5
+
+    ignoreErrors:
+        # Ignore mixed types voor legacy code
+        - '#Call to an undefined method [a-zA-Z0-9\\_]+::first\(\)#'
+
+    excludePaths:
+        - app/Console/Kernel.php

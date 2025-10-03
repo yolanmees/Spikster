@@ -2,42 +2,124 @@
 
 namespace App\Livewire\Server;
 
-use App\Models\Server;
+use App\Services\ServerService;
+use Livewire\Attributes\Validate;
 use Livewire\Component;
 
 class NewServer extends Component
 {
-    public $serverName;
+    #[Validate('required|string|max:255')]
+    public $serverName = '';
 
-    public $serverIp;
+    #[Validate('required|ip')]
+    public $serverIp = '';
 
-    public $serverProvider;
+    #[Validate('required|string|max:255')]
+    public $serverProvider = '';
 
-    public $serverApiKey;
+    #[Validate('nullable|string|max:255')]
+    public $serverApiKey = '';
 
-    public $serverLocation;
+    #[Validate('nullable|string|max:255')]
+    public $serverLocation = '';
 
+    #[Validate('required|integer|min:1|max:65535')]
     public $serverSshPort = 22;
 
-    public $serverSshPassword;
+    #[Validate('required|string|min:8')]
+    public $serverSshPassword = '';
 
+    public $isSubmitting = false;
+
+    /**
+     * Create a new component instance.
+     */
+    public function __construct(
+        protected ServerService $serverService
+    ) {}
+
+    /**
+     * Render the component.
+     */
     public function render()
     {
         return view('livewire.server.new-server');
     }
 
-    public function submit()
+    /**
+     * Submit the form.
+     */
+    public function submit(): void
     {
-        $server = new Server;
-        $server->server_id = uniqid();
-        $server->database = 'spikster';
-        $server->name = $this->serverName;
-        $server->ip = $this->serverIp;
-        $server->provider = $this->serverProvider;
-        $server->location = $this->serverLocation;
-        $server->api_key = $this->serverApiKey;
-        $server->ssh_port = $this->serverSshPort;
-        $server->password = $this->serverSshPassword;
-        $server->save();
+        // Prevent double submission
+        if ($this->isSubmitting) {
+            return;
+        }
+
+        $this->isSubmitting = true;
+
+        try {
+            // Validate the form
+            $validated = $this->validate();
+
+            // Create server using service
+            $server = $this->serverService->createServer([
+                'name' => $validated['serverName'],
+                'ip' => $validated['serverIp'],
+                'provider' => $validated['serverProvider'],
+                'location' => $validated['serverLocation'] ?? null,
+                'api_key' => $validated['serverApiKey'] ?? null,
+                'ssh_port' => $validated['serverSshPort'],
+                'password' => $validated['serverSshPassword'],
+                'database' => 'spikster',
+                'status' => 0, // Not installed yet
+            ]);
+
+            // Flash success message
+            session()->flash('success', 'Server succesvol aangemaakt.');
+
+            // Dispatch event to refresh server list
+            $this->dispatch('server-created');
+
+            // Reset form
+            $this->reset([
+                'serverName',
+                'serverIp',
+                'serverProvider',
+                'serverApiKey',
+                'serverLocation',
+                'serverSshPort',
+                'serverSshPassword',
+            ]);
+
+            $this->serverSshPort = 22;
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Re-throw validation exceptions
+            throw $e;
+        } catch (\Exception $e) {
+            // Flash error message
+            session()->flash('error', 'Fout bij aanmaken server: '.$e->getMessage());
+        } finally {
+            $this->isSubmitting = false;
+        }
+    }
+
+    /**
+     * Reset the form.
+     */
+    public function resetForm(): void
+    {
+        $this->reset([
+            'serverName',
+            'serverIp',
+            'serverProvider',
+            'serverApiKey',
+            'serverLocation',
+            'serverSshPort',
+            'serverSshPassword',
+        ]);
+
+        $this->serverSshPort = 22;
+        $this->resetValidation();
     }
 }

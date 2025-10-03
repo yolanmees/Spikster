@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Auth;
+use App\Services\AuditService;
 use Firebase\JWT\JWT;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -48,6 +49,9 @@ class AuthController extends Controller
         $user = Auth::attempt($request->username, $request->password);
 
         if (! $user) {
+            // Log failed login attempt
+            AuditService::logFailedLogin($request->username);
+
             return response()->json([
                 'message' => __('spikster.invalid_login_message'),
                 'errors' => __('spikster.invalid_login'),
@@ -56,6 +60,9 @@ class AuthController extends Controller
 
         $user->jwt = JWT::encode(['iat' => time(), 'exp' => time() + config('cipi.jwt_refresh')], config('cipi.jwt_secret').'-Rfs', 'HS256');
         $user->save();
+
+        // Log successful login
+        AuditService::logLogin($user->id);
 
         return response()->json([
             'access_token' => JWT::encode(['iat' => time(), 'exp' => time() + config('cipi.jwt_access')], config('cipi.jwt_secret').'-Acs', 'HS256'),

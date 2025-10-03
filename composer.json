@@ -23,6 +23,7 @@
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
+        "larastan/larastan": "^3.7",
         "laravel/pint": "^1.18",
         "laravel/sail": "^1.37",
         "mockery/mockery": "^1.6",
@@ -45,7 +46,10 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
-        }
+        },
+        "files": [
+            "app/Helpers/SecurityHelper.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
@@ -64,6 +68,27 @@
         ],
         "post-create-project-cmd": [
             "@php artisan key:generate --ansi"
+        ],
+        "format": [
+            "./vendor/bin/pint"
+        ],
+        "format:test": [
+            "./vendor/bin/pint --test"
+        ],
+        "analyse": [
+            "./vendor/bin/phpstan analyse --memory-limit=2G"
+        ],
+        "test": [
+            "@php artisan test"
+        ],
+        "test:coverage": [
+            "@php artisan test --coverage"
+        ],
+        "clear:all": [
+            "@php artisan cache:clear",
+            "@php artisan config:clear",
+            "@php artisan route:clear",
+            "@php artisan view:clear"
         ]
     }
 }

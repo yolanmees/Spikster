@@ -1,0 +1,218 @@
+name: Test Spikster Installation
+
+on:
+  push:
+    branches: [master, develop, laravel-12]
+    paths:
+      - 'new_install.sh'
+      - 'uninstall-spikster.sh'
+      - 'go.sh'
+      - 'multipass/**'
+      - '.github/workflows/test-multipass.yml'
+  pull_request:
+    branches: [master, develop]
+    paths:
+      - 'new_install.sh'
+      - 'uninstall-spikster.sh'
+  workflow_dispatch:
+    inputs:
+      ubuntu_version:
+        description: 'Ubuntu version to test'
+        required: false
+        default: '24.04'
+        type: choice
+        options:
+          - '20.04'
+          - '22.04'
+          - '24.04'
+      branch:
+        description: 'Branch to install'
+        required: false
+        default: 'master'
+
+jobs:
+  test-installation:
+    name: Test on Ubuntu ${{ matrix.ubuntu }}
+    runs-on: macos-latest
+    timeout-minutes: 30
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        ubuntu: ['20.04', '22.04', '24.04']
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Install Multipass
+        run: |
+          echo "Installing Multipass..."
+          brew install multipass
+          multipass version
+      
+      - name: Wait for Multipass daemon
+        run: |
+          echo "Waiting for Multipass daemon to be ready..."
+          sleep 10
+          multipass list || true
+      
+      - name: Launch Ubuntu VM
+        id: launch-vm
+        run: |
+          VM_NAME="test-${{ matrix.ubuntu }}-${{ github.run_id }}"
+          echo "vm_name=$VM_NAME" >> $GITHUB_OUTPUT
+          
+          echo "Launching Ubuntu ${{ matrix.ubuntu }} VM: $VM_NAME"
+          multipass launch ${{ matrix.ubuntu }} \
+            --name "$VM_NAME" \
+            --cpus 2 \
+            --memory 4G \
+            --disk 20G \
+            --timeout 600
+          
+          echo "VM launched successfully"
+          multipass info "$VM_NAME"
+      
+      - name: Transfer installation script
+        run: |
+          echo "Transferring new_install.sh to VM..."
+          multipass transfer new_install.sh ${{ steps.launch-vm.outputs.vm_name }}:/tmp/
+      
+      - name: Run Spikster installation
+        id: install
+        run: |
+          echo "Running Spikster installation..."
+          VM_NAME="${{ steps.launch-vm.outputs.vm_name }}"
+          BRANCH="${{ github.event.inputs.branch || 'master' }}"
+          
+          # Run installation and capture output
+          multipass exec "$VM_NAME" -- sudo bash /tmp/new_install.sh -b "$BRANCH" || {
+            echo "Installation failed!"
+            exit 1
+          }
+      
+      - name: Get VM IP
+        id: get-ip
+        run: |
+          VM_NAME="${{ steps.launch-vm.outputs.vm_name }}"
+          IP=$(multipass info "$VM_NAME" | grep IPv4 | awk '{print $2}')
+          echo "vm_ip=$IP" >> $GITHUB_OUTPUT
+          echo "VM IP: $IP"
+      
+      - name: Wait for services
+        run: |
+          echo "Waiting 60 seconds for services to fully start..."
+          sleep 60
+      
+      - name: Test HTTP response
+        run: |
+          IP="${{ steps.get-ip.outputs.vm_ip }}"
+          echo "Testing HTTP response from $IP..."
+          
+          # Retry up to 5 times
+          for i in {1..5}; do
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "http://$IP" || echo "000")
+            echo "Attempt $i: HTTP $HTTP_CODE"
+            
+            if [ "$HTTP_CODE" = "200" ]; then
+              echo "✅ HTTP test PASSED"
+              exit 0
+            fi
+            
+            if [ $i -lt 5 ]; then
+              echo "Retrying in 10 seconds..."
+              sleep 10
+            fi
+          done
+          
+          echo "⚠️ HTTP test did not return 200 OK"
+          exit 1
+      
+      - name: Check services status
+        if: always()
+        run: |
+          VM_NAME="${{ steps.launch-vm.outputs.vm_name }}"
+          echo "Checking service status..."
+          
+          echo "=== Nginx ==="
+          multipass exec "$VM_NAME" -- systemctl status nginx --no-pager || true
+          
+          echo "=== PHP-FPM ==="
+          multipass exec "$VM_NAME" -- systemctl status php8.3-fpm --no-pager || true
+          
+          echo "=== MySQL ==="
+          multipass exec "$VM_NAME" -- systemctl status mysql --no-pager || true
+          
+          echo "=== Redis ==="
+          multipass exec "$VM_NAME" -- systemctl status redis-server --no-pager || true
+          
+          echo "=== Supervisor ==="
+          multipass exec "$VM_NAME" -- systemctl status supervisor --no-pager || true
+      
+      - name: Check disk usage
+        if: always()
+        run: |
+          VM_NAME="${{ steps.launch-vm.outputs.vm_name }}"
+          echo "Disk usage:"
+          multipass exec "$VM_NAME" -- df -h /
+      
+      - name: Retrieve installation log
+        if: always()
+        run: |
+          VM_NAME="${{ steps.launch-vm.outputs.vm_name }}"
+          echo "=== Last 100 lines of installation log ==="
+          multipass exec "$VM_NAME" -- sudo tail -n 100 /var/log/spikster_install.log || echo "Log file not found"
+      
+      - name: Save installation log
+        if: always()
+        run: |
+          VM_NAME="${{ steps.launch-vm.outputs.vm_name }}"
+          mkdir -p logs
+          multipass exec "$VM_NAME" -- sudo cat /var/log/spikster_install.log > logs/install-${{ matrix.ubuntu }}.log 2>/dev/null || true
+      
+      - name: Upload installation logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: installation-logs-ubuntu-${{ matrix.ubuntu }}
+          path: logs/*.log
+          retention-days: 30
+      
+      - name: Cleanup VM
+        if: always()
+        run: |
+          VM_NAME="${{ steps.launch-vm.outputs.vm_name }}"
+          echo "Cleaning up VM: $VM_NAME"
+          multipass delete "$VM_NAME" || true
+          multipass purge || true
+      
+      - name: Test summary
+        if: always()
+        run: |
+          echo "=== Test Summary ==="
+          echo "Ubuntu Version: ${{ matrix.ubuntu }}"
+          echo "Branch: ${{ github.event.inputs.branch || 'master' }}"
+          echo "VM Name: ${{ steps.launch-vm.outputs.vm_name }}"
+          echo "VM IP: ${{ steps.get-ip.outputs.vm_ip }}"
+          echo "Status: ${{ job.status }}"
+  
+  test-summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: test-installation
+    if: always()
+    
+    steps:
+      - name: Check test results
+        run: |
+          echo "=== All Tests Complete ==="
+          echo "Check individual job results above"
+          
+          if [ "${{ needs.test-installation.result }}" = "success" ]; then
+            echo "✅ All installation tests passed!"
+            exit 0
+          else
+            echo "❌ Some installation tests failed"
+            exit 1
+          fi

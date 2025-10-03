@@ -34,6 +34,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('spikster:stats-get-mem')->everyMinute();
         $schedule->command('spikster:stats-get-load')->everyMinute();
         $schedule->command('spikster:stats-get-disk')->everyMinute();
+        $schedule->command('audit:cleanup')->weekly()->sundays()->at('02:00');
     }
 
     /**

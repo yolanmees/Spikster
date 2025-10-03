@@ -1,0 +1,32 @@
+#cloud-config
+# Simulates a medium VPS configuration  
+# Equivalent to: 2 vCPUs, 4GB RAM, 50GB disk
+# Launch: multipass launch 24.04 --name medium-vps --cpus 2 --memory 4G --disk 50G --cloud-init multipass/configs/test-medium-vps.yaml
+
+hostname: spikster-medium-vps
+timezone: Europe/Amsterdam
+
+package_update: true
+package_upgrade: false
+
+packages:
+  - curl
+  - wget
+  - git
+  - htop
+  - vim
+  - net-tools
+
+# 1GB swap for medium VPS
+swap:
+  filename: /swapfile
+  size: 1073741824  # 1GB
+  maxsize: 1073741824
+
+runcmd:
+  - echo "Medium VPS configuration (2 CPUs, 4GB RAM)" > /etc/motd
+  - echo "Recommended for production Spikster installations" >> /etc/motd
+  - mkdir -p /tmp/spikster
+  - echo "medium" > /tmp/spikster/vps-size.txt
+
+final_message: "Medium VPS simulation ready. Recommended for production."

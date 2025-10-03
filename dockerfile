@@ -1,67 +1,65 @@
-FROM ubuntu:22.04
-ARG DEBIAN_FRONTEND=noninteractive
+# Production Dockerfile for Spikster
+FROM php:8.3-fpm-alpine
 
-RUN apt-get update && apt-get install -y software-properties-common 
+LABEL maintainer="Spikster Team"
+LABEL version="1.0.0"
 
-# Set the working directory in the container
+# Install system dependencies
+RUN apk add --no-cache \
+    nginx \
+    supervisor \
+    curl \
+    git \
+    unzip \
+    zip \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
+    libzip-dev \
+    oniguruma-dev \
+    postgresql-dev \
+    icu-dev \
+    libxml2-dev
+
+# Install PHP extensions
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) \
+        pdo_mysql \
+        pdo_pgsql \
+        mysqli \
+        bcmath \
+        gd \
+        zip \
+        intl \
+        opcache \
+        pcntl \
+        sockets
+
+# Install Redis extension
+RUN pecl install redis && docker-php-ext-enable redis
+
+# Set working directory
 WORKDIR /var/www/html
-RUN apt-get update &&  apt-get install -y git
-RUN git clone https://github.com/yolanmees/Spikster.git /var/www/html
 
+# Copy application
+COPY . .
 
-RUN LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php
+# Install Composer
+COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
 
-RUN apt-get update -y && apt-get install -y php8.2 \
-    libapache2-mod-php8.2 \
-    php8.2-common \
-    php8.2-mysql \
-    php8.2-gmp \
-    php8.2-ldap \
-    php8.2-curl \
-    php8.2-intl \
-    php8.2-mbstring \
-    php8.2-xmlrpc \
-    php8.2-gd \
-    php8.2-bcmath \
-    php8.2-xml \
-    php8.2-cli \
-    php8.2-zip \
-    php8.2-fpm 
+# Install dependencies
+RUN composer install --no-dev --optimize-autoloader
 
-RUN apt-get update && apt-get install -y \
-    libfreetype-dev \
-    libpng-dev 
+# Set permissions
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 775 storage bootstrap/cache
 
+# Copy configurations
+COPY docker/nginx/production.conf /etc/nginx/http.d/default.conf
+COPY docker/supervisor/supervisord-production.conf /etc/supervisor/conf.d/supervisord.conf
 
+EXPOSE 80
 
-# Update the system and install necessary packages
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
-    software-properties-common curl wget nano vim rpl sed zip unzip openssl expect dirmngr apt-transport-https lsb-release ca-certificates dnsutils dos2unix zsh htop ffmpeg \
-    nginx-core \
-    fail2ban \
-    redis-server \
-    certbot python3-certbot-nginx \
-    supervisor 
+HEALTHCHECK CMD curl -f http://localhost/up || exit 1
 
-COPY ./nginx/default /etc/nginx/sites-available/default
-
-RUN apt-get install -y nodejs npm
-
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer 
-
-RUN chmod -R 755 /var/www/html
-RUN chown -R www-data:www-data /var/www/html
-RUN export COMPOSER_ALLOW_SUPERUSER=1
-RUN cp .env.example .env
-RUN composer install --ignore-platform-reqs
-RUN php artisan key:generate
-RUN npm install 
-RUN npm run dev
-RUN service nginx restart
-RUN service php8.2-fpm restart
-
-# Tell Docker about the port we'll run on.
-EXPOSE 80 22 443 3306 6379 9000
-
-# Run the specified command within the container.
-CMD [ "supervisord", "-n" ]RUN wget -O - https://raw.githubusercontent.com/yolanmees/Spikster/master/go.sh 
+CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]

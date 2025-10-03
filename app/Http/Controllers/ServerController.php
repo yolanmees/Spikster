@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreServerRequest;
 use App\Jobs\CronSSH;
 use App\Jobs\PanelDomainAddSSH;
 use App\Jobs\PanelDomainRemoveSSH;
@@ -15,6 +16,8 @@ use App\Models\Stats\Disk;
 use App\Models\Stats\Load;
 use App\Models\Stats\Mem;
 use App\Models\Userdatabase;
+use App\Services\ServerService;
+use App\Services\SSHService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -28,6 +31,11 @@ use Symfony\Component\Process\Process;
 
 class ServerController extends Controller
 {
+    public function __construct(
+        protected ServerService $serverService,
+        protected SSHService $sshService
+    ) {}
+
     /**
      * List all servers
      *
@@ -121,10 +129,11 @@ class ServerController extends Controller
      */
     public function index()
     {
-        $servers = Server::all();
+        $servers = $this->serverService->getAllServers();
         $response = [];
 
         foreach ($servers as $server) {
+            $stats = $this->serverService->getServerStats($server);
             $data = [
                 'server_id' => $server->server_id,
                 'name' => $server->name,
@@ -133,7 +142,7 @@ class ServerController extends Controller
                 'location' => $server->location,
                 'default' => $server->default,
                 'status' => $server->status,
-                'sites' => count($server->sites),
+                'sites' => $stats['sites_count'],
             ];
             array_push($response, $data);
         }
@@ -254,20 +263,9 @@ class ServerController extends Controller
      *      )
      * )
      */
-    public function create(Request $request)
+    public function create(StoreServerRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'ip' => 'required|ip',
-            'name' => 'required|min:3',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'message' => __('spikster.bad_request'),
-                'errors' => $validator->errors()->getMessages(),
-            ], 400);
-        }
-
+        // Check if IP conflicts with current server
         if ($request->ip == $request->server('SERVER_ADDR')) {
             return response()->json([
                 'message' => __('spikster.server_conflict_ip_current_message'),
@@ -275,6 +273,7 @@ class ServerController extends Controller
             ], 409);
         }
 
+        // Check if IP already exists
         if (Server::where('ip', $request->ip)->first()) {
             return response()->json([
                 'message' => __('spikster.server_conflict_ip_duplicate_message'),
@@ -282,23 +281,23 @@ class ServerController extends Controller
             ], 409);
         }
 
-        $server = new Server;
-        $server->ip = $request->ip;
-        $server->name = $request->name;
-        $server->provider = $request->provider;
-        $server->location = $request->location;
-        $server->password = Str::random(24);
-        $server->database = Str::random(24);
-        $server->server_id = Str::uuid();
-        $server->cron = ' ';
-        $server->save();
-
-        return response()->json([
-            'server_id' => $server->server_id,
+        // Create server using service
+        $server = $this->serverService->createServer([
+            'ip' => $request->ip,
             'name' => $request->name,
             'provider' => $request->provider,
             'location' => $request->location,
-            'ip' => $request->ip,
+            'password' => Str::random(24),
+            'database' => Str::random(24),
+            'cron' => ' ',
+        ]);
+
+        return response()->json([
+            'server_id' => $server->server_id,
+            'name' => $server->name,
+            'provider' => $server->provider,
+            'location' => $server->location,
+            'ip' => $server->ip,
             'setup' => URL::to('/sh/setup/'.$server->server_id),
         ]);
     }
@@ -350,7 +349,7 @@ class ServerController extends Controller
      */
     public function destroy(string $server_id)
     {
-        $server = Server::where('server_id', $server_id)->first();
+        $server = $this->serverService->getServerById($server_id);
 
         if (! $server) {
             return response()->json([
@@ -366,9 +365,16 @@ class ServerController extends Controller
             ], 400);
         }
 
-        $server->delete();
+        try {
+            $this->serverService->deleteServer($server);
 
-        return response()->json([]);
+            return response()->json([]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'errors' => __('spikster.bad_request'),
+            ], 400);
+        }
     }
 
     /**
@@ -481,14 +487,16 @@ class ServerController extends Controller
      */
     public function show(string $server_id)
     {
-        $server = Server::where('server_id', $server_id)->where('status', 1)->first();
+        $server = $this->serverService->getServerById($server_id);
 
-        if (! $server) {
+        if (! $server || ! $server->isActive()) {
             return response()->json([
                 'message' => __('spikster.server_not_found_message'),
                 'errors' => __('spikster.server_not_found'),
             ], 404);
         }
+
+        $stats = $this->serverService->getServerStats($server);
 
         return response()->json([
             'sever_id' => $server->server_id,
@@ -501,7 +509,7 @@ class ServerController extends Controller
             'github_key' => $server->github_key,
             'build' => $server->build,
             'cron' => $server->cron,
-            'sites' => count($server->sites),
+            'sites' => $stats['sites_count'],
         ]);
     }
 

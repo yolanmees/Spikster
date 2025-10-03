@@ -1,0 +1,31 @@
+#cloud-config
+# Simulates a small VPS configuration
+# Equivalent to: 1 vCPU, 2GB RAM, 25GB disk
+# Launch: multipass launch 24.04 --name small-vps --cpus 1 --memory 2G --disk 25G --cloud-init multipass/configs/test-small-vps.yaml
+
+hostname: spikster-small-vps
+timezone: Europe/Amsterdam
+
+package_update: true
+package_upgrade: false
+
+packages:
+  - curl
+  - wget
+  - git
+  - htop
+  - vim
+
+# Smaller swap for small VPS (512MB)
+swap:
+  filename: /swapfile
+  size: 536870912  # 512MB
+  maxsize: 536870912
+
+runcmd:
+  - echo "Small VPS configuration (1 CPU, 2GB RAM)" > /etc/motd
+  - echo "Ready for Spikster installation" >> /etc/motd
+  - mkdir -p /tmp/spikster
+  - echo "small" > /tmp/spikster/vps-size.txt
+
+final_message: "Small VPS simulation ready. Good for basic testing."

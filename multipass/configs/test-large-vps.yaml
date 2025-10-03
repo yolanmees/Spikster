@@ -1,0 +1,34 @@
+#cloud-config
+# Simulates a large VPS configuration
+# Equivalent to: 4 vCPUs, 8GB RAM, 100GB disk
+# Launch: multipass launch 24.04 --name large-vps --cpus 4 --memory 8G --disk 100G --cloud-init multipass/configs/test-large-vps.yaml
+
+hostname: spikster-large-vps
+timezone: Europe/Amsterdam
+
+package_update: true
+package_upgrade: false
+
+packages:
+  - curl
+  - wget
+  - git
+  - htop
+  - vim
+  - net-tools
+  - iotop
+  - sysstat
+
+# 2GB swap for large VPS
+swap:
+  filename: /swapfile
+  size: 2147483648  # 2GB
+  maxsize: 2147483648
+
+runcmd:
+  - echo "Large VPS configuration (4 CPUs, 8GB RAM)" > /etc/motd
+  - echo "High-performance setup for multiple sites" >> /etc/motd
+  - mkdir -p /tmp/spikster
+  - echo "large" > /tmp/spikster/vps-size.txt
+
+final_message: "Large VPS simulation ready. High-performance configuration."

@@ -17,6 +17,8 @@ use App\Jobs\SslSiteSSH;
 use App\Models\Alias;
 use App\Models\Server;
 use App\Models\Site;
+use App\Services\ServerService;
+use App\Services\SiteService;
 use Barryvdh\DomPDF\Facade\Pdf as PDF;
 use Carbon\Carbon;
 use Firebase\JWT\JWT;
@@ -28,6 +30,11 @@ use Illuminate\Support\Str;
 
 class SiteController extends Controller
 {
+    public function __construct(
+        protected SiteService $siteService,
+        protected ServerService $serverService
+    ) {}
+
     /**
      * List all sites
      *
@@ -121,21 +128,27 @@ class SiteController extends Controller
      */
     public function index()
     {
-        $sites = Site::where('panel', false)->get();
+        $sites = $this->siteService->getAllSites();
         $response = [];
 
         foreach ($sites as $site) {
+            if ($site->isPanel()) {
+                continue; // Skip panel sites
+            }
+
+            $stats = $this->siteService->getSiteStats($site);
+
             $data = [
                 'site_id' => $site->site_id,
                 'domain' => $site->domain,
                 'username' => $site->username,
-                'server_id' => $site->server->server_id,
+                'server_id' => $stats['server']['name'] ?? null,
                 'server_name' => $site->server->name,
-                'server_ip' => $site->server->ip,
+                'server_ip' => $stats['server']['ip'] ?? null,
                 'php' => $site->php,
                 'basepath' => $site->basepath,
                 'rootpath' => $site->rootpath,
-                'aliases' => count($site->aliases),
+                'aliases' => $stats['aliases_count'],
             ];
             array_push($response, $data);
         }
