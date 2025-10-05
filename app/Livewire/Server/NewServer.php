@@ -73,7 +73,7 @@ class NewServer extends Component
 
             // Dispatch event to refresh server list
             $this->dispatch('server-created');
-            
+
             // Close modal
             $this->dispatch('close-modal');
 

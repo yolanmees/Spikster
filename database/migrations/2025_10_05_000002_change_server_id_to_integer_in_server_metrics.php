@@ -9,7 +9,7 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     * 
+     *
      * Change server_id from string to unsignedBigInteger to match the servers.id column.
      */
     public function up(): void

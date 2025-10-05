@@ -1,10 +1,10 @@
 <div>
     @script
-    <script>
-        $wire.on('close-modal', () => {
-            $('#newServerModal').modal('hide');
-        });
-    </script>
+        <script>
+            $wire.on('close-modal', () => {
+                $('#newServerModal').modal('hide');
+            });
+        </script>
     @endscript
 
     <form wire:submit="submit">

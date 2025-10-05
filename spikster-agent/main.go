@@ -161,7 +161,7 @@ func metricsHandler(w http.ResponseWriter, r *http.Request) {
 // healthHandler handles /health endpoint
 func healthHandler(w http.ResponseWriter, r *http.Request) {
 	uptime, _ := host.Uptime()
-	
+
 	health := HealthResponse{
 		Status:  "healthy",
 		Version: Version,
@@ -213,7 +213,7 @@ func main() {
 	log.Printf("🚀 Spikster Agent v%s starting on port %s", Version, Port)
 	log.Printf("📊 Endpoints: /health, /metrics")
 	log.Printf("💻 CPU Cores: %d", runtime.NumCPU())
-	
+
 	if err := http.ListenAndServe(Port, r); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}

@@ -83,7 +83,7 @@ class FetchServerMetricsJob implements ShouldQueue, ShouldBeUnique
         try {
             // Fetch metrics from the agent
             $metrics = $this->fetchMetricsFromAgent();
-            
+
             if (!$metrics) {
                 Log::warning("No metrics received from server: {$this->server->id}");
                 return;
@@ -105,7 +105,7 @@ class FetchServerMetricsJob implements ShouldQueue, ShouldBeUnique
                 'server' => $this->server->id,
                 'exception' => $e,
             ]);
-            
+
             // Don't fail the job - we'll try again next time
             // This prevents filling the failed_jobs table
         }
@@ -127,7 +127,7 @@ class FetchServerMetricsJob implements ShouldQueue, ShouldBeUnique
     private function fetchMetricsFromAgent(): ?array
     {
         $agentUrl = $this->getAgentUrl();
-        
+
         try {
             $response = Http::timeout(10)
                 ->connectTimeout(5)
@@ -170,10 +170,10 @@ class FetchServerMetricsJob implements ShouldQueue, ShouldBeUnique
     {
         // Default port for spikster-agent
         $port = 9273;
-        
+
         // Use server IP - agent listens on localhost but we connect via server IP
         $host = $this->server->ip ?? $this->server->domain;
-        
+
         return "http://{$host}:{$port}/metrics";
     }
 
@@ -183,7 +183,7 @@ class FetchServerMetricsJob implements ShouldQueue, ShouldBeUnique
     private function validateMetricsData(array $data): bool
     {
         $required = ['cpu_percent', 'memory', 'disk', 'load', 'network', 'uptime_seconds', 'timestamp'];
-        
+
         foreach ($required as $field) {
             if (!isset($data[$field])) {
                 Log::error("Missing required field in metrics: {$field}");
@@ -206,11 +206,11 @@ class FetchServerMetricsJob implements ShouldQueue, ShouldBeUnique
 
         ServerMetric::create([
             'server_id' => $this->server->id,
-            
+
             // CPU
             'cpu_percent' => $data['cpu_percent'] ?? 0,
             'cpu_cores' => $data['cpu_cores'] ?? null,
-            
+
             // Memory (agent returns *_bytes fields)
             'memory_total' => $memory['total_bytes'] ?? 0,
             'memory_used' => $memory['used_bytes'] ?? 0,
@@ -219,30 +219,30 @@ class FetchServerMetricsJob implements ShouldQueue, ShouldBeUnique
             'memory_percent' => $memory['percent'] ?? 0,
             'memory_cached' => $memory['cached_bytes'] ?? null,
             'memory_buffers' => $memory['buffers_bytes'] ?? null,
-            
+
             // Disk (agent returns *_bytes fields)
             'disk_total' => $disk['total_bytes'] ?? 0,
             'disk_used' => $disk['used_bytes'] ?? 0,
             'disk_free' => $disk['free_bytes'] ?? 0,
             'disk_percent' => $disk['percent'] ?? 0,
-            
+
             // Load (agent returns load1, load5, load15)
             'load_1' => $load['load1'] ?? 0,
             'load_5' => $load['load5'] ?? 0,
             'load_15' => $load['load15'] ?? 0,
-            
+
             // Network
             'network_bytes_sent' => $network['bytes_sent'] ?? 0,
             'network_bytes_recv' => $network['bytes_recv'] ?? 0,
             'network_packets_sent' => $network['packets_sent'] ?? null,
             'network_packets_recv' => $network['packets_recv'] ?? null,
-            
+
             // System (agent returns uptime_seconds)
             'uptime_seconds' => $data['uptime_seconds'] ?? 0,
-            
+
             // Timestamp from agent
-            'measured_at' => isset($data['timestamp']) 
-                ? Carbon::parse($data['timestamp']) 
+            'measured_at' => isset($data['timestamp'])
+                ? Carbon::parse($data['timestamp'])
                 : now(),
         ]);
 
@@ -257,7 +257,7 @@ class FetchServerMetricsJob implements ShouldQueue, ShouldBeUnique
         try {
             $daysToKeep = config('monitoring.metrics_retention_days', 30);
             $deleted = ServerMetric::cleanupForServer($this->server->id, $daysToKeep);
-            
+
             if ($deleted > 0) {
                 Log::info("Cleaned up {$deleted} old metrics for server: {$this->server->id}");
             }

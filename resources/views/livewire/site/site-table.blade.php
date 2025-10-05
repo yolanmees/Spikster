@@ -12,19 +12,19 @@
     <div class="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <!-- Search -->
         <div class="sm:col-span-2">
-            <x-text-input 
-                model="search" 
-                debounce="300" 
-                placeholder="Search by domain or username..."
-            >
+            <x-text-input model="search" debounce="300" placeholder="Search by domain or username...">
                 <x-slot name="icon">
                     <x-icon icon="search" class="h-5 w-5 text-gray-400" />
                 </x-slot>
                 <x-slot name="suffix">
                     <div wire:loading wire:target="search">
-                        <svg class="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        <svg class="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg"
+                            fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                            </path>
                         </svg>
                     </div>
                 </x-slot>
@@ -149,17 +149,13 @@
                                     Manage
                                 </x-action-button>
                                 @if (!$site->isPanel())
-                                    <x-danger-button 
-                                        wire:click="confirmDelete('{{ $site->site_id }}')" 
-                                        type="button"
-                                        class="ml-2"
-                                        wire:loading.attr="disabled" 
-                                        wire:target="confirmDelete"
-                                    >
+                                    <x-danger-button wire:click="confirmDelete('{{ $site->site_id }}')" type="button"
+                                        class="ml-2" wire:loading.attr="disabled" wire:target="confirmDelete">
                                         Delete
                                     </x-danger-button>
                                 @else
-                                    <span class="ml-2 inline-flex items-center px-2.5 py-1.5 text-xs text-gray-400 dark:text-gray-500">
+                                    <span
+                                        class="ml-2 inline-flex items-center px-2.5 py-1.5 text-xs text-gray-400 dark:text-gray-500">
                                         (Panel - cannot be deleted)
                                     </span>
                                 @endif
@@ -168,11 +164,9 @@
                     @empty
                         <tr>
                             <td colspan="5">
-                                <x-empty-state 
-                                    icon="globe" 
-                                    :title="($search || $filterPhp) ? 'No sites found' : 'No sites yet'"
-                                    :message="($search || $filterPhp) ? 'No sites found with current filters.' : 'Start by adding a new site.'"
-                                />
+                                <x-empty-state icon="globe" :title="$search || $filterPhp ? 'No sites found' : 'No sites yet'" :message="$search || $filterPhp
+                                    ? 'No sites found with current filters.'
+                                    : 'Start by adding a new site.'" />
                             </td>
                         </tr>
                     @endforelse
@@ -190,8 +184,7 @@
 
     <!-- Delete Confirmation Modal -->
     @if ($confirmingDeletion)
-        <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog"
-            aria-modal="true">
+        <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
             <!-- Background overlay -->
             <div class="flex min-h-screen items-center justify-center p-4 text-center sm:p-0">
                 <div wire:click="cancelDelete" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity">
@@ -225,12 +218,8 @@
                         </div>
                     </div>
                     <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-                        <x-danger-button 
-                            wire:click="delete" 
-                            wire:loading.attr="disabled" 
-                            wire:target="delete"
-                            class="w-full sm:ml-3 sm:w-auto"
-                        >
+                        <x-danger-button wire:click="delete" wire:loading.attr="disabled" wire:target="delete"
+                            class="w-full sm:ml-3 sm:w-auto">
                             <span wire:loading.remove wire:target="delete">Delete</span>
                             <span wire:loading wire:target="delete" class="flex items-center">
                                 <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
@@ -244,10 +233,7 @@
                                 Deleting...
                             </span>
                         </x-danger-button>
-                        <x-secondary-button 
-                            wire:click="cancelDelete"
-                            class="mt-3 w-full sm:mt-0 sm:w-auto"
-                        >
+                        <x-secondary-button wire:click="cancelDelete" class="mt-3 w-full sm:mt-0 sm:w-auto">
                             Cancel
                         </x-secondary-button>
                     </div>

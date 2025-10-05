@@ -12,25 +12,25 @@ class MonitoringService
 {
     /**
      * Get the latest metrics for a server.
-     * 
+     *
      * Returns cached metrics if agent is unreachable and caching is enabled.
      */
     public function getLatestMetrics(Server $server): ?array
     {
         $cacheKey = "server_metrics_{$server->id}";
-        
+
         // Try to get from database first
         $metric = ServerMetric::getLatestForServer($server->id);
-        
+
         if ($metric) {
             $data = $this->formatMetricForDisplay($metric);
-            
+
             // Cache for 2 minutes
             Cache::put($cacheKey, $data, 120);
-            
+
             return $data;
         }
-        
+
         // Fallback to cached if enabled
         if (config('monitoring.use_cached_metrics', true)) {
             $cached = Cache::get($cacheKey);
@@ -39,7 +39,7 @@ class MonitoringService
                 return array_merge($cached, ['cached' => true]);
             }
         }
-        
+
         return null;
     }
 
@@ -78,7 +78,7 @@ class MonitoringService
     public function checkServerHealth(Server $server): array
     {
         $metric = ServerMetric::getLatestForServer($server->id);
-        
+
         if (!$metric) {
             return [
                 'status' => 'unknown',
@@ -121,7 +121,7 @@ class MonitoringService
 
         // Determine overall status
         $hasCritical = collect($issues)->contains(fn($i) => str_contains($i, 'critical'));
-        
+
         return [
             'status' => $hasCritical ? 'critical' : 'warning',
             'message' => count($issues) . ' issue(s) detected',
@@ -137,10 +137,10 @@ class MonitoringService
         $port = config('monitoring.agent_port', 9273);
         $host = $server->ip ?? $server->domain;
         $healthUrl = "http://{$host}:{$port}/health";
-        
+
         try {
             $response = Http::timeout(5)->get($healthUrl);
-            
+
             if ($response->successful()) {
                 $data = $response->json();
                 return [
@@ -149,13 +149,13 @@ class MonitoringService
                     'data' => $data,
                 ];
             }
-            
+
             return [
                 'success' => false,
                 'message' => "Agent returned status {$response->status()}",
                 'data' => null,
             ];
-            
+
         } catch (\Exception $e) {
             return [
                 'success' => false,
@@ -173,13 +173,13 @@ class MonitoringService
         return [
             'timestamp' => $metric->measured_at->toISOString(),
             'measured_at' => $metric->measured_at->diffForHumans(),
-            
+
             'cpu' => [
                 'percent' => $metric->cpu_percent,
                 'cores' => $metric->cpu_cores,
                 'status' => $this->getMetricStatus($metric->cpu_percent, 'cpu'),
             ],
-            
+
             'memory' => [
                 'total' => $metric->memory_total,
                 'used' => $metric->memory_used,
@@ -191,7 +191,7 @@ class MonitoringService
                 'formatted' => $metric->formatted_memory,
                 'status' => $this->getMetricStatus($metric->memory_percent, 'memory'),
             ],
-            
+
             'disk' => [
                 'total' => $metric->disk_total,
                 'used' => $metric->disk_used,
@@ -200,20 +200,20 @@ class MonitoringService
                 'formatted' => $metric->formatted_disk,
                 'status' => $this->getMetricStatus($metric->disk_percent, 'disk'),
             ],
-            
+
             'load' => [
                 '1' => $metric->load_1,
                 '5' => $metric->load_5,
                 '15' => $metric->load_15,
             ],
-            
+
             'network' => [
                 'bytes_sent' => $metric->network_bytes_sent,
                 'bytes_recv' => $metric->network_bytes_recv,
                 'packets_sent' => $metric->network_packets_sent,
                 'packets_recv' => $metric->network_packets_recv,
             ],
-            
+
             'uptime' => [
                 'seconds' => $metric->uptime_seconds,
                 'formatted' => $metric->formatted_uptime,
@@ -227,15 +227,15 @@ class MonitoringService
     private function getMetricStatus(float $value, string $type): string
     {
         $thresholds = config("monitoring.thresholds.{$type}", []);
-        
+
         if (isset($thresholds['critical']) && $value >= $thresholds['critical']) {
             return 'critical';
         }
-        
+
         if (isset($thresholds['warning']) && $value >= $thresholds['warning']) {
             return 'warning';
         }
-        
+
         return 'normal';
     }
 

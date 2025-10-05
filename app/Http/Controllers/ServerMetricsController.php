@@ -18,26 +18,26 @@ class ServerMetricsController extends Controller
     {
         $server = Server::where('server_id', $serverId)->firstOrFail();
         $hours = (int) $request->get('hours', 1);
-        
+
         Log::info('ServerMetricsController', [
             'server_uuid' => $serverId,
             'server_id' => $server->id,
             'hours' => $hours,
         ]);
-        
+
         // Get metrics data with dynamic grouping
         $data = $this->getTimeSeriesData($server->id, $hours);
-        
+
         Log::info('Metrics data result', [
             'labels_count' => count($data['labels']),
             'cpu_count' => count($data['cpu']),
             'first_label' => $data['labels'][0] ?? null,
             'last_label' => $data['labels'][count($data['labels']) - 1] ?? null,
         ]);
-        
+
         return response()->json($data);
     }
-    
+
     /**
      * Get time-series data with dynamic grouping
      */
@@ -48,14 +48,14 @@ class ServerMetricsController extends Controller
             'hours' => $hours,
             'time_range' => $hours <= 1 ? 'minute' : ($hours <= 6 ? '5min' : 'hourly'),
         ]);
-        
+
         if ($hours <= 1) {
             // Last hour: show every data point
             $metrics = ServerMetric::where('server_id', $serverId)
                 ->where('measured_at', '>=', now()->subHours($hours))
                 ->orderBy('measured_at')
                 ->get();
-            
+
             Log::info('Query result for hourly', [
                 'count' => $metrics->count(),
                 'first' => $metrics->first() ? $metrics->first()->measured_at : null,
@@ -69,7 +69,7 @@ class ServerMetricsController extends Controller
                 'disk' => $metrics->pluck('disk_percent')->map(fn($v) => round($v, 2))->values()->toArray(),
                 'load' => $metrics->pluck('load_1')->map(fn($v) => round($v, 2))->values()->toArray(),
             ];
-            
+
         } elseif ($hours <= 6) {
             // 6 hours: group by 5 minutes
             $metrics = ServerMetric::where('server_id', $serverId)
@@ -92,7 +92,7 @@ class ServerMetricsController extends Controller
                 'disk' => $metrics->pluck('avg_disk')->map(fn($v) => round($v, 2))->values()->toArray(),
                 'load' => $metrics->pluck('avg_load')->map(fn($v) => round($v, 2))->values()->toArray(),
             ];
-            
+
         } else {
             // 12+ hours: group by hour
             $metrics = ServerMetric::where('server_id', $serverId)

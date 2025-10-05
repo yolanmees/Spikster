@@ -5,21 +5,21 @@
 
 @php
     $cardClasses = [
-        'base' => 'rounded-lg border overflow-hidden transition-colors',
+        'base' => 'rounded-xl border shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md',
         'sizes' => [
             'sm' => 'text-sm',
             'md' => 'text-base',
             'lg' => 'text-lg',
         ],
         'light' => [
-            'card' => 'bg-white border-gray-400',
-            'header' => 'bg-gray-100 text-gray-700 py-3 px-4 border-b border-gray-400',
-            'body' => 'p-4',
+            'card' => 'bg-white border-gray-200',
+            'header' => 'bg-gray-50/50 text-gray-900 font-semibold py-4 px-6 border-b border-gray-100',
+            'body' => 'p-6',
         ],
         'dark' => [
-            'card' => 'dark:bg-gray-800 dark:border-gray-700 dark:text-white',
-            'header' => 'dark:bg-gray-900 dark:text-gray-300 py-3 px-4 dark:border-b dark:border-gray-700',
-            'body' => 'p-4',
+            'card' => 'dark:bg-gray-800/50 dark:border-gray-700/50 dark:text-white dark:backdrop-blur-sm',
+            'header' => 'dark:bg-gray-800/80 dark:text-white py-4 px-6 dark:border-b dark:border-gray-700/50',
+            'body' => 'p-6',
         ],
     ];
 

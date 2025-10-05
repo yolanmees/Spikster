@@ -84,7 +84,7 @@ class NewSite extends Component
 
             // Dispatch event to refresh site list
             $this->dispatch('site-created');
-            
+
             // Dispatch event to close modal
             $this->dispatch('close-modal');
 

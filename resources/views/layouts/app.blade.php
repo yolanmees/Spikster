@@ -16,12 +16,12 @@
     <link rel="icon" type="image/png" href="/favicon.png" />
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link href="/css/app.css" rel="stylesheet" />
-    
+
     <style>
-        [x-cloak] { 
-            display: none !important; 
+        [x-cloak] {
+            display: none !important;
         }
-        
+
         .space {
             min-height: 20px;
         }
@@ -49,20 +49,24 @@
     </style>
     @yield('css')
 </head>
-<body x-data="{ sidebarOpen: false, darkMode: false }"
-      x-init="darkMode = JSON.parse(localStorage.getItem('darkMode')) || false; $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
-      x-bind:class="{ 'dark': darkMode }" class="bg-gray-100 dark:bg-gray-900 dark:text-white">
+
+<body x-data="{ sidebarOpen: false, darkMode: false }" x-init="darkMode = JSON.parse(localStorage.getItem('darkMode')) || false;
+$watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))" x-bind:class="{ 'dark': darkMode }"
+    class="bg-gray-100 dark:bg-gray-900 dark:text-white">
     <div>
         @include('layouts.components.mobile-sidebar')
         @include('layouts.components.sidebar')
 
         <div class="xl:pl-72">
             <!-- Sticky search header -->
-            <div class="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-6 border-b border-white/5 bg-gray-900 dark:bg-gray-800 px-4 shadow-sm sm:px-6 lg:px-8">
+            <div
+                class="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-6 border-b border-white/5 bg-gray-900 dark:bg-gray-800 px-4 shadow-sm sm:px-6 lg:px-8">
                 <button x-on:click="sidebarOpen = true" type="button" class="-m-2.5 p-2.5 text-white xl:hidden">
                     <span class="sr-only">Open sidebar</span>
                     <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                        <path fill-rule="evenodd" d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10zm0 5.25a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75a.75.75 0 01-.75-.75z" clip-rule="evenodd" />
+                        <path fill-rule="evenodd"
+                            d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10zm0 5.25a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75a.75.75 0 01-.75-.75z"
+                            clip-rule="evenodd" />
                     </svg>
                 </button>
 
@@ -77,14 +81,14 @@
                         </div>
                     </form>
                 </div>
-                
-          
+
+
             </div>
 
             <main class="m-4">
                 @yield('content')
             </main>
-            <div class="grid place-items-center"> 
+            <div class="grid place-items-center">
                 @yield('extra')
             </div>
         </div>
@@ -149,18 +153,19 @@
 
         //IP Validation
         function ipValidate(ip) {
-            return (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ip))
+            return (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/
+                .test(ip))
         }
 
         //jQuery AJAX Authorization Header Setup & Default Error
         $.ajaxSetup({
-            cache: false
-            , headers: {
-                'Authorization': 'Bearer ' + localStorage.access_token
-                , 'Accept': 'application/json'
-                , 'Content-Type': 'application/json'
-            }
-            , error: function(error) {
+            cache: false,
+            headers: {
+                'Authorization': 'Bearer ' + localStorage.access_token,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            error: function(error) {
                 if (error.status == 401) {
                     jwtrefresh().then(data => {
                         this.headers = {
@@ -186,19 +191,19 @@
         function jwtrefresh() {
             return new Promise((resolve, reject) => {
                 $.ajax({
-                    url: '/auth'
-                    , type: 'GET'
-                    , data: {
-                        username: localStorage.username
-                        , refresh_token: localStorage.refresh_token
-                    }
-                    , success: function(data) {
+                    url: '/auth',
+                    type: 'GET',
+                    data: {
+                        username: localStorage.username,
+                        refresh_token: localStorage.refresh_token
+                    },
+                    success: function(data) {
                         localStorage.access_token = data.access_token;
                         localStorage.refresh_token = data.refresh_token;
                         localStorage.username = data.username;
                         resolve(data);
-                    }
-                    , error: function(error) {
+                    },
+                    error: function(error) {
                         localStorage.clear();
                         window.location.replace('/login');
                         reject(error);
@@ -213,9 +218,9 @@
                 $('#mainloading').removeClass('d-none');
             }
             $.ajax({
-                type: 'GET'
-                , url: url
-                , success: function(data) {
+                type: 'GET',
+                url: url,
+                success: function(data) {
                     localStorage.dtdata = '';
                     localStorage.dtdata = JSON.stringify(data);
                     dtRender();
@@ -231,9 +236,9 @@
         //Get Data for Other
         function getDataNoDT(url) {
             $.ajax({
-                type: 'GET'
-                , url: url
-                , success: function(data) {
+                type: 'GET',
+                url: url,
+                success: function(data) {
                     localStorage.otherdata = '';
                     localStorage.otherdata = JSON.stringify(data);
                 }
@@ -243,9 +248,9 @@
         //Get Data for DataTable
         function getDataNoUI(url) {
             $.ajax({
-                type: 'GET'
-                , url: url
-                , success: function(data) {
+                type: 'GET',
+                url: url,
+                success: function(data) {
                     localStorage.dtdata = '';
                     localStorage.dtdata = JSON.stringify(data);
                 }
@@ -256,26 +261,25 @@
         $('#logout').click(function(e) {
             e.preventDefault();
             $.ajax({
-                url: '/auth'
-                , type: 'DELETE'
-                , headers: {
-                    'x-csrf-token': $('meta[name="csrf-token"]').attr('content')
-                    , 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-                }
-                , data: {
-                    'username': localStorage.username
-                    , 'refresh_token': localStorage.refresh_token
-                }
-                , success: function(data) {
+                url: '/auth',
+                type: 'DELETE',
+                headers: {
+                    'x-csrf-token': $('meta[name="csrf-token"]').attr('content'),
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                },
+                data: {
+                    'username': localStorage.username,
+                    'refresh_token': localStorage.refresh_token
+                },
+                success: function(data) {
                     localStorage.clear();
                     window.location.replace('/login');
                 }
             });
         });
-
     </script>
     @yield('js')
     @stack('scripts')
 </body>
-</html>
 
+</html>
