@@ -1,312 +1,91 @@
 @extends('layouts.app')
 
-
-
-
 @section('title')
-    {{ __('spikster.titles.servers') }}
+    Servers
 @endsection
 
-
-
 @section('content')
-<div class="row">
-    <div class="col-xl-12">
-        <button class="btn btn-sm btn-secondary" id="newServer">
-            <i class="fas fa-plus mr-1"></i><b>{{ __('spikster.new_button', ['type' => __('spikster.server')]) }}</b>
-        </button>
-        @livewire('server.server-table')
-    </div>
+<div class="space-y-6">
+    <x-page-header title="Servers">
+        <x-slot name="actions">
+            <x-primary-button id="newServer">
+                <x-icon icon="plus" class="-ml-1 mr-2 h-5 w-5" />
+                New Server
+            </x-primary-button>
+        </x-slot>
+    </x-page-header>
+    
+    @livewire('server.server-table')
 </div>
 @endsection
 
 
 
 @section('extra')
-@livewire('server.new-server')
-<dialog class="modal fade" id="installServerModal" tabindex="-1" role="dialog" aria-labelledby="installServerModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="installServerModalLabel">{{ __('spikster.server_setup') }}</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p><b>{{ __('spikster.server_setup_title') }}</b>
-                    <ul>
-                        <li>{!! __('spikster.server_setup_step1') !!}</li>
-                        <li>{!! __('spikster.server_setup_step2') !!}<br>
-                            <code><i>ssh root@<span id="installserverssh"></span></i></code></li>
-                        <li>{!! __('spikster.server_setup_step3') !!}<br>
-                            <code><i>wget -O - {{ URL::to('/sh/setup/') }}/<span id="installserverid"></span> | bash</i></code></li>
-                        <li>{!! __('spikster.server_setup_step4') !!}</li>
-                        <li>{!! __('spikster.server_setup_step5') !!}</li>
-                        <li>{!! __('spikster.server_setup_step6') !!}</li>
-                        <li>{!! __('spikster.server_setup_step7') !!}</li>
-                        <li>{!! __('spikster.server_setup_step8') !!}</li>
-                    </ul>
-                </p>
-                <div class="space"></div>
+<!-- New Server Modal -->
+<div id="newServerModal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <!-- Background overlay -->
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+
+        <!-- Center modal -->
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+        <!-- Modal panel -->
+        <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+            <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div class="flex items-start justify-between pb-3 border-b border-gray-200 dark:border-gray-700">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+                        New Server
+                    </h3>
+                    <button type="button" id="closeNewServerModal" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                        <x-icon icon="x" class="h-6 w-6" />
+                    </button>
+                </div>
+                <div class="mt-4">
+                    @livewire('server.new-server')
+                </div>
             </div>
         </div>
     </div>
-</dialog>
-<dialog class="modal fade" id="deleteServerModal" tabindex="-1" role="dialog" aria-labelledby="deleteServerModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="deleteServerModalLabel">{{ __('spikster.delete_server') }}</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeDialog()">
-                <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p>{{ __('spikster.delete_server_confirmation') }} <b><span id="deleteservername"></span></b>?</p>
-                <div class="space"></div>
-                <label for="deleteserverip">{{ __('spikster.delete_server_confirmation_ip') }}: <i><span id="deleteserveriptocopy"></span></i></label>
-                <div class="input-group">
-                    <input class="form-control" type="text" id="deleteserverip" autocomplete="off" />
-                </div>
-                <input type="hidden" id="deleteserverid" value="" />
-                <div class="space"></div>
-                <div class="text-center">
-                    <button class="btn btn-danger" type="button" id="delete">{{ __('spikster.delete') }} <i class="fas fa-circle-notch fa-spin d-none" id="loadingdelete"></i></button>
-                </div>
-                <div class="space"></div>
-            </div>
-        </div>
-    </div>
-</dialog>
-@endsection
-
-
-
-@section('css')
-
+</div>
 @endsection
 
 
 
 @section('js')
 <script>
-    //Get DT Data
-    getData('/api/servers');
+    // Modal handling
+    const newServerModal = document.getElementById('newServerModal');
+    const newServerButton = document.getElementById('newServer');
+    const closeNewServerModalButton = document.getElementById('closeNewServerModal');
 
-    // Render Make
-    function renderMake() {
-        $('#dt').DataTable( {
-            'processing': true,
-            'data': JSON.parse(localStorage.getItem('dtdata')),
-            'columns': [
-                { data: 'name' },
-                { data: 'ip' },
-                // { data: 'provider' },
-                // { data: 'location' },
-                { data: {
-                    'server_id': 'server_id',
-                    'default': 'default',
-                    'name': 'name',
-                    'status': 'status',
-                    'ip': 'ip'
-                }}
-            ],
-            'columnDefs': [
-                {
-                    'targets': 0,
-                    'className': 'd-none d-md-table-cell',
-                },
-                {
-                    'targets': 1,
-                    'className': 'text-center',
-                },
-                // {
-                //     'targets': 2,
-                //     'className': 'text-center d-none d-lg-table-cell',
-                // },
-                // {
-                //     'targets': 3,
-                //     'className': 'text-center d-none d-xl-table-cell',
-                // },
-                {
-                    'targets': 4,
-                    'className': 'text-center',
-                    'render': function ( data, type, row, meta ) {
-                        if(data['status'] == 0) {
-                            if(data['default']) {
-                                return '<span class="btn btn-sm btn-warning mr-3"><i class="fas fa-circle-notch fa-spin fa-fw"></i> <b class="d-none d-sm-inline">Wait...</b></span><span class="disabled btn btn-sm btn-danger"><i class="fas fa-times fa-fw"></i> <b class="d-none d-sm-inline">Delete</b></span>';
-                            } else {
-                                return '<button data-id="'+data['server_id']+'" data-ip="'+data['ip']+'" class="btinstall btn btn-sm btn-secondary mr-3"><i class="fas fa-terminal fa-fw"></i> <b class="d-none d-sm-inline">Install</b></button><button data-id="'+data['server_id']+'" data-name="'+data['name']+'" data-ip="'+data['ip']+'" class="btdelete btn btn-sm btn-danger"><i class="fas fa-times fa-fw"></i> <b class="d-none d-sm-inline">Delete</b></button>';
-                            }
-                        } else {
-                            if(data['default']) {
-                                return '<button data-id="'+data['server_id']+'" class="btmanage btn btn-sm btn-primary mr-3"><i class="fas fa-cog fa-fw"></i> <b class="d-none d-sm-inline">Manage</b></button><span class="disabled btn btn-sm btn-danger"><i class="fas fa-times fa-fw"></i> <b class="d-none d-sm-inline">Delete</b></span>';
-                            } else {
-                                return '<button data-id="'+data['server_id']+'" class="btmanage btn btn-sm btn-primary mr-3"><i class="fas fa-cog fa-fw"></i> <b class="d-none d-sm-inline">Manage</b></button><button data-id="'+data['server_id']+'" data-name="'+data['name']+'" data-ip="'+data['ip']+'" class="btdelete btn btn-sm btn-danger"><i class="fas fa-times fa-fw"></i> <b class="d-none d-sm-inline">Delete</b></button>';
-                            }
-                        }
-
-                    }
-                }
-            ],
-            'bLengthChange': false,
-            'bAutoWidth': true,
-            'responsive': true,
-            'drawCallback': function(settings) {
-                //Manage Server
-                $(".btmanage").click(function() {
-                    window.location.href = '/servers/'+$(this).attr('data-id');
-                });
-                //Delete Server
-                $(".btdelete").click(function() {
-                    serverDelete($(this).attr('data-id'),$(this).attr('data-ip'),$(this).attr('data-name'));
-                });
-                //Setup Server
-                $(".btinstall").click(function() {
-                    $('#installserverid').html($(this).attr('data-id'));
-                    $('#installserverssh').html($(this).attr('data-ip'));
-                    $('#installServerModal').modal();
-                });
-            }
-        });
-    }
-
-    //Delete Server
-    function serverDelete(server_id,ip,name) {
-        validation = false;
-        $('#deleteserverid').val(server_id);
-        $('#deleteservername').html(name);
-        $('#deleteserveriptocopy').html(ip);
-        $('#deleteServerModal').modal();
-        $('#deleteserverip').blur(function() {
-            if($('#deleteserverip').val() == ip) {
-                validation = true;
-                $('#delete').removeClass('disabled');
-            }
-        });
-        $('#deleteserverip').keyup(function() {
-            if($('#deleteserverip').val() != ip) {
-                validation = false;
-                $('#delete').addClass('disabled');
-            }
-        });
-        $('#delete').click(function() {
-            if(validation) {
-                $.ajax({
-                    url: '/api/servers/'+$('#deleteserverid').val(),
-                    type: 'DELETE',
-                    contentType: 'application/json',
-                    dataType: 'json',
-                    beforeSend: function() {
-                        validation = false;
-                        $('#loadingdelete').removeClass('d-none');
-                    },
-                    complete: function(data) {
-                        setTimeout(function() {
-                            $('#dt').DataTable().clear().destroy();
-                        }, 1500);
-                        setTimeout(function() {
-                            getData('/api/servers',false);
-                            $('#deleteServerModal').modal('toggle');
-                            $('#deleteservername').html('');
-                            $('#deleteserverip').val('');
-                            $('#deleteserverid').val('');
-                            $('#deleteserveriptocopy').html('');
-                            $('#loadingdelete').addClass('d-none');
-                        }, 6500);
-                    },
-                });
-            }
-        });
-    }
-
-    //Auto Update List
-    setInterval(function() {
-        $('#dt').DataTable().clear().destroy();
-        getData('/api/servers',false);
-    }, 45000);
-
-    //Check IP conflict
-    function ipConflict(ip) {
-        conflict = 0;
-        getDataNoUI('/api/servers',false);
-        JSON.parse(localStorage.dtdata).forEach(server => {
-            if(ip === server.ip) {
-                conflict = conflict + 1;
-            }
-        });
-        return conflict;
-    }
-
-    //New Server
-    $('#newServer').click(function() {
-        $('#newserverid').html('');
-        $('#newserverssh').html('');
-        $('#newserverform').removeClass('d-none');
-        $('#newserverok').addClass('d-none');
-        $('#loading').addClass('d-none');
-        $('#newserverdialog').removeClass('modal-lg');
-        {{-- const newServerModal = document.getElementById('newServerModal');
-        newServerModal.showModal(); --}}
-        $('#newServerModal').modal();
-
+    // Open modal
+    newServerButton?.addEventListener('click', function() {
+        newServerModal?.classList.remove('hidden');
     });
 
-    //New Server Validation
-    $('#newservername').keyup(function() {
-        $('#newservername').removeClass('is-invalid');
-        $('#submit').removeClass('disabled');
-    });
-    $('#newserverip').keyup(function() {
-        $('#newserverip').removeClass('is-invalid');
-        $('#submit').removeClass('disabled');
+    // Close modal
+    closeNewServerModalButton?.addEventListener('click', function() {
+        newServerModal?.classList.add('hidden');
     });
 
-    //New Server Submit
-    $('#submit').click(function() {
-        validation = true;
-        if(!$('#newservername').val() || $('#newservername').val().length < 3) {
-            $('#newservername').addClass('is-invalid');
-            $('#submit').addClass('disabled');
-            validation = false;
+    // Close modal on background click
+    newServerModal?.addEventListener('click', function(e) {
+        if (e.target === newServerModal || e.target.classList.contains('bg-opacity-75')) {
+            newServerModal?.classList.add('hidden');
         }
-        if(!$('#newserverip').val() || !ipValidate($('#newserverip').val()) || ipConflict($('#newserverip').val()) > 0) {
-            $('#newserverip').addClass('is-invalid');
-            $('#submit').addClass('disabled');
-            validation = false;
-        }
-        if(validation) {
-            $.ajax({
-                url: '/api/servers',
-                type: 'POST',
-                contentType: 'application/json',
-                dataType: 'json',
-                data: JSON.stringify({
-                    'name':     $('#newservername').val(),
-                    'ip':       $('#newserverip').val(),
-                    'provider': $('#newserverprovider').val(),
-                    'location': $('#newserverlocation').val()
-                }),
-                beforeSend: function() {
-                    $('#loading').removeClass('d-none');
-                },
-                success: function(data) {
-                    $('#dt').DataTable().clear().destroy();
-                    getData('/api/servers',false);
-                    $('#loading').addClass('d-none');
-                    $('#newserverdialog').addClass('modal-lg');
-                    $('#newserverid').html(data.server_id);
-                    $('#newserverssh').html(data.ip);
-                    $('#newserverform').addClass('d-none');
-                    $('#newserverok').removeClass('d-none');
-                    $('#newservername').val('');
-                    $('#newserverip').val('');
-                    $('#newserverprovider').val('');
-                    $('#newserverlocation').val('');
-                },
-            });
-        }
+    });
+
+    // Listen for Livewire events to close modal
+    document.addEventListener('livewire:init', () => {
+        Livewire.on('close-modal', () => {
+            newServerModal?.classList.add('hidden');
+        });
+
+        Livewire.on('server-created', () => {
+            newServerModal?.classList.add('hidden');
+        });
     });
 </script>
 @endsection

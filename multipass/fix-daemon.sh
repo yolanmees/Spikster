@@ -54,11 +54,11 @@ if [ -f "/Library/LaunchDaemons/com.canonical.multipassd.plist" ]; then
     # Stop existing daemon
     sudo launchctl stop com.canonical.multipassd 2>/dev/null || true
     sleep 2
-    
+
     # Unload if loaded
     sudo launchctl unload /Library/LaunchDaemons/com.canonical.multipassd.plist 2>/dev/null || true
     sleep 1
-    
+
     # Load the daemon
     echo "  Loading daemon..."
     if sudo launchctl load /Library/LaunchDaemons/com.canonical.multipassd.plist; then
@@ -66,7 +66,7 @@ if [ -f "/Library/LaunchDaemons/com.canonical.multipassd.plist" ]; then
     else
         echo -e "${RED}  ❌ Failed to load daemon${NC}"
     fi
-    
+
     # Start the daemon
     echo "  Starting daemon..."
     if sudo launchctl start com.canonical.multipassd; then

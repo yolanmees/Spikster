@@ -32,13 +32,6 @@ class NewServer extends Component
     public $isSubmitting = false;
 
     /**
-     * Create a new component instance.
-     */
-    public function __construct(
-        protected ServerService $serverService
-    ) {}
-
-    /**
      * Render the component.
      */
     public function render()
@@ -49,7 +42,7 @@ class NewServer extends Component
     /**
      * Submit the form.
      */
-    public function submit(): void
+    public function submit(ServerService $serverService): void
     {
         // Prevent double submission
         if ($this->isSubmitting) {
@@ -63,7 +56,7 @@ class NewServer extends Component
             $validated = $this->validate();
 
             // Create server using service
-            $server = $this->serverService->createServer([
+            $server = $serverService->createServer([
                 'name' => $validated['serverName'],
                 'ip' => $validated['serverIp'],
                 'provider' => $validated['serverProvider'],
@@ -80,6 +73,9 @@ class NewServer extends Component
 
             // Dispatch event to refresh server list
             $this->dispatch('server-created');
+            
+            // Close modal
+            $this->dispatch('close-modal');
 
             // Reset form
             $this->reset([

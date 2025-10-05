@@ -32,22 +32,14 @@ class NewSite extends Component
     public $servers = [];
 
     /**
-     * Create a new component instance.
-     */
-    public function __construct(
-        protected SiteService $siteService,
-        protected ServerService $serverService
-    ) {}
-
-    /**
      * Mount the component.
      */
-    public function mount(): void
+    public function mount(ServerService $serverService): void
     {
-        $this->servers = $this->serverService->getAllServers()->get();
+        $this->servers = $serverService->getAllServers();
 
         // Set default server if available
-        $defaultServer = $this->serverService->getDefaultServer();
+        $defaultServer = $serverService->getDefaultServer();
         if ($defaultServer) {
             $this->serverId = (string) $defaultServer->id;
         }
@@ -64,7 +56,7 @@ class NewSite extends Component
     /**
      * Submit the form.
      */
-    public function submit(): void
+    public function submit(SiteService $siteService, ServerService $serverService): void
     {
         // Prevent double submission
         if ($this->isSubmitting) {
@@ -78,7 +70,7 @@ class NewSite extends Component
             $validated = $this->validate();
 
             // Create site using service
-            $site = $this->siteService->createSite([
+            $site = $siteService->createSite([
                 'server_id' => $validated['serverId'],
                 'domain' => $validated['domain'],
                 'php' => $validated['php'],
@@ -88,19 +80,22 @@ class NewSite extends Component
             ]);
 
             // Flash success message
-            session()->flash('success', 'Site succesvol aangemaakt.');
+            session()->flash('success', 'Site created successfully.');
 
             // Dispatch event to refresh site list
             $this->dispatch('site-created');
+            
+            // Dispatch event to close modal
+            $this->dispatch('close-modal');
 
             // Reset form
-            $this->resetForm();
+            $this->resetForm($serverService);
         } catch (\Illuminate\Validation\ValidationException $e) {
             // Re-throw validation exceptions
             throw $e;
         } catch (\Exception $e) {
             // Flash error message
-            session()->flash('error', 'Fout bij aanmaken site: '.$e->getMessage());
+            session()->flash('error', 'Error creating site: '.$e->getMessage());
         } finally {
             $this->isSubmitting = false;
         }
@@ -109,7 +104,7 @@ class NewSite extends Component
     /**
      * Reset the form.
      */
-    public function resetForm(): void
+    public function resetForm(ServerService $serverService): void
     {
         $this->reset([
             'domain',
@@ -124,7 +119,7 @@ class NewSite extends Component
         $this->branch = 'main';
 
         // Reset to default server
-        $defaultServer = $this->serverService->getDefaultServer();
+        $defaultServer = $serverService->getDefaultServer();
         if ($defaultServer) {
             $this->serverId = (string) $defaultServer->id;
         }

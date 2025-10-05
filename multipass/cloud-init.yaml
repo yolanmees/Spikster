@@ -40,10 +40,10 @@ runcmd:
 final_message: |
   Cloud-init completed!
   Spikster test VM is ready.
-  
+
   Next steps:
   1. Transfer installation script: multipass transfer new_install.sh <vm-name>:/tmp/
   2. Shell into VM: multipass shell <vm-name>
   3. Run installation: sudo bash /tmp/new_install.sh
-  
+
   System boot finished at $TIMESTAMP after $UPTIME seconds

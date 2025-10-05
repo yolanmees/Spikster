@@ -3,7 +3,7 @@
 namespace App\Livewire\Stats;
 
 use App\Models\Server;
-use Illuminate\Support\Facades\Http;
+use App\Services\MonitoringService;
 use Livewire\Component;
 
 class Disk extends Component
@@ -18,35 +18,37 @@ class Disk extends Component
 
     public $total;
 
-    public function mount($server_id)
+    public function mount($server_id, MonitoringService $monitoringService)
     {
         $this->server = Server::where('server_id', $server_id)->first();
+        
+        if (!$this->server) {
+            return;
+        }
+
         try {
-            $disk = Http::get($this->server->ip.'/api/servers/'.$this->server->server_id.'/stats/disk');
-            $this->disk = $disk->json()['disk'];
-            $this->labels = $this->getLabels();
-            $this->total = $this->disk[0]['write_bytes'] / 1024 / 1024;
-
-            foreach ($this->disk as $key => $disk) {
-                if (! isset($this->dataset[$disk['disk_name']])) {
-                    $this->dataset[$disk['disk_name']]['label'] = $disk['disk_name'];
-                    $this->dataset[$disk['disk_name']]['backgroundColor'] = 'rgba(15,64,97,255)';
-                    $this->dataset[$disk['disk_name']]['borderColor'] = 'rgba(15,64,97,255)';
-                }
-                $this->dataset[$disk['disk_name']]['data'][] = $disk['read_bytes'];
-            }
+            // Get chart data from new monitoring system
+            $chartData = $monitoringService->getChartData($this->server, 24);
+            
+            // Get latest metrics for total disk
+            $latest = $monitoringService->getLatestMetrics($this->server);
+            $this->total = $latest ? $latest['disk']['total'] / 1024 / 1024 : 0;
+            
+            $this->labels = $chartData['labels'] ?? [];
+            $this->dataset = [
+                [
+                    'label' => 'Disk Usage (%)',
+                    'backgroundColor' => 'rgba(15,64,97,255)',
+                    'borderColor' => 'rgba(15,64,97,255)',
+                    'data' => $chartData['disk'] ?? [],
+                ],
+            ];
         } catch (\Throwable $th) {
+            // Fallback to empty data
+            $this->total = 0;
+            $this->labels = [];
+            $this->dataset = [];
         }
-    }
-
-    private function getLabels()
-    {
-        $labels = [];
-        foreach ($this->disk as $disk) {
-            $labels[] = date('H:i', strtotime($disk['created_at']));
-        }
-
-        return $labels;
     }
 
     public function render()

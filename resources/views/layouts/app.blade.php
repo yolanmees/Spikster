@@ -18,6 +18,10 @@
     <link href="/css/app.css" rel="stylesheet" />
     
     <style>
+        [x-cloak] { 
+            display: none !important; 
+        }
+        
         .space {
             min-height: 20px;
         }

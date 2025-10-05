@@ -9,6 +9,7 @@
 ## 🎯 Problem
 
 When running `./multipass/quick-test.sh`, you get:
+
 ```
 launch failed: cannot connect to the multipass socket
 transfer failed: cannot connect to the multipass socket
@@ -175,6 +176,7 @@ Once the daemon is running, try your test again:
 ```
 
 Expected output:
+
 ```
 🚀 Quick Test - Creating VM...
 Launched: spikster-quick-1234567890
@@ -277,9 +279,9 @@ sudo launchctl start com.canonical.multipassd
 
 ### Contact Support
 
-- **Multipass Forum:** https://discourse.ubuntu.com/c/multipass/
-- **GitHub Issues:** https://github.com/canonical/multipass/issues
-- **Documentation:** https://multipass.run/docs
+-   **Multipass Forum:** https://discourse.ubuntu.com/c/multipass/
+-   **GitHub Issues:** https://github.com/canonical/multipass/issues
+-   **Documentation:** https://multipass.run/docs
 
 ---
 
@@ -287,16 +289,17 @@ sudo launchctl start com.canonical.multipassd
 
 After applying fixes, verify:
 
-- [ ] `multipass version` returns version number
-- [ ] `multipass list` shows empty list or existing VMs
-- [ ] `ps aux | grep multipass` shows daemon running
-- [ ] `./multipass/quick-test.sh` creates VM successfully
+-   [ ] `multipass version` returns version number
+-   [ ] `multipass list` shows empty list or existing VMs
+-   [ ] `ps aux | grep multipass` shows daemon running
+-   [ ] `./multipass/quick-test.sh` creates VM successfully
 
 ---
 
 **Status:** This is a **normal first-time issue**. The daemon just needs to be started once, then it runs automatically.
 
-**Quick Fix:** 
+**Quick Fix:**
+
 ```bash
 # Open Multipass GUI to start daemon
 open /Applications/Multipass.app

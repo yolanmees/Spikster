@@ -22,18 +22,11 @@ class ServerTable extends Component
     public $serverToDelete = null;
 
     /**
-     * Create a new component instance.
-     */
-    public function __construct(
-        protected ServerService $serverService
-    ) {}
-
-    /**
      * Render the component.
      */
-    public function render()
+    public function render(ServerService $serverService)
     {
-        $servers = $this->serverService->getAllServers()
+        $servers = $serverService->getAllServersQuery()
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
                     $q->where('name', 'like', '%'.$this->search.'%')
@@ -91,14 +84,14 @@ class ServerTable extends Component
     /**
      * Delete a server.
      */
-    public function delete(): void
+    public function delete(ServerService $serverService): void
     {
         if (! $this->serverToDelete) {
             return;
         }
 
         try {
-            $server = $this->serverService->getServerById($this->serverToDelete);
+            $server = $serverService->getServerById($this->serverToDelete);
 
             if (! $server) {
                 session()->flash('error', 'Server niet gevonden.');
@@ -107,7 +100,7 @@ class ServerTable extends Component
                 return;
             }
 
-            $this->serverService->deleteServer($server);
+            $serverService->deleteServer($server);
 
             session()->flash('success', 'Server succesvol verwijderd.');
 

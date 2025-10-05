@@ -3,7 +3,7 @@
 namespace App\Livewire\Stats;
 
 use App\Models\Server;
-use Illuminate\Support\Facades\Http;
+use App\Services\MonitoringService;
 use Livewire\Component;
 
 class Cpu extends Component
@@ -16,38 +16,32 @@ class Cpu extends Component
 
     public $cpu;
 
-    public function mount($server_id)
+    public function mount($server_id, MonitoringService $monitoringService)
     {
         $this->server = Server::where('server_id', $server_id)->first();
+        
+        if (!$this->server) {
+            return;
+        }
+
         try {
-            $cpu = Http::get($this->server->ip.'/api/servers/'.$this->server->server_id.'/stats/cpu');
-
-            $this->cpu = $cpu->json()['cpu'];
-
-            $this->labels = $this->getLabels();
+            // Get chart data from new monitoring system
+            $chartData = $monitoringService->getChartData($this->server, 24);
+            
+            $this->labels = $chartData['labels'] ?? [];
             $this->dataset = [
                 [
-                    'label' => 'Total',
+                    'label' => 'CPU Usage (%)',
                     'backgroundColor' => 'rgba(15,64,97,255)',
                     'borderColor' => 'rgba(15,64,97,255)',
+                    'data' => $chartData['cpu'] ?? [],
                 ],
             ];
-            foreach ($this->cpu as $key => $cpu) {
-                $this->dataset[0]['data'][] = $cpu['total'];
-            }
         } catch (\Throwable $th) {
+            // Fallback to empty data
+            $this->labels = [];
+            $this->dataset = [];
         }
-
-    }
-
-    private function getLabels()
-    {
-        $labels = [];
-        foreach ($this->cpu as $cpu) {
-            $labels[] = date('H:i', strtotime($cpu['created_at']));
-        }
-
-        return $labels;
     }
 
     public function render()

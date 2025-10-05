@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Alias;
 use App\Models\Server;
 use App\Models\Site;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
 
@@ -15,6 +16,14 @@ use Illuminate\Support\Str;
  */
 class SiteService
 {
+    /**
+     * Get all sites query builder.
+     */
+    public function getAllSitesQuery(): Builder
+    {
+        return Site::query()->with('server');
+    }
+
     /**
      * Get all sites.
      */

@@ -18,3 +18,6 @@ composer.lock
 public/build_*.php
 public/ping_*.php
 public/ghkey_*.php
+/docs/
+/multipass/
+/.vscode/

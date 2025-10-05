@@ -98,6 +98,24 @@ class Server extends Model
     }
 
     /**
+     * Get all metrics for this server.
+     *
+     * @return HasMany<ServerMetric>
+     */
+    public function metrics(): HasMany
+    {
+        return $this->hasMany(ServerMetric::class, 'server_id', 'id');
+    }
+
+    /**
+     * Get the latest metric for this server.
+     */
+    public function latestMetric(): ?ServerMetric
+    {
+        return $this->metrics()->latest('measured_at')->first();
+    }
+
+    /**
      * Check if server is active.
      */
     public function isActive(): bool

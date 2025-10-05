@@ -300,8 +300,9 @@ multipass exec <vm-name> -- sudo cat /var/log/spikster_install.log > install.log
 ### Test Results
 
 Test results are saved in:
-- `multipass-logs/` - Individual test logs
-- `test-results/` - Test suite results and summaries
+
+-   `multipass-logs/` - Individual test logs
+-   `test-results/` - Test suite results and summaries
 
 ```bash
 # View latest test summary
@@ -374,6 +375,7 @@ du -sh ~/Library/Application\ Support/multipass
 ### 2. Naming Convention
 
 Use descriptive names:
+
 ```bash
 # Good
 spikster-test-24.04-20251003
@@ -412,9 +414,9 @@ multipass snapshot vm --name 4-configured
 
 ## 📚 Additional Resources
 
-- [Multipass Documentation](https://multipass.run/docs)
-- [Cloud-init Documentation](https://cloudinit.readthedocs.io/)
-- [Main Strategy Document](../MULTIPASS_DEVELOPMENT_STRATEGY.md)
+-   [Multipass Documentation](https://multipass.run/docs)
+-   [Cloud-init Documentation](https://cloudinit.readthedocs.io/)
+-   [Main Strategy Document](../MULTIPASS_DEVELOPMENT_STRATEGY.md)
 
 ## 🎯 Next Steps
 

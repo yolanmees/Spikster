@@ -30,10 +30,23 @@ class Kernel extends ConsoleKernel
         $schedule->command('cipi:update')->dailyAt('12:05');
         $schedule->command('cipi:logrotate')->dailyAt('00:00');
         $schedule->command('cipi:activesetupcount')->dailyAt('03:03');
-        $schedule->command('spikster:stats-get-cpu')->everyMinute();
-        $schedule->command('spikster:stats-get-mem')->everyMinute();
-        $schedule->command('spikster:stats-get-load')->everyMinute();
-        $schedule->command('spikster:stats-get-disk')->everyMinute();
+        
+        // New monitoring system - fetch metrics from spikster-agent
+        $schedule->call(function () {
+            $servers = \App\Models\Server::active()->get();
+            foreach ($servers as $server) {
+                \App\Jobs\FetchServerMetricsJob::dispatch($server);
+            }
+        })->everyMinute()->name('fetch-server-metrics');
+        
+        // Cleanup old metrics daily
+        $schedule->call(function () {
+            $deleted = \App\Models\ServerMetric::cleanupOldMetrics(
+                config('monitoring.metrics_retention_days', 30)
+            );
+            \Illuminate\Support\Facades\Log::info("Cleaned up {$deleted} old server metrics");
+        })->dailyAt('03:00')->name('cleanup-old-metrics');
+        
         $schedule->command('audit:cleanup')->weekly()->sundays()->at('02:00');
     }
 

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Server;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
 
@@ -13,6 +14,14 @@ use Illuminate\Support\Str;
  */
 class ServerService
 {
+    /**
+     * Get all servers query builder.
+     */
+    public function getAllServersQuery(): Builder
+    {
+        return Server::query();
+    }
+
     /**
      * Get all servers for the authenticated user.
      */

@@ -71,17 +71,17 @@ test_installation() {
     local vm_name="spikster-suite-${version}-${TIMESTAMP}"
     local log_file="${RESULTS_DIR}/test-${version}-${TIMESTAMP}.log"
     local start_time=$(date +%s)
-    
+
     TOTAL_TESTS=$((TOTAL_TESTS + 1))
-    
+
     log "========================================"
     log "Testing Ubuntu $version"
     log "========================================"
-    
+
     {
         echo "### Ubuntu $version" >> "$SUMMARY_FILE"
         echo "" >> "$SUMMARY_FILE"
-        
+
         # Launch VM
         info "Launching VM..."
         if ! multipass launch "$version" \
@@ -95,7 +95,7 @@ test_installation() {
             FAILED_TESTS=$((FAILED_TESTS + 1))
             return 1
         fi
-        
+
         # Transfer script
         info "Transferring installation script..."
         if ! multipass transfer new_install.sh "$vm_name:/tmp/" >> "$log_file" 2>&1; then
@@ -105,7 +105,7 @@ test_installation() {
             FAILED_TESTS=$((FAILED_TESTS + 1))
             return 1
         fi
-        
+
         # Install
         info "Running installation (this may take 10-15 minutes)..."
         if ! multipass exec "$vm_name" -- sudo bash /tmp/new_install.sh -b "$BRANCH" >> "$log_file" 2>&1; then
@@ -116,50 +116,50 @@ test_installation() {
             FAILED_TESTS=$((FAILED_TESTS + 1))
             return 1
         fi
-        
+
         # Get IP
         IP=$(multipass info "$vm_name" | grep IPv4 | awk '{print $2}')
         info "VM IP: $IP"
-        
+
         # Wait for services
         info "Waiting for services to start..."
         sleep 60
-        
+
         # Test HTTP
         info "Testing HTTP response..."
         HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "http://$IP" || echo "000")
-        
+
         # Check services
         local nginx_status="❌"
         local php_status="❌"
         local mysql_status="❌"
         local redis_status="⚠️"
-        
+
         if multipass exec "$vm_name" -- systemctl is-active nginx &> /dev/null; then
             nginx_status="✅"
         fi
-        
+
         if multipass exec "$vm_name" -- systemctl is-active php8.3-fpm &> /dev/null; then
             php_status="✅"
         fi
-        
+
         if multipass exec "$vm_name" -- systemctl is-active mysql &> /dev/null; then
             mysql_status="✅"
         fi
-        
+
         if multipass exec "$vm_name" -- systemctl is-active redis-server &> /dev/null; then
             redis_status="✅"
         fi
-        
+
         # Get disk usage
         DISK_USAGE=$(multipass exec "$vm_name" -- df -h / | tail -1 | awk '{print $5}')
-        
+
         # Calculate duration
         local end_time=$(date +%s)
         local duration=$((end_time - start_time))
         local duration_min=$((duration / 60))
         local duration_sec=$((duration % 60))
-        
+
         # Determine overall status
         if [ "$HTTP_CODE" = "200" ] && [ "$nginx_status" = "✅" ] && [ "$php_status" = "✅" ] && [ "$mysql_status" = "✅" ]; then
             log "✅ All tests PASSED for Ubuntu $version"
@@ -170,7 +170,7 @@ test_installation() {
             echo "- ⚠️  **Status:** PARTIAL (Some issues detected)" >> "$SUMMARY_FILE"
             PASSED_TESTS=$((PASSED_TESTS + 1))  # Count as passed but with warnings
         fi
-        
+
         # Write details to summary
         echo "- **Duration:** ${duration_min}m ${duration_sec}s" >> "$SUMMARY_FILE"
         echo "- **HTTP Response:** $HTTP_CODE" >> "$SUMMARY_FILE"
@@ -183,17 +183,17 @@ test_installation() {
         echo "  - Redis: $redis_status" >> "$SUMMARY_FILE"
         echo "- **Detailed Log:** \`$log_file\`" >> "$SUMMARY_FILE"
         echo "" >> "$SUMMARY_FILE"
-        
+
         # Cleanup
         info "Cleaning up..."
         multipass delete "$vm_name"
-        
+
     } || {
         error "Unexpected error in test"
         FAILED_TESTS=$((FAILED_TESTS + 1))
         multipass delete "$vm_name" 2>/dev/null || true
     }
-    
+
     log ""
 }
 

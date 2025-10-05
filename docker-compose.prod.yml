@@ -27,22 +27,22 @@ services:
       APP_DEBUG: ${APP_DEBUG:-false}
       APP_KEY: ${APP_KEY}
       APP_URL: ${APP_URL:-http://localhost}
-      
+
       DB_CONNECTION: ${DB_CONNECTION:-mysql}
       DB_HOST: mysql
       DB_PORT: 3306
       DB_DATABASE: ${DB_DATABASE:-spikster}
       DB_USERNAME: ${DB_USERNAME:-spikster}
       DB_PASSWORD: ${DB_PASSWORD:-secret}
-      
+
       REDIS_HOST: redis
       REDIS_PASSWORD: ${REDIS_PASSWORD:-null}
       REDIS_PORT: 6379
-      
+
       CACHE_DRIVER: ${CACHE_DRIVER:-redis}
       QUEUE_CONNECTION: ${QUEUE_CONNECTION:-redis}
       SESSION_DRIVER: ${SESSION_DRIVER:-redis}
-      
+
       MAIL_MAILER: ${MAIL_MAILER:-smtp}
       MAIL_HOST: ${MAIL_HOST:-mailhog}
       MAIL_PORT: ${MAIL_PORT:-1025}
@@ -76,7 +76,7 @@ services:
       MYSQL_DATABASE: ${DB_DATABASE:-spikster}
       MYSQL_USER: ${DB_USERNAME:-spikster}
       MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
-      MYSQL_ALLOW_EMPTY_PASSWORD: 'no'
+      MYSQL_ALLOW_EMPTY_PASSWORD: "no"
     volumes:
       - mysql-data:/var/lib/mysql
       - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro
@@ -84,7 +84,17 @@ services:
     networks:
       - spikster
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-rootsecret}"]
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-p${DB_ROOT_PASSWORD:-rootsecret}",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5

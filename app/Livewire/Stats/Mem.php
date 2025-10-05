@@ -3,7 +3,7 @@
 namespace App\Livewire\Stats;
 
 use App\Models\Server;
-use Illuminate\Support\Facades\Http;
+use App\Services\MonitoringService;
 use Livewire\Component;
 
 class Mem extends Component
@@ -18,36 +18,37 @@ class Mem extends Component
 
     public $mem;
 
-    public function mount($server_id)
+    public function mount($server_id, MonitoringService $monitoringService)
     {
         $this->server = Server::where('server_id', $server_id)->first();
+        
+        if (!$this->server) {
+            return;
+        }
+
         try {
-            $mem = Http::get($this->server->ip.'/api/servers/'.$this->server->server_id.'/stats/mem');
-            $this->mem = $mem->json()['mem'];
-            $this->total = $this->mem[0]['total'] / 1024 / 1024;
-            $this->labels = $this->getLabels();
+            // Get chart data from new monitoring system
+            $chartData = $monitoringService->getChartData($this->server, 24);
+            
+            // Get latest metrics for total memory
+            $latest = $monitoringService->getLatestMetrics($this->server);
+            $this->total = $latest ? $latest['memory']['total'] / 1024 / 1024 : 0;
+            
+            $this->labels = $chartData['labels'] ?? [];
             $this->dataset = [
                 [
-                    'label' => 'Total',
+                    'label' => 'Memory Usage (%)',
                     'backgroundColor' => 'rgba(15,64,97,255)',
                     'borderColor' => 'rgba(15,64,97,255)',
+                    'data' => $chartData['memory'] ?? [],
                 ],
             ];
-            foreach ($this->mem as $key => $mem) {
-                $this->dataset[0]['data'][] = $mem['used'] / 1024 / 1024;
-            }
         } catch (\Throwable $th) {
+            // Fallback to empty data
+            $this->total = 0;
+            $this->labels = [];
+            $this->dataset = [];
         }
-    }
-
-    private function getLabels()
-    {
-        $labels = [];
-        foreach ($this->mem as $mem) {
-            $labels[] = date('H:i', strtotime($mem['created_at']));
-        }
-
-        return $labels;
     }
 
     public function render()

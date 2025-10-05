@@ -883,10 +883,72 @@ log_message "Supervisor configured"
 
 # Additional installations
 apt install -y bind9 bind9utils bind9-doc || handle_error "installing bind9"
-apt install -y python3-pip || handle_error "installing Python3 pip"
 
-pip install glances bottle fastapi uvicorn || handle_error "installing Python packages"
-log_message "Additional packages installed: bind9, glances, bottle, fastapi"
+# SPIKSTER MONITORING AGENT
+clear
+echo "${bggreen}${black}${bold}"
+echo "Spikster Monitoring Agent setup..."
+echo "${reset}"
+sleep 1s
+
+# Install Go if not already installed
+if ! command -v go &>/dev/null; then
+    log_message "Installing Go..."
+    wget -q https://go.dev/dl/go1.21.5.linux-amd64.tar.gz -O /tmp/go.tar.gz || handle_error "downloading Go"
+    rm -rf /usr/local/go
+    tar -C /usr/local -xzf /tmp/go.tar.gz || handle_error "extracting Go"
+    rm /tmp/go.tar.gz
+    export PATH=$PATH:/usr/local/go/bin
+    echo 'export PATH=$PATH:/usr/local/go/bin' >> /etc/profile
+    log_message "Go installed successfully"
+else
+    log_message "Go already installed, skipping installation"
+fi
+
+# Download and install spikster-agent
+log_message "Installing spikster-agent..."
+mkdir -p /tmp/spikster-agent-install
+cd /tmp/spikster-agent-install
+
+# Download agent files from GitHub
+wget -q https://raw.githubusercontent.com/$REPO/$BRANCH/spikster-agent/main.go -O main.go || handle_error "downloading agent main.go"
+wget -q https://raw.githubusercontent.com/$REPO/$BRANCH/spikster-agent/go.mod -O go.mod || handle_error "downloading agent go.mod"
+wget -q https://raw.githubusercontent.com/$REPO/$BRANCH/spikster-agent/spikster-agent.service -O spikster-agent.service || handle_error "downloading agent service file"
+
+# Build the agent
+log_message "Building spikster-agent..."
+/usr/local/go/bin/go mod download || handle_error "downloading Go dependencies"
+/usr/local/go/bin/go build -ldflags="-s -w" -o spikster-agent main.go || handle_error "building spikster-agent"
+
+# Install binary
+install -m 755 spikster-agent /usr/local/bin/spikster-agent || handle_error "installing spikster-agent binary"
+
+# Install systemd service
+install -m 644 spikster-agent.service /etc/systemd/system/spikster-agent.service || handle_error "installing systemd service"
+
+# Reload systemd and start service
+systemctl daemon-reload || handle_error "reloading systemd"
+systemctl enable spikster-agent.service || handle_error "enabling spikster-agent service"
+systemctl start spikster-agent.service || handle_error "starting spikster-agent service"
+
+# Verify agent is running
+sleep 2
+if systemctl is-active --quiet spikster-agent.service; then
+    log_message "spikster-agent installed and running successfully"
+    echo "${bggreen}${black}${bold}Spikster Monitoring Agent is running${reset}"
+else
+    log_message "WARNING: spikster-agent service failed to start"
+    echo "${bgyellow}${black}${bold}WARNING: Agent service failed to start. Check logs with: journalctl -u spikster-agent${reset}"
+fi
+
+# Cleanup
+cd /
+rm -rf /tmp/spikster-agent-install
+
+# Allow agent port through firewall
+ufw allow 9273/tcp comment 'Spikster Monitoring Agent' || log_message "WARNING: Could not add UFW rule for port 9273"
+
+log_message "Spikster Monitoring Agent installation completed"
 
 # Complete
 clear
@@ -913,10 +975,6 @@ echo "${bggreen}${black}${bold}"
 echo "Spikster installation has been completed..."
 echo "${reset}"
 sleep 1s
-# Start glances in the background and ensure it keeps running after the script ends
-nohup glances -w --disable-webui >/var/log/glances.log 2>&1 &
-
-echo "Glances has been started in the background."
 
 # Confirm script completion
 log_message "Script completed successfully."

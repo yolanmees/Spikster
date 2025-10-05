@@ -26,18 +26,11 @@ class SiteTable extends Component
     public $siteToDelete = null;
 
     /**
-     * Create a new component instance.
-     */
-    public function __construct(
-        protected SiteService $siteService
-    ) {}
-
-    /**
      * Render the component.
      */
-    public function render()
+    public function render(SiteService $siteService)
     {
-        $sites = $this->siteService->getAllSites()
+        $sites = $siteService->getAllSitesQuery()
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
                     $q->where('domain', 'like', '%'.$this->search.'%')
@@ -116,17 +109,17 @@ class SiteTable extends Component
     /**
      * Delete a site.
      */
-    public function delete(): void
+    public function delete(SiteService $siteService): void
     {
         if (! $this->siteToDelete) {
             return;
         }
 
         try {
-            $site = $this->siteService->getSiteById($this->siteToDelete);
+            $site = $siteService->getSiteById($this->siteToDelete);
 
             if (! $site) {
-                session()->flash('error', 'Site niet gevonden.');
+                session()->flash('error', 'Site not found.');
                 $this->cancelDelete();
 
                 return;
@@ -134,19 +127,19 @@ class SiteTable extends Component
 
             // Check if it's a panel site
             if ($site->isPanel()) {
-                session()->flash('error', 'Panel sites kunnen niet worden verwijderd.');
+                session()->flash('error', 'Panel sites cannot be deleted.');
                 $this->cancelDelete();
 
                 return;
             }
 
-            $this->siteService->deleteSite($site);
+            $siteService->deleteSite($site);
 
-            session()->flash('success', 'Site succesvol verwijderd.');
+            session()->flash('success', 'Site deleted successfully.');
 
             $this->dispatch('site-deleted');
         } catch (\Exception $e) {
-            session()->flash('error', 'Fout bij verwijderen: '.$e->getMessage());
+            session()->flash('error', 'Error deleting site: '.$e->getMessage());
         } finally {
             $this->cancelDelete();
         }

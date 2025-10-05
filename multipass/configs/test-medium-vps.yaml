@@ -1,5 +1,5 @@
 #cloud-config
-# Simulates a medium VPS configuration  
+# Simulates a medium VPS configuration
 # Equivalent to: 2 vCPUs, 4GB RAM, 50GB disk
 # Launch: multipass launch 24.04 --name medium-vps --cpus 2 --memory 4G --disk 50G --cloud-init multipass/configs/test-medium-vps.yaml
 

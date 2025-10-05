@@ -24,16 +24,16 @@ RUN apk add --no-cache \
 # Install PHP extensions
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
-        pdo_mysql \
-        pdo_pgsql \
-        mysqli \
-        bcmath \
-        gd \
-        zip \
-        intl \
-        opcache \
-        pcntl \
-        sockets
+    pdo_mysql \
+    pdo_pgsql \
+    mysqli \
+    bcmath \
+    gd \
+    zip \
+    intl \
+    opcache \
+    pcntl \
+    sockets
 
 # Install Redis extension
 RUN pecl install redis && docker-php-ext-enable redis

@@ -51,10 +51,10 @@ if [ "$DELETE_ALL" = true ]; then
 else
     # Delete only test VMs (starting with 'spikster-test' or 'spikster-suite')
     log "Deleting test VMs (spikster-test*, spikster-suite*)..."
-    
+
     # Get list of test VMs
     TEST_VMS=$(multipass list --format csv | grep -E "spikster-test|spikster-suite" | cut -d',' -f1 || true)
-    
+
     if [ -z "$TEST_VMS" ]; then
         log "No test VMs found"
     else
@@ -64,7 +64,7 @@ else
                 multipass delete "$vm"
             fi
         done
-        
+
         log "Purging deleted VMs..."
         multipass purge
         log "✅ Test VMs deleted"

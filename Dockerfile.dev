@@ -29,18 +29,18 @@ RUN apk add --no-cache \
 # Install PHP extensions
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
-        pdo_mysql \
-        pdo_pgsql \
-        mysqli \
-        bcmath \
-        gd \
-        zip \
-        intl \
-        opcache \
-        pcntl \
-        sockets \
-        soap \
-        exif
+    pdo_mysql \
+    pdo_pgsql \
+    mysqli \
+    bcmath \
+    gd \
+    zip \
+    intl \
+    opcache \
+    pcntl \
+    sockets \
+    soap \
+    exif
 
 # Install Redis extension via PECL
 RUN pecl install redis \

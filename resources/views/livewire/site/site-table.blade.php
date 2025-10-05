@@ -12,43 +12,34 @@
     <div class="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <!-- Search -->
         <div class="sm:col-span-2">
-            <div class="relative">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                </div>
-                <input type="text" wire:model.live.debounce.300ms="search"
-                    placeholder="Zoek op domain of username..."
-                    class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-
-                <!-- Loading indicator for search -->
-                <div wire:loading wire:target="search" class="absolute inset-y-0 right-0 pr-3 flex items-center">
-                    <svg class="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none"
-                        viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                            stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                        </path>
-                    </svg>
-                </div>
-            </div>
+            <x-text-input 
+                model="search" 
+                debounce="300" 
+                placeholder="Search by domain or username..."
+            >
+                <x-slot name="icon">
+                    <x-icon icon="search" class="h-5 w-5 text-gray-400" />
+                </x-slot>
+                <x-slot name="suffix">
+                    <div wire:loading wire:target="search">
+                        <svg class="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </div>
+                </x-slot>
+            </x-text-input>
         </div>
 
         <!-- PHP Version Filter -->
-        <div>
-            <select wire:model.live="filterPhp"
-                class="block w-full py-2 px-3 border border-gray-300 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                <option value="">Alle PHP versies</option>
-                <option value="7.4">PHP 7.4</option>
-                <option value="8.0">PHP 8.0</option>
-                <option value="8.1">PHP 8.1</option>
-                <option value="8.2">PHP 8.2</option>
-                <option value="8.3">PHP 8.3</option>
-            </select>
-        </div>
+        <x-select model="filterPhp">
+            <option value="">All PHP versions</option>
+            <option value="7.4">PHP 7.4</option>
+            <option value="8.0">PHP 8.0</option>
+            <option value="8.1">PHP 8.1</option>
+            <option value="8.2">PHP 8.2</option>
+            <option value="8.3">PHP 8.3</option>
+        </x-select>
     </div>
 
     <!-- Table Container with Loading Overlay -->
@@ -56,7 +47,7 @@
         <!-- Loading Overlay -->
         <div wire:loading.delay
             class="absolute inset-0 bg-white/50 dark:bg-gray-900/50 z-10 flex items-center justify-center rounded-lg">
-            <livewire:components.loading-spinner size="lg" color="blue" message="Bezig met laden..." />
+            <livewire:components.loading-spinner size="lg" color="blue" message="Loading..." />
         </div>
 
         <!-- Table -->
@@ -113,7 +104,7 @@
                             Repository
                         </th>
                         <th scope="col" class="relative text-right py-3.5 pl-3 pr-4 sm:pr-6 dark:text-white">
-                            Acties
+                            Actions
                         </th>
                     </tr>
                 </thead>
@@ -141,61 +132,47 @@
                                 <span class="font-mono text-xs">{{ $site->username }}</span>
                             </td>
                             <td class="hidden px-3 py-3.5 text-sm lg:table-cell">
-                                <span
-                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200">
-                                    PHP {{ $site->php }}
-                                </span>
+                                <x-badge color="indigo" text="PHP {{ $site->php }}" />
                             </td>
                             <td class="hidden px-3 py-3.5 text-sm lg:table-cell">
                                 @if ($site->hasRepository())
                                     <span class="inline-flex items-center text-green-700 dark:text-green-400">
-                                        <svg class="mr-1.5 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd"
-                                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                clip-rule="evenodd" />
-                                        </svg>
+                                        <x-icon icon="check" class="mr-1.5 h-4 w-4" />
                                         <span class="text-xs">Git</span>
                                     </span>
                                 @else
-                                    <span class="text-xs text-gray-400 dark:text-gray-500">Geen repo</span>
+                                    <span class="text-xs text-gray-400 dark:text-gray-500">No repo</span>
                                 @endif
                             </td>
                             <td class="relative py-3.5 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                                <a href="{{ route('site.edit', $site->site_id) }}"
-                                    class="inline-flex items-center rounded-md bg-white dark:bg-gray-700 px-2.5 py-1.5 text-sm font-semibold text-gray-900 dark:text-white shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
-                                    Beheer
-                                </a>
+                                <x-action-button :href="route('site.edit', $site->site_id)">
+                                    Manage
+                                </x-action-button>
                                 @if (!$site->isPanel())
-                                    <button wire:click="confirmDelete('{{ $site->site_id }}')" type="button"
-                                        class="ml-2 inline-flex items-center rounded-md bg-red-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-red-500 transition-colors"
-                                        wire:loading.attr="disabled" wire:target="confirmDelete">
-                                        Verwijder
-                                    </button>
+                                    <x-danger-button 
+                                        wire:click="confirmDelete('{{ $site->site_id }}')" 
+                                        type="button"
+                                        class="ml-2"
+                                        wire:loading.attr="disabled" 
+                                        wire:target="confirmDelete"
+                                    >
+                                        Delete
+                                    </x-danger-button>
                                 @else
-                                    <span
-                                        class="ml-2 inline-flex items-center px-2.5 py-1.5 text-xs text-gray-400 dark:text-gray-500">
-                                        (Panel - kan niet verwijderd worden)
+                                    <span class="ml-2 inline-flex items-center px-2.5 py-1.5 text-xs text-gray-400 dark:text-gray-500">
+                                        (Panel - cannot be deleted)
                                     </span>
                                 @endif
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="py-12 text-center">
-                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24"
-                                    stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                                </svg>
-                                <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">Geen sites gevonden
-                                </h3>
-                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                    @if ($search || $filterPhp)
-                                        Geen sites gevonden met de huidige filters.
-                                    @else
-                                        Begin met het toevoegen van een nieuwe site.
-                                    @endif
-                                </p>
+                            <td colspan="5">
+                                <x-empty-state 
+                                    icon="globe" 
+                                    :title="($search || $filterPhp) ? 'No sites found' : 'No sites yet'"
+                                    :message="($search || $filterPhp) ? 'No sites found with current filters.' : 'Start by adding a new site.'"
+                                />
                             </td>
                         </tr>
                     @endforelse
@@ -236,21 +213,25 @@
                             <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                                 <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-white"
                                     id="modal-title">
-                                    Site verwijderen
+                                    Delete site
                                 </h3>
                                 <div class="mt-2">
                                     <p class="text-sm text-gray-500 dark:text-gray-400">
-                                        Weet je zeker dat je deze site wilt verwijderen? Deze actie kan niet ongedaan
-                                        worden gemaakt. Alle bestanden, databases en configuraties worden verwijderd.
+                                        Are you sure you want to delete this site? This action cannot be undone.
+                                        All files, databases and configurations will be removed.
                                     </p>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-                        <button type="button" wire:click="delete" wire:loading.attr="disabled" wire:target="delete"
-                            class="inline-flex w-full justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed">
-                            <span wire:loading.remove wire:target="delete">Verwijderen</span>
+                        <x-danger-button 
+                            wire:click="delete" 
+                            wire:loading.attr="disabled" 
+                            wire:target="delete"
+                            class="w-full sm:ml-3 sm:w-auto"
+                        >
+                            <span wire:loading.remove wire:target="delete">Delete</span>
                             <span wire:loading wire:target="delete" class="flex items-center">
                                 <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
                                     xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -260,13 +241,15 @@
                                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
                                     </path>
                                 </svg>
-                                Bezig...
+                                Deleting...
                             </span>
-                        </button>
-                        <button type="button" wire:click="cancelDelete"
-                            class="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-base font-medium text-gray-700 dark:text-gray-300 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:mt-0 sm:w-auto sm:text-sm">
-                            Annuleren
-                        </button>
+                        </x-danger-button>
+                        <x-secondary-button 
+                            wire:click="cancelDelete"
+                            class="mt-3 w-full sm:mt-0 sm:w-auto"
+                        >
+                            Cancel
+                        </x-secondary-button>
                     </div>
                 </div>
             </div>

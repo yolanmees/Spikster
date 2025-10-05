@@ -18,6 +18,7 @@ use App\Models\Stats\Mem;
 use App\Models\Userdatabase;
 use App\Services\ServerService;
 use App\Services\SSHService;
+use App\Services\MonitoringService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -33,7 +34,8 @@ class ServerController extends Controller
 {
     public function __construct(
         protected ServerService $serverService,
-        protected SSHService $sshService
+        protected SSHService $sshService,
+        protected MonitoringService $monitoringService
     ) {}
 
     /**
@@ -1207,16 +1209,11 @@ class ServerController extends Controller
             ], 404);
         }
 
-        try {
-            $remote = Http::get('http://'.$server->ip.'/ping_'.$server->server_id.'.php');
-            if ($remote->status() != 200) {
-                return response()->json([
-                    'cpu' => '0',
-                    'ram' => '0',
-                    'hdd' => '0',
-                ]);
-            }
-        } catch (\Throwable $th) {
+        // Get latest metrics from new monitoring system
+        $metrics = $this->monitoringService->getLatestMetrics($server);
+
+        if (!$metrics) {
+            // No metrics available - return zeros
             return response()->json([
                 'cpu' => '0',
                 'ram' => '0',
@@ -1224,33 +1221,10 @@ class ServerController extends Controller
             ]);
         }
 
-        try {
-            $ssh = new SSH2($server->ip, 22);
-            if (! $ssh->login('spikster', $server->password)) {
-                return response()->json([
-                    'message' => __('spikster.server_error_ssh_error_message').$server->server_id,
-                    'errors' => __('spikster.server_error'),
-                ], 500);
-            }
-            $ssh->setTimeout(360);
-            $status = $ssh->exec('echo "`LC_ALL=C top -bn1 | grep "Cpu(s)" | sed "s/.*, *\([0-9.]*\)%* id.*/\1/" | awk \'{print 100 - $1}\'`%;`free -m | awk \'/Mem:/ { printf("%3.1f%%", $3/$2*100) }\'`;`df -h / | awk \'/\// {print $(NF-1)}\'`"');
-            $ssh->exec('exit');
-        } catch (\Throwable $th) {
-            return response()->json([
-                'message' => __('spikster.something_error_message'),
-                'errors' => __('spikster.error'),
-            ], 500);
-        }
-
-        $status = str_replace('%', '', $status);
-        $status = str_replace("\n", '', $status);
-
-        $api = explode(';', $status);
-
         return response()->json([
-            'cpu' => $api[0],
-            'ram' => $api[1],
-            'hdd' => $api[2],
+            'cpu' => number_format($metrics['cpu']['percent'], 2),
+            'ram' => number_format($metrics['memory']['percent'], 2),
+            'hdd' => number_format($metrics['disk']['percent'], 2),
         ]);
     }
 

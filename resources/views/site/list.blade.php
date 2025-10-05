@@ -1,362 +1,93 @@
 @extends('layouts.app')
 
-
-
 @section('title')
-    {{ __('spikster.titles.sites') }}
+    Sites
 @endsection
 
-
-
 @section('content')
-    <div class="row">
-        <button class="btn btn-sm btn-secondary" id="newSite">
-            <i class="fas fa-plus mr-1"></i><b>{{ __('spikster.new_button', ['type' => __('spikster.site')]) }}</b>
-        </button>
+    <div class="space-y-6">
+        <x-page-header title="Sites">
+            <x-slot name="actions">
+                <x-primary-button id="newSite">
+                    <x-icon icon="plus" class="-ml-1 mr-2 h-5 w-5" />
+                    New Site
+                </x-primary-button>
+            </x-slot>
+        </x-page-header>
+        
         @livewire('site.site-table')
-        <!-- <div class="col-xl-12">
-            <div class="card mb-4">
-                <div class="card-header text-right">
-                    <button class="btn btn-sm btn-secondary" id="newSite">
-                        <i class="fas fa-plus mr-1"></i><b>{{ __('spikster.new_button', ['type' => __('spikster.site')]) }}</b>
-                    </button>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-bordered" id="dt" width="100%" cellspacing="0">
-                            <thead>
-                            <tr>
-                                <th class="text-center">{{ __('spikster.domain') }}</th>
-                                <th class="text-center text-center d-none d-md-table-cell">{{ __('spikster.aliases') }}</th>
-                                <th class="text-center d-none d-lg-table-cell">{{ __('spikster.server') }}</th>
-                                <th class="text-center d-none d-xl-table-cell">IP</th>
-                                <th class="text-center">{{ __('spikster.actions') }}</th>
-                            </tr>
-                            </thead>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div> -->
     </div>
 @endsection
 
 
 
 @section('extra')
-    <dialog class="modal fade" id="newSiteModal" tabindex="-1" role="dialog" aria-labelledby="newSiteModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document" id="newsitedialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="newSiteModalLabel">{{ __('spikster.new_site_modal_title') }}</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
+<!-- New Site Modal -->
+<div id="newSiteModal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <!-- Background overlay -->
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+
+        <!-- Center modal -->
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+        <!-- Modal panel -->
+        <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+            <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div class="flex items-start justify-between pb-3 border-b border-gray-200 dark:border-gray-700">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+                        New Site
+                    </h3>
+                    <button type="button" id="closeNewSiteModal" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
                     </button>
                 </div>
-                <div class="modal-body">
-                    <div id="newsiteform">
-                        <label for="newsitedomain">{{ __('spikster.site_domain') }}</label>
-                        <div class="input-group">
-                            <input class="form-control" type="text" id="newsitedomain" placeholder="e.g. domain.ltd" autocomplete="off" />
-                        </div>
-                        <div class="space"></div>
-                        <label for="newsiteserver">{{ __('spikster.server') }}</label>
-                        <div class="input-group">
-                            <select class="form-control" id="newsiteserver"></select>
-                        </div>
-                        <div class="space"></div>
-                        <label for="newsiteprovider">{{ __('spikster.php_version') }}</label>
-                        <div class="input-group">
-                            <select class="form-control" id="newsitephp">
-                                <option value="8.3" selected>8.3</option>
-                                <option value="8.2">8.2</option>
-                                <option value="8.1">8.1</option>
-                                <option value="8.0">8.0</option>
-                                <option value="7.4">7.4</option>
-                            </select>
-                        </div>
-                        <div class="space"></div>
-                        <label for="newsitebasepath">{{ __('spikster.site_base_path') }}</label>
-                        <div class="input-group">
-                            <input class="form-control" type="text" id="newsitebasepath" placeholder="e.g. public" autocomplete="off" />
-                        </div>
-                        <div class="space"></div>
-                        <div class="text-center">
-                            <button class="btn btn-primary" type="button" id="submit">{{ __('spikster.confirm') }} </button>
-                        </div>
-                    </div>
-                    <div id="newsiteok" class="d-none container">
-                        <div class="row">
-                            <div class="col-xs-12">
-                                <p><b>{{ __('spikster.site_ready_message') }}</b></b>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-xl-12">
-                                <p>{{ __('spikster.domain') }}:<br><b><span id="newsitedomainok"></b></b></p>
-                                <p>{{ __('spikster.server_ip') }}:<br><b><span id="newsiteip"></b></b></p>
-                                <p>SSH {{ __('spikster.username') }}:<br><b><span id="newsiteusername"></b></p>
-                                <p>SSH {{ __('spikster.password') }}:<br><b><span id="newsitepassword"></b></p>
-                                <p>MySQL {{ __('spikster.database') }}:<br><b><span id="newsitedbname"></b></p>
-                                <p>MySQL {{ __('spikster.username') }}:<br><b><span id="newsitedbusername"></b></p>
-                                <p>MySQL {{ __('spikster.password') }}:<br><b><span id="newsitedbpassword"></b></p>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-xl-12">
-                                <p>{{ __('spikster.document_root') }}:<br><b>/home/<span id="newsitebasepathuser"></span>/web/<span id="newsitebasepath"></b></p>
-                            </div>
-                        </div>
-                        <div class="space"></div>
-                        <div class="row">
-                            <div class="col-xl-12 text-center">
-                                <a href="" target="_blank" id="newsitepdf">
-                                    <button class="btn btn-success" type="button"><i class="fas fa-file-pdf"></i> {{ __('spikster.download_site_data') }}</button>
-                                </a>
-                            </div>
-                        </div>
-                        <div class="space"></div>
-                    </div>
+                <div class="mt-4">
+                    @livewire('site.new-site')
                 </div>
             </div>
         </div>
-    </dialog>
-    <dialog class="modal fade" id="deleteSiteModal" tabindex="-1" role="dialog" aria-labelledby="deleteSiteModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="deleteSiteModalLabel">{{ __('spikster.delete_site_modal_title') }}</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p>Are you sure to delete site <b><span id="deletesitedomain"></span></b> and its database and aliases?</p>
-                    <div class="space"></div>
-                    <input type="hidden" id="deletesiteid" value="" />
-                    <div class="space"></div>
-                    <div class="text-center">
-                        <button class="btn btn-danger" type="button" id="delete">{{ __('spikster.delete') }} <i class="fas fa-circle-notch fa-spin d-none" id="loadingdelete"></i></button>
-                    </div>
-                    <div class="space"></div>
-                </div>
-            </div>
-        </div>
-    </dialog>
+    </div>
+</div>
 @endsection
-
-
-
-@section('css')
-
-@endsection
-
-
-
 
 
 
 @section('js')
 <script>
-    //Get DT Data
-    getData('/api/sites');
+    // Modal handling
+    const newSiteModal = document.getElementById('newSiteModal');
+    const newSiteButton = document.getElementById('newSite');
+    const closeNewSiteModalButton = document.getElementById('closeNewSiteModal');
 
-    // Render Make
-    function renderMake() {
-        $('#dt').DataTable( {
-            'processing': true,
-            'data': JSON.parse(localStorage.getItem('dtdata')),
-            'columns': [
-                { data: 'domain' },
-                { data: 'aliases' },
-                { data: 'server_name' },
-                { data: 'server_ip' },
-                { data: {
-                    'site_id': 'site_id',
-                    'domain': 'domain',
-                }}
-            ],
-            'columnDefs': [
-                {
-                    'targets': 1,
-                    'className': 'd-none d-md-table-cell text-center',
-                },
-                {
-                    'targets': 2,
-                    'className': 'text-center d-none d-lg-table-cell',
-                },
-                {
-                    'targets': 3,
-                    'className': 'text-center d-none d-xl-table-cell',
-                },
-                {
-                    'targets': 4,
-                    'className': 'text-center',
-                    'render': function ( data, type, row, meta ) {
-                        return '<button data-id="'+data['site_id']+'" class="btmanage btn btn-sm btn-primary mr-3"><i class="fas fa-cog fa-fw"></i> <b class="d-none d-sm-inline">Manage</b></button><button data-id="'+data['site_id']+'" data-name="'+data['domain']+'" class="btdelete btn btn-sm btn-danger"><i class="fas fa-times fa-fw"></i> <b class="d-none d-sm-inline">Delete</b></button>';
-                    }
-                }
-            ],
-            'bLengthChange': false,
-            'bAutoWidth': true,
-            'responsive': true,
-            'drawCallback': function(settings) {
-                //Manage Site
-                $(".btmanage").click(function() {
-                    window.location.href = '/sites/'+$(this).attr('data-id');
-                });
-                //Delete Site
-                $(".btdelete").click(function() {
-                    siteDelete($(this).attr('data-id'),$(this).attr('data-domain'));
-                });
-            }
-        });
-    }
-
-    //Delete Site
-    function siteDelete(site_id,domain) {
-        $('#deletesiteid').val(site_id);
-        $('#deletesitedomain').html(domain);
-        $('#deleteSiteModal').modal();
-        $('#delete').click(function() {
-            $.ajax({
-                url: '/api/sites/'+$('#deletesiteid').val(),
-                type: 'DELETE',
-                contentType: 'application/json',
-                dataType: 'json',
-                beforeSend: function() {
-                    $('#loadingdelete').removeClass('d-none');
-                },
-                complete: function(data) {
-                    setTimeout(function() {
-                        $('#dt').DataTable().clear().destroy();
-                    }, 1500);
-                    setTimeout(function() {
-                        getData('/api/sites',false);
-                        $('#deleteSiteModal').modal('toggle');
-                        $('#deletesitedomain').html('');
-                        $('#deletesiteid').val('');
-                        $('#loadingdelete').addClass('d-none');
-                    }, 6500);
-                },
-            });
-        });
-    }
-
-    //Auto Update List
-    setInterval(function() {
-        $('#dt').DataTable().clear().destroy();
-        getData('/api/sites',false);
-    }, 45000);
-
-    //Get server domains
-    $('#newsiteserver').change(function() {
-        getDataNoDT('/api/servers/'+$('#newsiteserver').val()+'/domains');
+    // Open modal
+    newSiteButton?.addEventListener('click', function() {
+        newSiteModal?.classList.remove('hidden');
     });
 
-    //Check Domain Conflict
-    function domainConflict(domain) {
-        conflict = 0;
-        JSON.parse(localStorage.otherdata).forEach(item => {
-            if(item == domain) {
-                conflict = conflict + 1;
-            }
-        });
-        return conflict;
-    }
-
-    //Server list
-    function getServers() {
-        $('#newsiteserver').empty();
-        $.ajax({
-            type: 'GET',
-            url: '/api/servers',
-            success: function(data) {
-                data.forEach(server => {
-                    if(server.status) {
-                        if(server.default) {
-                            $('#newsiteserver').append('<option value="'+server.server_id+'" selected>'+server.name+' ('+server.ip+')</option>');
-                            getDataNoDT('/api/servers/'+server.server_id+'/domains');
-                        } else {
-                            $('#newsiteserver').append('<option value="'+server.server_id+'">'+server.name+' ('+server.ip+')</option>');
-                        }
-                    }
-                });
-            }
-        });
-    }
-    getServers();
-
-    //New Site
-    $('#newSite').click(function() {
-        $('#loading').addClass('d-none');
-        $('#newsiteform').removeClass('d-none');
-        $('#newsiteok').addClass('d-none');
-        $('#newsiteip').html();
-        $('#newsiteusername').html();
-        $('#newsitepassword').html();
-        $('#newsitedbname').html();
-        $('#newsitedbusername').html();
-        $('#newsitedbpassword').html();
-        $('#newsitebasepathuser').html();
-        $('#newsitebasepath').html();
-        $('#newsitedomainok').html();
-        $('#newsitepdf').attr('href','#');
-        $('#newSiteModal').modal();
+    // Close modal
+    closeNewSiteModalButton?.addEventListener('click', function() {
+        newSiteModal?.classList.add('hidden');
     });
 
-    //New Site Validation
-    $('#newsitedomain').keyup(function() {
-        $('#newsitedomain').removeClass('is-invalid');
-        $('#submit').removeClass('disabled');
-    });
-
-    //New Site Submit
-    $('#submit').click(function() {
-        validation = true;
-        if(!$('#newsitedomain').val() || $('#newsitedomain').val().length < 5 || domainConflict($('#newsitedomain').val()) > 0) {
-            $('#newsitedomain').addClass('is-invalid');
-            $('#submit').addClass('disabled');
-            validation = false;
+    // Close modal on background click
+    newSiteModal?.addEventListener('click', function(e) {
+        if (e.target === newSiteModal || e.target.classList.contains('bg-opacity-75')) {
+            newSiteModal?.classList.add('hidden');
         }
-        if(validation) {
-            $.ajax({
-                url: '/api/sites',
-                type: 'POST',
-                contentType: 'application/json',
-                dataType: 'json',
-                data: JSON.stringify({
-                    'domain':   $('#newsitedomain').val(),
-                    'server_id':$('#newsiteserver').val(),
-                    'php':      $('#newsitephp').val(),
-                    'basepath': $('#newsitebasepath').val()
-                }),
-                beforeSend: function() {
-                    $('#loading').removeClass('d-none');
-                },
-                success: function(data) {
-                    $('#dt').DataTable().clear().destroy();
-                    getData('/api/sites',false);
-                    $('#loading').addClass('d-none');
-                    $('#newsiteip').html(data.server_ip);
-                    $('#newsiteusername').html(data.username);
-                    $('#newsitepassword').html(data.password);
-                    $('#newsitedbname').html(data.database);
-                    $('#newsitedbusername').html(data.database_username);
-                    $('#newsitedbpassword').html(data.database_password);
-                    $('#newsitebasepathuser').html(data.username);
-                    $('#newsitebasepath').html(data.basepath);
-                    $('#newsitedomainok').html(data.domain);
-                    $('#newsitepdf').attr('href',data.pdf);
-                    $('#newsiteform').addClass('d-none');
-                    $('#newsiteok').removeClass('d-none');
-                    $('#newsitedomain').val('');
-                    $('#newsitephp').val('8.2');
-                    $('#newsitebasepath').val('');
-                    getServers();
-                },
-            });
-        }
+    });
+
+    // Listen for Livewire event to close modal
+    document.addEventListener('livewire:init', () => {
+        Livewire.on('close-modal', () => {
+            newSiteModal?.classList.add('hidden');
+        });
+
+        Livewire.on('site-created', () => {
+            newSiteModal?.classList.add('hidden');
+        });
     });
 </script>
 @endsection

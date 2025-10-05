@@ -3,7 +3,7 @@
 namespace App\Livewire\Stats;
 
 use App\Models\Server;
-use Illuminate\Support\Facades\Http;
+use App\Services\MonitoringService;
 use Livewire\Component;
 
 class Load extends Component
@@ -16,35 +16,32 @@ class Load extends Component
 
     public $load;
 
-    public function mount($server_id)
+    public function mount($server_id, MonitoringService $monitoringService)
     {
         $this->server = Server::where('server_id', $server_id)->first();
+        
+        if (!$this->server) {
+            return;
+        }
+
         try {
-            $load = Http::get($this->server->ip.'/api/servers/'.$this->server->server_id.'/stats/load');
-            $this->load = $load->json()['load'];
-            $this->labels = $this->getLabels();
+            // Get chart data from new monitoring system
+            $chartData = $monitoringService->getChartData($this->server, 24);
+            
+            $this->labels = $chartData['labels'] ?? [];
             $this->dataset = [
                 [
-                    'label' => 'Total',
+                    'label' => 'Load Average (1 min)',
                     'backgroundColor' => 'rgba(15,64,97,255)',
                     'borderColor' => 'rgba(15,64,97,255)',
+                    'data' => $chartData['load'] ?? [],
                 ],
             ];
-            foreach ($this->load as $key => $load) {
-                $this->dataset[0]['data'][] = $load['min1'];
-            }
         } catch (\Throwable $th) {
+            // Fallback to empty data
+            $this->labels = [];
+            $this->dataset = [];
         }
-    }
-
-    private function getLabels()
-    {
-        $labels = [];
-        foreach ($this->load as $load) {
-            $labels[] = date('H:i', strtotime($load['created_at']));
-        }
-
-        return $labels;
     }
 
     public function render()

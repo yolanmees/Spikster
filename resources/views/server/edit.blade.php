@@ -18,28 +18,50 @@
     <div class="pb-4">
         <div class="sm:hidden">
             <label for="tabs" class="sr-only">Select a tab</label>
-            <!-- Use an "onChange" listener to redirect the user to the selected tab URL. -->
-            <select id="tabs" name="tabs" class="block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
-                <option selected>Monitor</option>
-                <option>Server information</option>
-                <option>Security</option>
-                <option>Tools</option>
+            <select id="tabs" name="tabs" x-model="tab" class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white focus:border-blue-500 focus:ring-blue-500">
+                <option value="monitor">Monitor</option>
+                <option value="server">Server information</option>
+                <option value="security">Security</option>
+                <option value="tools">Tools</option>
             </select>
         </div>
         <div class="hidden sm:block">
-            <nav class="flex space-x-4" aria-label="Tabs">
-                <!-- Current: "bg-gray-200 text-gray-800", Default: "text-gray-600 hover:text-gray-800" -->
-                <a @click="tab = 'monitor'" clas="tab" :class="tab === 'monitor' ? 'tab-item-active' : 'tab-item'" aria-current="page">Monitor</a>
-                <a @click="tab = 'server'" :class="tab === 'server' ? 'tab-item-active' : 'tab-item'">Server information</a>
-                <a @click="tab = 'security'" :class="tab === 'security' ? 'tab-item-active' : 'tab-item'">Security</a>
-                <a @click="tab = 'tools'" :class="tab === 'tools' ? 'tab-item-active' : 'tab-item'">Tools</a>
+            <nav class="flex space-x-4 border-b border-gray-200 dark:border-gray-700" aria-label="Tabs">
+                <button 
+                    @click="tab = 'monitor'" 
+                    :class="tab === 'monitor' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'"
+                    class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors"
+                >
+                    Monitor
+                </button>
+                <button 
+                    @click="tab = 'server'" 
+                    :class="tab === 'server' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'"
+                    class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors"
+                >
+                    Server information
+                </button>
+                <button 
+                    @click="tab = 'security'" 
+                    :class="tab === 'security' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'"
+                    class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors"
+                >
+                    Security
+                </button>
+                <button 
+                    @click="tab = 'tools'" 
+                    :class="tab === 'tools' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'"
+                    class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors"
+                >
+                    Tools
+                </button>
             </nav>
         </div>
     </div>
 
 
 
-    <div class="grid grid-cols-2 gap-4" x-show="tab === 'monitor'">
+    <div class="grid grid-cols-2 gap-4" x-show="tab === 'monitor'" x-transition>
             @livewire('stats.cpu', ['server_id' => $server_id])
             @livewire('stats.mem', ['server_id' => $server_id])
             @livewire('stats.load', ['server_id' => $server_id])
@@ -47,7 +69,7 @@
     </div>
 
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4" x-show="tab === 'server'">
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4" x-show="tab === 'server'" x-transition style="display: none;">
         <x-card header="{{ __('spikster.server_information') }}" size="md" dark="false">
             {{-- <canvas id="cpuChart" width="100%" height="40"></canvas> --}}
             <x-input type="text" label="{{ __('spikster.server_name') }}:" placeholder="e.g. Production" id="servername" autocomplete="off" />
@@ -88,122 +110,168 @@
             </a>
         </x-card>
     </div>
-    <div class="flex gap-x-4" x-show="tab === 'security'">
+    <div class="flex gap-x-4" x-show="tab === 'security'" x-transition style="display: none;">
         <div class="w-1/2">
             <x-card header="Security" size="md" dark="false">
-                <p>Fail2ban</p>
+                <p class="mb-4">Fail2ban</p>
                 <div>
-                    <a href="{{route('server.fail2ban', $server_id)}}" class="btn btn-primary" type="button" id="">Open Fail2ban</a>
+                    <x-action-button :href="route('server.fail2ban', $server_id)">
+                        Open Fail2ban
+                    </x-action-button>
                 </div>
             </x-card>
         </div>
     </div>
-    <div class="flex gap-x-4" x-show="tab === 'tools'">
+    <div class="flex gap-x-4" x-show="tab === 'tools'" x-transition style="display: none;">
         <div class="w-1/3">
             <x-card header="{{ __('spikster.tools') }}" size="md" dark="false">
-                <p>{{ __('spikster.php_cli_version') }}:</p>
-                <div class="input-group">
-                    <select class="form-control" id="phpver">
-                        <option value="8.3" id="php83">8.3</option>
-                        <option value="8.2" id="php82">8.2</option>
-                        <option value="8.1" id="php81">8.1</option>
-                        <option value="8.0" id="php80">8.0</option>
-                        <option value="7.4" id="php74">7.4</option>
-                    </select>
-                    <div class="input-group-append">
-                        <button class="btn btn-primary" type="button" id="changephp"><i class="fas fa-edit"></i></button>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {{ __('spikster.php_cli_version') }}:
+                    </label>
+                    <div class="flex gap-2">
+                        <select id="phpver" class="flex-1 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white focus:border-blue-500 focus:ring-blue-500">
+                            <option value="8.3" id="php83">8.3</option>
+                            <option value="8.2" id="php82">8.2</option>
+                            <option value="8.1" id="php81">8.1</option>
+                            <option value="8.0" id="php80">8.0</option>
+                            <option value="7.4" id="php74">7.4</option>
+                        </select>
+                        <button type="button" id="changephp" class="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <x-icon icon="edit" class="h-4 w-4" />
+                        </button>
                     </div>
                 </div>
-                <div class="mt-4">
-                    <p class="mb-2">{{ __('spikster.manage_cron_jobs') }}:</p>
-                    <button class="btn btn-primary" type="button" id="editcrontab">{{ __('spikster.edit_crontab') }}</button>
+                
+                <div class="mb-4">
+                    <p class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {{ __('spikster.manage_cron_jobs') }}:
+                    </p>
+                    <x-primary-button type="button" id="editcrontab">
+                        {{ __('spikster.edit_crontab') }}
+                    </x-primary-button>
                 </div>
-                <div class="mt-4">
-                    <p class="mb-2">{{ __('spikster.reset_cipi_password') }}:</p>
-                    <button class="btn btn-danger" type="button" id="rootreset">{{ __('spikster.require_reset_cipi_password') }}</button>
-
+                
+                <div class="mb-4">
+                    <p class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {{ __('spikster.reset_cipi_password') }}:
+                    </p>
+                    <x-danger-button type="button" id="rootreset">
+                        {{ __('spikster.require_reset_cipi_password') }}
+                    </x-danger-button>
                 </div>
-                <div class="mt-4">
-                    {{-- <p class="mb-2">{{ __('spikster.cipi_build_version') }}:</p>
-                    <span class="btn btn-secondary" id="serverbuild"></span> --}}
-                </div>
-                <div class="space"></div>
             </x-card>
         </div>
-       
-
     </div>
-    @endsection
-
-
-
-    @section('extra')
-    <input type="hidden" id="currentip">
-    <dialog class="modal fade" id="updateServerModal" tabindex="-1" role="dialog" aria-labelledby="updateServerModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document" id="updateserverdialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="updateServerModalLabel">{{ __('spikster.update_server_modal_title') }}</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p>{{ __('spikster.update_server_modal_text') }}</p>
-                    <p class="d-none" id="ipnotice"><b>{!! __('spikster.update_server_modal_ip') !!}</b></p>
-                    <div class="text-center">
-                        <button class="btn btn-primary" type="button" id="submit">{{ __('spikster.confirm') }} </button>
-                    </div>
-                    <div class="space"></div>
-                </div>
-            </div>
-        </div>
-    </dialog>
-    <dialog class="modal fade" id="crontabModal" tabindex="-1" role="dialog" aria-labelledby="crontabModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="crontabModalLabel">{{ __('spikster.server_crontab') }}</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p>{{ __('spikster.server_crontab_edit') }}:</p>
-                    <div id="crontab" style="height:250px;width:100%;"></div>
-                    <div class="space"></div>
-                    <div class="text-center">
-                        <button class="btn btn-primary" type="button" id="crontabsubmit">{{ __('spikster.save') }} <i class="fas fa-circle-notch fa-spin d-none" id="crontableloading"></i></button>
-                    </div>
-                    <div class="space"></div>
-                </div>
-            </div>
-        </div>
-    </dialog>
-    <dialog class="modal fade" id="rootresetModal" tabindex="-1" role="dialog" aria-labelledby="rootresetModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="rootresetModalLabel">{{ __('spikster.require_password_reset_modal_title') }}</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p>{{ __('spikster.require_password_reset_modal_text') }}</p>
-                    <div class="space"></div>
-                    <div class="text-center">
-                        <button class="btn btn-danger" type="button" id="rootresetsubmit">{{ __('spikster.confirm') }} <i class="fas fa-circle-notch fa-spin d-none" id="rootresetloading"></i></button>
-                    </div>
-                    <div class="space"></div>
-                </div>
-            </div>
-        </div>
-    </dialog>
 </div>
 @endsection
 
 
+
+@section('extra')
+<input type="hidden" id="currentip">
+
+<!-- Update Server Modal -->
+<div x-data="{ showUpdateModal: false }" x-show="showUpdateModal" x-cloak id="updateServerModalContainer" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
+    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div x-show="showUpdateModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="showUpdateModal = false"></div>
+        
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+        
+        <div x-show="showUpdateModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div class="flex items-start justify-between pb-3 border-b border-gray-200 dark:border-gray-700">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+                        {{ __('spikster.update_server_modal_title') }}
+                    </h3>
+                    <button type="button" @click="showUpdateModal = false" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                        <x-icon icon="x" class="h-6 w-6" />
+                    </button>
+                </div>
+                <div class="mt-4">
+                    <p class="text-sm text-gray-700 dark:text-gray-300">{{ __('spikster.update_server_modal_text') }}</p>
+                    <p class="hidden mt-2 text-sm font-bold text-gray-900 dark:text-white" id="ipnotice">{!! __('spikster.update_server_modal_ip') !!}</p>
+                </div>
+            </div>
+            <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+                <x-primary-button type="button" id="submit" class="sm:ml-3">
+                    {{ __('spikster.confirm') }}
+                </x-primary-button>
+                <x-secondary-button type="button" @click="showUpdateModal = false">
+                    Cancel
+                </x-secondary-button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Crontab Modal -->
+<div x-data="{ showCrontabModal: false }" x-show="showCrontabModal" x-cloak id="crontabModalContainer" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
+    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div x-show="showCrontabModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="showCrontabModal = false"></div>
+        
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+        
+        <div x-show="showCrontabModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+            <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div class="flex items-start justify-between pb-3 border-b border-gray-200 dark:border-gray-700">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+                        {{ __('spikster.server_crontab') }}
+                    </h3>
+                    <button type="button" @click="showCrontabModal = false" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                        <x-icon icon="x" class="h-6 w-6" />
+                    </button>
+                </div>
+                <div class="mt-4">
+                    <p class="text-sm text-gray-700 dark:text-gray-300 mb-2">{{ __('spikster.server_crontab_edit') }}:</p>
+                    <div id="crontab" style="height:250px;width:100%;"></div>
+                </div>
+            </div>
+            <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+                <x-primary-button type="button" id="crontabsubmit" class="sm:ml-3">
+                    {{ __('spikster.save') }}
+                </x-primary-button>
+                <x-secondary-button type="button" @click="showCrontabModal = false">
+                    Cancel
+                </x-secondary-button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Root Reset Modal -->
+<div x-data="{ showRootResetModal: false }" x-show="showRootResetModal" x-cloak id="rootresetModalContainer" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
+    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div x-show="showRootResetModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="showRootResetModal = false"></div>
+        
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+        
+        <div x-show="showRootResetModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div class="flex items-start justify-between pb-3 border-b border-gray-200 dark:border-gray-700">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+                        {{ __('spikster.require_password_reset_modal_title') }}
+                    </h3>
+                    <button type="button" @click="showRootResetModal = false" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                        <x-icon icon="x" class="h-6 w-6" />
+                    </button>
+                </div>
+                <div class="mt-4">
+                    <p class="text-sm text-gray-700 dark:text-gray-300">{{ __('spikster.require_password_reset_modal_text') }}</p>
+                </div>
+            </div>
+            <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+                <x-danger-button type="button" id="rootresetsubmit" class="sm:ml-3">
+                    {{ __('spikster.confirm') }}
+                </x-danger-button>
+                <x-secondary-button type="button" @click="showRootResetModal = false">
+                    Cancel
+                </x-secondary-button>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
 
 @section('css')
 
@@ -223,7 +291,8 @@
 
     // Crontab edit
     $('#editcrontab').click(function() {
-        $('#crontabModal').modal();
+        Alpine.store('modals', { showCrontabModal: true });
+        document.querySelector('#crontabModalContainer').__x.$data.showCrontabModal = true;
     });
 
     // Crontab Submit
@@ -236,12 +305,8 @@
             data: JSON.stringify({
                 'cron': crontab.getSession().getValue(),
             }),
-            beforeSend: function() {
-                $('#crontableloading').removeClass('d-none');
-            },
             success: function(data) {
-                $('#crontableloading').addClass('d-none');
-                $('#crontabModal').modal('toggle');
+                document.querySelector('#crontabModalContainer').__x.$data.showCrontabModal = false;
                 serverInit();
             },
         });
@@ -413,22 +478,18 @@
 
     // Root Reset
     $('#rootreset').click(function() {
-        $('#rootresetModal').modal();
+        document.querySelector('#rootresetModalContainer').__x.$data.showRootResetModal = true;
     });
 
     // Root Reset Submit
     $('#rootresetsubmit').click(function() {
-        $('#rootresetloading').removeClass('d-none');
         $.ajax({
             url: '/api/servers/{{ $server_id }}/rootreset',
             type: 'POST',
             success: function(data) {
                 success('{{ __('spikster.new_password_success') }}:<br><b>'+data.password+'</b>');
                 $(window).scrollTop(0);
-                $('#rootresetModal').modal('toggle');
-            },
-            complete: function() {
-                $('#rootresetloading').addClass('d-none');
+                document.querySelector('#rootresetModalContainer').__x.$data.showRootResetModal = false;
             }
         });
     });
@@ -465,7 +526,7 @@
         }
         if(validation) {
             $('#loading').addClass('d-none');
-            $('#updateServerModal').modal();
+            document.querySelector('#updateServerModalContainer').__x.$data.showUpdateModal = true;
         }
     });
 
@@ -501,7 +562,7 @@
             },
             complete: function() {
                 $('#ipnotice').addClass('d-none');
-                $('#updateServerModal').modal('toggle');
+                document.querySelector('#updateServerModalContainer').__x.$data.showUpdateModal = false;
             }
         });
     });

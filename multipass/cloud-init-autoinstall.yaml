@@ -29,27 +29,27 @@ write_files:
     content: |
       #!/bin/bash
       set -e
-      
+
       echo "========================================" | tee -a /var/log/spikster-autoinstall.log
       echo "Spikster Auto-Installation Started" | tee -a /var/log/spikster-autoinstall.log
       echo "Time: $(date)" | tee -a /var/log/spikster-autoinstall.log
       echo "========================================" | tee -a /var/log/spikster-autoinstall.log
-      
+
       # Clone repository
       echo "Cloning Spikster repository..." | tee -a /var/log/spikster-autoinstall.log
       cd /tmp
       git clone https://github.com/yolanmees/Spikster.git spikster-repo 2>&1 | tee -a /var/log/spikster-autoinstall.log
-      
+
       # Run installation
       echo "Running installation script..." | tee -a /var/log/spikster-autoinstall.log
       cd /tmp/spikster-repo
       bash new_install.sh -b master 2>&1 | tee -a /var/log/spikster-autoinstall.log
-      
+
       # Mark complete
       echo "========================================" | tee -a /var/log/spikster-autoinstall.log
       echo "Installation completed at $(date)" | tee -a /var/log/spikster-autoinstall.log
       echo "========================================" | tee -a /var/log/spikster-autoinstall.log
-      
+
       # Get IP and show access info
       IP=$(hostname -I | awk '{print $1}')
       echo "Spikster is accessible at: http://$IP" | tee -a /var/log/spikster-autoinstall.log
@@ -59,10 +59,10 @@ write_files:
 runcmd:
   # Wait for system to settle
   - sleep 10
-  
+
   # Run installation script in background
   - nohup /tmp/install-spikster.sh > /var/log/spikster-install-output.log 2>&1 &
-  
+
   # Create marker file
   - echo "Auto-installation initiated at $(date)" > /tmp/installation-started.txt
 
@@ -70,22 +70,22 @@ final_message: |
   ========================================
   Spikster Auto-Installation VM Ready
   ========================================
-  
+
   The installation script is running in the background.
   This may take 10-15 minutes to complete.
-  
+
   To monitor progress:
     multipass exec <vm-name> -- sudo tail -f /var/log/spikster-autoinstall.log
-  
+
   To check if installation is complete:
     multipass exec <vm-name> -- sudo cat /var/log/spikster-autoinstall.log | grep "completed"
-  
+
   Once complete, access Spikster at:
     http://<vm-ip>
-  
+
   Get VM IP:
     multipass info <vm-name> | grep IPv4
-  
+
   ========================================
   Boot finished at $TIMESTAMP
   ========================================

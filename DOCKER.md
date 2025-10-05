@@ -4,13 +4,13 @@ Complete guide voor het draaien van Spikster in Docker containers.
 
 ## 📋 Inhoud
 
-- [Snelstart](#snelstart)
-- [Vereisten](#vereisten)
-- [Configuratie](#configuratie)
-- [Docker Commands](#docker-commands)
-- [Development Workflow](#development-workflow)
-- [Production Deployment](#production-deployment)
-- [Troubleshooting](#troubleshooting)
+-   [Snelstart](#snelstart)
+-   [Vereisten](#vereisten)
+-   [Configuratie](#configuratie)
+-   [Docker Commands](#docker-commands)
+-   [Development Workflow](#development-workflow)
+-   [Production Deployment](#production-deployment)
+-   [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -39,25 +39,26 @@ open http://localhost:8000
 
 ### Beschikbare Services
 
-| Service | URL | Beschrijving |
-|---------|-----|--------------|
-| **Application** | http://localhost:8000 | Spikster web interface |
-| **MailHog UI** | http://localhost:8025 | Email testing interface |
-| **phpMyAdmin** | http://localhost:8080 | Database management |
-| **Redis Commander** | http://localhost:8081 | Redis management |
+| Service             | URL                   | Beschrijving            |
+| ------------------- | --------------------- | ----------------------- |
+| **Application**     | http://localhost:8000 | Spikster web interface  |
+| **MailHog UI**      | http://localhost:8025 | Email testing interface |
+| **phpMyAdmin**      | http://localhost:8080 | Database management     |
+| **Redis Commander** | http://localhost:8081 | Redis management        |
 
 ---
 
 ## 📦 Vereisten
 
-- Docker Desktop 20.10+
-- Docker Compose V2
-- 4GB vrij RAM minimum
-- 10GB vrije disk ruimte
+-   Docker Desktop 20.10+
+-   Docker Compose V2
+-   4GB vrij RAM minimum
+-   10GB vrije disk ruimte
 
 ### Installatie Docker
 
 **macOS:**
+
 ```bash
 brew install --cask docker
 ```
@@ -66,6 +67,7 @@ brew install --cask docker
 Download van [docker.com](https://www.docker.com/products/docker-desktop)
 
 **Linux:**
+
 ```bash
 curl -fsSL https://get.docker.com | sh
 sudo usermod -aG docker $USER
@@ -108,11 +110,13 @@ MAIL_PORT=1025
 ### Docker Compose Profiles
 
 **Development** (met debug tools):
+
 ```bash
 docker compose --profile dev up -d
 ```
 
 **Production** (minimal):
+
 ```bash
 docker compose up -d
 ```
@@ -522,17 +526,18 @@ docker compose ps
 
 ## 📚 Additional Resources
 
-- [Docker Documentation](https://docs.docker.com/)
-- [Docker Compose Documentation](https://docs.docker.com/compose/)
-- [Laravel Sail](https://laravel.com/docs/sail) (inspiration)
-- [PHP-FPM Configuration](https://www.php.net/manual/en/install.fpm.php)
-- [Nginx Configuration](https://nginx.org/en/docs/)
+-   [Docker Documentation](https://docs.docker.com/)
+-   [Docker Compose Documentation](https://docs.docker.com/compose/)
+-   [Laravel Sail](https://laravel.com/docs/sail) (inspiration)
+-   [PHP-FPM Configuration](https://www.php.net/manual/en/install.fpm.php)
+-   [Nginx Configuration](https://nginx.org/en/docs/)
 
 ---
 
 ## 🆘 Support
 
 Voor hulp:
+
 1. Check deze documentatie
 2. Bekijk `docker compose logs`
 3. Open een issue op GitHub

@@ -10,28 +10,23 @@
 
     <!-- Search Bar -->
     <div class="mb-4">
-        <div class="relative">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-            </div>
-            <input type="text" wire:model.live.debounce.300ms="search" placeholder="Zoek op naam, IP of provider..."
-                class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-
-            <!-- Loading indicator for search -->
-            <div wire:loading wire:target="search" class="absolute inset-y-0 right-0 pr-3 flex items-center">
-                <svg class="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none"
-                    viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                        stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                    </path>
-                </svg>
-            </div>
-        </div>
+        <x-text-input 
+            model="search" 
+            debounce="300" 
+            placeholder="Search by name, IP or provider..."
+        >
+            <x-slot name="icon">
+                <x-icon icon="search" class="h-5 w-5 text-gray-400" />
+            </x-slot>
+            <x-slot name="suffix">
+                <div wire:loading wire:target="search">
+                    <svg class="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </div>
+            </x-slot>
+        </x-text-input>
     </div>
 
     <!-- Table Container with Loading Overlay -->
@@ -39,7 +34,7 @@
         <!-- Loading Overlay -->
         <div wire:loading.delay
             class="absolute inset-0 bg-white/50 dark:bg-gray-900/50 z-10 flex items-center justify-center rounded-lg">
-            <livewire:components.loading-spinner size="lg" color="blue" message="Bezig met laden..." />
+            <livewire:components.loading-spinner size="lg" color="blue" message="Loading..." />
         </div>
 
         <!-- Table -->
@@ -108,68 +103,42 @@
                                     {{ $server->name }}
                                 </div>
                                 <div class="text-gray-500 dark:text-gray-400 text-xs mt-1">
-                                    {{ $server->location ?? 'Geen locatie' }}
+                                    {{ $server->location ?? 'No location' }}
                                 </div>
                             </td>
                             <td class="hidden px-3 py-3.5 text-sm text-gray-500 lg:table-cell dark:text-gray-300">
                                 <span class="font-mono">{{ $server->ip }}</span>
                             </td>
                             <td class="hidden px-3 py-3.5 text-sm text-gray-500 lg:table-cell dark:text-gray-300">
-                                <span
-                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                                    {{ ucfirst($server->provider) }}
-                                </span>
+                                <x-badge color="blue" :text="ucfirst($server->provider)" />
                             </td>
                             <td class="hidden px-3 py-3.5 text-sm lg:table-cell">
                                 @if ($server->isActive())
-                                    <span
-                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                        <svg class="-ml-0.5 mr-1.5 h-2 w-2 text-green-400" fill="currentColor"
-                                            viewBox="0 0 8 8">
-                                            <circle cx="4" cy="4" r="3" />
-                                        </svg>
-                                        Actief
-                                    </span>
+                                    <x-badge color="green" text="Active" />
                                 @else
-                                    <span
-                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
-                                        <svg class="-ml-0.5 mr-1.5 h-2 w-2 text-gray-400" fill="currentColor"
-                                            viewBox="0 0 8 8">
-                                            <circle cx="4" cy="4" r="3" />
-                                        </svg>
-                                        Niet geïnstalleerd
-                                    </span>
+                                    <x-badge color="gray" text="Not installed" />
                                 @endif
                             </td>
                             <td class="relative py-3.5 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                                <a href="{{ route('server.edit', $server->server_id) }}"
-                                    class="inline-flex items-center rounded-md bg-white dark:bg-gray-700 px-2.5 py-1.5 text-sm font-semibold text-gray-900 dark:text-white shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
-                                    Beheer
-                                </a>
-                                <button wire:click="confirmDelete('{{ $server->server_id }}')" type="button"
-                                    class="ml-2 inline-flex items-center rounded-md bg-red-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-red-500 transition-colors"
-                                    wire:loading.attr="disabled" wire:target="confirmDelete">
-                                    Verwijder
-                                </button>
+                                <x-action-button :href="route('server.edit', $server->server_id)">
+                                    Manage
+                                </x-action-button>
+                                <x-danger-button wire:click="confirmDelete('{{ $server->server_id }}')" type="button"
+                                    class="ml-2">
+                                    Delete
+                                </x-danger-button>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="py-12 text-center">
-                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24"
-                                    stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-                                </svg>
-                                <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">Geen servers
-                                    gevonden</h3>
-                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                            <td colspan="5">
+                                <x-empty-state icon="server" title="No servers found">
                                     @if ($search)
-                                        Geen servers gevonden voor "{{ $search }}"
+                                        No servers found for "{{ $search }}"
                                     @else
-                                        Begin met het toevoegen van een nieuwe server.
+                                        Start by adding a new server.
                                     @endif
-                                </p>
+                                </x-empty-state>
                             </td>
                         </tr>
                     @endforelse
@@ -210,37 +179,23 @@
                             <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                                 <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-white"
                                     id="modal-title">
-                                    Server verwijderen
+                                    Delete Server
                                 </h3>
                                 <div class="mt-2">
                                     <p class="text-sm text-gray-500 dark:text-gray-400">
-                                        Weet je zeker dat je deze server wilt verwijderen? Deze actie kan niet ongedaan
-                                        worden gemaakt.
+                                        Are you sure you want to delete this server? This action cannot be undone.
                                     </p>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-                        <button type="button" wire:click="delete" wire:loading.attr="disabled" wire:target="delete"
-                            class="inline-flex w-full justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed">
-                            <span wire:loading.remove wire:target="delete">Verwijderen</span>
-                            <span wire:loading wire:target="delete" class="flex items-center">
-                                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10"
-                                        stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor"
-                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                    </path>
-                                </svg>
-                                Bezig...
-                            </span>
-                        </button>
-                        <button type="button" wire:click="cancelDelete"
-                            class="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-base font-medium text-gray-700 dark:text-gray-300 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:mt-0 sm:w-auto sm:text-sm">
-                            Annuleren
-                        </button>
+                        <x-danger-button type="button" wire:click="delete" class="sm:ml-3">
+                            Delete
+                        </x-danger-button>
+                        <x-secondary-button type="button" wire:click="cancelDelete" class="mt-3 sm:mt-0">
+                            Cancel
+                        </x-secondary-button>
                     </div>
                 </div>
             </div>
