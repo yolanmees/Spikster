@@ -6,14 +6,16 @@ use App\Models\Server;
 use App\Models\ServerMetric;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 use Carbon\Carbon;
 
-class FetchServerMetricsJob implements ShouldQueue
+class FetchServerMetricsJob implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -38,6 +40,21 @@ class FetchServerMetricsJob implements ShouldQueue
     public int $timeout = 30;
 
     /**
+     * The unique ID of the job.
+     * This prevents duplicate jobs for the same server within a 1-minute window.
+     */
+    public function uniqueId(): string
+    {
+        return 'fetch-metrics-' . $this->server->id;
+    }
+
+    /**
+     * The number of seconds after which the job's unique lock will be released.
+     * This should match or exceed your scheduling interval (1 minute).
+     */
+    public int $uniqueFor = 60;
+
+    /**
      * Create a new job instance.
      */
     public function __construct(Server $server)
@@ -56,6 +73,13 @@ class FetchServerMetricsJob implements ShouldQueue
             return;
         }
 
+        // Rate limiting: don't fetch if we already have fresh metrics (< 50 seconds old)
+        $cacheKey = "last_metrics_fetch_{$this->server->id}";
+        if (Cache::has($cacheKey)) {
+            Log::debug("Skipping duplicate metrics fetch for server {$this->server->id} - already fetched recently");
+            return;
+        }
+
         try {
             // Fetch metrics from the agent
             $metrics = $this->fetchMetricsFromAgent();
@@ -67,6 +91,9 @@ class FetchServerMetricsJob implements ShouldQueue
 
             // Store metrics in database
             $this->storeMetrics($metrics);
+
+            // Set cache to prevent duplicate fetches for 50 seconds
+            Cache::put($cacheKey, true, 50);
 
             // Cleanup old metrics (every 100th run to avoid overhead)
             if (rand(1, 100) === 1) {
@@ -155,7 +182,7 @@ class FetchServerMetricsJob implements ShouldQueue
      */
     private function validateMetricsData(array $data): bool
     {
-        $required = ['cpu', 'memory', 'disk', 'load', 'network', 'uptime', 'timestamp'];
+        $required = ['cpu_percent', 'memory', 'disk', 'load', 'network', 'uptime_seconds', 'timestamp'];
         
         foreach ($required as $field) {
             if (!isset($data[$field])) {
@@ -172,7 +199,6 @@ class FetchServerMetricsJob implements ShouldQueue
      */
     private function storeMetrics(array $data): void
     {
-        $cpu = $data['cpu'];
         $memory = $data['memory'];
         $disk = $data['disk'];
         $load = $data['load'];
@@ -182,28 +208,28 @@ class FetchServerMetricsJob implements ShouldQueue
             'server_id' => $this->server->id,
             
             // CPU
-            'cpu_percent' => $cpu['percent'] ?? 0,
-            'cpu_cores' => $cpu['cores'] ?? null,
+            'cpu_percent' => $data['cpu_percent'] ?? 0,
+            'cpu_cores' => $data['cpu_cores'] ?? null,
             
-            // Memory
-            'memory_total' => $memory['total'] ?? 0,
-            'memory_used' => $memory['used'] ?? 0,
-            'memory_free' => $memory['free'] ?? 0,
-            'memory_available' => $memory['available'] ?? null,
+            // Memory (agent returns *_bytes fields)
+            'memory_total' => $memory['total_bytes'] ?? 0,
+            'memory_used' => $memory['used_bytes'] ?? 0,
+            'memory_free' => $memory['free_bytes'] ?? 0,
+            'memory_available' => $memory['available_bytes'] ?? null,
             'memory_percent' => $memory['percent'] ?? 0,
-            'memory_cached' => $memory['cached'] ?? null,
-            'memory_buffers' => $memory['buffers'] ?? null,
+            'memory_cached' => $memory['cached_bytes'] ?? null,
+            'memory_buffers' => $memory['buffers_bytes'] ?? null,
             
-            // Disk
-            'disk_total' => $disk['total'] ?? 0,
-            'disk_used' => $disk['used'] ?? 0,
-            'disk_free' => $disk['free'] ?? 0,
+            // Disk (agent returns *_bytes fields)
+            'disk_total' => $disk['total_bytes'] ?? 0,
+            'disk_used' => $disk['used_bytes'] ?? 0,
+            'disk_free' => $disk['free_bytes'] ?? 0,
             'disk_percent' => $disk['percent'] ?? 0,
             
-            // Load
-            'load_1' => $load['1'] ?? 0,
-            'load_5' => $load['5'] ?? 0,
-            'load_15' => $load['15'] ?? 0,
+            // Load (agent returns load1, load5, load15)
+            'load_1' => $load['load1'] ?? 0,
+            'load_5' => $load['load5'] ?? 0,
+            'load_15' => $load['load15'] ?? 0,
             
             // Network
             'network_bytes_sent' => $network['bytes_sent'] ?? 0,
@@ -211,8 +237,8 @@ class FetchServerMetricsJob implements ShouldQueue
             'network_packets_sent' => $network['packets_sent'] ?? null,
             'network_packets_recv' => $network['packets_recv'] ?? null,
             
-            // System
-            'uptime_seconds' => $data['uptime'] ?? 0,
+            // System (agent returns uptime_seconds)
+            'uptime_seconds' => $data['uptime_seconds'] ?? 0,
             
             // Timestamp from agent
             'measured_at' => isset($data['timestamp']) 

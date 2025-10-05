@@ -74,7 +74,7 @@ class ServerMetric extends Model
     /**
      * Scope to get metrics for a specific server.
      */
-    public function scopeForServer($query, string $serverId)
+    public function scopeForServer($query, int $serverId)
     {
         return $query->where('server_id', $serverId);
     }
@@ -114,7 +114,7 @@ class ServerMetric extends Model
     /**
      * Get the latest metric for a specific server.
      */
-    public static function getLatestForServer(string $serverId): ?self
+    public static function getLatestForServer(int $serverId): ?self
     {
         return static::forServer($serverId)
             ->latest()
@@ -124,7 +124,7 @@ class ServerMetric extends Model
     /**
      * Get aggregated metrics for a server over a time period.
      */
-    public static function getAggregatedMetrics(string $serverId, int $hours = 24): array
+    public static function getAggregatedMetrics(int $serverId, int $hours = 24): array
     {
         $metrics = static::forServer($serverId)
             ->lastHours($hours)
@@ -172,7 +172,7 @@ class ServerMetric extends Model
     /**
      * Delete metrics older than N days for a specific server.
      */
-    public static function cleanupForServer(string $serverId, int $daysToKeep = 30): int
+    public static function cleanupForServer(int $serverId, int $daysToKeep = 30): int
     {
         return static::forServer($serverId)
             ->where('created_at', '<', now()->subDays($daysToKeep))
@@ -180,30 +180,87 @@ class ServerMetric extends Model
     }
 
     /**
-     * Get time-series data for charting (hourly averages).
+     * Get time-series data for charting with dynamic grouping based on time range.
+     * 
+     * Grouping strategy:
+     * - 1 hour: Show every data point (per minute) - ~60 points
+     * - 6 hours: Group by 5 minutes - ~72 points  
+     * - 12+ hours: Group by hour - varies by range
      */
-    public static function getTimeSeriesData(string $serverId, int $hours = 24): array
+    public static function getTimeSeriesData(int $serverId, int $hours = 24): array
     {
-        $metrics = static::forServer($serverId)
-            ->lastHours($hours)
-            ->select([
-                DB::raw('DATE_FORMAT(measured_at, "%Y-%m-%d %H:00:00") as hour'),
-                DB::raw('AVG(cpu_percent) as avg_cpu'),
-                DB::raw('AVG(memory_percent) as avg_memory'),
-                DB::raw('AVG(disk_percent) as avg_disk'),
-                DB::raw('AVG(load_1) as avg_load'),
-            ])
-            ->groupBy('hour')
-            ->orderBy('hour')
-            ->get();
+        // Determine grouping strategy based on time range
+        if ($hours <= 1) {
+            // Last hour: show all data points (no grouping)
+            $metrics = static::forServer($serverId)
+                ->lastHours($hours)
+                ->select([
+                    'measured_at',
+                    'cpu_percent',
+                    'memory_percent',
+                    'disk_percent',
+                    'load_1',
+                ])
+                ->orderBy('measured_at')
+                ->get();
 
-        return [
-            'labels' => $metrics->pluck('hour')->map(fn($h) => Carbon::parse($h)->format('H:00'))->toArray(),
-            'cpu' => $metrics->pluck('avg_cpu')->map(fn($v) => round($v, 2))->toArray(),
-            'memory' => $metrics->pluck('avg_memory')->map(fn($v) => round($v, 2))->toArray(),
-            'disk' => $metrics->pluck('avg_disk')->map(fn($v) => round($v, 2))->toArray(),
-            'load' => $metrics->pluck('avg_load')->map(fn($v) => round($v, 2))->toArray(),
-        ];
+            return [
+                'labels' => $metrics->pluck('measured_at')->map(fn($t) => Carbon::parse($t)->format('H:i'))->toArray(),
+                'cpu' => $metrics->pluck('cpu_percent')->map(fn($v) => round($v, 2))->toArray(),
+                'memory' => $metrics->pluck('memory_percent')->map(fn($v) => round($v, 2))->toArray(),
+                'disk' => $metrics->pluck('disk_percent')->map(fn($v) => round($v, 2))->toArray(),
+                'load' => $metrics->pluck('load_1')->map(fn($v) => round($v, 2))->toArray(),
+            ];
+            
+        } elseif ($hours <= 6) {
+            // Last 6 hours: group by 5 minutes
+            $metrics = static::forServer($serverId)
+                ->lastHours($hours)
+                ->select([
+                    DB::raw('FROM_UNIXTIME(FLOOR(UNIX_TIMESTAMP(measured_at)/300)*300) as time_bucket'),
+                    DB::raw('AVG(cpu_percent) as avg_cpu'),
+                    DB::raw('AVG(memory_percent) as avg_memory'),
+                    DB::raw('AVG(disk_percent) as avg_disk'),
+                    DB::raw('AVG(load_1) as avg_load'),
+                ])
+                ->groupBy('time_bucket')
+                ->orderBy('time_bucket')
+                ->get();
+
+            return [
+                'labels' => $metrics->pluck('time_bucket')->map(fn($h) => Carbon::parse($h)->format('H:i'))->toArray(),
+                'cpu' => $metrics->pluck('avg_cpu')->map(fn($v) => round($v, 2))->toArray(),
+                'memory' => $metrics->pluck('avg_memory')->map(fn($v) => round($v, 2))->toArray(),
+                'disk' => $metrics->pluck('avg_disk')->map(fn($v) => round($v, 2))->toArray(),
+                'load' => $metrics->pluck('avg_load')->map(fn($v) => round($v, 2))->toArray(),
+            ];
+            
+        } else {
+            // 12+ hours: group by hour
+            $metrics = static::forServer($serverId)
+                ->lastHours($hours)
+                ->select([
+                    DB::raw('DATE_FORMAT(measured_at, "%Y-%m-%d %H:00:00") as hour'),
+                    DB::raw('AVG(cpu_percent) as avg_cpu'),
+                    DB::raw('AVG(memory_percent) as avg_memory'),
+                    DB::raw('AVG(disk_percent) as avg_disk'),
+                    DB::raw('AVG(load_1) as avg_load'),
+                ])
+                ->groupBy('hour')
+                ->orderBy('hour')
+                ->get();
+
+            // For longer periods, show date + hour
+            $labelFormat = $hours > 48 ? 'M j H:i' : 'H:i';
+            
+            return [
+                'labels' => $metrics->pluck('hour')->map(fn($h) => Carbon::parse($h)->format($labelFormat))->toArray(),
+                'cpu' => $metrics->pluck('avg_cpu')->map(fn($v) => round($v, 2))->toArray(),
+                'memory' => $metrics->pluck('avg_memory')->map(fn($v) => round($v, 2))->toArray(),
+                'disk' => $metrics->pluck('avg_disk')->map(fn($v) => round($v, 2))->toArray(),
+                'load' => $metrics->pluck('avg_load')->map(fn($v) => round($v, 2))->toArray(),
+            ];
+        }
     }
 
     /**

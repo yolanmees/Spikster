@@ -61,11 +61,8 @@
 
 
 
-    <div class="grid grid-cols-2 gap-4" x-show="tab === 'monitor'" x-transition>
-            @livewire('stats.cpu', ['server_id' => $server_id])
-            @livewire('stats.mem', ['server_id' => $server_id])
-            @livewire('stats.load', ['server_id' => $server_id])
-            @livewire('stats.disk', ['server_id' => $server_id])
+    <div x-show="tab === 'monitor'" x-transition>
+        <x-server-monitoring-charts :serverId="$server_id" />
     </div>
 
 

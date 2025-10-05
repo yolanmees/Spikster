@@ -34,6 +34,7 @@ Route::get('/servers/{server_id}/stats/cpu', [ServerController::class, 'statsCpu
 Route::get('/servers/{server_id}/stats/mem', [ServerController::class, 'statsMem']);
 Route::get('/servers/{server_id}/stats/load', [ServerController::class, 'statsLoad']);
 Route::get('/servers/{server_id}/stats/disk', [ServerController::class, 'statsDisk']);
+Route::get('/servers/{server_id}/metrics', [\App\Http\Controllers\ServerMetricsController::class, 'getChartData']);
 Route::post('/servers/{server_id}/rootreset', [ServerController::class, 'rootreset']);
 // Route::post('/servers/{server_id}/servicerestart/{service}', [ServerController::class, 'servicerestart']);
 Route::get('/servers/{server_id}/sites', [ServerController::class, 'sites']);
