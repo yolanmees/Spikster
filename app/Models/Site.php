@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * Site Model
@@ -99,6 +100,24 @@ class Site extends Model
     public function aliases(): HasMany
     {
         return $this->hasMany(Alias::class);
+    }
+
+    /**
+     * Get all domains for this site.
+     *
+     * @return HasMany<Domain>
+     */
+    public function domains(): HasMany
+    {
+        return $this->hasMany(Domain::class, 'site_id', 'site_id');
+    }
+
+    /**
+     * Get the primary domain for this site.
+     */
+    public function primaryDomain()
+    {
+        return $this->hasOne(Domain::class, 'site_id', 'site_id')->where('is_primary', true);
     }
 
     /**

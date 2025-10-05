@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Domain;
 use App\Models\DnsRecord;
 use App\Models\Site;
 use App\Services\DnsService;
@@ -16,90 +17,59 @@ class DnsRecordsController extends Controller
         $this->dnsService = $dnsService;
     }
 
-    //
+    /**
+     * Display DNS records for a site (backward compatibility).
+     * Redirects to primary domain DNS management.
+     */
     public function index($site_id)
     {
-        // $dns = $this->dnsService->getDnsRecords($site_id);
-        $dnsRecords = DnsRecord::where('site_id', $site_id)->get();
+        $site = Site::where('site_id', $site_id)->first();
 
-        return view('site.dns.index', compact('site_id', 'dnsRecords'));
+        if (! $site) {
+            abort(404, 'Site not found');
+        }
+
+        // Get primary domain for this site
+        $primaryDomain = Domain::where('site_id', $site_id)
+            ->where('is_primary', true)
+            ->first();
+
+        // If no primary domain exists, redirect to site with message
+        if (! $primaryDomain) {
+            session()->flash('warning', 'No primary domain found for this site.');
+
+            return redirect()->route('site.edit', $site_id);
+        }
+
+        // Redirect to domain DNS management
+        return redirect()->route('domain.show', $primaryDomain->domain_id);
     }
 
+    /**
+     * All other methods redirect to domain controller.
+     */
     public function new($site_id)
     {
-        return view('site.dns.new', compact('site_id'));
+        return $this->index($site_id);
     }
 
     public function create(Request $request, $site_id)
     {
-        $site = Site::where('site_id', $site_id)->first();
-
-        $request->validate([
-            'zone' => 'required',
-            'type' => 'required',
-            'value' => 'required',
-        ]);
-
-        try {
-            $this->dnsService->addRecord($site->domain, $request->zone, $request->type, $request->value, $request->ttl);
-        } catch (\Exception $e) {
-            dd($e->getMessage());
-        }
-
-        $dnsRecord = new DnsRecord;
-        $dnsRecord->site_id = $site_id;
-        $dnsRecord->ttl = $request->ttl;
-        $dnsRecord->zone = $request->zone;
-        $dnsRecord->type = $request->type;
-        $dnsRecord->value = $request->value;
-        $dnsRecord->save();
-
-        return redirect()->route('site.dns', $site_id);
+        return $this->index($site_id);
     }
 
     public function edit($site_id, $dns_id)
     {
-        $dnsRecord = DnsRecord::where('site_id', $site_id)->where('id', $dns_id)->first();
-
-        return view('site.dns.edit', compact('site_id', 'dnsRecord'));
+        return $this->index($site_id);
     }
 
     public function update(Request $request, $site_id, $dns_id)
     {
-        $request->validate([
-            'zone' => 'required',
-            'type' => 'required',
-            'value' => 'required',
-        ]);
-
-        try {
-            $dnsRecord = DnsRecord::where('site_id', $site_id)->where('id', $dns_id)->first();
-            $this->dnsService->deleteRecord($dnsRecord->zone, $dnsRecord->type, $dnsRecord->value);
-            $this->dnsService->addRecord($request->zone, $request->type, $request->value, $request->ttl);
-        } catch (\Exception $e) {
-            dd($e->getMessage());
-        }
-
-        $dnsRecord->ttl = $request->ttl;
-        $dnsRecord->zone = $request->zone;
-        $dnsRecord->type = $request->type;
-        $dnsRecord->value = $request->value;
-        $dnsRecord->save();
-
-        return redirect()->route('site.dns', $site_id);
+        return $this->index($site_id);
     }
 
     public function delete($site_id, $dns_id)
     {
-        try {
-            $dnsRecord = DnsRecord::where('site_id', $site_id)->where('id', $dns_id)->first();
-            $this->dnsService->deleteRecord($dnsRecord->zone, $dnsRecord->type, $dnsRecord->value);
-        } catch (\Exception $e) {
-            dd($e->getMessage());
-        }
-
-        $dnsRecord->delete();
-
-        return redirect()->route('site.dns', $site_id);
+        return $this->index($site_id);
     }
 }

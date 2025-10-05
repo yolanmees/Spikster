@@ -345,6 +345,33 @@
             </div>
         </x-card>
 
+        <!-- DNS Management -->
+        <x-card size="md" dark="false">
+            <x-slot name="header">
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3.75 5.25h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5" />
+                    </svg>
+                    DNS Records
+                </div>
+            </x-slot>
+            <div class="space-y-4">
+                <p class="text-sm text-gray-600 dark:text-gray-400">Manage DNS records</p>
+                <a href="{{ route('site.dns', $site_id) }}" class="block">
+                    <button type="button"
+                        class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transform hover:scale-105 active:scale-95 transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3.75 5.25h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5" />
+                        </svg>
+                        DNS MANAGEMENT
+                    </button>
+                </a>
+            </div>
+        </x-card>
+
         {{-- <div class="md:col-span-2 col-span-1">
         <div class="card h-full">
             <div class="card-header">
