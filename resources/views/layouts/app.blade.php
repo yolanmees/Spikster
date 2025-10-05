@@ -10,8 +10,6 @@
     <title>{{ config('cipi.name') }} | @yield('title')</title>
     <meta name="cipi-version" content="{{ Storage::get('cipi/version.md') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/js/all.min.js"></script> --}}
-    <link href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap4.min.css" rel="stylesheet" />
     <link rel="icon" type="image/png" href="/favicon.png" />
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -105,9 +103,7 @@ $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(valu
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap4.min.js"></script>
     <script src="https://cdn.datatables.net/responsive/2.2.7/js/dataTables.responsive.min.js"></script>
-    <script src="https://cdn.datatables.net/responsive/2.2.7/js/responsive.bootstrap4.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js"></script>
 
 
@@ -188,7 +184,9 @@ $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(valu
                 }
                 if (error.status == 503) {
                     $('#serverping').empty();
-                    $('#serverping').html('<i class="fas fa-times text-danger"></i>');
+                    $('#serverping').html(
+                        '<svg class="w-4 h-4 inline-block text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>'
+                        );
                 }
             }
         });

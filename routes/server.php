@@ -21,7 +21,9 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         return view('server.packages-installed', compact('server_id'));
     })->name('server.packages-installed');
 
-    Route::get('/servers/{server_id}/logs', [LogManagerController::class, 'index'])->name('logs');
+    Route::get('/servers/{server_id}/logs', [LogManagerController::class, 'index'])->name('logs.index');
     Route::get('/servers/{server_id}/logs/{log}', [LogManagerController::class, 'show'])->name('logs.show');
+    Route::get('/servers/{server_id}/logs/{log}/download', [LogManagerController::class, 'download'])->name('logs.download');
+    Route::delete('/servers/{server_id}/logs/{log}', [LogManagerController::class, 'delete'])->name('logs.delete');
 
 });

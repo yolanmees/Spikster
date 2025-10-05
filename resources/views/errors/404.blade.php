@@ -1,43 +1,32 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
-    <head>
-        <meta charset="utf-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-        <meta name="robots" content="noindex, nofollow">
-        <meta name="googlebot" content="noindex">
-        <title>{{ config('cipi.name') }} | {{ __('spikster.file_not_found') }}</title>
-        <link href="/assets/css/app.css" rel="stylesheet" />
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/js/all.min.js"></script>
-    </head>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="googlebot" content="noindex">
+    <title>{{ config('cipi.name') }} | {{ __('spikster.file_not_found') }}</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
 
-    <body>
-
-        <div id="layoutError">
-            <div id="layoutError_content">
-                <main>
-                    <div class="container">
-                        <div class="row justify-content-center">
-                            <div class="col-lg-6">
-                                <div class="text-center mt-4">
-                                    <img class="mb-4 img-error" src="/assets/img/notfound.png" />
-                                    <p class="lead"><b>{{ __('spikster.error') }} 404</b> | {{ __('spikster.file_not_found') }}</p>
-                                    <a href="/">
-                                        <i class="fas fa-arrow-left mr-1"></i>
-                                        {{ __('spikster.return_to_dashboard') }}
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </main>
-            </div>
+<body class="bg-gray-100 dark:bg-gray-900">
+    <div class="min-h-screen flex items-center justify-center px-4">
+        <div class="max-w-md w-full text-center">
+            <img class="mb-8 w-64 mx-auto" src="/assets/img/notfound.png" alt="404" />
+            <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-2">{{ __('spikster.error') }} 404</h1>
+            <p class="text-lg text-gray-600 dark:text-gray-400 mb-8">{{ __('spikster.file_not_found') }}</p>
+            <a href="/"
+                class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transform hover:scale-105 active:scale-95 transition-all duration-200">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                {{ __('spikster.return_to_dashboard') }}
+            </a>
         </div>
+    </div>
+</body>
 
-        <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js'></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="/assets/js/app.js"></script>
-
-    </body>
 </html>

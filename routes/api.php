@@ -19,6 +19,14 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+// Health check endpoint
+Route::get('/health', function () {
+    return response()->json([
+        'status' => 'ok',
+        'timestamp' => now()->toIso8601String(),
+    ]);
+});
+
 // Servers
 Route::get('/servers', [ServerController::class, 'index']);
 Route::post('/servers', [ServerController::class, 'create']);
@@ -91,3 +99,5 @@ Route::get('show-media-file/{id}', [FileManagerController::class, 'showMediaFile
 
 Route::get('logs', [LogManagerController::class, 'index'])->name('api.logs');
 Route::get('logs/{log}', [LogManagerController::class, 'show'])->name('api.logs.show');
+Route::get('logs/{log}/download', [LogManagerController::class, 'download'])->name('api.logs.download');
+Route::delete('logs/{log}', [LogManagerController::class, 'delete'])->name('api.logs.delete');

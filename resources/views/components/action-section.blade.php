@@ -1,19 +1,17 @@
-<div {{ $attributes->merge(['class' => 'md:grid box border p-5 w-full']) }}>
-  <div class="flex items-center w-full">
-      <div class="font-medium text-base truncate w-full">
-
-        <div class="border-b border-slate-200/60 dark:border-darkmode-400 pb-5">
-          <x-section-title>
-              <x-slot name="title">{{ $title }}</x-slot>
-              <x-slot name="description">{{ $description }}</x-slot>
-          </x-section-title>
+<div
+    {{ $attributes->merge(['class' => 'bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-gray-200 dark:border-gray-700']) }}>
+    <div class="p-6">
+        <!-- Header Section -->
+        <div class="border-b border-gray-200 dark:border-gray-700 pb-4 mb-6">
+            <x-section-title>
+                <x-slot name="title">{{ $title }}</x-slot>
+                <x-slot name="description">{{ $description }}</x-slot>
+            </x-section-title>
         </div>
 
-          <div class="mt-5 md:mt-0 md:col-span-2">
-              <div class="pt-5 bg-white shadow sm:rounded-lg">
-                  {{ $content }}
-              </div>
-          </div>
+        <!-- Content Section -->
+        <div class="space-y-6">
+            {{ $content }}
         </div>
     </div>
 </div>

@@ -390,107 +390,162 @@
 @section('extra')
     <input type="hidden" id="currentdomain">
     <input type="hidden" id="server_id">
-    <dialog class="modal fade" id="repositoryModal" tabindex="-1" role="dialog"
-        aria-labelledby="repositoryModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document" id="repositorydialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="repositoryModalLabel">{{ __('spikster.github_repository') }}</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <label for="repositoryproject">{{ __('spikster.repository_project') }}</label>
-                    <div class="input-group">
-                        <input class="form-control" type="text" id="repositoryproject"
-                            placeholder="e.g. johndoe/helloworld" autocomplete="off" />
-                    </div>
-                    <div class="space"></div>
-                    <label for="repositorybranch">{{ __('spikster.repository_branch') }}</label>
-                    <div class="input-group">
-                        <input class="form-control" type="text" id="repositorybranch" placeholder="e.g. develop"
-                            autocomplete="off" />
-                    </div>
-                    <div class="space"></div>
-                    <label for="deploykey">{{ __('spikster.repository_deploy_key') }} {!! __('spikster.repository_deploy_key_info') !!}</label>
-                    <div class="input-group">
-                        <textarea id="deploykey" readonly style="width:100%;height:150px;font-size:10px;"></textarea>
-                    </div>
-                    <div class="space"></div>
-                    <div class="text-center">
-                        <button class="btn btn-primary" type="button"
-                            id="repositorysubmit">{{ __('spikster.confirm') }} </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </dialog>
-    <dialog class="modal fade" id="deployModal" tabindex="-1" role="dialog" aria-labelledby="deployModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="deployModalLabel">{{ __('spikster.deploy_scripts') }}</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p class="mb-2">{{ __('spikster.github_repository_scripts') }}:</p>
-                    <div id="deploy" style="height:250px;width:100%;"></div>
-                    <div class="space"></div>
-                    <div class="text-center">
-                        <button class="btn btn-primary" type="button" id="deploysubmit">{{ __('spikster.save') }}
+
+    <!-- Repository Modal - Tailwind -->
+    <dialog class="hidden fixed inset-0 z-50 overflow-y-auto" id="repositoryModal"
+        aria-labelledby="repositoryModalLabel">
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+            <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" aria-hidden="true"></div>
+            <div class="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white dark:bg-gray-800 rounded-xl shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
+                id="repositorydialog">
+                <div class="px-6 pt-5 pb-4 bg-white dark:bg-gray-800 sm:p-6 sm:pb-4">
+                    <div class="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white" id="repositoryModalLabel">
+                            {{ __('spikster.github_repository') }}
+                        </h3>
+                        <button type="button" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+                            onclick="document.getElementById('repositoryModal').close()">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
                         </button>
                     </div>
-                    <div class="space"></div>
-                </div>
-            </div>
-        </div>
-    </dialog>
-    <dialog class="modal fade" id="sshresetModal" tabindex="-1" role="dialog" aria-labelledby="sshresetModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="sshresetModalLabel">
-                        {{ __('spikster.require_password_reset_modal_title') }}</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p class="mb-2">{{ __('spikster.require_ssh_password_reset_modal_text') }}</p>
-                    <div class="space"></div>
-                    <div class="text-center">
-                        <button class="btn btn-danger" type="button"
-                            id="sshresetsubmit">{{ __('spikster.confirm') }}</button>
+                    <div class="mt-6 space-y-4">
+                        <div>
+                            <label for="repositoryproject"
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                {{ __('spikster.repository_project') }}
+                            </label>
+                            <input
+                                class="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                type="text" id="repositoryproject" placeholder="e.g. johndoe/helloworld"
+                                autocomplete="off" />
+                        </div>
+                        <div>
+                            <label for="repositorybranch"
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                {{ __('spikster.repository_branch') }}
+                            </label>
+                            <input
+                                class="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                type="text" id="repositorybranch" placeholder="e.g. develop" autocomplete="off" />
+                        </div>
+                        <div>
+                            <label for="deploykey"
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                {{ __('spikster.repository_deploy_key') }} {!! __('spikster.repository_deploy_key_info') !!}
+                            </label>
+                            <textarea id="deploykey" readonly
+                                class="w-full h-36 px-4 py-2.5 text-xs rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white font-mono"></textarea>
+                        </div>
+                        <div class="text-center pt-2">
+                            <button
+                                class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transform hover:scale-105 active:scale-95 transition-all duration-200"
+                                type="button" id="repositorysubmit">{{ __('spikster.confirm') }}</button>
+                        </div>
                     </div>
-                    <div class="space"></div>
                 </div>
             </div>
         </div>
     </dialog>
-    <dialog class="modal fade" id="mysqlresetModal" tabindex="-1" role="dialog"
-        aria-labelledby="mysqlresetModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="mysqlresetModalLabel">
-                        {{ __('spikster.require_password_reset_modal_title') }}</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p class="mb-2">{{ __('spikster.require_mysql_password_reset_modal_text') }}</p>
-                    <div class="space"></div>
-                    <div class="text-center">
-                        <button class="btn btn-danger" type="button" id="mysqlresetsubmit">{{ __('spikster.confirm') }}
+
+    <!-- Deploy Scripts Modal - Tailwind -->
+    <dialog class="hidden fixed inset-0 z-50 overflow-y-auto" id="deployModal" aria-labelledby="deployModalLabel">
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+            <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" aria-hidden="true"></div>
+            <div
+                class="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white dark:bg-gray-800 rounded-xl shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="px-6 pt-5 pb-4 bg-white dark:bg-gray-800 sm:p-6 sm:pb-4">
+                    <div class="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white" id="deployModalLabel">
+                            {{ __('spikster.deploy_scripts') }}
+                        </h3>
+                        <button type="button" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+                            onclick="document.getElementById('deployModal').close()">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
                         </button>
                     </div>
-                    <div class="space"></div>
+                    <div class="mt-6">
+                        <p class="mb-4 text-sm text-gray-600 dark:text-gray-400">
+                            {{ __('spikster.github_repository_scripts') }}:</p>
+                        <div id="deploy" style="height:250px;width:100%;"></div>
+                        <div class="text-center mt-6">
+                            <button
+                                class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transform hover:scale-105 active:scale-95 transition-all duration-200"
+                                type="button" id="deploysubmit">{{ __('spikster.save') }}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </dialog>
+
+    <!-- SSH Reset Modal - Tailwind -->
+    <dialog class="hidden fixed inset-0 z-50 overflow-y-auto" id="sshresetModal" aria-labelledby="sshresetModalLabel">
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+            <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" aria-hidden="true"></div>
+            <div
+                class="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white dark:bg-gray-800 rounded-xl shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="px-6 pt-5 pb-4 bg-white dark:bg-gray-800 sm:p-6 sm:pb-4">
+                    <div class="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white" id="sshresetModalLabel">
+                            {{ __('spikster.require_password_reset_modal_title') }}
+                        </h3>
+                        <button type="button" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+                            onclick="document.getElementById('sshresetModal').close()">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="mt-6">
+                        <p class="mb-4 text-sm text-gray-600 dark:text-gray-400">
+                            {{ __('spikster.require_ssh_password_reset_modal_text') }}</p>
+                        <div class="text-center mt-6">
+                            <button
+                                class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transform hover:scale-105 active:scale-95 transition-all duration-200"
+                                type="button" id="sshresetsubmit">{{ __('spikster.confirm') }}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </dialog>
+
+    <!-- MySQL Reset Modal - Tailwind -->
+    <dialog class="hidden fixed inset-0 z-50 overflow-y-auto" id="mysqlresetModal"
+        aria-labelledby="mysqlresetModalLabel">
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+            <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" aria-hidden="true"></div>
+            <div
+                class="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white dark:bg-gray-800 rounded-xl shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="px-6 pt-5 pb-4 bg-white dark:bg-gray-800 sm:p-6 sm:pb-4">
+                    <div class="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white" id="mysqlresetModalLabel">
+                            {{ __('spikster.require_password_reset_modal_title') }}
+                        </h3>
+                        <button type="button" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+                            onclick="document.getElementById('mysqlresetModal').close()">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="mt-6">
+                        <p class="mb-4 text-sm text-gray-600 dark:text-gray-400">
+                            {{ __('spikster.require_mysql_password_reset_modal_text') }}</p>
+                        <div class="text-center mt-6">
+                            <button
+                                class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transform hover:scale-105 active:scale-95 transition-all duration-200"
+                                type="button" id="mysqlresetsubmit">{{ __('spikster.confirm') }}</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -571,7 +626,7 @@
                             '<span class="inline-flex items-center gap-2 px-3 py-1.5 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700/50 text-purple-700 dark:text-purple-300 text-sm rounded-lg">' +
                             item.domain + '<button data-id="' + item.alias_id +
                             '" class="sitealiasdel hover:text-purple-900 dark:hover:text-purple-100 transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button></span>'
-                            );
+                        );
                     });
                 },
             });
@@ -598,7 +653,7 @@
                     success('{{ __('spikster.new_ssh_password_success') }}:<br><b>' + data.password +
                         '</b><br><a href="' + data.pdf +
                         '" target="_blank" style="color:#ffffff">{{ __('spikster.download_site_data') }}</a>'
-                        );
+                    );
                     $('#sshresetloading').addClass('d-none');
                     $('#sshresetModal').modal('toggle');
                     $(window).scrollTop(0);
@@ -621,7 +676,7 @@
                     success('{{ __('spikster.new_mysql_password_success') }}:<br><b>' + data.password +
                         '</b><br><a href="' + data.pdf +
                         '" target="_blank" style="color:#ffffff">{{ __('spikster.download_site_data') }}</a>'
-                        );
+                    );
                     $('#mysqlresetloading').addClass('d-none');
                     $('#mysqlresetModal').modal('toggle');
                     $(window).scrollTop(0);
@@ -723,7 +778,7 @@
 
         // Site Aliases
         $('#siteaddalias').keyup(function() {
-            $('#siteaddalias').removeClass('is-invalid');
+            $('#siteaddalias').removeClass('border-red-500').addClass('border-gray-200 dark:border-gray-600');
         });
         $('#siteaddaliassubmit').click(function() {
             if (domainConflict($('#siteaddalias').val()) < 1 && $('#siteaddalias').val() != '') {
@@ -736,17 +791,21 @@
                         'domain': $('#siteaddalias').val(),
                     }),
                     beforeSend: function() {
-                        $('#siteaddaliassubmit').html('<i class="fas fa-circle-notch fa-spin"></i>');
+                        $('#siteaddaliassubmit').html(
+                            '<svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>'
+                            );
                     },
                     success: function(data) {
                         $('#siteaddalias').val('');
                         $('#siteaddaliassubmit').empty();
-                        $('#siteaddaliassubmit').html('<i class="fas fas fa-edit"></i>');
+                        $('#siteaddaliassubmit').html(
+                            '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>'
+                            );
                         siteInit();
                     },
                 });
             } else {
-                $('#siteaddalias').addClass('is-invalid');
+                $('#siteaddalias').removeClass('border-gray-200 dark:border-gray-600').addClass('border-red-500');
             }
         });
 
@@ -779,11 +838,15 @@
                     'php': $('#sitephpver').val(),
                 }),
                 beforeSend: function() {
-                    $('#sitephpversubmit').html('<i class="fas fa-circle-notch fa-spin"></i>');
+                    $('#sitephpversubmit').html(
+                        '<svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>'
+                        );
                 },
                 success: function(data) {
                     $('#sitephpversubmit').empty();
-                    $('#sitephpversubmit').html('<i class="fas fas fa-edit"></i>');
+                    $('#sitephpversubmit').html(
+                        '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>'
+                        );
                     siteInit();
                 },
             });

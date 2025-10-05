@@ -19,6 +19,7 @@ use App\Models\Userdatabase;
 use App\Services\ServerService;
 use App\Services\SSHService;
 use App\Services\MonitoringService;
+use App\Services\Fail2banService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -35,7 +36,8 @@ class ServerController extends Controller
     public function __construct(
         protected ServerService $serverService,
         protected SSHService $sshService,
-        protected MonitoringService $monitoringService
+        protected MonitoringService $monitoringService,
+        protected Fail2banService $fail2banService
     ) {}
 
     /**
@@ -1105,23 +1107,34 @@ class ServerController extends Controller
             return response()->json([
                 'message' => __('spikster.server_not_found_message'),
                 'errors' => __('spikster.server_not_found'),
+                'status' => 'offline',
             ], 404);
         }
 
         try {
-            $remote = Http::get('http://'.$server->ip.'/ping_'.$server->server_id.'.php');
-            if ($remote->status() == 200) {
-                //
+            // Try to ping the server's API logs endpoint (lightweight check)
+            $startTime = microtime(true);
+            $remote = Http::timeout(5)->get('http://'.$server->ip.'/api/logs');
+            $responseTime = round((microtime(true) - $startTime) * 1000); // Convert to milliseconds
+
+            if ($remote->successful()) {
+                return response()->json([
+                    'message' => 'Server is online',
+                    'status' => 'online',
+                    'response_time' => $responseTime . 'ms',
+                ], 200);
             } else {
                 return response()->json([
                     'message' => __('spikster.server_unavailable_message'),
                     'errors' => __('spikster.server_unavailable'),
+                    'status' => 'offline',
                 ], 503);
             }
         } catch (\Throwable $th) {
             return response()->json([
                 'message' => __('spikster.server_unavailable_message'),
-                'errors' => __('spikster.server_unavailable'),
+                'errors' => $th->getMessage(),
+                'status' => 'offline',
             ], 503);
         }
     }
@@ -1858,5 +1871,552 @@ class ServerController extends Controller
         $output = $process->getOutput();
 
         return response()->json(json_decode($output, true));
+    }
+
+    /**
+     * Get all Fail2ban jails with statistics
+     *
+     * @OA\Get(
+     *      path="/api/servers/{server_id}/fail2ban/jails",
+     *      summary="List all Fail2ban jails",
+     *      tags={"Fail2ban"},
+     *      description="Get all configured Fail2ban jails with statistics",
+     *
+     *      @OA\Parameter(
+     *          name="server_id",
+     *          description="Server unique ID",
+     *          required=true,
+     *          in="path",
+     *          @OA\Schema(type="string")
+     *      ),
+     *
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful request"
+     *      ),
+     *      @OA\Response(
+     *          response=404,
+     *          description="Server not found"
+     *      )
+     * )
+     */
+    public function fail2banJails(string $server_id)
+    {
+        $server = Server::where('server_id', $server_id)->where('status', 1)->first();
+
+        if (!$server) {
+            return response()->json([
+                'message' => 'Server not found',
+                'errors' => 'Not found',
+            ], 404);
+        }
+
+        try {
+            $jails = $this->fail2banService->getJails($server);
+
+            return response()->json([
+                'jails' => $jails,
+                'total' => count($jails),
+            ]);
+        } catch (\Throwable $th) {
+            Log::error('Fail2ban jails error: ' . $th->getMessage());
+            return response()->json([
+                'message' => 'Failed to fetch Fail2ban jails',
+                'errors' => $th->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Get status of a specific Fail2ban jail
+     *
+     * @OA\Get(
+     *      path="/api/servers/{server_id}/fail2ban/jails/{jail}",
+     *      summary="Get jail status",
+     *      tags={"Fail2ban"},
+     *      description="Get detailed status of a specific jail",
+     *
+     *      @OA\Parameter(
+     *          name="server_id",
+     *          description="Server unique ID",
+     *          required=true,
+     *          in="path",
+     *          @OA\Schema(type="string")
+     *      ),
+     *      @OA\Parameter(
+     *          name="jail",
+     *          description="Jail name",
+     *          required=true,
+     *          in="path",
+     *          @OA\Schema(type="string")
+     *      ),
+     *
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful request"
+     *      )
+     * )
+     */
+    public function fail2banJailStatus(string $server_id, string $jail)
+    {
+        $server = Server::where('server_id', $server_id)->where('status', 1)->first();
+
+        if (!$server) {
+            return response()->json([
+                'message' => 'Server not found',
+                'errors' => 'Not found',
+            ], 404);
+        }
+
+        try {
+            $status = $this->fail2banService->getJailStatus($server, $jail);
+
+            return response()->json([
+                'jail' => $jail,
+                'status' => $status,
+            ]);
+        } catch (\Throwable $th) {
+            Log::error('Fail2ban jail status error: ' . $th->getMessage());
+            return response()->json([
+                'message' => 'Failed to fetch jail status',
+                'errors' => $th->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Ban an IP address
+     *
+     * @OA\Post(
+     *      path="/api/servers/{server_id}/fail2ban/ban",
+     *      summary="Ban an IP address",
+     *      tags={"Fail2ban"},
+     *      description="Manually ban an IP address in a specific jail",
+     *
+     *      @OA\Parameter(
+     *          name="server_id",
+     *          description="Server unique ID",
+     *          required=true,
+     *          in="path",
+     *          @OA\Schema(type="string")
+     *      ),
+     *
+     *      @OA\RequestBody(
+     *          required=true,
+     *          @OA\JsonContent(
+     *              @OA\Property(property="ip", type="string", example="192.168.1.100"),
+     *              @OA\Property(property="jail", type="string", example="sshd")
+     *          )
+     *      ),
+     *
+     *      @OA\Response(
+     *          response=200,
+     *          description="IP banned successfully"
+     *      )
+     * )
+     */
+    public function fail2banBanIp(Request $request, string $server_id)
+    {
+        $validator = Validator::make($request->all(), [
+            'ip' => 'required|ip',
+            'jail' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $server = Server::where('server_id', $server_id)->where('status', 1)->first();
+
+        if (!$server) {
+            return response()->json([
+                'message' => 'Server not found',
+                'errors' => 'Not found',
+            ], 404);
+        }
+
+        try {
+            $ip = $request->input('ip');
+            $jail = $request->input('jail', 'sshd');
+
+            $result = $this->fail2banService->banIp($server, $ip, $jail);
+
+            return response()->json([
+                'message' => "IP {$ip} banned successfully in jail {$jail}",
+                'success' => $result,
+            ]);
+        } catch (\Throwable $th) {
+            Log::error('Fail2ban ban IP error: ' . $th->getMessage());
+            return response()->json([
+                'message' => 'Failed to ban IP',
+                'errors' => $th->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Unban an IP address
+     *
+     * @OA\Post(
+     *      path="/api/servers/{server_id}/fail2ban/unban",
+     *      summary="Unban an IP address",
+     *      tags={"Fail2ban"},
+     *      description="Unban an IP address from a specific jail or all jails",
+     *
+     *      @OA\Parameter(
+     *          name="server_id",
+     *          description="Server unique ID",
+     *          required=true,
+     *          in="path",
+     *          @OA\Schema(type="string")
+     *      ),
+     *
+     *      @OA\RequestBody(
+     *          required=true,
+     *          @OA\JsonContent(
+     *              @OA\Property(property="ip", type="string", example="192.168.1.100"),
+     *              @OA\Property(property="jail", type="string", example="sshd")
+     *          )
+     *      ),
+     *
+     *      @OA\Response(
+     *          response=200,
+     *          description="IP unbanned successfully"
+     *      )
+     * )
+     */
+    public function fail2banUnbanIp(Request $request, string $server_id)
+    {
+        $validator = Validator::make($request->all(), [
+            'ip' => 'required|ip',
+            'jail' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $server = Server::where('server_id', $server_id)->where('status', 1)->first();
+
+        if (!$server) {
+            return response()->json([
+                'message' => 'Server not found',
+                'errors' => 'Not found',
+            ], 404);
+        }
+
+        try {
+            $ip = $request->input('ip');
+            $jail = $request->input('jail');
+
+            $result = $this->fail2banService->unbanIp($server, $ip, $jail);
+
+            $message = $jail 
+                ? "IP {$ip} unbanned successfully from jail {$jail}"
+                : "IP {$ip} unbanned successfully from all jails";
+
+            return response()->json([
+                'message' => $message,
+                'success' => $result,
+            ]);
+        } catch (\Throwable $th) {
+            Log::error('Fail2ban unban IP error: ' . $th->getMessage());
+            return response()->json([
+                'message' => 'Failed to unban IP',
+                'errors' => $th->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Check if IP is banned
+     *
+     * @OA\Get(
+     *      path="/api/servers/{server_id}/fail2ban/check/{ip}",
+     *      summary="Check if IP is banned",
+     *      tags={"Fail2ban"},
+     *      description="Check if a specific IP address is currently banned",
+     *
+     *      @OA\Parameter(
+     *          name="server_id",
+     *          description="Server unique ID",
+     *          required=true,
+     *          in="path",
+     *          @OA\Schema(type="string")
+     *      ),
+     *      @OA\Parameter(
+     *          name="ip",
+     *          description="IP address to check",
+     *          required=true,
+     *          in="path",
+     *          @OA\Schema(type="string")
+     *      ),
+     *
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful request"
+     *      )
+     * )
+     */
+    public function fail2banCheckIp(string $server_id, string $ip)
+    {
+        $server = Server::where('server_id', $server_id)->where('status', 1)->first();
+
+        if (!$server) {
+            return response()->json([
+                'message' => 'Server not found',
+                'errors' => 'Not found',
+            ], 404);
+        }
+
+        try {
+            $banned = $this->fail2banService->isIpBanned($server, $ip);
+
+            return response()->json([
+                'ip' => $ip,
+                'is_banned' => !empty($banned),
+                'ban_details' => $banned,
+            ]);
+        } catch (\Throwable $th) {
+            Log::error('Fail2ban check IP error: ' . $th->getMessage());
+            return response()->json([
+                'message' => 'Failed to check IP status',
+                'errors' => $th->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Get Fail2ban statistics
+     *
+     * @OA\Get(
+     *      path="/api/servers/{server_id}/fail2ban/stats",
+     *      summary="Get Fail2ban statistics",
+     *      tags={"Fail2ban"},
+     *      description="Get overall Fail2ban statistics for the server",
+     *
+     *      @OA\Parameter(
+     *          name="server_id",
+     *          description="Server unique ID",
+     *          required=true,
+     *          in="path",
+     *          @OA\Schema(type="string")
+     *      ),
+     *
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful request"
+     *      )
+     * )
+     */
+    public function fail2banStats(string $server_id)
+    {
+        $server = Server::where('server_id', $server_id)->where('status', 1)->first();
+
+        if (!$server) {
+            return response()->json([
+                'message' => 'Server not found',
+                'errors' => 'Not found',
+            ], 404);
+        }
+
+        try {
+            $stats = $this->fail2banService->getStatistics($server);
+            $serviceStatus = $this->fail2banService->getServiceStatus($server);
+
+            return response()->json([
+                'statistics' => $stats,
+                'service' => $serviceStatus,
+            ]);
+        } catch (\Throwable $th) {
+            Log::error('Fail2ban stats error: ' . $th->getMessage());
+            return response()->json([
+                'message' => 'Failed to fetch Fail2ban statistics',
+                'errors' => $th->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Get Fail2ban logs
+     *
+     * @OA\Get(
+     *      path="/api/servers/{server_id}/fail2ban/logs",
+     *      summary="Get Fail2ban logs",
+     *      tags={"Fail2ban"},
+     *      description="Get recent Fail2ban log entries",
+     *
+     *      @OA\Parameter(
+     *          name="server_id",
+     *          description="Server unique ID",
+     *          required=true,
+     *          in="path",
+     *          @OA\Schema(type="string")
+     *      ),
+     *      @OA\Parameter(
+     *          name="lines",
+     *          description="Number of log lines to retrieve",
+     *          required=false,
+     *          in="query",
+     *          @OA\Schema(type="integer", default=100)
+     *      ),
+     *
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful request"
+     *      )
+     * )
+     */
+    public function fail2banLogs(Request $request, string $server_id)
+    {
+        $server = Server::where('server_id', $server_id)->where('status', 1)->first();
+
+        if (!$server) {
+            return response()->json([
+                'message' => 'Server not found',
+                'errors' => 'Not found',
+            ], 404);
+        }
+
+        try {
+            $lines = $request->input('lines', 100);
+            $logs = $this->fail2banService->getLogs($server, $lines);
+
+            return response()->json([
+                'logs' => $logs,
+                'total' => count($logs),
+            ]);
+        } catch (\Throwable $th) {
+            Log::error('Fail2ban logs error: ' . $th->getMessage());
+            return response()->json([
+                'message' => 'Failed to fetch Fail2ban logs',
+                'errors' => $th->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Whitelist an IP address
+     *
+     * @OA\Post(
+     *      path="/api/servers/{server_id}/fail2ban/whitelist",
+     *      summary="Whitelist an IP address",
+     *      tags={"Fail2ban"},
+     *      description="Add an IP address to the Fail2ban whitelist",
+     *
+     *      @OA\Parameter(
+     *          name="server_id",
+     *          description="Server unique ID",
+     *          required=true,
+     *          in="path",
+     *          @OA\Schema(type="string")
+     *      ),
+     *
+     *      @OA\RequestBody(
+     *          required=true,
+     *          @OA\JsonContent(
+     *              @OA\Property(property="ip", type="string", example="192.168.1.100")
+     *          )
+     *      ),
+     *
+     *      @OA\Response(
+     *          response=200,
+     *          description="IP whitelisted successfully"
+     *      )
+     * )
+     */
+    public function fail2banWhitelistIp(Request $request, string $server_id)
+    {
+        $validator = Validator::make($request->all(), [
+            'ip' => 'required|ip',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $server = Server::where('server_id', $server_id)->where('status', 1)->first();
+
+        if (!$server) {
+            return response()->json([
+                'message' => 'Server not found',
+                'errors' => 'Not found',
+            ], 404);
+        }
+
+        try {
+            $ip = $request->input('ip');
+            $result = $this->fail2banService->whitelistIp($server, $ip);
+
+            return response()->json([
+                'message' => "IP {$ip} whitelisted successfully",
+                'success' => $result,
+            ]);
+        } catch (\Throwable $th) {
+            Log::error('Fail2ban whitelist IP error: ' . $th->getMessage());
+            return response()->json([
+                'message' => 'Failed to whitelist IP',
+                'errors' => $th->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Get whitelisted IPs
+     *
+     * @OA\Get(
+     *      path="/api/servers/{server_id}/fail2ban/whitelist",
+     *      summary="Get whitelisted IPs",
+     *      tags={"Fail2ban"},
+     *      description="Get all whitelisted IP addresses",
+     *
+     *      @OA\Parameter(
+     *          name="server_id",
+     *          description="Server unique ID",
+     *          required=true,
+     *          in="path",
+     *          @OA\Schema(type="string")
+     *      ),
+     *
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful request"
+     *      )
+     * )
+     */
+    public function fail2banGetWhitelist(string $server_id)
+    {
+        $server = Server::where('server_id', $server_id)->where('status', 1)->first();
+
+        if (!$server) {
+            return response()->json([
+                'message' => 'Server not found',
+                'errors' => 'Not found',
+            ], 404);
+        }
+
+        try {
+            $whitelist = $this->fail2banService->getWhitelistedIps($server);
+
+            return response()->json([
+                'whitelist' => $whitelist,
+                'total' => count($whitelist),
+            ]);
+        } catch (\Throwable $th) {
+            Log::error('Fail2ban get whitelist error: ' . $th->getMessage());
+            return response()->json([
+                'message' => 'Failed to fetch whitelist',
+                'errors' => $th->getMessage(),
+            ], 500);
+        }
     }
 }

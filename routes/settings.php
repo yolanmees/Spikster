@@ -9,7 +9,17 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         return view('settings.settings');
     })->name('settings.general');
 
-    Route::get('/settings/users', [SettingsController::class, 'users'])->name('settings.users');
+    // User Management Routes
+    Route::get('/settings/users', function () {
+        return view('settings.users-management');
+    })->name('settings.users');
+
+    // Role Management Routes
+    Route::get('/settings/roles', function () {
+        return view('settings.roles-management');
+    })->name('settings.roles');
+
+    // Legacy routes (kept for backward compatibility)
     Route::delete('/settings/user/{userId}/delete', [SettingsController::class, 'users'])->name('settings.users.delete');
 
 });

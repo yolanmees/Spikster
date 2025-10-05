@@ -16,15 +16,23 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 bg-white">
-                            @foreach($iptables[0] as $ip)
-                            <tr>
-                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{{ $ip[0] }}</td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ $ip[1] }}</td>
-                                <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                                    <a href="#" class="text-indigo-600 hover:text-indigo-900">Edit<span class="sr-only">, Lindsay Walton</span></a>
-                                </td>
-                            </tr>
-                            @endforeach
+                            @if(isset($iptables[0]) && is_array($iptables[0]))
+                                @foreach($iptables[0] as $ip)
+                                    @if(is_array($ip) && count($ip) >= 2)
+                                    <tr>
+                                        <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{{ $ip[0] ?? 'N/A' }}</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ $ip[1] ?? 'N/A' }}</td>
+                                        <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                            <a href="#" class="text-indigo-600 hover:text-indigo-900">Edit<span class="sr-only">, Lindsay Walton</span></a>
+                                        </td>
+                                    </tr>
+                                    @endif
+                                @endforeach
+                            @else
+                                <tr>
+                                    <td colspan="3" class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-500 text-center">No banned IPs found</td>
+                                </tr>
+                            @endif
 
                             <!-- More people... -->
                         </tbody>
