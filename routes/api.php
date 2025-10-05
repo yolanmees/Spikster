@@ -54,6 +54,18 @@ Route::post('/servers/{server_id}/packages/uninstall', [ServerController::class,
 Route::get('/servers/{server_id}/services', [ServerController::class, 'listServices']);
 Route::post('/servers/{server_id}/services/manage', [ServerController::class, 'manageService']);
 
+// Fail2ban endpoints
+Route::get('/servers/{server_id}/fail2ban/jails', [ServerController::class, 'fail2banJails']);
+Route::get('/servers/{server_id}/fail2ban/jails/{jail}', [ServerController::class, 'fail2banJailStatus']);
+Route::post('/servers/{server_id}/fail2ban/ban', [ServerController::class, 'fail2banBanIp']);
+Route::post('/servers/{server_id}/fail2ban/unban', [ServerController::class, 'fail2banUnbanIp']);
+Route::get('/servers/{server_id}/fail2ban/check/{ip}', [ServerController::class, 'fail2banCheckIp']);
+Route::get('/servers/{server_id}/fail2ban/stats', [ServerController::class, 'fail2banStats']);
+Route::get('/servers/{server_id}/fail2ban/logs', [ServerController::class, 'fail2banLogs']);
+Route::post('/servers/{server_id}/fail2ban/whitelist', [ServerController::class, 'fail2banWhitelistIp']);
+Route::get('/servers/{server_id}/fail2ban/whitelist', [ServerController::class, 'fail2banGetWhitelist']);
+Route::post('/servers/{server_id}/fail2ban/deploy', [ServerController::class, 'fail2banDeploy']);
+
 // Sites
 Route::get('/sites', [SiteController::class, 'index']);
 Route::post('/sites', [SiteController::class, 'create']);

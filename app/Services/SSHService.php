@@ -17,9 +17,9 @@ class SSHService
      */
     public function connect(Server $server): SSH2
     {
-        $ssh = new SSH2($server->ip);
+        $ssh = new SSH2($server->ip, 22);
 
-        if (! $ssh->login('root', $server->password)) {
+        if (! $ssh->login('spikster', $server->password)) {
             throw new \Exception('SSH authentication failed');
         }
 
@@ -56,9 +56,9 @@ class SSHService
     public function testConnection(string $ip, string $password): bool
     {
         try {
-            $ssh = new SSH2($ip);
+            $ssh = new SSH2($ip, 22);
 
-            return $ssh->login('root', $password);
+            return $ssh->login('spikster', $password);
         } catch (\Exception $e) {
             return false;
         }
@@ -270,7 +270,7 @@ class SSHService
         $ssh = $this->connect($server);
 
         // Use SCP for file upload
-        $command = "scp {$localPath} root@{$server->ip}:{$remotePath}";
+        $command = "scp {$localPath} spikster@{$server->ip}:{$remotePath}";
         exec($command, $output, $returnCode);
 
         return $returnCode === 0;
@@ -284,7 +284,7 @@ class SSHService
         $ssh = $this->connect($server);
 
         // Use SCP for file download
-        $command = "scp root@{$server->ip}:{$remotePath} {$localPath}";
+        $command = "scp spikster@{$server->ip}:{$remotePath} {$localPath}";
         exec($command, $output, $returnCode);
 
         return $returnCode === 0;

@@ -3,50 +3,39 @@
 namespace App\Services;
 
 use App\Models\Server;
-use phpseclib3\Net\SSH2;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Fail2ban Service
  *
  * Handles all Fail2ban-related operations with servers.
+ * Uses HTTP API for remote servers or direct commands for local panel server.
  */
 class Fail2banService
 {
-    protected SSHService $sshService;
-
-    public function __construct(SSHService $sshService)
-    {
-        $this->sshService = $sshService;
-    }
-
     /**
      * Get all banned IPs from the Fail2ban database.
      */
     public function getBannedIps(Server $server): array
     {
-        $command = "sqlite3 /var/lib/fail2ban/fail2ban.sqlite3 'select ip,jail,timeofban from bips ORDER BY timeofban DESC'";
-        $output = $this->sshService->executeCommand($server, $command);
+        try {
+            $response = Http::timeout(10)->get("http://{$server->ip}/spikster-api/fail2ban.php", [
+                'action' => 'get-banned-ips',
+                'server_id' => $server->server_id,
+            ]);
 
-        $bannedIps = [];
-        $lines = explode("\n", trim($output));
-
-        foreach ($lines as $line) {
-            if (empty($line)) {
-                continue;
+            if (!$response->successful()) {
+                Log::error("Failed to get banned IPs", ['server' => $server->id, 'status' => $response->status()]);
+                return [];
             }
 
-            $parts = explode('|', $line);
-            if (count($parts) >= 2) {
-                $bannedIps[] = [
-                    'ip' => $parts[0] ?? '',
-                    'jail' => $parts[1] ?? '',
-                    'banned_at' => isset($parts[2]) ? date('Y-m-d H:i:s', $parts[2]) : null,
-                    'timestamp' => $parts[2] ?? null,
-                ];
-            }
+            $data = $response->json();
+            return $data['ips'] ?? [];
+        } catch (\Exception $e) {
+            Log::error("Fail2ban getBannedIps error: " . $e->getMessage());
+            return [];
         }
-
-        return $bannedIps;
     }
 
     /**
@@ -54,25 +43,23 @@ class Fail2banService
      */
     public function getJails(Server $server): array
     {
-        $command = "fail2ban-client status";
-        $output = $this->sshService->executeCommand($server, $command);
+        try {
+            $response = Http::timeout(10)->get("http://{$server->ip}/spikster-api/fail2ban.php", [
+                'action' => 'get-jails',
+                'server_id' => $server->server_id,
+            ]);
 
-        // Parse jail list
-        $jails = [];
-        if (preg_match('/Jail list:\s+(.+)/', $output, $matches)) {
-            $jailNames = array_map('trim', explode(',', $matches[1]));
-
-            foreach ($jailNames as $jailName) {
-                if (empty($jailName)) {
-                    continue;
-                }
-
-                $jailStats = $this->getJailStatus($server, $jailName);
-                $jails[] = array_merge(['name' => $jailName], $jailStats);
+            if (!$response->successful()) {
+                Log::error("Failed to get jails", ['server' => $server->id, 'status' => $response->status()]);
+                return [];
             }
-        }
 
-        return $jails;
+            $data = $response->json();
+            return $data['jails'] ?? [];
+        } catch (\Exception $e) {
+            Log::error("Fail2ban getJails error: " . $e->getMessage());
+            return [];
+        }
     }
 
     /**
@@ -80,113 +67,103 @@ class Fail2banService
      */
     public function getJailStatus(Server $server, string $jail): array
     {
-        $command = "fail2ban-client status {$jail}";
-        $output = $this->sshService->executeCommand($server, $command);
+        try {
+            $response = Http::timeout(10)->get("http://{$server->ip}/spikster-api/fail2ban.php", [
+                'action' => 'get-jail-status',
+                'server_id' => $server->server_id,
+                'jail' => $jail,
+            ]);
 
-        $stats = [
-            'total_banned' => 0,
-            'current_banned' => 0,
-            'total_failed' => 0,
-            'current_failed' => 0,
-            'banned_ips' => [],
-        ];
+            if (!$response->successful()) {
+                return [];
+            }
 
-        // Parse output
-        if (preg_match('/Total banned:\s+(\d+)/', $output, $matches)) {
-            $stats['total_banned'] = (int) $matches[1];
+            $data = $response->json();
+            return $data['status'] ?? [];
+        } catch (\Exception $e) {
+            Log::error("Fail2ban getJailStatus error: " . $e->getMessage());
+            return [];
         }
-
-        if (preg_match('/Currently banned:\s+(\d+)/', $output, $matches)) {
-            $stats['current_banned'] = (int) $matches[1];
-        }
-
-        if (preg_match('/Total failed:\s+(\d+)/', $output, $matches)) {
-            $stats['total_failed'] = (int) $matches[1];
-        }
-
-        if (preg_match('/Currently failed:\s+(\d+)/', $output, $matches)) {
-            $stats['current_failed'] = (int) $matches[1];
-        }
-
-        if (preg_match('/Banned IP list:\s+(.+)/', $output, $matches)) {
-            $ips = array_filter(array_map('trim', explode(' ', $matches[1])));
-            $stats['banned_ips'] = $ips;
-        }
-
-        return $stats;
     }
 
     /**
      * Ban an IP address in a specific jail.
      */
-    public function banIp(Server $server, string $ip, string $jail = 'manual'): bool
+    public function banIp(Server $server, string $ip, string $jail = 'sshd'): bool
     {
         // Validate IP address
         if (!filter_var($ip, FILTER_VALIDATE_IP)) {
             throw new \Exception("Invalid IP address: {$ip}");
         }
 
-        // Check if jail exists, if not use sshd as default
-        $jails = $this->getJails($server);
-        $jailNames = array_column($jails, 'name');
-        
-        if (!in_array($jail, $jailNames)) {
-            $jail = 'sshd'; // Default to sshd jail
+        try {
+            $response = Http::timeout(10)->post("http://{$server->ip}/spikster-api/fail2ban.php", [
+                'action' => 'ban-ip',
+                'server_id' => $server->server_id,
+                'ip' => $ip,
+                'jail' => $jail,
+            ]);
+
+            if (!$response->successful()) {
+                throw new \Exception("HTTP request failed with status: " . $response->status());
+            }
+
+            $data = $response->json();
+
+            // Log the action
+            if (class_exists(\App\Services\AuditService::class)) {
+                \App\Services\AuditService::log(
+                    eventType: 'fail2ban_ban_ip',
+                    description: "Banned IP {$ip} in jail {$jail}",
+                    severity: 'warning'
+                );
+            }
+
+            return $data['success'] ?? false;
+        } catch (\Exception $e) {
+            Log::error("Fail2ban banIp error: " . $e->getMessage());
+            throw $e;
         }
-
-        $command = "fail2ban-client set {$jail} banip {$ip}";
-        $output = $this->sshService->executeCommand($server, $command);
-
-        // Log the action
-        if (class_exists(\App\Services\AuditService::class)) {
-            \App\Services\AuditService::log(
-                action: 'fail2ban_ban_ip',
-                description: "Banned IP {$ip} in jail {$jail}",
-                server_id: $server->server_id
-            );
-        }
-
-        return str_contains($output, '1') || str_contains(strtolower($output), 'success');
     }
 
     /**
      * Unban an IP address from a specific jail.
      */
-    public function unbanIp(Server $server, string $ip, string $jail = null): bool
+    public function unbanIp(Server $server, string $ip, ?string $jail = null): bool
     {
         // Validate IP address
         if (!filter_var($ip, FILTER_VALIDATE_IP)) {
             throw new \Exception("Invalid IP address: {$ip}");
         }
 
-        if ($jail) {
-            // Unban from specific jail
-            $command = "fail2ban-client set {$jail} unbanip {$ip}";
-        } else {
-            // Unban from all jails
-            $jails = $this->getJails($server);
-            foreach ($jails as $jailData) {
-                $jailName = $jailData['name'];
-                $command = "fail2ban-client set {$jailName} unbanip {$ip}";
-                $this->sshService->executeCommand($server, $command);
+        try {
+            $response = Http::timeout(10)->post("http://{$server->ip}/spikster-api/fail2ban.php", [
+                'action' => 'unban-ip',
+                'server_id' => $server->server_id,
+                'ip' => $ip,
+                'jail' => $jail,
+            ]);
+
+            if (!$response->successful()) {
+                throw new \Exception("HTTP request failed");
             }
 
-            // Also remove from database
-            $command = "sqlite3 /var/lib/fail2ban/fail2ban.sqlite3 \"DELETE FROM bips WHERE ip='{$ip}'\"";
+            $data = $response->json();
+
+            // Log the action
+            if (class_exists(\App\Services\AuditService::class)) {
+                \App\Services\AuditService::log(
+                    eventType: 'fail2ban_unban_ip',
+                    description: "Unbanned IP {$ip}" . ($jail ? " from jail {$jail}" : " from all jails"),
+                    severity: 'info'
+                );
+            }
+
+            return $data['success'] ?? false;
+        } catch (\Exception $e) {
+            Log::error("Fail2ban unbanIp error: " . $e->getMessage());
+            throw $e;
         }
-
-        $output = $this->sshService->executeCommand($server, $command);
-
-        // Log the action
-        if (class_exists(\App\Services\AuditService::class)) {
-            \App\Services\AuditService::log(
-                action: 'fail2ban_unban_ip',
-                description: "Unbanned IP {$ip}" . ($jail ? " from jail {$jail}" : " from all jails"),
-                server_id: $server->server_id
-            );
-        }
-
-        return true;
     }
 
     /**
@@ -211,19 +188,21 @@ class Fail2banService
      */
     public function getServiceStatus(Server $server): array
     {
-        $isRunning = $this->sshService->isServiceRunning($server, 'fail2ban');
-        
-        $status = [
-            'running' => $isRunning,
-            'version' => '',
-        ];
+        try {
+            $response = Http::timeout(10)->get("http://{$server->ip}/spikster-api/fail2ban.php", [
+                'action' => 'get-service-status',
+                'server_id' => $server->server_id,
+            ]);
 
-        if ($isRunning) {
-            $versionOutput = $this->sshService->executeCommand($server, 'fail2ban-client version');
-            $status['version'] = trim($versionOutput);
+            if (!$response->successful()) {
+                return ['running' => false, 'version' => ''];
+            }
+
+            $data = $response->json();
+            return $data['status'] ?? ['running' => false, 'version' => ''];
+        } catch (\Exception $e) {
+            return ['running' => false, 'version' => ''];
         }
-
-        return $status;
     }
 
     /**
@@ -231,7 +210,17 @@ class Fail2banService
      */
     public function restartService(Server $server): bool
     {
-        return $this->sshService->restartService($server, 'fail2ban');
+        try {
+            $response = Http::timeout(10)->post("http://{$server->ip}/spikster-api/fail2ban.php", [
+                'action' => 'restart-service',
+                'server_id' => $server->server_id,
+            ]);
+
+            return $response->successful();
+        } catch (\Exception $e) {
+            Log::error("Fail2ban restartService error: " . $e->getMessage());
+            return false;
+        }
     }
 
     /**
@@ -239,41 +228,23 @@ class Fail2banService
      */
     public function getLogs(Server $server, int $lines = 100): array
     {
-        $command = "tail -n {$lines} /var/log/fail2ban.log";
-        $output = $this->sshService->executeCommand($server, $command);
+        try {
+            $response = Http::timeout(10)->get("http://{$server->ip}/spikster-api/fail2ban.php", [
+                'action' => 'get-logs',
+                'server_id' => $server->server_id,
+                'lines' => $lines,
+            ]);
 
-        $logs = [];
-        $logLines = explode("\n", trim($output));
-
-        foreach ($logLines as $line) {
-            if (empty($line)) {
-                continue;
+            if (!$response->successful()) {
+                return [];
             }
 
-            // Parse log line (format: YYYY-MM-DD HH:MM:SS,mmm fail2ban.actions [PID]: LEVEL Message)
-            if (preg_match('/^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d+ (.+?) \[(\d+)\]: (\w+)\s+(.+)$/', $line, $matches)) {
-                $logs[] = [
-                    'timestamp' => $matches[1],
-                    'component' => $matches[2],
-                    'pid' => $matches[3],
-                    'level' => $matches[4],
-                    'message' => $matches[5],
-                    'raw' => $line,
-                ];
-            } else {
-                // If parsing fails, include raw line
-                $logs[] = [
-                    'timestamp' => '',
-                    'component' => '',
-                    'pid' => '',
-                    'level' => '',
-                    'message' => $line,
-                    'raw' => $line,
-                ];
-            }
+            $data = $response->json();
+            return $data['logs'] ?? [];
+        } catch (\Exception $e) {
+            Log::error("Fail2ban getLogs error: " . $e->getMessage());
+            return [];
         }
-
-        return $logs;
     }
 
     /**
@@ -293,11 +264,11 @@ class Fail2banService
         ];
 
         foreach ($jails as $jail) {
-            if ($jail['current_banned'] > 0) {
+            if (($jail['current_banned'] ?? 0) > 0) {
                 $stats['jails_active']++;
             }
-            $stats['total_bans'] += $jail['total_banned'];
-            $stats['bans_by_jail'][$jail['name']] = $jail['current_banned'];
+            $stats['total_bans'] += $jail['total_banned'] ?? 0;
+            $stats['bans_by_jail'][$jail['name']] = $jail['current_banned'] ?? 0;
         }
 
         return $stats;
@@ -313,26 +284,33 @@ class Fail2banService
             throw new \Exception("Invalid IP address: {$ip}");
         }
 
-        // First unban the IP if it's currently banned
-        $this->unbanIp($server, $ip);
+        try {
+            $response = Http::timeout(10)->post("http://{$server->ip}/spikster-api/fail2ban.php", [
+                'action' => 'whitelist-ip',
+                'server_id' => $server->server_id,
+                'ip' => $ip,
+            ]);
 
-        // Add to ignoreip in jail.local
-        $command = "grep -q 'ignoreip.*{$ip}' /etc/fail2ban/jail.local || sed -i '/^ignoreip/s/$/ {$ip}/' /etc/fail2ban/jail.local";
-        $this->sshService->executeCommand($server, $command);
+            if (!$response->successful()) {
+                throw new \Exception("HTTP request failed");
+            }
 
-        // Reload Fail2ban
-        $this->sshService->executeCommand($server, 'fail2ban-client reload');
+            $data = $response->json();
 
-        // Log the action
-        if (class_exists(\App\Services\AuditService::class)) {
-            \App\Services\AuditService::log(
-                action: 'fail2ban_whitelist_ip',
-                description: "Whitelisted IP {$ip}",
-                server_id: $server->server_id
-            );
+            // Log the action
+            if (class_exists(\App\Services\AuditService::class)) {
+                \App\Services\AuditService::log(
+                    eventType: 'fail2ban_whitelist_ip',
+                    description: "Whitelisted IP {$ip}",
+                    severity: 'info'
+                );
+            }
+
+            return $data['success'] ?? false;
+        } catch (\Exception $e) {
+            Log::error("Fail2ban whitelistIp error: " . $e->getMessage());
+            throw $e;
         }
-
-        return true;
     }
 
     /**
@@ -340,15 +318,55 @@ class Fail2banService
      */
     public function getWhitelistedIps(Server $server): array
     {
-        $command = "grep '^ignoreip' /etc/fail2ban/jail.local | head -1";
-        $output = $this->sshService->executeCommand($server, $command);
+        try {
+            $response = Http::timeout(10)->get("http://{$server->ip}/spikster-api/fail2ban.php", [
+                'action' => 'get-whitelist',
+                'server_id' => $server->server_id,
+            ]);
 
-        $whitelisted = [];
-        if (preg_match('/ignoreip\s*=\s*(.+)/', $output, $matches)) {
-            $ips = array_filter(array_map('trim', explode(' ', $matches[1])));
-            $whitelisted = array_values($ips);
+            if (!$response->successful()) {
+                return [];
+            }
+
+            $data = $response->json();
+            return $data['whitelist'] ?? [];
+        } catch (\Exception $e) {
+            Log::error("Fail2ban getWhitelistedIps error: " . $e->getMessage());
+            return [];
         }
+    }
 
-        return $whitelisted;
+    /**
+     * Add a new jail.
+     */
+    public function addJail(Server $server, array $jailConfig): bool
+    {
+        try {
+            $response = Http::timeout(10)->post("http://{$server->ip}/spikster-api/fail2ban.php", [
+                'action' => 'add-jail',
+                'server_id' => $server->server_id,
+                'jail_config' => $jailConfig,
+            ]);
+
+            if (!$response->successful()) {
+                throw new \Exception("HTTP request failed");
+            }
+
+            $data = $response->json();
+
+            // Log the action
+            if (class_exists(\App\Services\AuditService::class)) {
+                \App\Services\AuditService::log(
+                    eventType: 'fail2ban_add_jail',
+                    description: "Added jail: {$jailConfig['name']}",
+                    severity: 'info'
+                );
+            }
+
+            return $data['success'] ?? false;
+        } catch (\Exception $e) {
+            Log::error("Fail2ban addJail error: " . $e->getMessage());
+            throw $e;
+        }
     }
 }

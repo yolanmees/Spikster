@@ -2117,7 +2117,7 @@ class ServerController extends Controller
 
             $result = $this->fail2banService->unbanIp($server, $ip, $jail);
 
-            $message = $jail 
+            $message = $jail
                 ? "IP {$ip} unbanned successfully from jail {$jail}"
                 : "IP {$ip} unbanned successfully from all jails";
 
@@ -2415,6 +2415,98 @@ class ServerController extends Controller
             Log::error('Fail2ban get whitelist error: ' . $th->getMessage());
             return response()->json([
                 'message' => 'Failed to fetch whitelist',
+                'errors' => $th->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Deploy Fail2ban API to server
+     *
+     * @OA\Post(
+     *      path="/api/servers/{server_id}/fail2ban/deploy",
+     *      summary="Deploy Fail2ban API script",
+     *      tags={"Fail2ban"},
+     *      description="Upload Fail2ban API script to server",
+     *
+     *      @OA\Parameter(
+     *          name="server_id",
+     *          description="Server unique ID",
+     *          required=true,
+     *          in="path",
+     *          @OA\Schema(type="string")
+     *      ),
+     *
+     *      @OA\Response(
+     *          response=200,
+     *          description="API deployed successfully"
+     *      )
+     * )
+     */
+    public function fail2banDeploy(string $server_id)
+    {
+        $server = Server::where('server_id', $server_id)->where('status', 1)->first();
+
+        if (!$server) {
+            return response()->json([
+                'message' => 'Server not found',
+                'errors' => 'Not found',
+            ], 404);
+        }
+
+        try {
+            $localScriptPath = storage_path('scripts/fail2ban-api.php');
+
+            if (!file_exists($localScriptPath)) {
+                return response()->json([
+                    'message' => 'Fail2ban API script not found',
+                    'errors' => 'Script file missing',
+                ], 404);
+            }
+
+            // Create spikster-api directory on server if it doesn't exist
+            $ssh = $this->sshService->connect($server);
+            if (!$ssh) {
+                throw new \Exception('Failed to connect via SSH');
+            }
+
+            // Create directory structure
+            $ssh->exec("echo '{$server->password}' | sudo -S mkdir -p /var/www/html/spikster-api");
+            $ssh->exec("echo '{$server->password}' | sudo -S chown -R www-data:www-data /var/www/html/spikster-api");
+            $ssh->exec("echo '{$server->password}' | sudo -S chmod -R 755 /var/www/html/spikster-api");
+
+            // Upload the script
+            $uploaded = $this->sshService->uploadFile($server, $localScriptPath, '/tmp/fail2ban-api.php');
+
+            if (!$uploaded) {
+                throw new \Exception('Failed to upload script');
+            }
+
+            // Move to final location with sudo
+            $ssh->exec("echo '{$server->password}' | sudo -S mv /tmp/fail2ban-api.php /var/www/html/spikster-api/fail2ban.php");
+            $ssh->exec("echo '{$server->password}' | sudo -S chown www-data:www-data /var/www/html/spikster-api/fail2ban.php");
+            $ssh->exec("echo '{$server->password}' | sudo -S chmod 644 /var/www/html/spikster-api/fail2ban.php");
+
+            // Configure sudo permissions for www-data to run fail2ban commands
+            $sudoersContent = "www-data ALL=(ALL) NOPASSWD: /usr/bin/fail2ban-client\n";
+            $sudoersContent .= "www-data ALL=(ALL) NOPASSWD: /bin/systemctl restart fail2ban\n";
+            $sudoersContent .= "www-data ALL=(ALL) NOPASSWD: /bin/systemctl status fail2ban\n";
+            $sudoersContent .= "www-data ALL=(ALL) NOPASSWD: /usr/bin/tail -n * /var/log/fail2ban.log\n";
+
+            $ssh->exec("echo '{$sudoersContent}' | sudo tee /etc/sudoers.d/fail2ban-api > /dev/null");
+            $ssh->exec("echo '{$server->password}' | sudo -S chmod 440 /etc/sudoers.d/fail2ban-api");
+
+            $ssh->disconnect();
+
+            return response()->json([
+                'message' => 'Fail2ban API deployed successfully',
+                'success' => true,
+                'api_url' => "http://{$server->ip}/spikster-api/fail2ban.php",
+            ]);
+        } catch (\Throwable $th) {
+            Log::error('Fail2ban deploy error: ' . $th->getMessage());
+            return response()->json([
+                'message' => 'Failed to deploy Fail2ban API',
                 'errors' => $th->getMessage(),
             ], 500);
         }

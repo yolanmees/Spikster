@@ -39,7 +39,7 @@ class UnbanIpSSH implements ShouldQueue
     {
         try {
             $fail2banService->unbanIp($this->server, $this->ip, $this->jail);
-            
+
             $jailInfo = $this->jail ? "from jail {$this->jail}" : "from all jails";
             Log::info("Fail2ban: Unbanned IP {$this->ip} {$jailInfo} on server {$this->server->name}");
         } catch (\Throwable $e) {

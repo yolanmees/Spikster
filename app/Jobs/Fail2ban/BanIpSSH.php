@@ -39,7 +39,7 @@ class BanIpSSH implements ShouldQueue
     {
         try {
             $fail2banService->banIp($this->server, $this->ip, $this->jail);
-            
+
             Log::info("Fail2ban: Banned IP {$this->ip} in jail {$this->jail} on server {$this->server->name}");
         } catch (\Throwable $e) {
             Log::error("Fail2ban: Failed to ban IP {$this->ip}: " . $e->getMessage());

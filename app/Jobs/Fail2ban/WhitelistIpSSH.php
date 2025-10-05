@@ -37,7 +37,7 @@ class WhitelistIpSSH implements ShouldQueue
     {
         try {
             $fail2banService->whitelistIp($this->server, $this->ip);
-            
+
             Log::info("Fail2ban: Whitelisted IP {$this->ip} on server {$this->server->name}");
         } catch (\Throwable $e) {
             Log::error("Fail2ban: Failed to whitelist IP {$this->ip}: " . $e->getMessage());

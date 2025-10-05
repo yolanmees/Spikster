@@ -7,6 +7,7 @@ use App\Models\Site;
 use App\Models\Wordpress;
 use App\Services\WordPressService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class WordPressController extends Controller
 {
@@ -19,9 +20,15 @@ class WordPressController extends Controller
 
     public function index($site_id): \Illuminate\View\View
     {
-        $wordpresses = Wordpress::with('database')->where(['site_id' => $site_id])->paginate(10);
+        // Verify site exists
+        $site = Site::where('site_id', $site_id)->first();
+        if (!$site) {
+            abort(404, 'Site not found');
+        }
 
-        return view('site.wordpress.index', compact('site_id', 'wordpresses'));
+        $wordpresses = Wordpress::with('database')->where('site_id', $site_id)->paginate(10);
+
+        return view('site.wordpress.index', compact('site_id', 'site', 'wordpresses'));
     }
 
     public function create(Request $request, $site_id): \Illuminate\Http\RedirectResponse
@@ -32,24 +39,30 @@ class WordPressController extends Controller
             'password' => 'required|string|min:8',
         ]);
 
-        $site = Site::where(['site_id' => $site_id])->first();
-        if (! $site) {
-            return back()->withErrors(['Site not found']);
+        $site = Site::where('site_id', $site_id)->first();
+        if (!$site) {
+            return back()->withErrors(['error' => 'Site not found. Please check the site ID.']);
         }
 
-        $path = $site->rootpath.'/'.$request->input('path');
+        $path = $site->rootpath . '/' . trim($request->input('path'), '/');
 
-        $response = $this->wordpressService->deployWordPress(
-            $path,
-            $request->input('username'),
-            $request->input('password'),
-            $site_id
-        );
+        try {
+            $response = $this->wordpressService->deployWordPress(
+                $path,
+                $request->input('username'),
+                $request->input('password'),
+                $site_id
+            );
 
-        if ($response['success']) {
-            return redirect()->route('site.wordpress', $site_id)->with('success', $response['message']);
-        } else {
-            return back()->withErrors(['Deployment failed' => $response['message']]);
+            if ($response['success']) {
+                return redirect()->route('site.wordpress', $site_id)
+                    ->with('success', $response['message']);
+            } else {
+                return back()->withErrors(['error' => $response['message']]);
+            }
+        } catch (\Exception $e) {
+            Log::error('WordPress deployment failed: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'WordPress deployment failed: ' . $e->getMessage()]);
         }
     }
 }
