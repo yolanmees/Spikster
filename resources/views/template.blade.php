@@ -3,7 +3,6 @@
     if (localStorage.getItem('username') === null) {
         window.location.replace('/login');
     } //Session Check
-
 </script>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
@@ -45,14 +44,15 @@
             margin-top: 100px;
             z-index: 100000;
         }
-
     </style>
     @yield('css')
 </head>
+
 <body class="sb-nav-fixed">
     <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
         <a class="navbar-brand" href="/dashboard"><i class="fab fa-fw fa-linux"></i> {{ config('cipi.name') }}</a>
-        <button class="btn btn-link btn-sm order-1 order-lg-0  d-lg-none" id="sidebarToggle" href="#"><i class="fas fa-bars"></i></button>
+        <button class="order-1 btn btn-link btn-sm order-lg-0 d-lg-none" id="sidebarToggle" href="#"><i
+                class="fas fa-bars"></i></button>
     </nav>
     <div id="layoutSidenav">
         <div id="layoutSidenav_nav">
@@ -103,7 +103,7 @@
                     <div id="success" class="d-none">
                         <div class="row">
                             <div class="col-xl-12">
-                                <div class="card bg-primary text-white mb-12">
+                                <div class="mb-12 text-white card bg-primary">
                                     <div class="card-body">
                                         <b><i class="fas fa-check"></i></b> <span id="successtext"></span>
                                         <button type="button" class="close" id="successx">
@@ -118,7 +118,7 @@
                     <div id="fail" class="d-none">
                         <div class="row">
                             <div class="col-xl-12">
-                                <div class="card bg-secondary text-white mb-12">
+                                <div class="mb-12 text-white card bg-secondary">
                                     <div class="card-body">
                                         <b><i class="fas fa-times"></i></b> <span id="failtext"></span>
                                         <button type="button" class="close" id="failx">
@@ -138,7 +138,8 @@
             <p><i class="fas fa-circle-notch fa-spin" id="mainloadingicon"></i> Loading data...</p>
         </div>
         @yield('extra')
-        <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true">
+        <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel"
+            aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -198,25 +199,21 @@
             $('#failtext').empty();
         });
 
-        //Tooltips
-        $(function() {
-            $('[data-toggle="tooltip"]').tooltip()
-        })
-
         //IP Validation
         function ipValidate(ip) {
-            return (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ip))
+            return (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/
+                .test(ip))
         }
 
         //jQuery AJAX Authorization Header Setup & Default Error
         $.ajaxSetup({
-            cache: false
-            , headers: {
-                'Authorization': 'Bearer ' + localStorage.access_token
-                , 'Accept': 'application/json'
-                , 'Content-Type': 'application/json'
-            }
-            , error: function(error) {
+            cache: false,
+            headers: {
+                'Authorization': 'Bearer ' + localStorage.access_token,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            error: function(error) {
                 if (error.status == 401) {
                     jwtrefresh().then(data => {
                         this.headers = {
@@ -244,19 +241,19 @@
         function jwtrefresh() {
             return new Promise((resolve, reject) => {
                 $.ajax({
-                    url: '/auth'
-                    , type: 'GET'
-                    , data: {
-                        username: localStorage.username
-                        , refresh_token: localStorage.refresh_token
-                    }
-                    , success: function(data) {
+                    url: '/auth',
+                    type: 'GET',
+                    data: {
+                        username: localStorage.username,
+                        refresh_token: localStorage.refresh_token
+                    },
+                    success: function(data) {
                         localStorage.access_token = data.access_token;
                         localStorage.refresh_token = data.refresh_token;
                         localStorage.username = data.username;
                         resolve(data);
-                    }
-                    , error: function(error) {
+                    },
+                    error: function(error) {
                         localStorage.clear();
                         window.location.replace('/login');
                         reject(error);
@@ -271,9 +268,9 @@
                 $('#mainloading').removeClass('d-none');
             }
             $.ajax({
-                type: 'GET'
-                , url: url
-                , success: function(data) {
+                type: 'GET',
+                url: url,
+                success: function(data) {
                     localStorage.dtdata = '';
                     localStorage.dtdata = JSON.stringify(data);
                     dtRender();
@@ -289,9 +286,9 @@
         //Get Data for Other
         function getDataNoDT(url) {
             $.ajax({
-                type: 'GET'
-                , url: url
-                , success: function(data) {
+                type: 'GET',
+                url: url,
+                success: function(data) {
                     localStorage.otherdata = '';
                     localStorage.otherdata = JSON.stringify(data);
                 }
@@ -301,9 +298,9 @@
         //Get Data for DataTable
         function getDataNoUI(url) {
             $.ajax({
-                type: 'GET'
-                , url: url
-                , success: function(data) {
+                type: 'GET',
+                url: url,
+                success: function(data) {
                     localStorage.dtdata = '';
                     localStorage.dtdata = JSON.stringify(data);
                 }
@@ -314,24 +311,24 @@
         $('#logout').click(function(e) {
             e.preventDefault();
             $.ajax({
-                url: '/auth'
-                , type: 'DELETE'
-                , headers: {
-                    'x-csrf-token': $('meta[name="csrf-token"]').attr('content')
-                    , 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-                }
-                , data: {
-                    'username': localStorage.username
-                    , 'refresh_token': localStorage.refresh_token
-                }
-                , success: function(data) {
+                url: '/auth',
+                type: 'DELETE',
+                headers: {
+                    'x-csrf-token': $('meta[name="csrf-token"]').attr('content'),
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                },
+                data: {
+                    'username': localStorage.username,
+                    'refresh_token': localStorage.refresh_token
+                },
+                success: function(data) {
                     localStorage.clear();
                     window.location.replace('/login');
                 }
             });
         });
-
     </script>
     @yield('js')
 </body>
+
 </html>

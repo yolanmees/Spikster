@@ -55,20 +55,43 @@ class SiteService
      */
     public function createSite(array $data): Site
     {
+        // Get server instance - use server_id from data
+        $serverId = $data['server_id'];
+        $server = Server::findOrFail($serverId);
+
+        // Ensure server_id is set correctly as the internal database ID
+        $data['server_id'] = $server->id;
+
         // Generate unique site ID
         $data['site_id'] = $this->generateSiteId();
 
         // Generate unique username if not provided
         if (! isset($data['username'])) {
-            $data['username'] = $this->generateUsername($data['domain']);
+            $data['username'] = config('cipi.users_prefix').hash('crc32', (Str::uuid()->toString())).rand(1, 9);
+        }
+
+        // Generate passwords
+        if (! isset($data['password'])) {
+            $data['password'] = Str::random(24);
+        }
+
+        if (! isset($data['database'])) {
+            $data['database'] = Str::random(24);
         }
 
         // Set default values
         $data['php'] = $data['php'] ?? config('cipi.default_php');
         $data['basepath'] = $data['basepath'] ?? '/public';
         $data['panel'] = $data['panel'] ?? false;
+        $data['deploy'] = $data['deploy'] ?? ' ';
 
-        return Site::create($data);
+        // Create the site
+        $site = Site::create($data);
+
+        // Dispatch SSH job to create the site on the server
+        \App\Jobs\NewSiteSSH::dispatch($server, $site)->delay(\Carbon\Carbon::now()->addSeconds(3));
+
+        return $site;
     }
 
     /**

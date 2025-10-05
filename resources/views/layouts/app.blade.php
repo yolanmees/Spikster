@@ -10,12 +10,21 @@
     <title>{{ config('cipi.name') }} | @yield('title')</title>
     <meta name="cipi-version" content="{{ Storage::get('cipi/version.md') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/js/all.min.js"></script>
+    {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/js/all.min.js"></script> --}}
     <link href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap4.min.css" rel="stylesheet" />
-    {{-- <link href="https://cdn.datatables.net/responsive/2.2.7/css/responsive.bootstrap4.min.css" rel="stylesheet" /> --}}
     <link rel="icon" type="image/png" href="/favicon.png" />
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link href="/css/app.css" rel="stylesheet" />
+
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <!-- Livewire Configuration -->
+    {{-- <script>
+        window.livewireScriptConfig = {
+            csrf: '{{ csrf_token() }}',
+            uri: '{{ rtrim(config('livewire.asset_url', '/livewire'), '/') }}',
+            progressBar: {{ config('livewire.navigate.show_progress_bar') ? 'true' : 'false' }},
+            nonce: ''
+        };
+    </script> --}}
 
     <style>
         [x-cloak] {
@@ -60,10 +69,10 @@ $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(valu
         <div class="xl:pl-72">
             <!-- Sticky search header -->
             <div
-                class="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-6 border-b border-white/5 bg-gray-900 dark:bg-gray-800 px-4 shadow-sm sm:px-6 lg:px-8">
+                class="sticky top-0 z-40 flex items-center h-16 px-4 bg-gray-900 border-b shadow-sm shrink-0 gap-x-6 border-white/5 dark:bg-gray-800 sm:px-6 lg:px-8">
                 <button x-on:click="sidebarOpen = true" type="button" class="-m-2.5 p-2.5 text-white xl:hidden">
                     <span class="sr-only">Open sidebar</span>
-                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                         <path fill-rule="evenodd"
                             d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10zm0 5.25a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75a.75.75 0 01-.75-.75z"
                             clip-rule="evenodd" />
@@ -71,13 +80,13 @@ $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(valu
                 </button>
 
 
-                <div class="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
+                <div class="flex self-stretch flex-1 gap-x-4 lg:gap-x-6">
                     <form class="flex flex-1" action="#" method="GET">
                         <div class="relative w-full">
-                            {{-- <svg class="pointer-events-none absolute inset-y-0 left-0 h-full w-5 text-gray-500 dark:text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            {{-- <svg class="absolute inset-y-0 left-0 w-5 h-full text-gray-500 pointer-events-none dark:text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                 <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
                             </svg> --}}
-                            {{-- <input id="search-field" class="block h-full w-full border-0 bg-transparent py-0 pl-8 pr-0 text-white dark:bg-gray-800 dark:text-gray-300 focus:ring-0 sm:text-sm" placeholder="Search..." type="search" name="search"> --}}
+                            {{-- <input id="search-field" class="block w-full h-full py-0 pl-8 pr-0 text-white bg-transparent border-0 dark:bg-gray-800 dark:text-gray-300 focus:ring-0 sm:text-sm" placeholder="Search..." type="search" name="search"> --}}
                         </div>
                     </form>
                 </div>
@@ -94,13 +103,15 @@ $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(valu
         </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/assets/js/app.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap4.min.js"></script>
     <script src="https://cdn.datatables.net/responsive/2.2.7/js/dataTables.responsive.min.js"></script>
     <script src="https://cdn.datatables.net/responsive/2.2.7/js/responsive.bootstrap4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js"></script>
+
+
+
     <script>
         //Init Datatable Data
         localStorage.dtdata = '';
@@ -145,11 +156,6 @@ $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(valu
             $('#fail').addClass('d-none');
             $('#failtext').empty();
         });
-
-        //Tooltips
-        $(function() {
-            $('[data-toggle="tooltip"]').tooltip()
-        })
 
         //IP Validation
         function ipValidate(ip) {

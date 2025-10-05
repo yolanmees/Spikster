@@ -9,7 +9,7 @@ use Livewire\Component;
 
 class NewSite extends Component
 {
-    #[Validate('required|string|regex:/^[a-z0-9\-\.]+$/|max:255')]
+    #[Validate('required|string|regex:/^[a-zA-Z0-9\-\.]+$/|max:255')]
     public $domain = '';
 
     #[Validate('required|exists:servers,id')]
@@ -71,12 +71,12 @@ class NewSite extends Component
 
             // Create site using service
             $site = $siteService->createSite([
-                'server_id' => $validated['serverId'],
-                'domain' => $validated['domain'],
+                'server_id' => (int) $validated['serverId'],
+                'domain' => strtolower($validated['domain']),
                 'php' => $validated['php'],
                 'basepath' => $validated['basepath'] ?? '/public',
-                'repository' => $validated['repository'] ?? null,
-                'branch' => $validated['branch'] ?? null,
+                'repository' => ! empty($validated['repository']) ? $validated['repository'] : null,
+                'branch' => ! empty($validated['branch']) ? $validated['branch'] : null,
             ]);
 
             // Flash success message
@@ -104,7 +104,7 @@ class NewSite extends Component
     /**
      * Reset the form.
      */
-    public function resetForm(ServerService $serverService): void
+    public function resetForm(?ServerService $serverService = null): void
     {
         $this->reset([
             'domain',
@@ -119,9 +119,11 @@ class NewSite extends Component
         $this->branch = 'main';
 
         // Reset to default server
-        $defaultServer = $serverService->getDefaultServer();
-        if ($defaultServer) {
-            $this->serverId = (string) $defaultServer->id;
+        if ($serverService) {
+            $defaultServer = $serverService->getDefaultServer();
+            if ($defaultServer) {
+                $this->serverId = (string) $defaultServer->id;
+            }
         }
 
         $this->resetValidation();

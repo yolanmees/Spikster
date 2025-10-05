@@ -1,5 +1,5 @@
 <div>
-    <form wire:submit="submit">
+    <form wire:submit.prevent="submit">
         <div class="space-y-6">
             <!-- Flash Messages -->
             @if (session()->has('success'))
@@ -18,7 +18,7 @@
                         Domain <span class="text-red-500">*</span>
                     </label>
                     <input type="text" id="domain" wire:model="domain" placeholder="e.g. example.com"
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white sm:text-sm"
+                        class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white sm:text-sm"
                         autocomplete="off">
                     @error('domain')
                         <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
@@ -34,7 +34,7 @@
                         Server <span class="text-red-500">*</span>
                     </label>
                     <select id="serverId" wire:model="serverId"
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white sm:text-sm">
+                        class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white sm:text-sm">
                         <option value="">Select a server</option>
                         @foreach ($servers as $server)
                             <option value="{{ $server->id }}">
@@ -56,7 +56,7 @@
                         PHP Version <span class="text-red-500">*</span>
                     </label>
                     <select id="php" wire:model="php"
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white sm:text-sm">
+                        class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white sm:text-sm">
                         <option value="7.4">PHP 7.4</option>
                         <option value="8.0">PHP 8.0</option>
                         <option value="8.1">PHP 8.1</option>
@@ -74,7 +74,7 @@
                         Public Directory
                     </label>
                     <input type="text" id="basepath" wire:model="basepath" placeholder="/public"
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white sm:text-sm"
+                        class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white sm:text-sm"
                         autocomplete="off">
                     @error('basepath')
                         <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
@@ -86,8 +86,8 @@
             </div>
 
             <!-- Git Repository (Optional) -->
-            <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
+            <div class="pt-6 border-t border-gray-200 dark:border-gray-700">
+                <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">
                     Git Repository (optional)
                 </h3>
                 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
@@ -98,7 +98,7 @@
                         </label>
                         <input type="url" id="repository" wire:model="repository"
                             placeholder="https://github.com/username/repository.git"
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white sm:text-sm"
+                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white sm:text-sm"
                             autocomplete="off">
                         @error('repository')
                             <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
@@ -114,7 +114,7 @@
                             Branch
                         </label>
                         <input type="text" id="branch" wire:model="branch" placeholder="main"
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white sm:text-sm"
+                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white sm:text-sm"
                             autocomplete="off">
                         @error('branch')
                             <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
@@ -127,21 +127,21 @@
             </div>
 
             <!-- Information Box -->
-            <div class="rounded-md bg-blue-50 dark:bg-blue-900/20 p-4">
+            <div class="p-4 rounded-md bg-blue-50 dark:bg-blue-900/20">
                 <div class="flex">
                     <div class="flex-shrink-0">
-                        <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                        <svg class="w-5 h-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd"
                                 d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
                                 clip-rule="evenodd" />
                         </svg>
                     </div>
-                    <div class="ml-3 flex-1">
+                    <div class="flex-1 ml-3">
                         <h3 class="text-sm font-medium text-blue-800 dark:text-blue-300">
                             What happens after creation?
                         </h3>
                         <div class="mt-2 text-sm text-blue-700 dark:text-blue-400">
-                            <ul class="list-disc pl-5 space-y-1">
+                            <ul class="pl-5 space-y-1 list-disc">
                                 <li>A new site will be created on the selected server</li>
                                 <li>Nginx configuration will be automatically generated</li>
                                 <li>PHP-FPM pool will be configured</li>
@@ -157,21 +157,21 @@
             </div>
 
             <!-- Actions -->
-            <div class="flex items-center justify-end space-x-3 border-t border-gray-200 dark:border-gray-700 pt-6">
+            <div class="flex items-center justify-end pt-6 space-x-3 border-t border-gray-200 dark:border-gray-700">
                 <button type="button" wire:click="resetForm"
-                    class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                    :disabled="isSubmitting">
+                    class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm dark:border-gray-600 dark:text-gray-300 dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    wire:loading.attr="disabled" wire:target="submit">
                     Reset
                 </button>
 
-                <button type="submit"
-                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                <button type="submit" wire:click="submit"
+                    class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                     wire:loading.attr="disabled" wire:target="submit">
                     <span wire:loading.remove wire:target="submit">
                         Create Site
                     </span>
                     <span wire:loading wire:target="submit" class="flex items-center">
-                        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg"
+                        <svg class="w-4 h-4 mr-2 -ml-1 text-white animate-spin" xmlns="http://www.w3.org/2000/svg"
                             fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
                                 stroke-width="4"></circle>

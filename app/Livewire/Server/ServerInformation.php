@@ -31,13 +31,13 @@ class ServerInformation extends Component
     public function loadServerData()
     {
         $server = Server::where('server_id', $this->server_id)->first();
-        
+
         if ($server) {
             $this->serverName = $server->name;
             $this->serverIp = $server->ip;
             $this->serverProvider = $server->provider ?? '';
             $this->serverLocation = $server->location ?? '';
-            
+
             // Force Livewire to update
             $this->dispatch('server-data-loaded');
         }
@@ -76,7 +76,7 @@ class ServerInformation extends Component
             ]);
 
             session()->flash('success', 'Server information updated successfully.');
-            
+
             $this->dispatch('server-updated');
             $this->loadServerData();
         } catch (\Exception $e) {
