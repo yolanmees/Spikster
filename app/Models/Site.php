@@ -121,6 +121,16 @@ class Site extends Model
     }
 
     /**
+     * Get all cron jobs for this site.
+     *
+     * @return HasMany<CronJob>
+     */
+    public function cronJobs(): HasMany
+    {
+        return $this->hasMany(CronJob::class);
+    }
+
+    /**
      * Check if this is a panel site.
      */
     public function isPanel(): bool

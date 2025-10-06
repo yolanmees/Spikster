@@ -64,7 +64,8 @@
                         class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
                         <option value="A" {{ old('type') == 'A' ? 'selected' : '' }}>A - IPv4 Address</option>
                         <option value="AAAA" {{ old('type') == 'AAAA' ? 'selected' : '' }}>AAAA - IPv6 Address</option>
-                        <option value="CNAME" {{ old('type') == 'CNAME' ? 'selected' : '' }}>CNAME - Canonical Name</option>
+                        <option value="CNAME" {{ old('type') == 'CNAME' ? 'selected' : '' }}>CNAME - Canonical Name
+                        </option>
                         <option value="MX" {{ old('type') == 'MX' ? 'selected' : '' }}>MX - Mail Exchange</option>
                         <option value="TXT" {{ old('type') == 'TXT' ? 'selected' : '' }}>TXT - Text Record</option>
                         <option value="NS" {{ old('type') == 'NS' ? 'selected' : '' }}>NS - Name Server</option>
@@ -106,7 +107,8 @@
                     <label for="ttl" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                         TTL (seconds)
                     </label>
-                    <input type="number" name="ttl" id="ttl" value="{{ old('ttl', 3600) }}" min="60" max="86400"
+                    <input type="number" name="ttl" id="ttl" value="{{ old('ttl', 3600) }}" min="60"
+                        max="86400"
                         class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                         Time to live in seconds (default: 3600 = 1 hour)

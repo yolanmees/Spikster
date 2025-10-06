@@ -9,6 +9,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.2|^8.3",
+        "bacon/bacon-qr-code": "^3.0",
         "barryvdh/laravel-dompdf": "^3.0",
         "darkaonline/l5-swagger": "^8.6",
         "firebase/php-jwt": "^6.10",
@@ -19,7 +20,9 @@
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.10",
         "livewire/livewire": "^3.6",
+        "nwidart/laravel-modules": "^12.0",
         "phpseclib/phpseclib": "^3.0",
+        "pragmarx/google2fa": "^8.0",
         "spatie/laravel-permission": "^6.21"
     },
     "require-dev": {
@@ -35,11 +38,19 @@
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "wikimedia/composer-merge-plugin": true
+        }
     },
     "extra": {
         "laravel": {
             "dont-discover": []
+        },
+        "merge-plugin": {
+            "include": [
+                "Modules/*/composer.json"
+            ]
         }
     },
     "autoload": {

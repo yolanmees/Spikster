@@ -116,6 +116,16 @@ class Server extends Model
     }
 
     /**
+     * Get all cron jobs for this server.
+     *
+     * @return HasMany<CronJob>
+     */
+    public function cronJobs(): HasMany
+    {
+        return $this->hasMany(CronJob::class);
+    }
+
+    /**
      * Check if server is active.
      */
     public function isActive(): bool

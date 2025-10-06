@@ -70,11 +70,13 @@
                             Address</option>
                         <option value="CNAME" {{ old('type', $dnsRecord->type) == 'CNAME' ? 'selected' : '' }}>CNAME -
                             Canonical Name</option>
-                        <option value="MX" {{ old('type', $dnsRecord->type) == 'MX' ? 'selected' : '' }}>MX - Mail Exchange
+                        <option value="MX" {{ old('type', $dnsRecord->type) == 'MX' ? 'selected' : '' }}>MX - Mail
+                            Exchange
                         </option>
                         <option value="TXT" {{ old('type', $dnsRecord->type) == 'TXT' ? 'selected' : '' }}>TXT - Text
                             Record</option>
-                        <option value="NS" {{ old('type', $dnsRecord->type) == 'NS' ? 'selected' : '' }}>NS - Name Server
+                        <option value="NS" {{ old('type', $dnsRecord->type) == 'NS' ? 'selected' : '' }}>NS - Name
+                            Server
                         </option>
                         <option value="SRV" {{ old('type', $dnsRecord->type) == 'SRV' ? 'selected' : '' }}>SRV - Service
                             Record</option>
@@ -86,7 +88,8 @@
                     <label for="zone" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                         Host/Name *
                     </label>
-                    <input type="text" name="zone" id="zone" value="{{ old('zone', $dnsRecord->zone) }}" required
+                    <input type="text" name="zone" id="zone" value="{{ old('zone', $dnsRecord->zone) }}"
+                        required
                         class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                         placeholder="@, www, mail, subdomain">
                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
@@ -99,7 +102,8 @@
                     <label for="value" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                         Value *
                     </label>
-                    <input type="text" name="value" id="value" value="{{ old('value', $dnsRecord->value) }}" required
+                    <input type="text" name="value" id="value" value="{{ old('value', $dnsRecord->value) }}"
+                        required
                         class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                         The value depends on the record type (IP address, domain name, or text)
@@ -111,8 +115,8 @@
                     <label for="ttl" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                         TTL (seconds)
                     </label>
-                    <input type="number" name="ttl" id="ttl" value="{{ old('ttl', $dnsRecord->ttl) }}" min="60"
-                        max="86400"
+                    <input type="number" name="ttl" id="ttl" value="{{ old('ttl', $dnsRecord->ttl) }}"
+                        min="60" max="86400"
                         class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                         Time to live in seconds (default: 3600 = 1 hour)
@@ -124,8 +128,8 @@
                     <label for="priority" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                         Priority (MX/SRV only)
                     </label>
-                    <input type="number" name="priority" id="priority" value="{{ old('priority', $dnsRecord->priority) }}"
-                        min="0" max="65535"
+                    <input type="number" name="priority" id="priority"
+                        value="{{ old('priority', $dnsRecord->priority) }}" min="0" max="65535"
                         class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                         Required for MX and SRV records. Lower values have higher priority.

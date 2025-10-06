@@ -10,10 +10,10 @@
 @section('content')
     <!-- Modern Breadcrumbs with Icons -->
     <div
-        class="mb-6 bg-white dark:bg-gray-800/30 rounded-xl border border-gray-200 dark:border-gray-700/50 p-4 backdrop-blur-sm">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        class="p-4 mb-6 bg-white border border-gray-200 dark:bg-gray-800/30 rounded-xl dark:border-gray-700/50 backdrop-blur-sm">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
+                <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/20">
                     <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor"
                         viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -26,7 +26,7 @@
                 </div>
             </div>
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center">
+                <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-purple-50 dark:bg-purple-900/20">
                     <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor"
                         viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -39,7 +39,7 @@
                 </div>
             </div>
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-green-50 dark:bg-green-900/20 flex items-center justify-center">
+                <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-green-50 dark:bg-green-900/20">
                     <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor"
                         viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -52,7 +52,7 @@
                 </div>
             </div>
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center">
+                <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-orange-50 dark:bg-orange-900/20">
                     <svg class="w-5 h-5 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor"
                         viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -68,7 +68,7 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
         <!-- Basic Information -->
         <x-card size="md" dark="false">
             <x-slot name="header">
@@ -83,14 +83,14 @@
             </x-slot>
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                         {{ __('spikster.domain') }}:
                     </label>
                     <input type="text" placeholder="e.g. domain.ltd" id="sitedomain" autocomplete="off"
                         class="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                         {{ __('spikster.site_base_path') }}:
                     </label>
                     <input type="text" placeholder="e.g. public" id="sitebasepath" autocomplete="off"
@@ -121,7 +121,7 @@
             </x-slot>
             <div class="space-y-4">
                 <div>
-                    <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('spikster.add_alias') }}:</p>
+                    <p class="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('spikster.add_alias') }}:</p>
                     <div class="flex gap-2">
                         <input type="text" placeholder="e.g. www.domain.ltd" id="siteaddalias" autocomplete="off"
                             class="flex-1 px-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all" />
@@ -135,7 +135,7 @@
                     </div>
                 </div>
                 <div>
-                    <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('spikster.aliases') }}:</p>
+                    <p class="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('spikster.aliases') }}:</p>
                     <div id="sitealiaseslist" class="flex flex-wrap gap-2"></div>
                 </div>
             </div>
@@ -155,7 +155,7 @@
             </x-slot>
             <div class="space-y-4">
                 <div>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">{{ __('spikster.ssl_security_text') }}:</p>
+                    <p class="mb-3 text-sm text-gray-600 dark:text-gray-400">{{ __('spikster.ssl_security_text') }}:</p>
                     <button type="button" id="sitessl"
                         class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transform hover:scale-105 active:scale-95 transition-all">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -166,7 +166,7 @@
                     </button>
                 </div>
                 <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
-                    <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                    <p class="mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">
                         {{ __('spikster.password_resets') }}:</p>
                     <div class="grid grid-cols-2 gap-2">
                         <button type="button" id="sitesshreset"
@@ -204,7 +204,7 @@
             </x-slot>
             <div class="space-y-4">
                 <div>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">{{ __('spikster.github_repository_setup') }}
+                    <p class="mb-3 text-sm text-gray-600 dark:text-gray-400">{{ __('spikster.github_repository_setup') }}
                     </p>
                     <div class="grid grid-cols-1 gap-2">
                         <button type="button" id="sitesetrepo"
@@ -228,10 +228,10 @@
                     </div>
                 </div>
                 <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
-                    <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <p class="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                         {{ __('spikster.github_repository_deploy') }}:</p>
-                    <div class="bg-gray-900 dark:bg-gray-950 rounded-lg p-3 border border-gray-700">
-                        <code class="text-xs text-green-400 font-mono">
+                    <div class="p-3 bg-gray-900 border border-gray-700 rounded-lg dark:bg-gray-950">
+                        <code class="font-mono text-xs text-green-400">
                             ssh <span id="repodeployinfouser1"></span>@<span id="repodeployinfoip"></span><br />
                             sh /home/<span id="repodeployinfouser2"></span>/git/deploy.sh
                         </code>
@@ -256,7 +256,7 @@
             </x-slot>
             <div class="space-y-4">
                 <div>
-                    <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <p class="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                         {{ __('spikster.php_fpm_version') }}:</p>
                     <div class="flex gap-2">
                         <select id="sitephpver"
@@ -277,7 +277,7 @@
                     </div>
                 </div>
                 <div>
-                    <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Supervisor script:</p>
+                    <p class="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Supervisor script:</p>
                     <input type="text" id="sitesupervisor" autocomplete="off"
                         class="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all mb-3" />
                     <button type="button" id="sitesupervisorupdate"
@@ -372,13 +372,92 @@
             </div>
         </x-card>
 
-        {{-- <div class="md:col-span-2 col-span-1">
-        <div class="card h-full">
+        <!-- Email Management -->
+        <x-card size="md" dark="false">
+            <x-slot name="header">
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    Email Accounts
+                </div>
+            </x-slot>
+            <div class="space-y-4">
+                <p class="text-sm text-gray-600 dark:text-gray-400">Manage email accounts</p>
+                <a href="{{ route('email.index', $site_id) }}" class="block">
+                    <button type="button"
+                        class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transform hover:scale-105 active:scale-95 transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        EMAIL MANAGER
+                    </button>
+                </a>
+            </div>
+        </x-card>
+
+        <!-- Backup & Restore -->
+        <x-card size="md" dark="false">
+            <x-slot name="header">
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+                    </svg>
+                    Backup & Restore
+                </div>
+            </x-slot>
+            <div class="space-y-4">
+                <p class="text-sm text-gray-600 dark:text-gray-400">Create and restore backups</p>
+                <a href="{{ route('backups.index', $site_id) }}" class="block">
+                    <button type="button"
+                        class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transform hover:scale-105 active:scale-95 transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                        </svg>
+                        BACKUP MANAGER
+                    </button>
+                </a>
+            </div>
+        </x-card>
+
+        <!-- Reset Permissions -->
+        <x-card size="md" dark="false">
+            <x-slot name="header">
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    File Permissions
+                </div>
+            </x-slot>
+            <div class="space-y-4">
+                <p class="text-sm text-gray-600 dark:text-gray-400">Fix file permission issues (chmod/chown)</p>
+                <button type="button" id="resetPermissionsBtn"
+                    class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg transform hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    <span id="resetPermissionsText">RESET PERMISSIONS</span>
+                </button>
+            </div>
+        </x-card>
+
+        {{-- <div class="col-span-1 md:col-span-2">
+        <div class="h-full card">
             <div class="card-header">
-                <i class="fas fa-rocket fs-fw mr-1"></i>
+                <i class="mr-1 fas fa-rocket fs-fw"></i>
                 File Manager
             </div>
-            <div class="card-body text-center">
+            <div class="text-center card-body">
                 <div class="space"></div>
                 <form action="{{route('files.index')}}" method="get">
                     <input type="hidden" name="site-uuid" id="siteuuid">
@@ -389,10 +468,10 @@
         </div>
     </div> --}}
 
-        {{-- <div id="nodejsManager" class="md:col-span-2 col-span-1 d-none">
-        <div class="card h-full">
+        {{-- <div id="nodejsManager" class="col-span-1 md:col-span-2 d-none">
+        <div class="h-full card">
             <div class="card-header">
-                <i class="fab fa-github fs-fw mr-1"></i>
+                <i class="mr-1 fab fa-github fs-fw"></i>
                 Nodejs Manager
             </div>
             <div class="card-body">
@@ -419,11 +498,11 @@
     <input type="hidden" id="server_id">
 
     <!-- Repository Modal - Tailwind -->
-    <dialog class="hidden fixed inset-0 z-50 overflow-y-auto" id="repositoryModal"
+    <dialog class="fixed inset-0 z-50 hidden overflow-y-auto" id="repositoryModal"
         aria-labelledby="repositoryModalLabel">
         <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
             <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" aria-hidden="true"></div>
-            <div class="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white dark:bg-gray-800 rounded-xl shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
+            <div class="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white shadow-xl dark:bg-gray-800 rounded-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
                 id="repositorydialog">
                 <div class="px-6 pt-5 pb-4 bg-white dark:bg-gray-800 sm:p-6 sm:pb-4">
                     <div class="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700">
@@ -441,7 +520,7 @@
                     <div class="mt-6 space-y-4">
                         <div>
                             <label for="repositoryproject"
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 {{ __('spikster.repository_project') }}
                             </label>
                             <input
@@ -451,7 +530,7 @@
                         </div>
                         <div>
                             <label for="repositorybranch"
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 {{ __('spikster.repository_branch') }}
                             </label>
                             <input
@@ -460,13 +539,13 @@
                         </div>
                         <div>
                             <label for="deploykey"
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 {{ __('spikster.repository_deploy_key') }} {!! __('spikster.repository_deploy_key_info') !!}
                             </label>
                             <textarea id="deploykey" readonly
                                 class="w-full h-36 px-4 py-2.5 text-xs rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white font-mono"></textarea>
                         </div>
-                        <div class="text-center pt-2">
+                        <div class="pt-2 text-center">
                             <button
                                 class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transform hover:scale-105 active:scale-95 transition-all duration-200"
                                 type="button" id="repositorysubmit">{{ __('spikster.confirm') }}</button>
@@ -478,11 +557,11 @@
     </dialog>
 
     <!-- Deploy Scripts Modal - Tailwind -->
-    <dialog class="hidden fixed inset-0 z-50 overflow-y-auto" id="deployModal" aria-labelledby="deployModalLabel">
+    <dialog class="fixed inset-0 z-50 hidden overflow-y-auto" id="deployModal" aria-labelledby="deployModalLabel">
         <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
             <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" aria-hidden="true"></div>
             <div
-                class="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white dark:bg-gray-800 rounded-xl shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                class="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white shadow-xl dark:bg-gray-800 rounded-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
                 <div class="px-6 pt-5 pb-4 bg-white dark:bg-gray-800 sm:p-6 sm:pb-4">
                     <div class="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white" id="deployModalLabel">
@@ -500,7 +579,7 @@
                         <p class="mb-4 text-sm text-gray-600 dark:text-gray-400">
                             {{ __('spikster.github_repository_scripts') }}:</p>
                         <div id="deploy" style="height:250px;width:100%;"></div>
-                        <div class="text-center mt-6">
+                        <div class="mt-6 text-center">
                             <button
                                 class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transform hover:scale-105 active:scale-95 transition-all duration-200"
                                 type="button" id="deploysubmit">{{ __('spikster.save') }}</button>
@@ -512,11 +591,11 @@
     </dialog>
 
     <!-- SSH Reset Modal - Tailwind -->
-    <dialog class="hidden fixed inset-0 z-50 overflow-y-auto" id="sshresetModal" aria-labelledby="sshresetModalLabel">
+    <dialog class="fixed inset-0 z-50 hidden overflow-y-auto" id="sshresetModal" aria-labelledby="sshresetModalLabel">
         <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
             <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" aria-hidden="true"></div>
             <div
-                class="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white dark:bg-gray-800 rounded-xl shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                class="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white shadow-xl dark:bg-gray-800 rounded-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
                 <div class="px-6 pt-5 pb-4 bg-white dark:bg-gray-800 sm:p-6 sm:pb-4">
                     <div class="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white" id="sshresetModalLabel">
@@ -533,7 +612,7 @@
                     <div class="mt-6">
                         <p class="mb-4 text-sm text-gray-600 dark:text-gray-400">
                             {{ __('spikster.require_ssh_password_reset_modal_text') }}</p>
-                        <div class="text-center mt-6">
+                        <div class="mt-6 text-center">
                             <button
                                 class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transform hover:scale-105 active:scale-95 transition-all duration-200"
                                 type="button" id="sshresetsubmit">{{ __('spikster.confirm') }}</button>
@@ -545,12 +624,12 @@
     </dialog>
 
     <!-- MySQL Reset Modal - Tailwind -->
-    <dialog class="hidden fixed inset-0 z-50 overflow-y-auto" id="mysqlresetModal"
+    <dialog class="fixed inset-0 z-50 hidden overflow-y-auto" id="mysqlresetModal"
         aria-labelledby="mysqlresetModalLabel">
         <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
             <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" aria-hidden="true"></div>
             <div
-                class="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white dark:bg-gray-800 rounded-xl shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                class="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white shadow-xl dark:bg-gray-800 rounded-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
                 <div class="px-6 pt-5 pb-4 bg-white dark:bg-gray-800 sm:p-6 sm:pb-4">
                     <div class="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white" id="mysqlresetModalLabel">
@@ -567,7 +646,7 @@
                     <div class="mt-6">
                         <p class="mb-4 text-sm text-gray-600 dark:text-gray-400">
                             {{ __('spikster.require_mysql_password_reset_modal_text') }}</p>
-                        <div class="text-center mt-6">
+                        <div class="mt-6 text-center">
                             <button
                                 class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transform hover:scale-105 active:scale-95 transition-all duration-200"
                                 type="button" id="mysqlresetsubmit">{{ __('spikster.confirm') }}</button>
@@ -652,7 +731,7 @@
                         $('#sitealiaseslist').append(
                             '<span class="inline-flex items-center gap-2 px-3 py-1.5 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700/50 text-purple-700 dark:text-purple-300 text-sm rounded-lg">' +
                             item.domain + '<button data-id="' + item.alias_id +
-                            '" class="sitealiasdel hover:text-purple-900 dark:hover:text-purple-100 transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button></span>'
+                            '" class="transition-colors sitealiasdel hover:text-purple-900 dark:hover:text-purple-100"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button></span>'
                         );
                     });
                 },
@@ -819,15 +898,15 @@
                     }),
                     beforeSend: function() {
                         $('#siteaddaliassubmit').html(
-                            '<svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>'
-                            );
+                            '<svg class="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>'
+                        );
                     },
                     success: function(data) {
                         $('#siteaddalias').val('');
                         $('#siteaddaliassubmit').empty();
                         $('#siteaddaliassubmit').html(
                             '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>'
-                            );
+                        );
                         siteInit();
                     },
                 });
@@ -866,14 +945,14 @@
                 }),
                 beforeSend: function() {
                     $('#sitephpversubmit').html(
-                        '<svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>'
-                        );
+                        '<svg class="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>'
+                    );
                 },
                 success: function(data) {
                     $('#sitephpversubmit').empty();
                     $('#sitephpversubmit').html(
                         '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>'
-                        );
+                    );
                     siteInit();
                 },
             });

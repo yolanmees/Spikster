@@ -61,7 +61,7 @@ return new class extends Migration
                     ->update(['domain_id' => null]);
             }
         });
-        
+
         Domain::truncate();
     }
 };

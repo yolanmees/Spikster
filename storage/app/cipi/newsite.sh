@@ -47,14 +47,15 @@ done
 
 sudo useradd -m -s $USER_SHELL -d /home/$USER_NAME -G www-data $USER_NAME
 echo "$USER_NAME:$PASSWORD"|chpasswd
-sudo chmod o-r /home/$USER_NAME
 
 mkdir /home/$USER_NAME/web
 mkdir /home/$USER_NAME/log
 
 if [ $BASE_PATH != "" ]; then
-    mkdir /home/$USER_NAME/web/$BASE_PATH
-    WELCOME=/home/$USER_NAME/web/$BASE_PATH/index.php
+    # Remove leading slash from BASE_PATH to avoid double slashes
+    BASE_PATH_CLEAN=$(echo $BASE_PATH | sed 's/^\///')
+    mkdir -p /home/$USER_NAME/web/$BASE_PATH_CLEAN
+    WELCOME=/home/$USER_NAME/web/$BASE_PATH_CLEAN/index.php
 else
     WELCOME=/home/$USER_NAME/web/index.php
 fi
@@ -73,7 +74,6 @@ CUSTOM=/etc/nginx/spikster/$USER_NAME.conf
 sudo wget $REMOTE/conf/nginx -O $CUSTOM
 sudo dos2unix $CUSTOM
 sudo ln -s $NGINX /etc/nginx/sites-enabled/$USER_NAME.conf
-sudo chown -R www-data: /home/$USER_NAME/web
 sudo service php$PHP-fpm restart
 sudo systemctl restart nginx.service
 
@@ -91,7 +91,19 @@ sudo mkdir /home/$USER_NAME/.cache
 sudo mkdir /home/$USER_NAME/git
 sudo cp /etc/spikster/github /home/$USER_NAME/git/deploy
 
-sudo chown -R $USER_NAME:$USER_NAME /home/$USER_NAME/.cache
-sudo chown -R $USER_NAME:$USER_NAME /home/$USER_NAME/git
-sudo chown -R $USER_NAME:$USER_NAME /home/$USER_NAME/web
-sudo chown -R www-data /home/$USER_NAME/web
+# Set correct ownership: user owns, www-data is group
+sudo chown -R $USER_NAME:www-data /home/$USER_NAME
+
+# Set directory permissions (755 = rwxr-xr-x - readable/executable by all)
+sudo chmod 755 /home/$USER_NAME
+sudo chmod 755 /home/$USER_NAME/web
+sudo chmod 755 /home/$USER_NAME/log
+sudo chmod 755 /home/$USER_NAME/.cache
+sudo chmod 755 /home/$USER_NAME/git
+
+# Set all subdirectories to 755
+sudo find /home/$USER_NAME/web -type d -exec chmod 755 {} \;
+
+# Set all files to 644 (rw-r--r-- - readable by all, writable by owner)
+sudo find /home/$USER_NAME/web -type f -exec chmod 644 {} \;
+

@@ -1,0 +1,25 @@
+{
+    "name": "WordPress",
+    "alias": "wordpress",
+    "description": "Complete WordPress management system with installation, theme/plugin management, updates, and staging environments",
+    "version": "1.0.0",
+    "author": "Spikster Team",
+    "category": "application",
+    "icon": "🔷",
+    "color": "#21759B",
+    "priority": 10,
+    "is_core": false,
+    "keywords": [
+        "wordpress",
+        "cms",
+        "management",
+        "themes",
+        "plugins",
+        "updates"
+    ],
+    "dependencies": [],
+    "providers": [
+        "Modules\\WordPress\\Providers\\WordPressServiceProvider"
+    ],
+    "files": []
+}

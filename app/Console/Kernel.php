@@ -48,6 +48,44 @@ class Kernel extends ConsoleKernel
         })->dailyAt('03:00')->name('cleanup-old-metrics');
 
         $schedule->command('audit:cleanup')->weekly()->sundays()->at('02:00');
+
+        // Backup System - Process scheduled backups
+        $schedule->call(function () {
+            $backupService = app(\App\Services\BackupService::class);
+            $created = $backupService->processScheduledBackups();
+            \Illuminate\Support\Facades\Log::info("Processed scheduled backups: {$created} backups created");
+        })->everyFiveMinutes()->name('process-scheduled-backups');
+
+        // Backup System - Cleanup old backups daily
+        $schedule->call(function () {
+            $sites = \App\Models\Site::all();
+            $totalDeleted = 0;
+
+            foreach ($sites as $site) {
+                $backupService = app(\App\Services\BackupService::class);
+                $deleted = $backupService->rotateBackups($site);
+                $totalDeleted += $deleted;
+            }
+
+            \Illuminate\Support\Facades\Log::info("Backup rotation completed: {$totalDeleted} old backups removed");
+        })->dailyAt('04:00')->name('rotate-backups');
+
+        // Backup System - Cleanup failed backups weekly
+        $schedule->call(function () {
+            $failedBackups = \App\Models\Backup::where('status', 'failed')
+                ->where('created_at', '<', now()->subDays(7))
+                ->get();
+
+            $deleted = 0;
+            $backupService = app(\App\Services\BackupService::class);
+
+            foreach ($failedBackups as $backup) {
+                $backupService->deleteBackup($backup, true);
+                $deleted++;
+            }
+
+            \Illuminate\Support\Facades\Log::info("Cleaned up {$deleted} failed backups older than 7 days");
+        })->weekly()->sundays()->at('05:00')->name('cleanup-failed-backups');
     }
 
     /**

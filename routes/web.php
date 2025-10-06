@@ -62,4 +62,28 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
 
     Route::get('download_file_object/{id}', [FileManagerController::class, 'downloadObject']);
     Route::get('show-media-file/{id}', [FileManagerController::class, 'showMediaFile']);
+
+    // Backup Management
+    Route::get('/sites/{site}/backups', function (\App\Models\Site $site) {
+        return view('backup.index', ['site' => $site]);
+    })->name('backups.index');
+
+    // Email Management
+    Route::get('/sites/{site}/email', function (\App\Models\Site $site) {
+        return view('email.index', ['site' => $site]);
+    })->name('email.index');
+
+    // FTP Management
+    Route::get('/sites/{site}/ftp', function (\App\Models\Site $site) {
+        return view('ftp.index', ['site' => $site]);
+    })->name('ftp.index');
+
+    // Module Management
+    Route::prefix('modules')->name('modules.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\ModuleController::class, 'index'])->name('index');
+        Route::get('/{module}', [\App\Http\Controllers\ModuleController::class, 'show'])->name('show');
+        Route::post('/{module}/toggle', [\App\Http\Controllers\ModuleController::class, 'toggle'])->name('toggle');
+        Route::post('/{module}/enable', [\App\Http\Controllers\ModuleController::class, 'enable'])->name('enable');
+        Route::post('/{module}/disable', [\App\Http\Controllers\ModuleController::class, 'disable'])->name('disable');
+    });
 });

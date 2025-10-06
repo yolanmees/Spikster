@@ -86,6 +86,55 @@
                                             <span>Usage</span>
                                         </a>
                                     </li> --}}
+
+                                     {{-- Module Menu Items --}}
+                                     @php
+                                         $menuManager = app(\App\Services\ModuleMenuManager::class);
+                                         $moduleMenuItems = $menuManager->getMenuItems('main');
+                                     @endphp
+
+                                     @foreach ($moduleMenuItems as $menuItem)
+                                         <li>
+                                             <a href="{{ $menuItem->getUrl() }}"
+                                                 class="@if (request()->is(trim($menuItem->route, '/') . '*')) sidebar-item-active @else sidebar-item @endif"
+                                                 @if ($menuItem->is_external) target="{{ $menuItem->target }}" @endif>
+                                                 @if ($menuItem->icon)
+                                                     @if ($menuItem->icon_type === 'heroicon')
+                                                         {!! $menuItem->icon !!}
+                                                     @elseif ($menuItem->icon_type === 'fontawesome')
+                                                         <i class="{{ $menuItem->icon }} h-5 w-5 shrink-0"></i>
+                                                     @endif
+                                                 @else
+                                                     <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24"
+                                                         stroke-width="2" stroke="currentColor">
+                                                         <path stroke-linecap="round" stroke-linejoin="round"
+                                                             d="M13.5 16.875h3.375m0 0h3.375m-3.375 0V13.5m0 3.375v3.375M6 10.5h2.25a2.25 2.25 0 002.25-2.25V6a2.25 2.25 0 00-2.25-2.25H6A2.25 2.25 0 003.75 6v2.25A2.25 2.25 0 006 10.5zm0 9.75h2.25A2.25 2.25 0 0010.5 18v-2.25a2.25 2.25 0 00-2.25-2.25H6a2.25 2.25 0 00-2.25 2.25V18A2.25 2.25 0 006 20.25zm9.75-9.75H18a2.25 2.25 0 002.25-2.25V6A2.25 2.25 0 0018 3.75h-2.25A2.25 2.25 0 0013.5 6v2.25a2.25 2.25 0 002.25 2.25z" />
+                                                     </svg>
+                                                 @endif
+                                                 <span>{{ $menuItem->title }}</span>
+                                                 @if ($menuItem->badge_type !== 'none' && $menuItem->getBadgeValue())
+                                                     <span
+                                                         class="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-{{ $menuItem->badge_color ?? 'blue' }}-600 text-[0.625rem] font-medium text-white">
+                                                         {{ $menuItem->getBadgeValue() }}
+                                                     </span>
+                                                 @endif
+                                             </a>
+                                         </li>
+                                     @endforeach
+
+                                     {{-- Modules Management --}}
+                                     <li>
+                                         <a href="/modules"
+                                             class="@if (request()->is('modules*')) sidebar-item-active @else sidebar-item @endif">
+                                             <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24"
+                                                 stroke-width="2" stroke="currentColor" aria-hidden="true">
+                                                 <path stroke-linecap="round" stroke-linejoin="round"
+                                                     d="M13.5 16.875h3.375m0 0h3.375m-3.375 0V13.5m0 3.375v3.375M6 10.5h2.25a2.25 2.25 0 002.25-2.25V6a2.25 2.25 0 00-2.25-2.25H6A2.25 2.25 0 003.75 6v2.25A2.25 2.25 0 006 10.5zm0 9.75h2.25A2.25 2.25 0 0010.5 18v-2.25a2.25 2.25 0 00-2.25-2.25H6a2.25 2.25 0 00-2.25 2.25V18A2.25 2.25 0 006 20.25zm9.75-9.75H18a2.25 2.25 0 002.25-2.25V6A2.25 2.25 0 0018 3.75h-2.25A2.25 2.25 0 0013.5 6v2.25a2.25 2.25 0 002.25 2.25z" />
+                                             </svg>
+                                             <span>Modules</span>
+                                         </a>
+                                     </li>
+
                                      <li>
                                          <a href="/settings"
                                              class="@if (request()->is('settings*')) sidebar-item-active @else sidebar-item @endif">

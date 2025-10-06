@@ -16,112 +16,177 @@ class RolesAndPermissionsSeeder extends Seeder
         // Reset cached roles and permissions
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // Create permissions
+        // Create permissions with organized groups
         $permissions = [
             // Server permissions
-            'server.view',
-            'server.create',
-            'server.edit',
-            'server.delete',
-            'server.manage',
+            'server.view', 'server.create', 'server.edit', 'server.delete',
+            'server.reboot', 'server.configure',
 
             // Site permissions
-            'site.view',
-            'site.create',
-            'site.edit',
-            'site.delete',
-            'site.manage',
+            'site.view', 'site.create', 'site.edit', 'site.delete',
+            'site.configure', 'site.deploy',
 
             // User permissions
-            'user.view',
-            'user.create',
-            'user.edit',
-            'user.delete',
-            'user.manage',
+            'user.view', 'user.create', 'user.edit', 'user.delete',
+            'user.impersonate',
 
-            // Role permissions
-            'role.view',
-            'role.create',
-            'role.edit',
-            'role.delete',
-            'role.manage',
+            // Role & Permission management
+            'role.view', 'role.create', 'role.edit', 'role.delete',
+            'permission.assign', 'permission.revoke',
 
-            // Settings permissions
-            'settings.view',
-            'settings.edit',
+            // Email permissions
+            'email.view', 'email.create', 'email.edit', 'email.delete',
+            'email.configure',
 
-            // Monitoring permissions
-            'monitoring.view',
-            'monitoring.manage',
+            // Backup permissions
+            'backup.view', 'backup.create', 'backup.restore', 'backup.delete',
+            'backup.configure',
 
-            // Logs permissions
-            'logs.view',
-            'logs.download',
+            // FTP permissions
+            'ftp.view', 'ftp.create', 'ftp.edit', 'ftp.delete',
 
             // Database permissions
-            'database.view',
-            'database.create',
-            'database.edit',
-            'database.delete',
+            'database.view', 'database.create', 'database.edit', 'database.delete',
 
-            // API permissions
+            // DNS permissions
+            'dns.view', 'dns.create', 'dns.edit', 'dns.delete',
+
+            // SSL permissions
+            'ssl.view', 'ssl.create', 'ssl.delete',
+
+            // Monitoring permissions
+            'monitoring.view', 'monitoring.configure',
+
+            // Audit Log permissions
+            'audit.view', 'audit.export',
+
+            // Settings permissions
+            'settings.view', 'settings.edit',
+
+            // API access
             'api.access',
         ];
 
         foreach ($permissions as $permission) {
-            Permission::create(['name' => $permission]);
+            Permission::firstOrCreate(['name' => $permission]);
         }
 
-        // Create roles and assign permissions
+        // Create roles with specific permission sets
 
-        // Super Admin - has all permissions
-        $superAdmin = Role::create(['name' => 'Super Admin']);
-        $superAdmin->givePermissionTo(Permission::all());
+        // 1. Super Admin - God mode, all permissions
+        $superAdmin = Role::firstOrCreate(['name' => 'Super Admin']);
+        $superAdmin->syncPermissions(Permission::all());
 
-        // Admin - has most permissions except user/role management
-        $admin = Role::create(['name' => 'Admin']);
-        $admin->givePermissionTo([
-            'server.view', 'server.create', 'server.edit', 'server.delete', 'server.manage',
-            'site.view', 'site.create', 'site.edit', 'site.delete', 'site.manage',
-            'user.view',
-            'settings.view', 'settings.edit',
-            'monitoring.view', 'monitoring.manage',
-            'logs.view', 'logs.download',
+        // 2. Admin - Manages servers and users, no system settings
+        $admin = Role::firstOrCreate(['name' => 'Admin']);
+        $admin->syncPermissions([
+            // Servers (assigned only)
+            'server.view', 'server.edit', 'server.configure',
+
+            // Sites (all operations)
+            'site.view', 'site.create', 'site.edit', 'site.delete',
+            'site.configure', 'site.deploy',
+
+            // Users (Reseller & User only)
+            'user.view', 'user.create', 'user.edit', 'user.delete',
+
+            // Email
+            'email.view', 'email.create', 'email.edit', 'email.delete', 'email.configure',
+
+            // Backups
+            'backup.view', 'backup.create', 'backup.restore', 'backup.delete',
+
+            // FTP
+            'ftp.view', 'ftp.create', 'ftp.edit', 'ftp.delete',
+
+            // Databases
             'database.view', 'database.create', 'database.edit', 'database.delete',
+
+            // DNS
+            'dns.view', 'dns.create', 'dns.edit', 'dns.delete',
+
+            // SSL
+            'ssl.view', 'ssl.create', 'ssl.delete',
+
+            // Monitoring
+            'monitoring.view',
+
+            // Audit logs (own actions)
+            'audit.view',
+
+            // API
             'api.access',
         ]);
 
-        // Developer - can manage sites and databases
-        $developer = Role::create(['name' => 'Developer']);
-        $developer->givePermissionTo([
-            'server.view',
-            'site.view', 'site.create', 'site.edit', 'site.manage',
-            'monitoring.view',
-            'logs.view',
+        // 3. Reseller - Manages clients and sites with resource limits
+        $reseller = Role::firstOrCreate(['name' => 'Reseller']);
+        $reseller->syncPermissions([
+            // Sites (own only)
+            'site.view', 'site.create', 'site.edit', 'site.delete', 'site.configure',
+
+            // Users (User role only - own clients)
+            'user.view', 'user.create', 'user.edit', 'user.delete',
+
+            // Email
+            'email.view', 'email.create', 'email.edit', 'email.delete',
+
+            // Backups
+            'backup.view', 'backup.create', 'backup.restore',
+
+            // FTP
+            'ftp.view', 'ftp.create', 'ftp.edit', 'ftp.delete',
+
+            // Databases
             'database.view', 'database.create', 'database.edit', 'database.delete',
+
+            // DNS
+            'dns.view', 'dns.create', 'dns.edit', 'dns.delete',
+
+            // SSL
+            'ssl.view', 'ssl.create',
+
+            // API
             'api.access',
         ]);
 
-        // Viewer - read-only access
-        $viewer = Role::create(['name' => 'Viewer']);
-        $viewer->givePermissionTo([
-            'server.view',
-            'site.view',
-            'user.view',
-            'monitoring.view',
-            'logs.view',
-            'database.view',
+        // 4. User - End user, assigned sites only
+        $user = Role::firstOrCreate(['name' => 'User']);
+        $user->syncPermissions([
+            // Sites (assigned only)
+            'site.view', 'site.edit',
+
+            // Email
+            'email.view', 'email.create', 'email.edit', 'email.delete',
+
+            // Backups (view and create only)
+            'backup.view', 'backup.create',
+
+            // FTP
+            'ftp.view', 'ftp.create', 'ftp.edit', 'ftp.delete',
+
+            // Databases
+            'database.view', 'database.create', 'database.edit',
+
+            // DNS (view only)
+            'dns.view',
+
+            // SSL (view only)
+            'ssl.view',
+
+            // API
+            'api.access',
         ]);
 
-        // Client - limited access
-        $client = Role::create(['name' => 'Client']);
-        $client->givePermissionTo([
-            'site.view',
-            'monitoring.view',
-        ]);
-
-        $this->command->info('Roles and permissions created successfully!');
-        $this->command->info('Roles created: Super Admin, Admin, Developer, Viewer, Client');
-        $this->command->info('Total permissions: ' . count($permissions));
+        $this->command->info('✅ Roles and permissions seeded successfully!');
+        $this->command->info('');
+        $this->command->info('📊 Summary:');
+        $this->command->info('   Roles created: 4 (Super Admin, Admin, Reseller, User)');
+        $this->command->info('   Permissions created: ' . count($permissions));
+        $this->command->info('');
+        $this->command->info('🔐 Role Permissions:');
+        $this->command->info('   Super Admin: ' . $superAdmin->permissions->count() . ' (ALL)');
+        $this->command->info('   Admin: ' . $admin->permissions->count());
+        $this->command->info('   Reseller: ' . $reseller->permissions->count());
+        $this->command->info('   User: ' . $user->permissions->count());
     }
 }
