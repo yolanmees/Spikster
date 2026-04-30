@@ -1,33 +1,26 @@
-@extends('layouts.guest')
-    <x-authentication-card>
-        <x-slot name="logo">
-            <x-authentication-card-logo />
-        </x-slot>
+<x-guest-layout>
+    <h2 class="text-2xl font-bold text-white text-center mb-1">Forgot password?</h2>
+    <p class="text-sm text-gray-400 text-center mb-8">Enter your email and we'll send a reset link.</p>
 
-        <div class="mb-4 text-sm text-gray-600">
-            {{ __('Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.') }}
+    @if (session('status'))
+        <x-alert type="success" class="mb-5">{{ session('status') }}</x-alert>
+    @endif
+
+    <x-validation-errors class="mb-5" />
+
+    <form method="POST" action="{{ route('password.email') }}" class="space-y-5">
+        @csrf
+        <div>
+            <label for="email" class="block text-sm font-medium text-gray-300 mb-1.5">Email address</label>
+            <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus
+                class="w-full px-4 py-2.5 bg-gray-800 border border-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-colors" />
         </div>
-
-        @if (session('status'))
-            <div class="mb-4 font-medium text-sm text-green-600">
-                {{ session('status') }}
-            </div>
-        @endif
-
-        <x-validation-errors class="mb-4" />
-
-        <form method="POST" action="{{ route('password.email') }}">
-            @csrf
-
-            <div class="block">
-                <x-label for="email" value="{{ __('Email') }}" />
-                <x-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus />
-            </div>
-
-            <div class="flex items-center justify-end mt-4">
-                <x-button>
-                    {{ __('Email Password Reset Link') }}
-                </x-button>
-            </div>
-        </form>
-    </x-authentication-card>
+        <button type="submit"
+            class="w-full py-2.5 px-6 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-semibold rounded-lg shadow-lg shadow-blue-500/20 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] text-sm">
+            Send Reset Link
+        </button>
+    </form>
+    <p class="text-center text-sm text-gray-500 mt-6">
+        <a href="{{ route('login') }}" class="text-blue-400 hover:text-blue-300 transition-colors">Back to sign in</a>
+    </p>
+</x-guest-layout>

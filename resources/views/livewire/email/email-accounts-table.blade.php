@@ -16,13 +16,10 @@
                 Manage email accounts for {{ $site->domain }}
             </p>
         </div>
-        <button wire:click="create" type="button"
-            class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
-            <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
+        <x-primary-button wire:click="create">
+            <x-icon icon="plus" class="h-4 w-4 -ml-1 mr-1.5" />
             Create Account
-        </button>
+        </x-primary-button>
     </div>
 
     <!-- Search and Filters -->
@@ -71,23 +68,7 @@
                     <tr>
                         <th scope="col"
                             class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 dark:text-white sm:pl-6">
-                            <button wire:click="sortBy('email')"
-                                class="group inline-flex items-center hover:text-blue-600">
-                                Email Address
-                                @if ($sortField === 'email')
-                                    @if ($sortDirection === 'asc')
-                                        <svg class="ml-1 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                                            <path
-                                                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-                                        </svg>
-                                    @else
-                                        <svg class="ml-1 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                                            <path
-                                                d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" />
-                                        </svg>
-                                    @endif
-                                @endif
-                            </button>
+                            <x-sort-button field="email" label="Email Address" :sort-field="$sortField" :sort-direction="$sortDirection" />
                         </th>
                         <th scope="col"
                             class="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white lg:table-cell">

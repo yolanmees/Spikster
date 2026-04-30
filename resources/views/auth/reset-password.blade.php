@@ -1,37 +1,31 @@
-@extends('layouts.guest')
+<x-guest-layout>
+    <h2 class="text-2xl font-bold text-white text-center mb-1">Reset password</h2>
+    <p class="text-sm text-gray-400 text-center mb-8">Choose a new secure password.</p>
 
+    <x-validation-errors class="mb-5" />
 
-    <x-authentication-card>
-        <x-slot name="logo">
-            <x-authentication-card-logo />
-        </x-slot>
+    <form method="POST" action="{{ route('password.update') }}" class="space-y-5">
+        @csrf
+        <input type="hidden" name="token" value="{{ $request->route('token') }}">
 
-        <x-validation-errors class="mb-4" />
-
-        <form method="POST" action="{{ route('password.update') }}">
-            @csrf
-
-            <input type="hidden" name="token" value="{{ $request->route('token') }}">
-
-            <div class="block">
-                <x-label for="email" value="{{ __('Email') }}" />
-                <x-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email', $request->email)" required autofocus />
-            </div>
-
-            <div class="mt-4">
-                <x-label for="password" value="{{ __('Password') }}" />
-                <x-input id="password" class="block mt-1 w-full" type="password" name="password" required autocomplete="new-password" />
-            </div>
-
-            <div class="mt-4">
-                <x-label for="password_confirmation" value="{{ __('Confirm Password') }}" />
-                <x-input id="password_confirmation" class="block mt-1 w-full" type="password" name="password_confirmation" required autocomplete="new-password" />
-            </div>
-
-            <div class="flex items-center justify-end mt-4">
-                <x-button>
-                    {{ __('Reset Password') }}
-                </x-button>
-            </div>
-        </form>
-    </x-authentication-card>
+        <div>
+            <label for="email" class="block text-sm font-medium text-gray-300 mb-1.5">Email address</label>
+            <input id="email" type="email" name="email" value="{{ old('email', $request->email) }}" required autofocus
+                class="w-full px-4 py-2.5 bg-gray-800 border border-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-colors" />
+        </div>
+        <div>
+            <label for="password" class="block text-sm font-medium text-gray-300 mb-1.5">New password</label>
+            <input id="password" type="password" name="password" required autocomplete="new-password"
+                class="w-full px-4 py-2.5 bg-gray-800 border border-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-colors" />
+        </div>
+        <div>
+            <label for="password_confirmation" class="block text-sm font-medium text-gray-300 mb-1.5">Confirm password</label>
+            <input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password"
+                class="w-full px-4 py-2.5 bg-gray-800 border border-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-colors" />
+        </div>
+        <button type="submit"
+            class="w-full py-2.5 px-6 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-semibold rounded-lg shadow-lg shadow-blue-500/20 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] text-sm">
+            Reset Password
+        </button>
+    </form>
+</x-guest-layout>

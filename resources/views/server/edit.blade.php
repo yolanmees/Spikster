@@ -25,74 +25,16 @@
                     </span></b></li>
         </ol>
 
-        <div class="pb-6">
-            <div class="sm:hidden">
-                <label for="tabs" class="sr-only">Select a tab</label>
-                <select id="tabs" name="tabs" x-model="tab"
-                    class="block w-full rounded-lg border-2 border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200">
-                    <option value="monitor">Monitor</option>
-                    <option value="server">Server information</option>
-                    <option value="security">Security</option>
-                    <option value="tools">Tools</option>
-                </select>
-            </div>
-            <div class="hidden sm:block">
-                <div class="border-b-2 border-gray-200 dark:border-gray-700">
-                    <nav class="flex -mb-px space-x-6" aria-label="Tabs">
-                        <button @click="tab = 'monitor'"
-                            :class="tab === 'monitor' ? 'border-blue-500 text-blue-600 dark:text-blue-400' :
-                                'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'"
-                            class="group inline-flex items-center gap-2 py-4 px-1 border-b-2 font-semibold text-sm transition-all duration-200">
-                            <svg class="w-5 h-5"
-                                :class="tab === 'monitor' ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500'"
-                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                            </svg>
-                            Monitor
-                        </button>
-                        <button @click="tab = 'server'"
-                            :class="tab === 'server' ? 'border-blue-500 text-blue-600 dark:text-blue-400' :
-                                'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'"
-                            class="group inline-flex items-center gap-2 py-4 px-1 border-b-2 font-semibold text-sm transition-all duration-200">
-                            <svg class="w-5 h-5"
-                                :class="tab === 'server' ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500'"
-                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
-                            </svg>
-                            Server information
-                        </button>
-                        <button @click="tab = 'security'"
-                            :class="tab === 'security' ? 'border-blue-500 text-blue-600 dark:text-blue-400' :
-                                'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'"
-                            class="group inline-flex items-center gap-2 py-4 px-1 border-b-2 font-semibold text-sm transition-all duration-200">
-                            <svg class="w-5 h-5"
-                                :class="tab === 'security' ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500'"
-                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                            </svg>
-                            Security
-                        </button>
-                        <button @click="tab = 'tools'"
-                            :class="tab === 'tools' ? 'border-blue-500 text-blue-600 dark:text-blue-400' :
-                                'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'"
-                            class="group inline-flex items-center gap-2 py-4 px-1 border-b-2 font-semibold text-sm transition-all duration-200">
-                            <svg class="w-5 h-5"
-                                :class="tab === 'tools' ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500'"
-                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            Tools
-                        </button>
-                    </nav>
-                </div>
-            </div>
-        </div>
+        <x-alpine-tabs model="tab" :tabs="[
+            ['key' => 'monitor',  'label' => 'Monitor',
+                'icon' => '<svg class=\'w-5 h-5\' fill=\'none\' stroke=\'currentColor\' viewBox=\'0 0 24 24\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z\'/></svg>'],
+            ['key' => 'server',   'label' => 'Server information',
+                'icon' => '<svg class=\'w-5 h-5\' fill=\'none\' stroke=\'currentColor\' viewBox=\'0 0 24 24\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01\'/></svg>'],
+            ['key' => 'security', 'label' => 'Security',
+                'icon' => '<svg class=\'w-5 h-5\' fill=\'none\' stroke=\'currentColor\' viewBox=\'0 0 24 24\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z\'/></svg>'],
+            ['key' => 'tools',    'label' => 'Tools',
+                'icon' => '<svg class=\'w-5 h-5\' fill=\'none\' stroke=\'currentColor\' viewBox=\'0 0 24 24\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z\'/><path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M15 12a3 3 0 11-6 0 3 3 0 016 0z\'/></svg>'],
+        ]" />
 
 
 
@@ -415,96 +357,26 @@
 
 
 @section('extra')
-    <!-- Crontab Modal -->
-    <div x-data="{ showCrontabModal: false }" x-show="showCrontabModal" x-cloak id="crontabModalContainer"
-        class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
-        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div x-show="showCrontabModal" x-transition:enter="ease-out duration-300"
-                x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-                x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100"
-                x-transition:leave-end="opacity-0" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
-                @click="showCrontabModal = false"></div>
+    {{-- Crontab Modal --}}
+    <x-modal id="crontab-modal" title="{{ __('spikster.server_crontab') }}" max-width="2xl">
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">{{ __('spikster.server_crontab_edit') }}:</p>
+        <div id="crontab" style="height:250px;width:100%;border-radius:0.5rem;overflow:hidden;"></div>
+        <x-slot name="footer">
+            <x-secondary-button @click="open = false">Cancel</x-secondary-button>
+            <x-primary-button id="crontabsubmit">{{ __('spikster.save') }}</x-primary-button>
+        </x-slot>
+    </x-modal>
 
-            <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
-
-            <div x-show="showCrontabModal" x-transition:enter="ease-out duration-300"
-                x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200"
-                x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-                x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
-                <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                    <div class="flex items-start justify-between pb-3 border-b border-gray-200 dark:border-gray-700">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">
-                            {{ __('spikster.server_crontab') }}
-                        </h3>
-                        <button type="button" @click="showCrontabModal = false"
-                            class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
-                            <x-icon icon="x" class="h-6 w-6" />
-                        </button>
-                    </div>
-                    <div class="mt-4">
-                        <p class="text-sm text-gray-700 dark:text-gray-300 mb-2">{{ __('spikster.server_crontab_edit') }}:
-                        </p>
-                        <div id="crontab" style="height:250px;width:100%;"></div>
-                    </div>
-                </div>
-                <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-                    <x-primary-button type="button" id="crontabsubmit" class="sm:ml-3">
-                        {{ __('spikster.save') }}
-                    </x-primary-button>
-                    <x-secondary-button type="button" @click="showCrontabModal = false">
-                        Cancel
-                    </x-secondary-button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Root Reset Modal -->
-    <div x-data="{ showRootResetModal: false }" x-show="showRootResetModal" x-cloak id="rootresetModalContainer"
-        class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
-        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div x-show="showRootResetModal" x-transition:enter="ease-out duration-300"
-                x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-                x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100"
-                x-transition:leave-end="opacity-0" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
-                @click="showRootResetModal = false"></div>
-
-            <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
-
-            <div x-show="showRootResetModal" x-transition:enter="ease-out duration-300"
-                x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200"
-                x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-                x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                    <div class="flex items-start justify-between pb-3 border-b border-gray-200 dark:border-gray-700">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">
-                            {{ __('spikster.require_password_reset_modal_title') }}
-                        </h3>
-                        <button type="button" @click="showRootResetModal = false"
-                            class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
-                            <x-icon icon="x" class="h-6 w-6" />
-                        </button>
-                    </div>
-                    <div class="mt-4">
-                        <p class="text-sm text-gray-700 dark:text-gray-300">
-                            {{ __('spikster.require_password_reset_modal_text') }}</p>
-                    </div>
-                </div>
-                <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-                    <x-danger-button type="button" id="rootresetsubmit" class="sm:ml-3">
-                        {{ __('spikster.confirm') }}
-                    </x-danger-button>
-                    <x-secondary-button type="button" @click="showRootResetModal = false">
-                        Cancel
-                    </x-secondary-button>
-                </div>
-            </div>
-        </div>
-    </div>
+    {{-- Root Reset Modal --}}
+    <x-modal id="root-reset-modal" title="{{ __('spikster.require_password_reset_modal_title') }}" max-width="lg">
+        <p class="text-sm text-gray-700 dark:text-gray-300">
+            {{ __('spikster.require_password_reset_modal_text') }}
+        </p>
+        <x-slot name="footer">
+            <x-secondary-button @click="open = false">Cancel</x-secondary-button>
+            <x-danger-button id="rootresetsubmit">{{ __('spikster.confirm') }}</x-danger-button>
+        </x-slot>
+    </x-modal>
 @endsection
 
 @section('css')
@@ -524,10 +396,7 @@
 
         // Crontab edit
         $('#editcrontab').click(function() {
-            Alpine.store('modals', {
-                showCrontabModal: true
-            });
-            document.querySelector('#crontabModalContainer').__x.$data.showCrontabModal = true;
+            window.dispatchEvent(new CustomEvent('open-modal', { detail: 'crontab-modal' }));
         });
 
         // Crontab Submit
@@ -541,7 +410,7 @@
                     'cron': crontab.getSession().getValue(),
                 }),
                 success: function(data) {
-                    document.querySelector('#crontabModalContainer').__x.$data.showCrontabModal = false;
+                    window.dispatchEvent(new CustomEvent('close-modal'));
                     serverInit();
                 },
             });
@@ -665,7 +534,7 @@
 
         // Root Reset
         $('#rootreset').click(function() {
-            document.querySelector('#rootresetModalContainer').__x.$data.showRootResetModal = true;
+            window.dispatchEvent(new CustomEvent('open-modal', { detail: 'root-reset-modal' }));
         });
 
         // Root Reset Submit
@@ -677,8 +546,7 @@
                     success('{{ __('spikster.new_password_success') }}:<br><b>' + data.password +
                         '</b>');
                     $(window).scrollTop(0);
-                    document.querySelector('#rootresetModalContainer').__x.$data.showRootResetModal =
-                        false;
+                    window.dispatchEvent(new CustomEvent('close-modal'));
                 }
             });
         });
