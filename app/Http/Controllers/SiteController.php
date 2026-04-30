@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\EditSiteDeploySSH;
-use App\Jobs\EditSiteSupervisorSSH;
 use App\Services\DaemonService;
 use App\Jobs\SiteDbPwdSSH;
 use App\Jobs\SiteUserPwdSSH;
@@ -679,7 +678,7 @@ class SiteController extends Controller
             if ($site->supervisor != $request->supervisor) {
                 $site->supervisor = $request->supervisor;
                 $site->save();
-                EditSiteSupervisorSSH::dispatch($site, $site->supervisor)->delay(Carbon::now()->addSeconds(15));
+                app(\App\Services\DaemonService::class)->send('site.supervisor', ['username' => $site->username, 'script' => $site->supervisor ?? '']);
             }
         }
 
@@ -710,7 +709,7 @@ class SiteController extends Controller
         }
 
         if ($deploy_patch) {
-            EditSiteDeploySSH::dispatch($site)->delay(Carbon::now()->addSeconds(1));
+            app(\App\Services\DaemonService::class)->send('site.deploy-script', ['username' => $site->username, 'content' => $site->deploy ?? '']);
         }
 
         $site->save();
@@ -1124,7 +1123,7 @@ class SiteController extends Controller
         $site->password = $newpassword;
         $site->save();
 
-        SiteUserPwdSSH::dispatch($site, $newpassword)->delay(Carbon::now()->addSeconds(1));
+        app(\App\Services\DaemonService::class)->send('site.user-password', ['username' => $site->username, 'password' => $newpassword]);
 
         $pdftoken = JWT::encode(['iat' => time(), 'exp' => time() + 180], config('cipi.jwt_secret').'-Pdf', 'HS256');
 
@@ -1208,7 +1207,7 @@ class SiteController extends Controller
         $site->database = Str::random(24);
         $site->save();
 
-        SiteDbPwdSSH::dispatch($site, $last_password)->delay(Carbon::now()->addSeconds(1));
+        app(\App\Services\DaemonService::class)->send('site.db-password', ['username' => $site->username, 'old_pass' => $last_password, 'new_pass' => $site->database]);
 
         $pdftoken = JWT::encode(['iat' => time(), 'exp' => time() + 180], config('cipi.jwt_secret').'-Pdf', 'HS256');
 

@@ -368,3 +368,145 @@ func EnableAliasSSL(domain string) error {
 	}
 	return nil
 }
+
+// ─── Site passwords ───────────────────────────────────────────────────────────
+
+func UpdateUserPassword(username, password string) error {
+	return run("bash", "-c", fmt.Sprintf("echo '%s:%s' | chpasswd", username, password))
+}
+
+func UpdateDBPassword(username, oldPass, newPass string) error {
+	sql := fmt.Sprintf("ALTER USER '%s'@'%%' IDENTIFIED BY '%s'; FLUSH PRIVILEGES;", username, newPass)
+	return run("mysql", "-u"+username, "-p"+oldPass, "-e", sql)
+}
+
+// ─── Supervisor ───────────────────────────────────────────────────────────────
+
+var supervisorTpl = `[program:{{.Username}}]
+command={{.Script}}
+user={{.Username}}
+autostart=true
+autorestart=true
+redirect_stderr=true
+stdout_logfile=/home/{{.Username}}/log/supervisor.log
+`
+
+type SupervisorConfig struct {
+	Username string
+	Script   string
+}
+
+func UpdateSupervisor(username, script string) error {
+	confPath := fmt.Sprintf("/etc/supervisor/conf.d/%s.conf", username)
+	os.Remove(confPath)
+	if script == "" {
+		// Disabled — just reload
+	} else {
+		if err := writeTpl(confPath, supervisorTpl, SupervisorConfig{username, script}); err != nil {
+			return err
+		}
+	}
+	run("supervisorctl", "reread")
+	run("supervisorctl", "update")
+	if script != "" {
+		run("supervisorctl", "start", username)
+	}
+	return run("systemctl", "restart", "supervisor")
+}
+
+// ─── PHP CLI ──────────────────────────────────────────────────────────────────
+
+func SetPHPCLI(version string) error {
+	return run("update-alternatives", "--set", "php", "/usr/bin/php"+version)
+}
+
+// ─── Deploy script ────────────────────────────────────────────────────────────
+
+func WriteDeployScript(username, content string) error {
+	path := fmt.Sprintf("/home/%s/git/deploy.sh", username)
+	if err := os.WriteFile(path, []byte(content), 0750); err != nil {
+		return err
+	}
+	return run("chown", username+":www-data", path)
+}
+
+// ─── Spikster user password reset ─────────────────────────────────────────────
+
+func ResetSpiksterPassword(newPass string) error {
+	return run("bash", "-c", fmt.Sprintf("echo 'spikster:%s' | chpasswd", newPass))
+}
+
+// ─── Panel nginx domain ───────────────────────────────────────────────────────
+
+var panelNginxTpl = `server {
+    listen 80;
+    listen [::]:80;
+    server_tokens off;
+    server_name {{.Domain}};
+    root /var/www/html/public;
+    index index.php;
+    access_log /var/log/nginx/panel.access.log;
+    error_log /var/log/nginx/panel.error.log;
+    location / { try_files $uri $uri/ /index.php?$query_string; }
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
+    }
+    location ~ /\.(?!well-known).* { deny all; }
+}
+`
+
+type PanelConf struct{ Domain string }
+
+func AddPanelDomain(domain string) error {
+	if err := writeTpl("/etc/nginx/sites-available/panel.conf", panelNginxTpl, PanelConf{domain}); err != nil {
+		return err
+	}
+	os.Remove("/etc/nginx/sites-enabled/panel.conf")
+	if err := os.Symlink("/etc/nginx/sites-available/panel.conf", "/etc/nginx/sites-enabled/panel.conf"); err != nil {
+		return err
+	}
+	return reloadService("nginx")
+}
+
+func RemovePanelDomain() error {
+	os.Remove("/etc/nginx/sites-enabled/panel.conf")
+	os.Remove("/etc/nginx/sites-available/panel.conf")
+	return reloadService("nginx")
+}
+
+func EnablePanelSSL(domain string) error {
+	steps := []struct {
+		name string
+		fn   func() error
+	}{
+		{"certbot", func() error {
+			return run("certbot", "--nginx", "-d", domain,
+				"--non-interactive", "--agree-tos", "--register-unsafely-without-email")
+		}},
+		{"enable http2", func() error {
+			return replaceInFile("/etc/nginx/sites-enabled/panel.conf", "443 ssl;", "443 ssl http2;")
+		}},
+		{"reload nginx", func() error { return reloadService("nginx") }},
+	}
+	for _, step := range steps {
+		if err := step.fn(); err != nil {
+			return fmt.Errorf("[%s] %w", step.name, err)
+		}
+	}
+	return nil
+}
+
+// ─── Node.js ──────────────────────────────────────────────────────────────────
+
+func SetupNodejs(username string, port int, script string) error {
+	// Install PM2 if needed
+	run("npm", "install", "-g", "pm2")
+	// Start app
+	return run("su", "-", username, "-c",
+		fmt.Sprintf("cd ~/web && pm2 start %s --name %s --watch", script, username))
+}
+
+func StopNodejs(username string) error {
+	return run("su", "-", username, "-c", fmt.Sprintf("pm2 delete %s", username))
+}

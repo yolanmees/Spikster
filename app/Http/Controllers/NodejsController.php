@@ -189,7 +189,7 @@ class NodejsController extends Controller
         $site->node_status = 1;
         $site->save();
 
-        NodejsSetupSSH::dispatch($site)->delay(Carbon::now()->addSeconds(1));
+        app(\App\Services\DaemonService::class)->send('nodejs.setup', ['username' => $site->username, 'script' => $site->node_script ?? 'app.js']);
 
         return response()->json([
             'site_id' => $site->site_id,
@@ -389,7 +389,7 @@ class NodejsController extends Controller
         $site->node_status = 0;
         $site->save();
 
-        NodejsStopSSH::dispatch($site)->delay(Carbon::now()->addSeconds(1));
+        app(\App\Services\DaemonService::class)->send('nodejs.stop', ['username' => $site->username]);
 
         return response()->json([
             'site_id' => $site->site_id,

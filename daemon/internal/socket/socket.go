@@ -143,6 +143,67 @@ func dispatch(req Request) (string, error) {
 		if err != nil { return "", err }
 		return content, nil
 
+	// ── Site passwords ───────────────────────────────────────────────────────
+	case "site.user-password":
+		err := site.UpdateUserPassword(req.Params["username"], req.Params["password"])
+		if err != nil { return "", err }
+		return "password updated", nil
+
+	case "site.db-password":
+		err := site.UpdateDBPassword(req.Params["username"], req.Params["old_pass"], req.Params["new_pass"])
+		if err != nil { return "", err }
+		return "db password updated", nil
+
+	// ── Supervisor ────────────────────────────────────────────────────────────
+	case "site.supervisor":
+		err := site.UpdateSupervisor(req.Params["username"], req.Params["script"])
+		if err != nil { return "", err }
+		return "supervisor updated", nil
+
+	// ── PHP CLI ───────────────────────────────────────────────────────────────
+	case "server.php-cli":
+		err := site.SetPHPCLI(req.Params["version"])
+		if err != nil { return "", err }
+		return "php cli updated", nil
+
+	// ── Deploy script ─────────────────────────────────────────────────────────
+	case "site.deploy-script":
+		err := site.WriteDeployScript(req.Params["username"], req.Params["content"])
+		if err != nil { return "", err }
+		return "deploy script updated", nil
+
+	// ── Spikster password reset ───────────────────────────────────────────────
+	case "server.root-reset":
+		err := site.ResetSpiksterPassword(req.Params["new_pass"])
+		if err != nil { return "", err }
+		return "password reset", nil
+
+	// ── Panel domain ──────────────────────────────────────────────────────────
+	case "panel.domain-add":
+		err := site.AddPanelDomain(req.Params["domain"])
+		if err != nil { return "", err }
+		return "panel domain added", nil
+
+	case "panel.domain-remove":
+		if err := site.RemovePanelDomain(); err != nil { return "", err }
+		return "panel domain removed", nil
+
+	case "panel.domain-ssl":
+		err := site.EnablePanelSSL(req.Params["domain"])
+		if err != nil { return "", err }
+		return "panel ssl enabled", nil
+
+	// ── Node.js ───────────────────────────────────────────────────────────────
+	case "nodejs.setup":
+		port := 3000
+		err := site.SetupNodejs(req.Params["username"], port, req.Params["script"])
+		if err != nil { return "", err }
+		return "nodejs setup", nil
+
+	case "nodejs.stop":
+		if err := site.StopNodejs(req.Params["username"]); err != nil { return "", err }
+		return "nodejs stopped", nil
+
 	default:
 		return "", fmt.Errorf("unknown action: %s", req.Action)
 	}

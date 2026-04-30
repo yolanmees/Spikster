@@ -3,11 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreServerRequest;
-use App\Jobs\PanelDomainAddSSH;
-use App\Jobs\PanelDomainRemoveSSH;
-use App\Jobs\PanelDomainSslSSH;
-use App\Jobs\PhpCliSSH;
-use App\Jobs\RootResetSSH;
 use App\Models\Server;
 use App\Models\Site;
 use App\Models\Stats\Cpu;
@@ -711,7 +706,7 @@ class ServerController extends Controller
         $site = Site::where('server_id', $server->id)->where('panel', true)->first();
         if ($site) {
             $site->delete();
-            PanelDomainRemoveSSH::dispatch($server)->delay(Carbon::now()->addSeconds(3));
+            app(\App\Services\DaemonService::class)->send('panel.domain-remove', []);
         }
 
         if ($request->domain && $request->domain != '') {
@@ -733,7 +728,7 @@ class ServerController extends Controller
             $newsite->database = 'Secret_123';
             $newsite->panel = true;
             $newsite->save();
-            PanelDomainAddSSH::dispatch($server)->delay(Carbon::now()->addSeconds(3));
+            app(\App\Services\DaemonService::class)->send('panel.domain-add', ['domain' => $server->domain]);
         }
 
         return response()->json([]);
@@ -789,7 +784,7 @@ class ServerController extends Controller
         $site = Site::where('server_id', $server->id)->where('panel', true)->first();
 
         if ($site) {
-            PanelDomainSslSSH::dispatch($server, $site)->delay(Carbon::now()->addSeconds(3));
+            app(\App\Services\DaemonService::class)->send('panel.domain-ssl', ['domain' => $site->domain]);
         } else {
             return response()->json([
                 'message' => __('spikster.ssl_request_error_message'),
@@ -1032,7 +1027,7 @@ class ServerController extends Controller
                     'errors' => 'Invalid PHP version.',
                 ], 400);
             }
-            PhpCliSSH::dispatch($server, $request->php)->delay(Carbon::now()->addSeconds(3));
+            app(\App\Services\DaemonService::class)->send('server.php-cli', ['version' => $request->php]);
             $server->php = $request->php;
         }
 
@@ -1307,7 +1302,7 @@ class ServerController extends Controller
         $server->password = $new_password;
         $server->save();
 
-        RootResetSSH::dispatch($server, $new_password, $last_password)->delay(Carbon::now()->addSeconds(1));
+        app(\App\Services\DaemonService::class)->send('server.root-reset', ['new_pass' => $new_password]);
 
         return response()->json([
             'password' => $server->password,
