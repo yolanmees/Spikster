@@ -110,3 +110,24 @@ class DaemonService
         }
     }
 }
+
+    // ─── Site management ──────────────────────────────────────────────────────
+
+    /**
+     * Create a new site via the daemon.
+     */
+    public function createSite(array $params): bool
+    {
+        $result = $this->send('site.create', $params);
+        return $result['success'] ?? false;
+    }
+
+    /**
+     * Delete a site via the daemon.
+     */
+    public function deleteSite(array $params): bool
+    {
+        $result = $this->send('site.delete', $params);
+        return $result['success'] ?? false;
+    }
+}
