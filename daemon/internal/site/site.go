@@ -187,3 +187,102 @@ func writeTpl(path, tmpl string, data interface{}) error {
 	}
 	return os.WriteFile(path, buf.Bytes(), 0644)
 }
+
+// UpdatePHP switches a site to a different PHP version
+func UpdatePHP(username, oldPHP, newPHP string) error {
+	oldPool := fmt.Sprintf("/etc/php/%s/fpm/pool.d/%s.conf", oldPHP, username)
+	newPool := fmt.Sprintf("/etc/php/%s/fpm/pool.d/%s.conf", newPHP, username)
+	nginxConf := fmt.Sprintf("/etc/nginx/sites-available/%s.conf", username)
+
+	// Move pool config
+	if err := run("mv", oldPool, newPool); err != nil {
+		return fmt.Errorf("move pool: %w", err)
+	}
+
+	// Update socket reference in pool
+	oldSock := fmt.Sprintf("/run/php/php%s-fpm-%s.sock", oldPHP, username)
+	newSock := fmt.Sprintf("/run/php/php%s-fpm-%s.sock", newPHP, username)
+	if err := replaceInFile(newPool, oldSock, newSock); err != nil {
+		return fmt.Errorf("update pool socket: %w", err)
+	}
+
+	// Update nginx config
+	if err := replaceInFile(nginxConf, "php"+oldPHP+"-fpm-"+username, "php"+newPHP+"-fpm-"+username); err != nil {
+		return fmt.Errorf("update nginx: %w", err)
+	}
+
+	// Reload both PHP versions + nginx
+	run("systemctl", "reload", "php"+oldPHP+"-fpm")
+	run("systemctl", "reload", "php"+newPHP+"-fpm")
+	return reloadService("nginx")
+}
+
+// UpdateDomain changes the server_name in the nginx config
+func UpdateDomain(username, oldDomain, newDomain string) error {
+	nginxConf := fmt.Sprintf("/etc/nginx/sites-available/%s.conf", username)
+	if err := replaceInFile(nginxConf, "server_name "+oldDomain+";", "server_name "+newDomain+";"); err != nil {
+		return err
+	}
+	return reloadService("nginx")
+}
+
+// UpdateBasepath rewrites the nginx root directive
+func UpdateBasepath(username, newBasepath string) error {
+	nginxConf := fmt.Sprintf("/etc/nginx/sites-available/%s.conf", username)
+
+	// Read current config
+	data, err := os.ReadFile(nginxConf)
+	if err != nil {
+		return err
+	}
+
+	// Replace root line
+	lines := strings.Split(string(data), "\n")
+	for i, line := range lines {
+		if strings.HasPrefix(strings.TrimSpace(line), "root ") {
+			newRoot := "/home/" + username + "/web"
+			if newBasepath != "" {
+				newRoot += "/" + strings.TrimPrefix(newBasepath, "/")
+			}
+			lines[i] = "    root " + newRoot + ";"
+			break
+		}
+	}
+	return os.WriteFile(nginxConf, []byte(strings.Join(lines, "\n")), 0644)
+}
+
+// EnableSSL runs certbot for a domain and enables HTTP/2
+func EnableSSL(username, domain string) error {
+	steps := []struct {
+		name string
+		fn   func() error
+	}{
+		{"stop nginx", func() error { return run("systemctl", "stop", "nginx") }},
+		{"certbot", func() error {
+			return run("certbot", "--nginx", "-d", domain,
+				"--non-interactive", "--agree-tos", "--register-unsafely-without-email")
+		}},
+		{"enable http2", func() error {
+			conf := fmt.Sprintf("/etc/nginx/sites-enabled/%s.conf", username)
+			return replaceInFile(conf, "443 ssl;", "443 ssl http2;")
+		}},
+		{"start nginx", func() error { return run("systemctl", "start", "nginx") }},
+	}
+	for _, step := range steps {
+		if err := step.fn(); err != nil {
+			run("systemctl", "start", "nginx") // ensure nginx comes back up
+			return fmt.Errorf("[%s] %w", step.name, err)
+		}
+	}
+	return nil
+}
+
+// replaceInFile does a simple string replacement in a file
+func replaceInFile(path, old, new string) error {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	replaced := strings.ReplaceAll(string(data), old, new)
+	return os.WriteFile(path, []byte(replaced), 0644)
+}

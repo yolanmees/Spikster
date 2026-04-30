@@ -3,17 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\DeleteAliasSSH;
-use App\Jobs\DeleteSiteSSH;
-use App\Jobs\EditSiteBasepathSSH;
 use App\Jobs\EditSiteDeploySSH;
-use App\Jobs\EditSiteDomainSSH;
-use App\Jobs\EditSitePhpSSH;
 use App\Jobs\EditSiteSupervisorSSH;
+use App\Services\DaemonService;
 use App\Jobs\NewAliasSSH;
-use App\Jobs\NewSiteSSH;
 use App\Jobs\SiteDbPwdSSH;
 use App\Jobs\SiteUserPwdSSH;
-use App\Jobs\SslSiteSSH;
 use App\Models\Alias;
 use App\Models\Server;
 use App\Models\Site;
@@ -387,7 +382,17 @@ class SiteController extends Controller
         $site->deploy = ' ';
         $site->save();
 
-        NewSiteSSH::dispatch($server, $site)->delay(Carbon::now()->addSeconds(3));
+        app(DaemonService::class)->createSite([
+            'id'       => $site->site_id,
+            'domain'   => $site->domain,
+            'username' => $site->username,
+            'password' => $site->password,
+            'db_name'  => $site->username,
+            'db_pass'  => $site->database,
+            'db_root'  => $server->database,
+            'php'      => $site->php,
+            'basepath' => $site->basepath ?? '',
+        ]);
 
         return response()->json([
             'site_id' => $site->site_id,
@@ -651,7 +656,7 @@ class SiteController extends Controller
             $site->domain = strtolower($request->domain);
             $site->save();
 
-            EditSiteDomainSSH::dispatch($site, $last_domain)->delay(Carbon::now()->addSeconds(1));
+            app(DaemonService::class)->updateSiteDomain($site->username, $last_domain, $site->domain);
         }
 
         if ($request->has('basepath')) {
@@ -659,7 +664,7 @@ class SiteController extends Controller
                 $last_basepath = $site->basepath;
                 $site->basepath = strtolower($request->basepath);
                 $site->save();
-                EditSiteBasepathSSH::dispatch($site, $last_basepath)->delay(Carbon::now()->addSeconds(5));
+                app(DaemonService::class)->updateSiteBasepath($site->username, $site->basepath);
             }
         }
 
@@ -668,7 +673,7 @@ class SiteController extends Controller
                 $last_php = $site->php;
                 $site->php = $request->php;
                 $site->save();
-                EditSitePhpSSH::dispatch($site, $last_php)->delay(Carbon::now()->addSeconds(10));
+                app(DaemonService::class)->updateSitePHP($site->username, $last_php, $site->php);
             }
         }
 
@@ -980,7 +985,12 @@ class SiteController extends Controller
             ], 400);
         }
 
-        DeleteSiteSSH::dispatch($site)->delay(Carbon::now()->addSeconds(1));
+        app(DaemonService::class)->deleteSite([
+            'username' => $site->username,
+            'php'      => $site->php,
+            'db_name'  => $site->username,
+            'db_root'  => $site->server->database,
+        ]);
 
         return response()->json([]);
     }
@@ -1037,7 +1047,7 @@ class SiteController extends Controller
             ], 404);
         }
 
-        SslSiteSSH::dispatch($site)->delay(Carbon::now()->addSeconds(3));
+        app(DaemonService::class)->enableSSL($site->username, $site->domain);
 
         return response()->json([]);
     }

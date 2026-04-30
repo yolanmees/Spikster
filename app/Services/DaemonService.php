@@ -109,25 +109,36 @@ class DaemonService
             throw new \InvalidArgumentException("Service not allowed: {$service}");
         }
     }
-}
 
     // ─── Site management ──────────────────────────────────────────────────────
 
-    /**
-     * Create a new site via the daemon.
-     */
     public function createSite(array $params): bool
     {
-        $result = $this->send('site.create', $params);
-        return $result['success'] ?? false;
+        return ($this->send('site.create', $params))['success'] ?? false;
     }
 
-    /**
-     * Delete a site via the daemon.
-     */
     public function deleteSite(array $params): bool
     {
-        $result = $this->send('site.delete', $params);
-        return $result['success'] ?? false;
+        return ($this->send('site.delete', $params))['success'] ?? false;
+    }
+
+    public function updateSitePHP(string $username, string $oldPHP, string $newPHP): bool
+    {
+        return ($this->send('site.update-php', compact('username', 'oldPHP', 'newPHP')))['success'] ?? false;
+    }
+
+    public function updateSiteDomain(string $username, string $oldDomain, string $newDomain): bool
+    {
+        return ($this->send('site.update-domain', compact('username', 'oldDomain', 'newDomain')))['success'] ?? false;
+    }
+
+    public function updateSiteBasepath(string $username, string $basepath): bool
+    {
+        return ($this->send('site.update-basepath', compact('username', 'basepath')))['success'] ?? false;
+    }
+
+    public function enableSSL(string $username, string $domain): bool
+    {
+        return ($this->send('site.ssl', compact('username', 'domain')))['success'] ?? false;
     }
 }

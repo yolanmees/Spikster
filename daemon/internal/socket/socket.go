@@ -93,6 +93,26 @@ func dispatch(req Request) (string, error) {
 		}
 		return "site deleted", nil
 
+	case "site.update-php":
+		err := site.UpdatePHP(req.Params["username"], req.Params["old_php"], req.Params["new_php"])
+		if err != nil { return "", err }
+		return "php updated", nil
+
+	case "site.update-domain":
+		err := site.UpdateDomain(req.Params["username"], req.Params["old_domain"], req.Params["new_domain"])
+		if err != nil { return "", err }
+		return "domain updated", nil
+
+	case "site.update-basepath":
+		err := site.UpdateBasepath(req.Params["username"], req.Params["basepath"])
+		if err != nil { return "", err }
+		return "basepath updated", nil
+
+	case "site.ssl":
+		err := site.EnableSSL(req.Params["username"], req.Params["domain"])
+		if err != nil { return "", err }
+		return "ssl enabled", nil
+
 	default:
 		return "", fmt.Errorf("unknown action: %s", req.Action)
 	}
