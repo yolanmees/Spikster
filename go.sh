@@ -7,7 +7,7 @@ PASS=$(openssl rand -base64 32 | sha256sum | base64 | head -c 32 | tr '[:upper:]
 DBPASS=$(openssl rand -base64 24 | sha256sum | base64 | head -c 32 | tr '[:upper:]' '[:lower:]')
 SERVERID=$(openssl rand -base64 12 | sha256sum | base64 | head -c 32 | tr '[:upper:]' '[:lower:]')
 REPO=yolanmees/Spikster
-BRANCH=master
+BRANCH=v2-update
 ADMIN_EMAIL="your_admin_email@example.com"
 USE_LOCAL_IP=false
 
@@ -773,10 +773,12 @@ EOF
     sed -i "s/APP_ENV=local/APP_ENV=production/g" /var/www/html/.env
 
     # Replace additional placeholders in the seeder file
-    sed -i "s|CIPISERVERID|$SERVERID|g" /var/www/html/database/seeders/DatabaseSeeder.php
-    sed -i "s|CIPIIP|$IP|g" /var/www/html/database/seeders/DatabaseSeeder.php
-    sed -i "s|CIPIPASS|$PASS|g" /var/www/html/database/seeders/DatabaseSeeder.php
-    sed -i "s|CIPIDB|$DBPASS|g" /var/www/html/database/seeders/DatabaseSeeder.php
+    # Write panel server vars to .env — read by DatabaseSeeder
+    grep -q "PANEL_SERVER_ID" /var/www/html/.env || echo "" >> /var/www/html/.env
+    sed -i "s|^PANEL_SERVER_ID=.*|PANEL_SERVER_ID=$SERVERID|" /var/www/html/.env || echo "PANEL_SERVER_ID=$SERVERID" >> /var/www/html/.env
+    sed -i "s|^PANEL_SERVER_IP=.*|PANEL_SERVER_IP=$IP|" /var/www/html/.env || echo "PANEL_SERVER_IP=$IP" >> /var/www/html/.env
+    sed -i "s|^PANEL_SERVER_PASS=.*|PANEL_SERVER_PASS=$PASS|" /var/www/html/.env || echo "PANEL_SERVER_PASS=$PASS" >> /var/www/html/.env
+    sed -i "s|^PANEL_SERVER_DB=.*|PANEL_SERVER_DB=$DBPASS|" /var/www/html/.env || echo "PANEL_SERVER_DB=$DBPASS" >> /var/www/html/.env
 
     chmod -R o+w /var/www/html/storage
     chmod -R 777 /var/www/html/storage
@@ -947,15 +949,23 @@ else
     echo "${bgyellow}${black}${bold}WARNING: Agent service failed to start. Check logs with: journalctl -u spikster-daemon${reset}"
 fi
 
-# Generate daemon token + db.pass via the installer (idempotent)
-log_message "Generating daemon security tokens..."
+# Write security tokens — daemon.token + db.pass must exist before daemon starts
+log_message "Writing daemon security tokens..."
 mkdir -p /etc/spikster && chmod 750 /etc/spikster
+
+# daemon.token — shared secret for TCP auth
 if [ ! -f /etc/spikster/daemon.token ]; then
     openssl rand -hex 32 > /etc/spikster/daemon.token
     chmod 600 /etc/spikster/daemon.token
     log_message "daemon.token generated"
 fi
 DAEMON_TOKEN=$(cat /etc/spikster/daemon.token)
+
+# db.pass — spikster MySQL user password (same as DBPASS set during MySQL install)
+# This file is read by the Go daemon for all site DB operations.
+echo -n "$DBPASS" > /etc/spikster/db.pass
+chmod 600 /etc/spikster/db.pass
+log_message "db.pass written"
 
 # Cleanup
 cd /

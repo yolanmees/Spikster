@@ -2,46 +2,43 @@
 
 namespace Database\Seeders;
 
-use App\Models\Auth;
 use App\Models\Server;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
-        Auth::query()->truncate();
+        // Admin user — no default password, must complete setup wizard
+        User::firstOrCreate(
+            ['email' => 'administrator@localhost'],
+            [
+                'name'     => 'admin',
+                'password' => Hash::make(bin2hex(random_bytes(32))), // random, unusable until wizard runs
+            ]
+        );
 
-        Auth::create([
-            'username' => config('cipi.username'),
-            'password' => Hash::make(config('cipi.password')),
-            'apikey' => Str::random(48),
-        ]);
+        // Panel server entry — reads from env vars set by go.sh
+        $serverId = env('PANEL_SERVER_ID');
+        $serverIp = env('PANEL_SERVER_IP');
+        $serverPass = env('PANEL_SERVER_PASS');
+        $serverDb = env('PANEL_SERVER_DB');
 
-        User::create([
-            'name' => 'admin',
-            'email' => 'administrator@localhost',
-            'password' => Hash::make('password'),
-        ]);
-
-        Server::create([
-            'server_id' => strtolower('CIPISERVERID'),
-            'name' => 'This VPS!',
-            'ip' => 'CIPIIP',
-            'password' => strtolower('CIPIPASS'),
-            'database' => strtolower('CIPIDB'),
-            'default' => 1,
-            'cron' => ' ',
-        ]);
-
-        return true;
+        if ($serverId && $serverIp) {
+            Server::firstOrCreate(
+                ['server_id' => $serverId],
+                [
+                    'name'     => 'This VPS!',
+                    'ip'       => $serverIp,
+                    'password' => $serverPass ?? '',
+                    'database' => $serverDb ?? '',
+                    'default'  => true,
+                    'status'   => 1,
+                    'cron'     => ' ',
+                ]
+            );
+        }
     }
 }

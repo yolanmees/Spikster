@@ -85,21 +85,40 @@ class SiteService
         $data['panel'] = $data['panel'] ?? false;
         $data['deploy'] = $data['deploy'] ?? ' ';
 
-        // Create the site
-        $site = Site::create($data);
-
-        // Dispatch SSH job to create the site on the server
-        app(\App\Services\DaemonService::class)->createSite([
-            'id'       => $site->site_id,
-            'domain'   => $site->domain,
-            'username' => $site->username,
-            'password' => $site->password,
-            'db_name'  => $site->username,
-            'db_pass'  => $site->database,
+        // Call the daemon first — if it fails we never write to the DB
+        $daemonParams = [
+            'id'       => $data['site_id'],
+            'domain'   => $data['domain'],
+            'username' => $data['username'],
+            'password' => $data['password'],
+            'db_name'  => $data['username'],
+            'db_pass'  => $data['database'],
             'db_root'  => $server->database,
-            'php'      => $site->php,
-            'basepath' => $site->basepath ?? '',
-        ]);
+            'php'      => $data['php'],
+            'basepath' => $data['basepath'] ?? '',
+        ];
+
+        $daemon  = app(\App\Services\DaemonService::class);
+        $success = $daemon->createSite($daemonParams);
+
+        if (! $success) {
+            throw new \RuntimeException('Daemon failed to create site on the server.');
+        }
+
+        // Daemon succeeded — persist to DB
+        // Wrap in try/catch so we can attempt cleanup if DB write fails
+        try {
+            $site = Site::create($data);
+        } catch (\Throwable $e) {
+            // Best-effort: remove what we just created on the server
+            $daemon->deleteSite([
+                'username' => $data['username'],
+                'db_name'  => $data['username'],
+                'db_root'  => $server->database,
+                'php'      => $data['php'],
+            ]);
+            throw $e;
+        }
 
         return $site;
     }

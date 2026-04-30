@@ -325,7 +325,7 @@ class SiteController extends Controller
         }
 
         if ($request->php) {
-            if (! in_array($request->php, config('cipi.phpvers'))) {
+            if (! in_array($request->php, config('spikster.phpvers'))) {
                 return response()->json([
                     'message' => __('spikster.bad_request'),
                     'errors' => __('spikster.invalid_php_version'),
@@ -333,7 +333,7 @@ class SiteController extends Controller
             }
             $php = $request->php;
         } else {
-            $php = config('cipi.default_php');
+            $php = config('spikster.default_php');
         }
 
         $server = Server::where('server_id', $request->server_id)->where('status', 1)->first();
@@ -373,7 +373,7 @@ class SiteController extends Controller
         $site->domain = strtolower($request->domain);
         $site->php = $php;
         $site->basepath = $request->basepath;
-        $site->username = config('cipi.users_prefix').hash('crc32', (Str::uuid()->toString())).rand(1, 9);
+        $site->username = config('spikster.users_prefix').hash('crc32', (Str::uuid()->toString())).rand(1, 9);
         $site->password = Str::random(24);
         $site->database = Str::random(24);
         $site->deploy = ' ';

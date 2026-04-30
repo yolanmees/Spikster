@@ -56,7 +56,7 @@ class ServerService
 
         // Set default values
         $data['status'] = $data['status'] ?? 1;
-        $data['php'] = $data['php'] ?? config('cipi.default_php');
+        $data['php'] = $data['php'] ?? config('spikster.default_php');
         $data['default'] = $data['default'] ?? false;
 
         return Server::create($data);

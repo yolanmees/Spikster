@@ -27,11 +27,14 @@ class DaemonService
             throw new \Exception('Spikster daemon is not running.');
         }
 
-        $socket = stream_socket_client("unix://{$this->socketPath}", $errno, $errstr, 5);
+        $socket = stream_socket_client("unix://{$this->socketPath}", $errno, $errstr, 10);
 
         if (! $socket) {
             throw new \Exception("Cannot connect to daemon: {$errstr}");
         }
+
+        // Allow up to 60s for long-running operations (site create, ssl, backup)
+        stream_set_timeout($socket, 60);
 
         $payload = json_encode(['action' => $action, 'params' => $params]);
         fwrite($socket, $payload);

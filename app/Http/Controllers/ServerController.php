@@ -1021,7 +1021,7 @@ class ServerController extends Controller
         }
 
         if ($request->php) {
-            if (! in_array($request->php, config('cipi.phpvers'))) {
+            if (! in_array($request->php, config('spikster.phpvers'))) {
                 return response()->json([
                     'message' => __('spikster.bad_request'),
                     'errors' => 'Invalid PHP version.',
@@ -1369,7 +1369,7 @@ class ServerController extends Controller
      */
     public function servicerestart(string $server_id, string $service)
     {
-        if (!in_array($service, config('cipi.services'))) {
+        if (!in_array($service, config('spikster.services'))) {
             return response()->json([
                 'message' => __('spikster.invalid_service_error_message'),
                 'errors' => __('spikster.bad_request')
