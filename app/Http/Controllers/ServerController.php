@@ -1390,39 +1390,22 @@ class ServerController extends Controller
             ], 404);
         }
 
-        try {
-            $ssh = new SSH2($server->ip, 22);
-            if (!$ssh->login('spikster', $server->password)) {
-                return response()->json([
-                    'message' => __('spikster.server_error_ssh_error_message').$server->server_id,
-                    'errors' => __('spikster.server_error')
-                ], 500);
-            }
+        // Service name mapping
+        $serviceMap = [
+            'nginx'      => 'nginx',
+            'php'        => ['php8.4-fpm', 'php8.3-fpm', 'php8.2-fpm'],
+            'mysql'      => 'mysql',
+            'redis'      => 'redis-server',
+            'supervisor' => 'supervisor',
+        ];
 
-            $ssh->setTimeout(360);
-            switch ($service) {
-                case 'nginx':
-                    $ssh->exec('sudo systemctl restart nginx.service');
-                    break;
-                case 'php':
-                    $ssh->exec('sudo service php8.4-fpm restart');
-                    $ssh->exec('sudo service php8.3-fpm restart');
-                    $ssh->exec('sudo service php8.2-fpm restart');
-                    $ssh->exec('sudo service php8.1-fpm restart');
-                    break;
-                case 'mysql':
-                    $ssh->exec('sudo service mysql restart');
-                    break;
-                case 'redis':
-                    $ssh->exec('sudo systemctl restart redis.service');
-                    break;
-                case 'supervisor':
-                    $ssh->exec('service supervisor restart');
-                    break;
-                default:
-                    break;
+        try {
+            $daemon = app(\App\Services\DaemonService::class);
+            $services = (array) ($serviceMap[$service] ?? $service);
+
+            foreach ($services as $svc) {
+                $daemon->restart($svc);
             }
-            $ssh->exec('exit');
 
             return response()->json([]);
         } catch (\Throwable $th) {

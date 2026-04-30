@@ -2,30 +2,21 @@
 
 namespace App\Providers;
 
+use App\Services\DaemonService;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     *
-     * @return void
-     */
-    public function register()
+    public function register(): void
     {
-        //
+        $this->app->singleton(DaemonService::class, fn () => new DaemonService());
     }
 
-    /**
-     * Bootstrap any application services.
-     *
-     * @return void
-     */
-    public function boot()
+    public function boot(): void
     {
-        // hack to fix livewire not working properly
+        // Fix livewire script route
         Livewire::setScriptRoute(function ($handle) {
             return Route::get('/vendor/livewire/livewire.js', $handle);
         });
