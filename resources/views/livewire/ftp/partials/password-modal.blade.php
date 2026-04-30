@@ -1,64 +1,71 @@
 {{-- Reset Password Modal --}}
-<div x-data="{ show: @entangle('showPasswordModal') }" x-show="show" x-cloak class="fixed z-10 inset-0 overflow-y-auto" aria-labelledby="modal-title"
-    role="dialog" aria-modal="true">
-    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div x-show="show" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"
-            x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-            class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+<div
+    x-data="{ open: @entangle('showPasswordModal') }"
+    x-show="open"
+    x-cloak
+    x-on:keydown.escape.window="open = false"
+    class="fixed inset-0 z-50 overflow-y-auto"
+    role="dialog"
+    aria-modal="true"
+>
+    <div class="flex min-h-screen items-center justify-center p-4 sm:p-0">
+        {{-- Backdrop --}}
+        <div
+            x-show="open"
+            x-transition:enter="ease-out duration-200"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="ease-in duration-150"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 bg-gray-900/75 backdrop-blur-sm"
+            @click="open = false"
+        ></div>
 
-        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-
-        <div x-show="show" x-transition:enter="ease-out duration-300"
+        {{-- Panel --}}
+        <div
+            x-show="open"
+            x-transition:enter="ease-out duration-200"
             x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-            x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200"
+            x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+            x-transition:leave="ease-in duration-150"
             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-            class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            class="relative w-full sm:max-w-lg transform overflow-hidden rounded-xl bg-white dark:bg-gray-800 shadow-2xl ring-1 ring-black/10 dark:ring-white/10 transition-all sm:my-8"
+        >
+            {{-- Header --}}
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Reset FTP Password</h3>
+                <button type="button" @click="open = false"
+                    class="rounded-lg p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
 
+            {{-- Form --}}
             <form wire:submit.prevent="resetPassword">
-                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                    <div class="sm:flex sm:items-start">
-                        <div class="mt-3 text-center sm:mt-0 sm:text-left w-full">
-                            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
-                                Reset FTP Password
-                            </h3>
-                            <div class="mt-4 space-y-4">
-                                {{-- New Password --}}
-                                <div>
-                                    <label for="reset_password" class="block text-sm font-medium text-gray-700">New
-                                        Password *</label>
-                                    <input wire:model="password" type="password" id="reset_password"
-                                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                        required>
-                                    @error('password')
-                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                    @enderror
-                                    <p class="mt-1 text-xs text-gray-500">Minimum 8 characters</p>
-                                </div>
+                <div class="px-6 py-5 space-y-4">
+                    {{-- New Password --}}
+                    <div>
+                        <x-label for="reset_password" value="New Password *" />
+                        <x-input wire:model="password" type="password" id="reset_password" class="mt-1 w-full" required />
+                        @error('password') <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Minimum 8 characters</p>
+                    </div>
 
-                                {{-- Confirm Password --}}
-                                <div>
-                                    <label for="reset_password_confirmation"
-                                        class="block text-sm font-medium text-gray-700">Confirm Password *</label>
-                                    <input wire:model="password_confirmation" type="password"
-                                        id="reset_password_confirmation"
-                                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                        required>
-                                </div>
-                            </div>
-                        </div>
+                    {{-- Confirm Password --}}
+                    <div>
+                        <x-label for="reset_password_confirmation" value="Confirm Password *" />
+                        <x-input wire:model="password_confirmation" type="password" id="reset_password_confirmation" class="mt-1 w-full" required />
                     </div>
                 </div>
-                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <button type="submit"
-                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm">
-                        Reset Password
-                    </button>
-                    <button wire:click="closeModal" type="button"
-                        class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                        Cancel
-                    </button>
+
+                {{-- Footer --}}
+                <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                    <x-secondary-button wire:click="closeModal" type="button">Cancel</x-secondary-button>
+                    <x-primary-button type="submit">Reset Password</x-primary-button>
                 </div>
             </form>
         </div>
