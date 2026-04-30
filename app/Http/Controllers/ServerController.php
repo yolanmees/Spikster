@@ -1589,6 +1589,10 @@ class ServerController extends Controller
 
     public function createdatabase(Request $request)
     {
+        $request->validate([
+            'database_name' => ['required', 'string', 'max:64', 'regex:/^[a-zA-Z0-9_]+$/'],
+        ]);
+
         $database = new Userdatabase;
         $database->user_id = Auth::user()->id;
         $database->database_name = $request->database_name;
@@ -1790,12 +1794,28 @@ class ServerController extends Controller
 
     public function manageService(Request $request)
     {
+        $allowedActions = ['start', 'stop', 'restart', 'status', 'reload'];
+        $allowedFormats = ['json', 'text'];
+
         $action = $request->get('action');
         $service = $request->get('service');
         $format = $request->get('format', 'json');
 
         if (! $action || ! $service) {
             return response()->json(['result' => 'error', 'message' => 'Invalid request parameters'], 400);
+        }
+
+        if (! in_array($action, $allowedActions)) {
+            return response()->json(['result' => 'error', 'message' => 'Invalid action'], 400);
+        }
+
+        if (! in_array($format, $allowedFormats)) {
+            return response()->json(['result' => 'error', 'message' => 'Invalid format'], 400);
+        }
+
+        // Only allow safe service names
+        if (! preg_match('/^[a-zA-Z0-9\-\.@]+$/', $service)) {
+            return response()->json(['result' => 'error', 'message' => 'Invalid service name'], 400);
         }
 
         $process = new Process(['bin/spikster', 'manage-services', '--format', $format, $action, $service]);

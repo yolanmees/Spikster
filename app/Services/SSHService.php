@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Server;
 use phpseclib3\Net\SSH2;
+use phpseclib3\Net\SFTP;
 
 /**
  * SSH Service
@@ -152,7 +153,9 @@ class SSHService
     {
         $command = 'ps aux';
         if ($filter) {
-            $command .= " | grep '{$filter}'";
+            // Escape single quotes to prevent SSH command injection
+            $safeFilter = str_replace("'", "'\\'''", $filter);
+            $command .= " | grep -F '{$safeFilter}'";
         }
 
         $output = $this->executeCommand($server, $command);
@@ -175,6 +178,10 @@ class SSHService
      */
     public function installPackage(Server $server, string $package): bool
     {
+        // Only allow safe package names (alphanumeric, dash, dot, plus)
+        if (! preg_match('/^[a-zA-Z0-9\-\.\+]+$/', $package)) {
+            throw new \InvalidArgumentException("Invalid package name: {$package}");
+        }
         $this->executeCommand($server, "DEBIAN_FRONTEND=noninteractive apt-get install -y {$package}");
 
         return true;
@@ -185,6 +192,10 @@ class SSHService
      */
     public function uninstallPackage(Server $server, string $package): bool
     {
+        // Only allow safe package names (alphanumeric, dash, dot, plus)
+        if (! preg_match('/^[a-zA-Z0-9\-\.\+]+$/', $package)) {
+            throw new \InvalidArgumentException("Invalid package name: {$package}");
+        }
         $this->executeCommand($server, "DEBIAN_FRONTEND=noninteractive apt-get remove -y {$package}");
 
         return true;
@@ -227,11 +238,16 @@ class SSHService
      */
     public function deleteDirectory(Server $server, string $path): bool
     {
-        // Safety check - prevent deleting critical directories
-        $dangerousPaths = ['/', '/bin', '/boot', '/dev', '/etc', '/lib', '/proc', '/root', '/sbin', '/sys', '/usr', '/var'];
+        // Normalize path to prevent traversal attacks before checking
+        $normalizedPath = '/' . trim(str_replace(['..', '//'], ['', '/'], $path), '/');
 
-        if (in_array($path, $dangerousPaths)) {
-            throw new \Exception('Cannot delete critical system directory');
+        // Safety check - prevent deleting critical directories or anything beneath them
+        $dangerousPrefixes = ['/', '/bin', '/boot', '/dev', '/etc', '/lib', '/proc', '/root', '/sbin', '/sys', '/usr', '/var'];
+
+        foreach ($dangerousPrefixes as $prefix) {
+            if ($normalizedPath === $prefix || str_starts_with($normalizedPath . '/', $prefix . '/')) {
+                throw new \Exception('Cannot delete critical system directory');
+            }
         }
 
         $this->executeCommand($server, "rm -rf {$path}");
@@ -263,30 +279,30 @@ class SSHService
     }
 
     /**
-     * Upload a file to the server.
+     * Upload a file to the server via SFTP.
      */
     public function uploadFile(Server $server, string $localPath, string $remotePath): bool
     {
-        $ssh = $this->connect($server);
+        $sftp = new SFTP($server->ip, 22);
 
-        // Use SCP for file upload
-        $command = "scp {$localPath} spikster@{$server->ip}:{$remotePath}";
-        exec($command, $output, $returnCode);
+        if (! $sftp->login('spikster', $server->password)) {
+            throw new \Exception('SFTP authentication failed');
+        }
 
-        return $returnCode === 0;
+        return (bool) $sftp->put($remotePath, $localPath, SFTP::SOURCE_LOCAL_FILE);
     }
 
     /**
-     * Download a file from the server.
+     * Download a file from the server via SFTP.
      */
     public function downloadFile(Server $server, string $remotePath, string $localPath): bool
     {
-        $ssh = $this->connect($server);
+        $sftp = new SFTP($server->ip, 22);
 
-        // Use SCP for file download
-        $command = "scp spikster@{$server->ip}:{$remotePath} {$localPath}";
-        exec($command, $output, $returnCode);
+        if (! $sftp->login('spikster', $server->password)) {
+            throw new \Exception('SFTP authentication failed');
+        }
 
-        return $returnCode === 0;
+        return (bool) $sftp->get($remotePath, $localPath);
     }
 }
