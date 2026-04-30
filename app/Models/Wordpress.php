@@ -18,6 +18,16 @@ class Wordpress extends Model
         'database_user_id',
     ];
 
+    protected $hidden = [
+        'password',
+    ];
+
+    protected $casts = [
+        'site_id' => 'integer',
+        'database_id' => 'integer',
+        'database_user_id' => 'integer',
+    ];
+
     public function site()
     {
         return $this->belongsTo(Site::class);

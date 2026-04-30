@@ -9,6 +9,17 @@ class Userdatabase extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'mysqluser_id',
+        'database_name',
+        'server_id',
+    ];
+
+    protected $casts = [
+        'mysqluser_id' => 'integer',
+        'server_id' => 'integer',
+    ];
+
     public function mysqluser()
     {
         return $this->belongsTo(Mysqluser::class, 'mysqluser_id', 'id');

@@ -8,4 +8,13 @@ use Illuminate\Database\Eloquent\Model;
 class Mysqluser extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'username',
+        'password',
+    ];
+
+    protected $hidden = [
+        'password',
+    ];
 }
