@@ -3,15 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Services\DaemonService;
-use App\Models\Alias;
 use App\Models\Server;
 use App\Models\Site;
 use App\Services\ServerService;
 use App\Services\SiteService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
 
 class SiteController extends Controller
 {
@@ -338,14 +335,17 @@ class SiteController extends Controller
             ], 404);
         }
 
+        $requestedDomain = strtolower($request->domain);
         $conflict = false;
         foreach ($server->allsites as $checksite) {
-            if ($checksite->domain == strtolower($request->domain)) {
+            if ($checksite->domain === $requestedDomain) {
                 $conflict = true;
-                foreach ($checksite->aliases as $alias) {
-                    if ($alias->domain == strtolower($request->domain)) {
-                        $conflict = true;
-                    }
+                break;
+            }
+            foreach ($checksite->aliases as $alias) {
+                if ($alias->domain === $requestedDomain) {
+                    $conflict = true;
+                    break 2;
                 }
             }
         }
@@ -356,61 +356,33 @@ class SiteController extends Controller
             ], 409);
         }
 
-        $pdftoken = JWT::encode(['iat' => time(), 'exp' => time() + 180], config('cipi.jwt_secret').'-Pdf', 'HS256');
-
-        $site_id = Str::uuid();
-
-        // Build site data before touching DB or daemon
-        $username = config('spikster.users_prefix').hash('crc32', (Str::uuid()->toString())).rand(1, 9);
-        $password = Str::random(24);
-        $database = Str::random(24);
-
-        // Call daemon first — if it fails, nothing is written to DB
-        $daemonSuccess = app(DaemonService::class)->createSite([
-            'id'       => $site_id,
-            'domain'   => strtolower($request->domain),
-            'username' => $username,
-            'password' => $password,
-            'db_name'  => $username,
-            'db_pass'  => $database,
-            'db_root'  => $server->database,
-            'php'      => $php,
-            'basepath' => $request->basepath ?? '',
-        ]);
-
-        if (! $daemonSuccess) {
+        try {
+            $site = $this->siteService->createSite([
+                'server_id' => $server->server_id,
+                'domain'    => $requestedDomain,
+                'php'       => $php,
+                'basepath'  => $request->basepath,
+            ]);
+        } catch (\RuntimeException $e) {
             return response()->json([
                 'message' => __('spikster.server_connection_issue'),
                 'errors'  => __('spikster.server_connection_issue'),
             ], 500);
         }
 
-        $site = new Site;
-        $site->site_id = $site_id;
-        $site->server_id = $server->id;
-        $site->domain = strtolower($request->domain);
-        $site->php = $php;
-        $site->basepath = $request->basepath;
-        $site->username = $username;
-        $site->password = $password;
-        $site->database = $database;
-        $site->deploy = ' ';
-        $site->save();
-
         return response()->json([
-            'site_id' => $site->site_id,
-            'domain' => $site->domain,
-            'username' => $site->username,
-            'password' => $site->password,
-            'database' => $site->username,
+            'site_id'           => $site->site_id,
+            'domain'            => $site->domain,
+            'username'          => $site->username,
+            'password'          => $site->password,
+            'database'          => $site->username,
             'database_username' => $site->username,
             'database_password' => $site->database,
-            'server_id' => $server->server_id,
-            'server_name' => $server->name,
-            'server_ip' => $server->ip,
-            'php' => $site->php,
-            'basepath' => $site->basepath,
-            'pdf' => URL::to('/pdf/'.$site_id.'/'.$pdftoken),
+            'server_id'         => $server->server_id,
+            'server_name'       => $server->name,
+            'server_ip'         => $server->ip,
+            'php'               => $site->php,
+            'basepath'          => $site->basepath,
         ]);
     }
 

@@ -149,7 +149,15 @@ class SiteService
             throw new \Exception('Cannot delete panel site');
         }
 
-        // Delete all aliases first
+        // Tell the daemon to remove the site from the server first
+        app(\App\Services\DaemonService::class)->deleteSite([
+            'username' => $site->username,
+            'php'      => $site->php,
+            'db_name'  => $site->username,
+            'db_root'  => $site->server->database,
+        ]);
+
+        // Delete all aliases then the site record
         $site->aliases()->delete();
 
         return $site->delete();
