@@ -8,6 +8,10 @@ ExecStart=/usr/local/bin/spikster daemon
 Restart=always
 RestartSec=5
 User=root
+# Unix socket accessible to www-data
+UMask=0007
+# TCP only on localhost — use SSH tunnel for remote access
+Environment="SPIKSTER_DAEMON_BIND=127.0.0.1:18999"
 
 [Install]
 WantedBy=multi-user.target
