@@ -58,7 +58,10 @@ class UpdateFtpUserSSH implements ShouldQueue
 
     protected function updateVirtualUser(SSHService $ssh): void
     {
-        $username = $this->ftpUser->username;
+        $username = preg_replace('/[^a-zA-Z0-9._-]/', '', $this->ftpUser->username);
+        if (empty($username)) {
+            throw new \RuntimeException('Invalid FTP username.');
+        }
         $password = $this->generateRandomPassword();
 
         // Remove old entry

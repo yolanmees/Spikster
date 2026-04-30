@@ -52,7 +52,7 @@ class ServerSetupCheck extends Command
 
                         $ssh = new SSH2($server->ip, 22);
                         $ssh->setTimeout(360);
-                        $ssh->exec('echo '.$server->password.' | sudo -s sudo unlink /var/www/html/ghkey_'.$server->server_id.'.php');
+                        $ssh->exec('sudo unlink /var/www/html/ghkey_'.$server->server_id.'.php');
                         $ssh->exec('exit');
                     } catch (\Throwable $th) {
                         //

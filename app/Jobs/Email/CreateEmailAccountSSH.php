@@ -35,27 +35,28 @@ class CreateEmailAccountSSH implements ShouldQueue
         try {
             $ssh = $sshService->connect($this->server);
 
-            $domain = $this->account->domain;
-            $username = $this->account->username;
-            $email = $this->account->email;
-            $password = $this->account->getAttributes()['password']; // Get hashed password
-            $quota = $this->account->quota_mb;
+            // Sanitize all values used in shell commands
+            $domain   = preg_replace('/[^a-zA-Z0-9._-]/', '', $this->account->domain);
+            $username = preg_replace('/[^a-zA-Z0-9._-]/', '', $this->account->username);
+            $email    = preg_replace('/[^a-zA-Z0-9@._+-]/', '', $this->account->email);
+            $password = $this->account->getAttributes()['password']; // pre-hashed
+            $quota    = (int) $this->account->quota_mb;
 
             // Create mail directory structure
             $ssh->exec("mkdir -p /var/mail/vhosts/{$domain}/{$username}/{cur,new,tmp}");
             $ssh->exec("chown -R vmail:vmail /var/mail/vhosts/{$domain}");
             $ssh->exec("chmod -R 770 /var/mail/vhosts/{$domain}");
 
-            // Add to Postfix virtual mailbox
-            $ssh->exec("echo '{$email} {$domain}/{$username}/' >> /etc/postfix/vmailbox");
+            // Add to Postfix virtual mailbox using printf (safe)
+            $ssh->exec('printf "%s %s/%s/\n" ' . escapeshellarg($email) . ' ' . escapeshellarg($domain) . ' ' . escapeshellarg($username) . ' >> /etc/postfix/vmailbox');
             $ssh->exec("postmap /etc/postfix/vmailbox");
 
-            // Add to Dovecot users (with hashed password)
-            $ssh->exec("echo '{$email}:{$password}' >> /etc/dovecot/users");
+            // Add to Dovecot users
+            $ssh->exec('printf "%s:%s\n" ' . escapeshellarg($email) . ' ' . escapeshellarg($password) . ' >> /etc/dovecot/users');
 
             // Set quota if not unlimited
             if ($quota > 0) {
-                $ssh->exec("echo '{$email}:storage={$quota}M' >> /etc/dovecot/quota");
+                $ssh->exec('printf "%s:storage=%dM\n" ' . escapeshellarg($email) . ' ' . $quota . ' >> /etc/dovecot/quota');
             }
 
             // Reload services

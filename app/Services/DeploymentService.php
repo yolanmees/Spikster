@@ -18,6 +18,18 @@ class DeploymentService
     /**
      * Deploy a site from Git repository.
      */
+    /**
+     * Validate a git branch/tag name to prevent command injection.
+     * Allows: letters, digits, /, -, _, .
+     */
+    protected function validateBranch(string $branch): string
+    {
+        if (! preg_match('/^[a-zA-Z0-9\/\-_\.]+$/', $branch)) {
+            throw new \InvalidArgumentException("Invalid branch name: {$branch}");
+        }
+        return $branch;
+    }
+
     public function deploySite(Site $site): array
     {
         if (! $site->hasRepository()) {
@@ -39,7 +51,7 @@ class DeploymentService
             // Pull latest code
             $this->sshService->executeCommand(
                 $server,
-                "cd {$sitePath} && git pull origin {$site->branch}"
+                "cd {$sitePath} && git pull origin " . $this->validateBranch($site->branch)
             );
             $steps['pull_code'] = true;
 
@@ -137,7 +149,7 @@ class DeploymentService
         if ($site->branch && $site->branch !== 'main' && $site->branch !== 'master') {
             $this->sshService->executeCommand(
                 $server,
-                "cd {$sitePath} && git checkout {$site->branch}"
+                "cd {$sitePath} && git checkout " . $this->validateBranch($site->branch)
             );
         }
 

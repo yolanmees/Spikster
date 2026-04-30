@@ -3,54 +3,31 @@
 namespace App\Console\Commands;
 
 use App\Models\Server;
+use App\Services\SSHService;
 use Illuminate\Console\Command;
-use phpseclib3\Net\SSH2;
 
 class LogRotate extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'cipi:logrotate';
+    protected $signature = 'spikster:logrotate';
+    protected $description = 'Rotate site access/error logs on all servers';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Site Log Rotation';
-
-    /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct()
+    public function handle(SSHService $sshService): int
     {
-        parent::__construct();
-    }
+        $day = date('N');
 
-    /**
-     * Execute the console command.
-     *
-     * @return int
-     */
-    public function handle()
-    {
-        $servers = Server::all();
-
-        foreach ($servers as $server) {
+        foreach (Server::all() as $server) {
             foreach ($server->sites as $site) {
-                $ssh = new SSH2($server->ip, 22);
-                $ssh->login('spikster', $server->password);
-                $ssh->setTimeout(360);
-                $ssh->exec('echo '.$server->password.' | sudo -S sudo unlink /home/'.$site->username.'/log/access_bk_'.date('N').'.log');
-                $ssh->exec('echo '.$server->password.' | sudo -S sudo mv /home/'.$site->username.'/log/access.log /home/'.$site->username.'/log/access_bk_'.date('N').'.log');
-                $ssh->exec('echo '.$server->password.' | sudo -S sudo unlink /home/'.$site->username.'/log/error_bk_'.date('N').'.log');
-                $ssh->exec('echo '.$server->password.' | sudo -S sudo mv /home/'.$site->username.'/log/error.log /home/'.$site->username.'/log/error_bk_'.date('N').'.log');
-                $ssh->exec('exit');
+                try {
+                    $u = $site->username;
+                    $ssh = $sshService->connect($server);
+                    // passwordless sudo — spikster has NOPASSWD for log ops via go.sh
+                    $ssh->exec("sudo unlink /home/{$u}/log/access_bk_{$day}.log 2>/dev/null; true");
+                    $ssh->exec("sudo mv /home/{$u}/log/access.log /home/{$u}/log/access_bk_{$day}.log 2>/dev/null; true");
+                    $ssh->exec("sudo unlink /home/{$u}/log/error_bk_{$day}.log 2>/dev/null; true");
+                    $ssh->exec("sudo mv /home/{$u}/log/error.log /home/{$u}/log/error_bk_{$day}.log 2>/dev/null; true");
+                } catch (\Exception $e) {
+                    $this->warn("Log rotate failed for {$site->domain}: " . $e->getMessage());
+                }
             }
         }
 

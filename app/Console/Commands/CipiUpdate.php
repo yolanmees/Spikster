@@ -2,68 +2,21 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Server;
 use Illuminate\Console\Command;
-use phpseclib3\Net\SSH2;
 
+/**
+ * @deprecated This command applied a one-time 2021 patch (build 202112181).
+ * All servers have long since been updated. Command is kept as a no-op stub
+ * so any cron entries referencing `cipi:update` don't break.
+ */
 class CipiUpdate extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'cipi:update';
+    protected $description = '[deprecated] Legacy 2021 patch — no-op';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Update Cipi';
-
-    /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct()
+    public function handle(): int
     {
-        parent::__construct();
-    }
-
-    /**
-     * Execute the console command.
-     *
-     * @return int
-     */
-    public function handle()
-    {
-        // 2021-12-18 patch
-        $servers = Server::where('build', '<', '202112181')->get();
-
-        foreach ($servers as $server) {
-            $ssh = new SSH2($server->ip, 22);
-            $ssh->login('spikster', $server->password);
-            $ssh->setTimeout(360);
-            $ssh->exec('echo '.$server->password.' | sudo -S sudo wget '.config('app.url').'/sh/client-patch/202112181');
-            $ssh->exec('echo '.$server->password.' | sudo -S sudo dos2unix 202112181');
-            $ssh->exec('echo '.$server->password.' | sudo -S sudo bash 202112181');
-            $ssh->exec('echo '.$server->password.' | sudo -S sudo unlink 202112181');
-            $ssh->exec('exit');
-
-            $server->build = '202112181';
-            $server->save();
-        }
-
-        $server = Server::where('default', 1)->first();
-
-        $ssh = new SSH2($server->ip, 22);
-        $ssh->login('spikster', $server->password);
-        $ssh->setTimeout(360);
-        $ssh->exec('echo '.$server->password.' | sudo -s cd /var/www/html/utility/cipi-update && sh run.sh');
-        $ssh->exec('exit');
-
+        $this->info('cipi:update is deprecated and does nothing. Use spikster:logrotate for maintenance tasks.');
         return 0;
     }
 }

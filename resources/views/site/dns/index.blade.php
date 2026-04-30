@@ -1,88 +1,62 @@
 @extends('layouts.app')
 
+@section('title', 'DNS Records')
+
 @section('content')
+    <div class="space-y-6">
+        <x-page-header title="DNS Records">
+            <x-slot name="actions">
+                <x-back-button :href="route('site.edit', $site_id)" label="Back to Site" />
+                <x-primary-button tag="a" href="{{ route('site.dns.new', ['site_id' => $site_id]) }}">
+                    <x-icon icon="plus" class="-ml-1 mr-1.5 h-4 w-4" />
+                    Add Record
+                </x-primary-button>
+            </x-slot>
+        </x-page-header>
 
-    <body class="bg-gray-100">
-
-        <div class="mt-8">
-            <!-- Buttons Row -->
-            <div class="mb-6">
-                <a class="inline-flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transform hover:scale-105 active:scale-95 transition-all duration-200"
-                    href="{{ route('site.dns.new', ['site_id' => $site_id]) }}">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                    Add new record
-                </a>
-            </div>
-
-            <!-- Table -->
-            <div class="bg-white shadow-md rounded">
-                <table class="min-w-full leading-normal">
-                    <thead>
-                        <tr>
-                            <th
-                                class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                Host
+        <x-table-wrapper>
+            <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
+                <thead class="bg-gray-50 dark:bg-gray-800">
+                    <tr>
+                        @foreach (['Host', 'TTL', 'Type', 'Value', 'Actions'] as $col)
+                            <th scope="col" class="px-4 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white {{ $loop->last ? 'text-right pr-6' : '' }}">
+                                {{ $col }}
                             </th>
-                            <th
-                                class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                TTL
-                            </th>
-                            <th
-                                class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                Record Type
-                            </th>
-                            <th
-                                class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                Value
-                            </th>
-                            <th
-                                class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                Actions
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($dnsRecords as $record)
-                            <tr>
-                                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                    <div class="flex items-center">
-                                        <div class="ml-3">
-                                            <p class="text-gray-900 whitespace-no-wrap">
-                                                {{ $record->zone }}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                    <p class="text-gray-900 whitespace-no-wrap">{{ $record->ttl }}</p>
-                                </td>
-                                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                    <p class="text-gray-900 whitespace-no-wrap">{{ $record->type }}</p>
-                                </td>
-                                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                    <p class="text-gray-900 whitespace-no-wrap">{{ $record->value }}</p>
-                                </td>
-                                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                    <div class="flex space-x-4">
-                                        <a class="text-blue-600 hover:text-blue-900"
-                                            href="{{ route('site.dns.edit', ['site_id' => $site_id, 'dns_id' => $record->id]) }}">Edit</a>
-                                        <form method="POST"
-                                            action="{{ route('site.dns.delete', ['site_id' => $site_id, 'dns_id' => $record->id]) }}">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button class="text-red-600 hover:text-red-900" type="submit">Delete</button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
                         @endforeach
-
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-    </body>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-900">
+                    @forelse ($dnsRecords as $record)
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                            <td class="px-4 py-3.5 text-sm font-mono text-gray-900 dark:text-white">{{ $record->zone }}</td>
+                            <td class="px-4 py-3.5 text-sm text-gray-500 dark:text-gray-400">{{ $record->ttl }}</td>
+                            <td class="px-4 py-3.5 text-sm">
+                                <x-badge color="indigo" :text="$record->type" />
+                            </td>
+                            <td class="px-4 py-3.5 text-sm font-mono text-gray-700 dark:text-gray-300 max-w-xs truncate">{{ $record->value }}</td>
+                            <td class="px-4 py-3.5 text-sm text-right pr-6">
+                                <div class="flex items-center justify-end gap-2">
+                                    <x-action-button :href="route('site.dns.edit', ['site_id' => $site_id, 'dns_id' => $record->id])">
+                                        Edit
+                                    </x-action-button>
+                                    <form method="POST" action="{{ route('site.dns.delete', ['site_id' => $site_id, 'dns_id' => $record->id]) }}"
+                                          onsubmit="return confirm('Delete this DNS record?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <x-danger-button type="submit" size="sm">Delete</x-danger-button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5">
+                                <x-empty-state icon="dns" title="No DNS records" message="Add your first DNS record to get started." />
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </x-table-wrapper>
+    </div>
 @endsection

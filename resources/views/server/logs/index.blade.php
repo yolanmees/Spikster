@@ -16,36 +16,17 @@
 @endphp
 
 @section('content')
-    <!-- Header with breadcrumbs -->
-    <div
-        class="mb-6 bg-white dark:bg-gray-800/30 rounded-xl border border-gray-200 dark:border-gray-700/50 p-4 backdrop-blur-sm">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center">
-                    <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor"
-                        viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                </div>
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Log Files</h1>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Server: {{ $server->name }} ({{ $server->ip }})
-                    </p>
-                </div>
-            </div>
-            <div class="flex items-center gap-3">
-                <button onclick="refreshLogs()"
-                    class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-semibold rounded-lg transition-all duration-200">
-                    <svg class="w-4 h-4" id="refresh-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    Refresh
-                </button>
-            </div>
-        </div>
-    </div>
+    <x-page-header title="Log Files" :subtitle="'Server: ' . $server->name . ' (' . $server->ip . ')'">
+        <x-slot name="actions">
+            <x-back-button :href="route('server.edit', $server->server_id)" label="Back to Server" />
+            <x-secondary-button onclick="refreshLogs()">
+                <svg class="w-4 h-4 mr-1.5" id="refresh-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+                Refresh
+            </x-secondary-button>
+        </x-slot>
+    </x-page-header>
 
     <!-- Search Bar -->
     <div class="mb-6">

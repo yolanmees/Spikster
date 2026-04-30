@@ -168,7 +168,10 @@ EOF;
 
     protected function createVirtualUser(SSHService $ssh): void
     {
-        $username = $this->ftpUser->username;
+        $username = preg_replace('/[^a-zA-Z0-9._-]/', '', $this->ftpUser->username);
+        if (empty($username)) {
+            throw new \RuntimeException('Invalid FTP username.');
+        }
 
         // Get the plain text password (before it was hashed in the model)
         // We need to store it in plain text for vsftpd's Berkeley DB
@@ -186,8 +189,7 @@ EOF;
         } else {
             // Update existing user password
             // Remove old entry and add new one
-            $escapedUser = escapeshellarg($username);
-            $ssh->execute("sed -i '/{$username}/,+1d' /etc/vsftpd/vusers.txt");
+            $ssh->execute("sed -i '/^" . addcslashes($username, "/") . "$/,+1d' /etc/vsftpd/vusers.txt");
             $ssh->execute("echo '{$username}' >> /etc/vsftpd/vusers.txt");
             $ssh->execute("echo '{$password}' >> /etc/vsftpd/vusers.txt");
 
