@@ -65,14 +65,20 @@ class FileManagerController extends Controller
      *
      * )
      */
-    public function index(FileManager $fileManager, $params = null)
+    public function index(FileManager $fileManager, Request $request, $params = null)
     {
-        $path = request('site-uuid');
-        $queryPath = $_SERVER['QUERY_STRING'];
+        $path = $request->query('site-uuid', '');
+        $queryPath = $request->getQueryString() ?? '';
 
-        extract($fileManager->fetchServerContents($params, $path, $queryPath));
+        $result = $fileManager->fetchServerContents($params, $path, $queryPath);
 
-        return view('file_manager.index', compact('pathContents', 'params', 'path', 'queryPath', 'headers'));
+        return view('file_manager.index', [
+            'pathContents' => $result['pathContents'],
+            'params'       => $result['params'],
+            'path'         => $result['path'],
+            'queryPath'    => $result['queryPath'],
+            'headers'      => $result['headers'],
+        ]);
     }
 
     /**
@@ -261,13 +267,23 @@ class FileManagerController extends Controller
      *
      * )
      */
-    public function destroy()
+    public function destroy(Request $request)
     {
-        $validated = request()->validate([
+        $validated = $request->validate([
             'pathName' => 'required|string',
         ]);
 
-        $pathName = $validated['pathName'];
+        $pathName = realpath($validated['pathName']);
+
+        // Restrict deletions to site home directories only
+        if (!$pathName || !str_starts_with($pathName, '/home/')) {
+            abort(403, 'Access denied: path outside allowed directory.');
+        }
+
+        // Never allow deletion of the web root itself
+        if (preg_match('#^/home/[^/]+/?$#', $pathName)) {
+            abort(403, 'Access denied: cannot delete site root.');
+        }
 
         return unlink($pathName);
     }

@@ -70,11 +70,14 @@ class Server extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'default' => 'boolean',
-        'build' => 'integer',
-        'status' => 'integer',
+        'default'    => 'boolean',
+        'build'      => 'integer',
+        'status'     => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        // Sensitive fields — encrypted at rest using APP_KEY
+        'password'   => 'encrypted',
+        'database'   => 'encrypted',
     ];
 
     /**

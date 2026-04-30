@@ -5,7 +5,6 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BackupController;
 use App\Http\Controllers\DatabaseController;
 use App\Http\Controllers\EmailController;
-use App\Http\Controllers\FileManagerController;
 use App\Http\Controllers\ServerController;
 use App\Http\Controllers\SiteController;
 use Illuminate\Support\Facades\Route;
@@ -38,7 +37,6 @@ Route::post('/servers/panel/ssl', [ServerController::class, 'panelssl']);
 Route::delete('/servers/{server_id}', [ServerController::class, 'destroy']);
 Route::get('/servers/{server_id}', [ServerController::class, 'show']);
 Route::patch('/servers/{server_id}', [ServerController::class, 'edit']);
-Route::get('/servers/{server_id}/ping', [ServerController::class, 'ping']);
 Route::get('/servers/{server_id}/ping', [ServerController::class, 'ping']);
 Route::get('/servers/{server_id}/stats/cpu', [ServerController::class, 'statsCpu']);
 Route::get('/servers/{server_id}/stats/mem', [ServerController::class, 'statsMem']);
@@ -128,20 +126,7 @@ Route::middleware('api')->group(function () {
     Route::post('/linkdatabuser', [DatabaseController::class, 'linkdatabaseuser'])->name('linkdatabuser');
 });
 
-Route::get('files/{folder_name?}', [FileManagerController::class, 'index'])->where('folder_name', '(.*)')->name('files.index');
-Route::post('files/view', [FileManagerController::class, 'show'])->name('files.show');
-Route::post('files/edit', [FileManagerController::class, 'edit'])->name('files.edit');
-Route::post('files/store', [FileManagerController::class, 'store'])->name('files.store');
-Route::post('files/download', [FileManagerController::class, 'download'])->name('files.download');
-Route::post('files/create-directory', [FileManagerController::class, 'createDirectory'])->name('files.create.directory');
-Route::post('files/create-file', [FileManagerController::class, 'createFile'])->name('files.create.file');
-Route::post('files/rename-file', [FileManagerController::class, 'renameFile'])->name('files.rename.file');
-Route::post('files/copy-file', [FileManagerController::class, 'copy'])->name('files.copy');
-Route::post('files/move-file', [FileManagerController::class, 'move'])->name('files.move');
-Route::post('files/delete', [FileManagerController::class, 'destroy'])->name('files.delete');
-
-Route::get('download_file_object/{id}', [FileManagerController::class, 'downloadObject']);
-Route::get('show-media-file/{id}', [FileManagerController::class, 'showMediaFile']);
+// File manager routes are defined in web.php (behind auth:sanctum)
 
 Route::get('logs', [LogManagerController::class, 'index'])->name('api.logs');
 Route::get('logs/{log}', [LogManagerController::class, 'show'])->name('api.logs.show');

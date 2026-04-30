@@ -9,7 +9,10 @@ use Illuminate\Support\Str;
 
 class FileManager
 {
-    public function fetchServerContents($params, $path, $queryPath)
+    /** All file operations are restricted to this base path. */
+    protected string $allowedBase = '/home';
+
+    public function fetchServerContents($params, $path, $queryPath): array
     {
         $headers = explode('/', Str::after($queryPath, '/'));
 
@@ -17,29 +20,31 @@ class FileManager
             array_shift($headers);
         }
 
-        $slash = $this->getSlashByOS();
+        $fullPath = $path . '/' . $params;
 
-        $directories = File::directories($path.$slash.$params);
-        $files = File::files($path.$slash.$params);
+        // Ensure we stay within /home
+        $this->guardPath($fullPath);
+
+        $directories = File::directories($fullPath);
+        $files = File::files($fullPath);
 
         $directoryContent = collect();
         foreach ($directories as $directory) {
             $directoryContent->push([
-                'full_path' => $directory,
-                'folder_name' => Str::afterLast($directory, $slash),
-                'type' => 'folder',
+                'full_path'   => $directory,
+                'folder_name' => Str::afterLast($directory, '/'),
+                'type'        => 'folder',
             ]);
         }
 
         $fileContents = collect();
         foreach ($files as $file) {
-            // dd($file->getPathInfo());
             $fileContents->push([
-                'filename' => $file->getFilename(),
-                'size' => $file->getSize(),
-                'pathName' => $file->getPathname(),
-                'last_modified' => Carbon::parse($file->getMTime())->format('M d, Y , H:m:s'),
-                'type' => 'file',
+                'filename'      => $file->getFilename(),
+                'size'          => $file->getSize(),
+                'pathName'      => $file->getPathname(),
+                'last_modified' => Carbon::parse($file->getMTime())->format('M d, Y , H:i:s'),
+                'type'          => 'file',
             ]);
         }
 
@@ -48,116 +53,129 @@ class FileManager
         return compact('pathContents', 'params', 'path', 'queryPath', 'headers');
     }
 
-    public function storeFile($validatedFileData)
+    public function storeFile(array $validatedFileData): bool
     {
-        $content = json_decode($validatedFileData['content'], true);
+        $content  = json_decode($validatedFileData['content'], true);
         $pathName = $content['pathName'];
-        $data = $validatedFileData['data'];
+        $data     = $validatedFileData['data'];
+
+        $this->guardPath($pathName);
 
         try {
-            return File::put($pathName, $data);
+            return (bool) File::put($pathName, $data);
         } catch (Exception $e) {
             return false;
         }
     }
 
-    public function createDirectory($validatedFileData)
+    public function createDirectory(array $validatedFileData): bool
     {
-        $path = str_replace('~', $this->getSlashByOS(), $validatedFileData['path']);
+        $path          = $validatedFileData['path'];
         $directoryName = $validatedFileData['new-directory-name'];
+        $full          = $path . '/' . $directoryName;
+
+        $this->guardPath($full);
 
         try {
-            mkdir($path.$this->getSlashByOS().$directoryName);
-
+            mkdir($full);
             return true;
         } catch (Exception $e) {
             return false;
         }
     }
 
-    public function createFile($validatedFileData)
+    public function createFile(array $validatedFileData): bool
     {
-        $path = str_replace('~', $this->getSlashByOS(), $validatedFileData['path']);
+        $path     = $validatedFileData['path'];
         $fileName = $validatedFileData['new-file-name'];
+        $full     = $path . '/' . $fileName;
+
+        $this->guardPath($full);
 
         try {
-            fopen(''.$path.$this->getSlashByOS().$fileName.'', 'w');
-
+            fopen($full, 'w');
             return true;
-        } catch (Exception $ex) {
+        } catch (Exception $e) {
             return false;
         }
     }
 
-    public function renameFile($validatedFileData)
+    public function renameFile(array $validatedFileData): bool
     {
-        $fullPath = str_replace('/', $this->getSlashByOS(), json_decode($validatedFileData['content'])->pathName);
-        $path = Str::beforeLast($fullPath, $this->getSlashByOS());
-        $newName = $validatedFileData['rename-file-name'];
+        $fullPath = json_decode($validatedFileData['content'])->pathName;
+        $path     = Str::beforeLast($fullPath, '/');
+        $newName  = $validatedFileData['rename-file-name'];
+        $newPath  = $path . '/' . $newName;
+
+        $this->guardPath($fullPath);
+        $this->guardPath($newPath);
 
         try {
-            rename($fullPath, $path.$this->getSlashByOS().$newName);
-
+            rename($fullPath, $newPath);
             return true;
-        } catch (exception $e) {
+        } catch (Exception $e) {
             return false;
         }
     }
 
-    public function copyFile($validatedFileData)
+    public function copyFile(array $validatedFileData): bool
     {
         $decodedData = json_decode($validatedFileData['content']);
-        $fullPath = $decodedData->pathName;
-        $fileName = $decodedData->filename;
-        $ext = Str::afterLast($fileName, '.');
-        $copyPath = $validatedFileData['copy-file-path'];
+        $fullPath    = $decodedData->pathName;
+        $fileName    = $decodedData->filename;
+        $ext         = Str::afterLast($fileName, '.');
+        $copyPath    = $validatedFileData['copy-file-path'];
+        $copyFull    = $copyPath . '/' . $fileName;
 
-        $copyFullPath = $copyPath.$this->getSlashByOS().$fileName;
-        $renameFile = Str::beforeLast($fileName, '.').'-1.'.$ext;
+        $this->guardPath($fullPath);
+        $this->guardPath($copyPath);
 
-        if ($fullPath == $copyFullPath) {
-            try {
-                copy($fullPath, $copyPath.$this->getSlashByOS().$renameFile);
+        try {
+            $dest = ($fullPath === $copyFull)
+                ? $copyPath . '/' . Str::beforeLast($fileName, '.') . '-1.' . $ext
+                : $copyFull;
 
-                return true;
-            } catch (exception $e) {
-                return false;
-            }
-        } else {
-            try {
-                copy($fullPath, $copyFullPath);
-
-                return true;
-            } catch (exception $e) {
-                return false;
-            }
+            copy($fullPath, $dest);
+            return true;
+        } catch (Exception $e) {
+            return false;
         }
     }
 
-    public function moveFile($validatedFileData)
+    public function moveFile(array $validatedFileData): bool
     {
         $decodedData = json_decode($validatedFileData['content']);
-        $fullPath = str_replace('/', $this->getSlashByOS(), $decodedData->pathName);
-        $fileName = $decodedData->filename;
-        $movePath = str_replace('/', $this->getSlashByOS(), $validatedFileData['move-file-path']);
+        $fullPath    = $decodedData->pathName;
+        $fileName    = $decodedData->filename;
+        $movePath    = $validatedFileData['move-file-path'];
 
-        if ($fullPath != $movePath) {
-            try {
-                rename($fullPath, $movePath.$this->getSlashByOS().$fileName);
+        $this->guardPath($fullPath);
+        $this->guardPath($movePath);
 
-                return true;
-            } catch (Exception $e) {
-                return false;
-            }
+        if ($fullPath === $movePath) {
+            return false;
+        }
+
+        try {
+            rename($fullPath, $movePath . '/' . $fileName);
+            return true;
+        } catch (Exception $e) {
+            return false;
         }
     }
 
-    public function getSlashByOS()
+    /**
+     * Ensure a path stays within /home to prevent path traversal attacks.
+     *
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException
+     */
+    protected function guardPath(string $path): void
     {
-        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-            return '\\';
-        }
+        // Resolve symlinks and .. segments where possible
+        $real = realpath($path) ?: $path;
 
-        return '/';
+        if (!str_starts_with($real, $this->allowedBase . '/')) {
+            abort(403, 'Access denied: path outside allowed directory.');
+        }
     }
 }

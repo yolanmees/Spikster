@@ -900,7 +900,7 @@ sleep 1s
 # Install Go if not already installed
 if ! command -v go &>/dev/null; then
     log_message "Installing Go..."
-    wget -q https://go.dev/dl/go1.21.5.linux-amd64.tar.gz -O /tmp/go.tar.gz || handle_error "downloading Go"
+    wget -q https://go.dev/dl/go1.22.3.linux-amd64.tar.gz -O /tmp/go.tar.gz || handle_error "downloading Go"
     rm -rf /usr/local/go
     tar -C /usr/local -xzf /tmp/go.tar.gz || handle_error "extracting Go"
     rm /tmp/go.tar.gz

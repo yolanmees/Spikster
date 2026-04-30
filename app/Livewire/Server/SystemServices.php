@@ -3,31 +3,43 @@
 namespace App\Livewire\Server;
 
 use App\Models\Server;
+use App\Services\DaemonService;
 use Livewire\Component;
-use Illuminate\Support\Facades\Http;
 
 class SystemServices extends Component
 {
     public $server_id;
     public $services = [
-        'nginx' => ['name' => 'nginx', 'status' => 'unknown'],
-        'php' => ['name' => 'PHP-FPM', 'status' => 'unknown'],
-        'mysql' => ['name' => 'MySql', 'status' => 'unknown'],
-        'redis' => ['name' => 'Redis', 'status' => 'unknown'],
-        'supervisor' => ['name' => 'Supervisor', 'status' => 'unknown'],
+        'nginx'      => ['name' => 'nginx',      'status' => 'unknown'],
+        'php'        => ['name' => 'PHP-FPM',     'status' => 'unknown'],
+        'mysql'      => ['name' => 'MySql',       'status' => 'unknown'],
+        'redis'      => ['name' => 'Redis',       'status' => 'unknown'],
+        'supervisor' => ['name' => 'Supervisor',  'status' => 'unknown'],
     ];
     public $restarting = [];
-    private $server;
 
-    public function mount($server_id)
+    private array $serviceMap = [
+        'nginx'      => 'nginx',
+        'php'        => ['php8.4-fpm', 'php8.3-fpm', 'php8.2-fpm'],
+        'mysql'      => 'mysql',
+        'redis'      => 'redis-server',
+        'supervisor' => 'supervisor',
+    ];
+
+    public function mount($server_id): void
     {
         $this->server_id = $server_id;
-        $this->server = Server::where('server_id', $this->server_id)->first();
     }
 
-    public function restartService($service)
+    public function restartService(string $service): void
     {
-        if (!$this->server) {
+        if (!array_key_exists($service, $this->serviceMap)) {
+            session()->flash('error', 'Unknown service.');
+            return;
+        }
+
+        $server = Server::where('server_id', $this->server_id)->first();
+        if (!$server) {
             session()->flash('error', 'Server not found.');
             return;
         }
@@ -35,18 +47,16 @@ class SystemServices extends Component
         $this->restarting[$service] = true;
 
         try {
-            $response = Http::timeout(30)->post(
-                'http://' . $this->server->ip . '/api/servers/' . $this->server_id . '/servicerestart/' . $service,
-                ['format' => 'json']
-            );
+            $daemon   = app(DaemonService::class);
+            $services = (array) $this->serviceMap[$service];
 
-            if ($response->successful()) {
-                session()->flash('success', ucfirst($service) . ' has been restarted successfully.');
-            } else {
-                session()->flash('error', 'Failed to restart ' . $service . '.');
+            foreach ($services as $svc) {
+                $daemon->restart($svc);
             }
+
+            session()->flash('success', ucfirst($service) . ' restarted.');
         } catch (\Exception $e) {
-            session()->flash('error', 'Error restarting ' . $service . ': ' . $e->getMessage());
+            session()->flash('error', 'Failed to restart ' . $service . ': ' . $e->getMessage());
         } finally {
             unset($this->restarting[$service]);
         }
