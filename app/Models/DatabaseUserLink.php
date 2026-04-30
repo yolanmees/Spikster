@@ -14,7 +14,7 @@ class DatabaseUserLink extends Model
         'database_id',
     ];
 
-    public function user()
+    public function databaseUser()
     {
         return $this->belongsTo(DatabaseUser::class, 'database_user_id');
     }

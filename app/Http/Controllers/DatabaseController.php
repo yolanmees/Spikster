@@ -6,18 +6,17 @@ use App\Models\Database;
 use App\Models\DatabaseUser;
 use App\Services\DatabaseService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class DatabaseController extends Controller
 {
-    protected $databaseService;
+    protected DatabaseService $databaseService;
 
     public function __construct(DatabaseService $databaseService)
     {
         $this->databaseService = $databaseService;
     }
 
-    public function viewdatabase($siteId): \Illuminate\View\View
+    public function index($siteId): \Illuminate\View\View
     {
         $databases     = Database::with('users')->where('site_id', $siteId)->get();
         $databaseUsers = DatabaseUser::where('site_id', $siteId)->get();
@@ -25,20 +24,20 @@ class DatabaseController extends Controller
         return view('site.database.index', compact('databases', 'databaseUsers', 'siteId'));
     }
 
-    public function createdatabase(Request $request, $site_id): \Illuminate\Http\RedirectResponse
+    public function createDatabase(Request $request, $siteId): \Illuminate\Http\RedirectResponse
     {
         $request->validate([
             'database_name' => ['required', 'string', 'max:64', 'regex:/^[a-zA-Z][a-zA-Z0-9_]{1,63}$/'],
         ]);
 
-        $response = $this->databaseService->createDatabase($request->input('database_name'), $site_id);
+        $response = $this->databaseService->createDatabase($request->input('database_name'), $siteId);
 
         return $response['success']
-            ? \Redirect::back()->with('success', $response['message'])
-            : \Redirect::back()->with('failed', $response['message']);
+            ? redirect()->back()->with('success', $response['message'])
+            : redirect()->back()->with('failed', $response['message']);
     }
 
-    public function createuser(Request $request, $site_id): \Illuminate\Http\RedirectResponse
+    public function createUser(Request $request, $siteId): \Illuminate\Http\RedirectResponse
     {
         $request->validate([
             'username' => ['required', 'string', 'max:64', 'regex:/^[a-zA-Z][a-zA-Z0-9_]{1,63}$/'],
@@ -48,15 +47,15 @@ class DatabaseController extends Controller
         $response = $this->databaseService->createUser(
             $request->input('username'),
             $request->input('password'),
-            $site_id
+            $siteId
         );
 
         return $response['success']
-            ? \Redirect::back()->with('success', $response['message'])
-            : \Redirect::back()->with('failed', $response['message']);
+            ? redirect()->back()->with('success', $response['message'])
+            : redirect()->back()->with('failed', $response['message']);
     }
 
-    public function linkdatabaseuser(Request $request, $site_id): \Illuminate\Http\RedirectResponse
+    public function linkDatabaseUser(Request $request, $siteId): \Illuminate\Http\RedirectResponse
     {
         $request->validate([
             'username' => ['required', 'integer'],
@@ -66,44 +65,41 @@ class DatabaseController extends Controller
         $response = $this->databaseService->linkDatabaseUser(
             $request->input('username'),
             $request->input('database'),
-            $site_id
+            $siteId
         );
 
         return $response['success']
-            ? \Redirect::back()->with('success', $response['message'])
-            : \Redirect::back()->with('failed', $response['message']);
+            ? redirect()->back()->with('success', $response['message'])
+            : redirect()->back()->with('failed', $response['message']);
     }
 
-    public function deleteDatabase(Request $request, $site_id): \Illuminate\Http\RedirectResponse
+    public function deleteDatabase(Request $request, $siteId): \Illuminate\Http\RedirectResponse
     {
         $request->validate(['database_id' => ['required', 'integer']]);
 
-        $response = $this->databaseService->deleteDatabase($request->input('database_id'));
+        $response = $this->databaseService->deleteDatabase($request->input('database_id'), $siteId);
 
         return $response['success']
             ? redirect()->back()->with('success', $response['message'])
             : redirect()->back()->with('failed', $response['message']);
     }
 
-    public function deleteUser(Request $request, $site_id): \Illuminate\Http\RedirectResponse
+    public function deleteUser(Request $request, $siteId): \Illuminate\Http\RedirectResponse
     {
         $request->validate(['user_id' => ['required', 'integer']]);
 
-        $response = $this->databaseService->deleteUser($request->input('user_id'));
+        $response = $this->databaseService->deleteUser($request->input('user_id'), $siteId);
 
         return $response['success']
             ? redirect()->back()->with('success', $response['message'])
             : redirect()->back()->with('failed', $response['message']);
     }
 
-    /**
-     * Named deleteLink to match the registered route (site.database.delete.link).
-     */
-    public function deleteLink(Request $request, $site_id): \Illuminate\Http\RedirectResponse
+    public function deleteLink(Request $request, $siteId): \Illuminate\Http\RedirectResponse
     {
         $request->validate(['link_id' => ['required', 'integer']]);
 
-        $response = $this->databaseService->unlinkDatabaseUser($request->input('link_id'));
+        $response = $this->databaseService->unlinkDatabaseUser($request->input('link_id'), $siteId);
 
         return $response['success']
             ? redirect()->back()->with('success', $response['message'])

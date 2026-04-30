@@ -121,10 +121,10 @@ Route::post('/login', [AuthController::class, 'appLogin'])->middleware('throttle
 
 Route::middleware(['auth:sanctum'])->group(function () {
     // database
-    Route::get('/data', [DatabaseController::class, 'viewdatabase'])->name('data');
-    Route::post('/createdatab', [DatabaseController::class, 'createdatabase'])->name('createdatab');
-    Route::post('/createuser', [DatabaseController::class, 'createuser'])->name('createuser');
-    Route::post('/linkdatabuser', [DatabaseController::class, 'linkdatabaseuser'])->name('linkdatabuser');
+    Route::get('/data', [DatabaseController::class, 'index'])->name('data');
+    Route::post('/createdatab', [DatabaseController::class, 'createDatabase'])->name('createdatab');
+    Route::post('/createuser', [DatabaseController::class, 'createUser'])->name('createUser');
+    Route::post('/linkdatabuser', [DatabaseController::class, 'linkDatabaseUser'])->name('linkdatabuser');
 });
 
 // File manager routes are defined in web.php (behind auth:sanctum)

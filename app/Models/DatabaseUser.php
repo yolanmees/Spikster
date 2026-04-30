@@ -16,6 +16,6 @@ class DatabaseUser extends Model
 
     public function databases()
     {
-        return $this->belongsThrough(Database::class, DatabaseUserLink::class);
+        return $this->belongsToMany(Database::class, 'database_user_links', 'database_user_id', 'database_id');
     }
 }

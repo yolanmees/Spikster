@@ -95,8 +95,8 @@ class DatabaseService
     public function linkDatabaseUser($userId, $databaseId, $siteId): array
     {
         $pdo          = $this->pdoConnect();
-        $databaseUser = DatabaseUser::find($userId);
-        $database     = Database::find($databaseId);
+        $databaseUser = DatabaseUser::where('id', $userId)->where('site_id', $siteId)->first();
+        $database     = Database::where('id', $databaseId)->where('site_id', $siteId)->first();
 
         if (! $databaseUser || ! $database) {
             return ['success' => false, 'message' => 'User or database not found.'];
@@ -118,10 +118,10 @@ class DatabaseService
         }
     }
 
-    public function deleteDatabase($databaseId): array
+    public function deleteDatabase($databaseId, $siteId): array
     {
         $pdo      = $this->pdoConnect();
-        $database = Database::find($databaseId);
+        $database = Database::where('id', $databaseId)->where('site_id', $siteId)->first();
 
         if (! $database) {
             return ['success' => false, 'message' => 'Database not found.'];
@@ -136,10 +136,10 @@ class DatabaseService
         }
     }
 
-    public function deleteUser($userId): array
+    public function deleteUser($userId, $siteId): array
     {
         $pdo          = $this->pdoConnect();
-        $databaseUser = DatabaseUser::find($userId);
+        $databaseUser = DatabaseUser::where('id', $userId)->where('site_id', $siteId)->first();
 
         if (! $databaseUser) {
             return ['success' => false, 'message' => 'User not found.'];
@@ -155,12 +155,20 @@ class DatabaseService
         }
     }
 
-    public function unlinkDatabaseUser($linkId): array
+    public function unlinkDatabaseUser($linkId, $siteId): array
     {
         $pdo  = $this->pdoConnect();
         $link = DatabaseUserLink::with(['database', 'databaseUser'])->find($linkId);
 
         if (! $link) {
+            return ['success' => false, 'message' => 'Link not found.'];
+        }
+
+        // Ownership check: ensure both sides of the link belong to this site
+        if (
+            ($link->database && $link->database->site_id != $siteId) ||
+            ($link->databaseUser && $link->databaseUser->site_id != $siteId)
+        ) {
             return ['success' => false, 'message' => 'Link not found.'];
         }
 

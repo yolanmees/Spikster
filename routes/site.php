@@ -17,10 +17,10 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     })->name('site.edit');
 
     // database
-    Route::get('/site/{site_id}/database', [DatabaseController::class, 'viewdatabase'])->name('site.database');
-    Route::post('/site/{site_id}/database/create/database', [DatabaseController::class, 'createdatabase'])->name('site.database.create.database');
-    Route::post('/site/{site_id}/database/create/user', [DatabaseController::class, 'createuser'])->name('site.database.create.user');
-    Route::post('/site/{site_id}/database/create/link', [DatabaseController::class, 'linkdatabaseuser'])->name('site.database.create.link');
+    Route::get('/site/{site_id}/database', [DatabaseController::class, 'index'])->name('site.database');
+    Route::post('/site/{site_id}/database/create/database', [DatabaseController::class, 'createDatabase'])->name('site.database.create.database');
+    Route::post('/site/{site_id}/database/create/user', [DatabaseController::class, 'createUser'])->name('site.database.create.user');
+    Route::post('/site/{site_id}/database/create/link', [DatabaseController::class, 'linkDatabaseUser'])->name('site.database.create.link');
     Route::delete('/site/{site_id}/database/delete/database', [DatabaseController::class, 'deleteDatabase'])->name('site.database.delete.database');
     Route::delete('/site/{site_id}/database/delete/user', [DatabaseController::class, 'deleteUser'])->name('site.database.delete.user');
     Route::delete('/site/{site_id}/database/delete/link', [DatabaseController::class, 'deleteLink'])->name('site.database.delete.link');
