@@ -9,11 +9,13 @@
 
 @section('content')
     <div x-data="{ tab: 'monitor' }">
-        <ol class="breadcrumbs">
-            <li class="breadcrumb-item active">IP:<b><span class="ml-1" id="serveriptop"></span></b></li>
-            <li class="breadcrumb-item active">{{ __('spikster.sites') }}:<b><span class="ml-1" id="serversites"></span></b>
-            </li>
-            <li class="breadcrumb-item active">Ping:<b><span class="ml-1" id="serverping">
+        <x-page-header title="{{ __('spikster.titles.server') }}">
+            <x-slot name="actions">
+                <x-back-button :href="route('servers.index')" />
+                <div class="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+                    <span>IP: <b id="serveriptop" class="text-gray-900 dark:text-white"></b></span>
+                    <span>{{ __('spikster.sites') }}: <b id="serversites" class="text-gray-900 dark:text-white"></b></span>
+                    <span class="flex items-center gap-1">Ping: <span id="serverping">
                         <svg class="animate-spin h-4 w-4 inline-block text-gray-400" xmlns="http://www.w3.org/2000/svg"
                             fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
@@ -22,8 +24,10 @@
                                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
                             </path>
                         </svg>
-                    </span></b></li>
-        </ol>
+                    </span></span>
+                </div>
+            </x-slot>
+        </x-page-header>
 
         <x-alpine-tabs model="tab" :tabs="[
             ['key' => 'monitor',  'label' => 'Monitor',
