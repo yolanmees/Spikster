@@ -16,6 +16,11 @@ class DnsService
         if (! $zone || ! $email || ! $nameservers) {
             throw new \Exception('Missing required parameter: zone, email or nameservers');
         }
+        // Strict zone validation before any file or exec operation
+        if (! preg_match('/^[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)*$/', $zone)) {
+            throw new \Exception('Invalid zone name.');
+        }
+        $zone = strtolower(trim($zone));
         $zone = htmlspecialchars($zone, ENT_QUOTES, 'utf-8');
         $email = htmlspecialchars($email, ENT_QUOTES, 'utf-8');
         if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -27,7 +32,7 @@ class DnsService
             $nameservers[$key] = htmlspecialchars($value, ENT_QUOTES, 'utf-8');
         }
 
-        $zoneFile = '/root/zones/'.$zone;
+        $zoneFile = '/etc/bind/zones/'.$zone;
         $template = '$TTL    86400
         @       IN      SOA     '.$nameservers[0].'. '.$email.' (
                                 '.time().' ; serial
@@ -90,7 +95,7 @@ class DnsService
         }
         $zone = htmlspecialchars($zone, ENT_QUOTES, 'utf-8');
 
-        $zoneFile = '/root/zones/'.$zone;
+        $zoneFile = '/etc/bind/zones/'.$zone;
 
         if (file_exists($zoneFile)) {
             unlink($zoneFile);
@@ -121,7 +126,7 @@ class DnsService
         $type = htmlspecialchars($type, ENT_QUOTES, 'utf-8');
         $value = htmlspecialchars($value, ENT_QUOTES, 'utf-8');
 
-        $zoneFile = '/root/zones/'.$zone;
+        $zoneFile = '/etc/bind/zones/'.$zone;
 
         if (! file_exists($zoneFile)) {
             throw new \Exception('Zone file not found.');
@@ -156,7 +161,7 @@ class DnsService
         $type = htmlspecialchars($type, ENT_QUOTES, 'utf-8');
         $value = htmlspecialchars($value, ENT_QUOTES, 'utf-8');
 
-        $zoneFile = '/root/zones/'.$zone;
+        $zoneFile = '/etc/bind/zones/'.$zone;
 
         if (! file_exists($zoneFile)) {
             throw new \Exception('Zone file not found.');

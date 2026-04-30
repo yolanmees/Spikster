@@ -15,11 +15,12 @@ class SecurityHelper
     }
 
     /**
-     * Sanitize for SQL-like queries (additional layer of protection)
+     * @deprecated Use prepared statements (PDO) instead. This method gives false security.
+     * Kept for BC only — do not use in new code.
      */
     public static function sanitizeSql(string $input): string
     {
-        return str_replace(['--', ';', '/*', '*/', 'xp_', 'sp_'], '', $input);
+        return $input; // No-op: use parameterized queries, not string sanitization
     }
 
     /**

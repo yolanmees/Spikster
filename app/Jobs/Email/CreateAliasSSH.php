@@ -35,11 +35,12 @@ class CreateAliasSSH implements ShouldQueue
         try {
             $ssh = $sshService->connect($this->server);
 
-            $aliasEmail = $this->alias->alias;
-            $targetEmail = $this->alias->emailAccount->email;
+            $aliasEmail = preg_replace('/[^a-zA-Z0-9@._+-]/', '', $this->alias->alias);
+            $targetEmail = preg_replace('/[^a-zA-Z0-9@._+-]/', '', $this->alias->emailAccount->email);
 
             // Add to Postfix virtual alias map
-            $ssh->exec("echo '{$aliasEmail} {$targetEmail}' >> /etc/postfix/virtual");
+            // Use printf to safely write without shell injection
+            $ssh->exec('printf "%s %s\n" ' . escapeshellarg($aliasEmail) . ' ' . escapeshellarg($targetEmail) . ' >> /etc/postfix/virtual');
             $ssh->exec("postmap /etc/postfix/virtual");
 
             // Reload Postfix

@@ -38,8 +38,8 @@ class LogSecurityEvents
         $suspicious = false;
         $patterns = [];
 
-        // Check for SQL injection patterns
-        $sqlPatterns = ['union', 'select', 'insert', 'update', 'delete', 'drop', '--', ';--'];
+        // Check for SQL injection patterns (specific enough to avoid false positives)
+        $sqlPatterns = ["' OR '", "' OR 1=1", 'UNION SELECT', 'UNION ALL SELECT', '; DROP', '--;', ';--', "1'='1"];
         foreach ($sqlPatterns as $pattern) {
             if (stripos($request->getContent(), $pattern) !== false) {
                 $suspicious = true;

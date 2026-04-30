@@ -61,7 +61,7 @@ class WordPressService
 
             // Create installation directory with sudo
             Log::info('Creating WordPress directory', ['path' => $path]);
-            $ssh->exec("echo '{$server->password}' | sudo -S mkdir -p {$path}");
+            $ssh->exec("sudo mkdir -p {$path}");
 
             // Verify directory was created
             $dirCheck = trim($ssh->exec("test -d {$path} && echo 'exists' || echo 'not found'"));
@@ -72,7 +72,7 @@ class WordPressService
 
             // Download WordPress using curl (more reliable than wget with sudo)
             Log::info('Downloading WordPress', ['path' => $path]);
-            $downloadCmd = "echo '{$server->password}' | sudo -S curl -L -o {$path}/wordpress.tar.gz https://wordpress.org/latest.tar.gz 2>&1";
+            $downloadCmd = "sudo curl -L -o {$path}/wordpress.tar.gz https://wordpress.org/latest.tar.gz 2>&1";
             $downloadResult = $ssh->exec($downloadCmd);
             Log::info('Download result', ['output' => $downloadResult]);
 
@@ -90,14 +90,14 @@ class WordPressService
             if (intval($fileSize) < 1000000) {
                 Log::error('WordPress download failed - file too small', ['size' => $fileSize]);
                 // Show file content for debugging
-                $fileContent = $ssh->exec("echo '{$server->password}' | sudo -S head -20 {$path}/wordpress.tar.gz");
+                $fileContent = $ssh->exec("sudo head -20 {$path}/wordpress.tar.gz");
                 Log::error('File content preview', ['content' => $fileContent]);
                 return ['success' => false, 'message' => 'Failed to download WordPress. Downloaded file is too small or corrupt.'];
             }
 
             // Extract WordPress (tar extracts to wordpress/ subdirectory by default)
             Log::info('Extracting WordPress', ['path' => $path]);
-            $extractCmd = "echo '{$server->password}' | sudo -S tar -xzf {$path}/wordpress.tar.gz -C {$path} 2>&1";
+            $extractCmd = "sudo tar -xzf {$path}/wordpress.tar.gz -C {$path} 2>&1";
             $extractResult = $ssh->exec($extractCmd);
             Log::info('Extract result', ['output' => $extractResult]);
 
@@ -112,7 +112,7 @@ class WordPressService
             }
 
             // Move files from wordpress/ subdirectory to main path
-            $moveCmd = "echo '{$server->password}' | sudo -S bash -c 'shopt -s dotglob && mv {$path}/wordpress/* {$path}/ && rmdir {$path}/wordpress && rm {$path}/wordpress.tar.gz' 2>&1";
+            $moveCmd = "sudo bash -c 'shopt -s dotglob && mv {$path}/wordpress/* {$path}/ && rmdir {$path}/wordpress && rm {$path}/wordpress.tar.gz' 2>&1";
             $moveResult = $ssh->exec($moveCmd);
             Log::info('Move result', ['output' => $moveResult]);
 
@@ -133,22 +133,22 @@ class WordPressService
             }
 
             // Create wp-config.php from sample
-            $ssh->exec("echo '{$server->password}' | sudo -S cp {$path}/wp-config-sample.php {$path}/wp-config.php");
+            $ssh->exec("sudo cp {$path}/wp-config-sample.php {$path}/wp-config.php");
 
             // Update database credentials in wp-config.php
-            $ssh->exec("echo '{$server->password}' | sudo -S sed -i 's/database_name_here/{$dbName}/g' {$path}/wp-config.php");
-            $ssh->exec("echo '{$server->password}' | sudo -S sed -i 's/username_here/{$dbUser}/g' {$path}/wp-config.php");
-            $ssh->exec("echo '{$server->password}' | sudo -S sed -i 's/password_here/{$dbPassword}/g' {$path}/wp-config.php");
+            $ssh->exec("sudo sed -i 's/database_name_here/{$dbName}/g' {$path}/wp-config.php");
+            $ssh->exec("sudo sed -i 's/username_here/{$dbUser}/g' {$path}/wp-config.php");
+            $ssh->exec("sudo sed -i 's/password_here/{$dbPassword}/g' {$path}/wp-config.php");
 
             // Generate and set security keys
             $authKey = Str::random(64);
 
-            $ssh->exec("echo '{$server->password}' | sudo -S sed -i \"s/put your unique phrase here/{$authKey}/\" {$path}/wp-config.php");
+            $ssh->exec("sudo sed -i \"s/put your unique phrase here/{$authKey}/\" {$path}/wp-config.php");
 
             // Set proper permissions (files owned by www-data for web server access)
-            $ssh->exec("echo '{$server->password}' | sudo -S chown -R www-data:www-data {$path}");
-            $ssh->exec("echo '{$server->password}' | sudo -S find {$path} -type d -exec chmod 755 {} \\;");
-            $ssh->exec("echo '{$server->password}' | sudo -S find {$path} -type f -exec chmod 644 {} \\;");
+            $ssh->exec("sudo chown -R www-data:www-data {$path}");
+            $ssh->exec("sudo find {$path} -type d -exec chmod 755 {} \\;");
+            $ssh->exec("sudo find {$path} -type f -exec chmod 644 {} \\;");
 
             $ssh->disconnect();
 

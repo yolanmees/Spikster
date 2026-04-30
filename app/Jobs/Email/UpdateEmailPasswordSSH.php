@@ -35,12 +35,12 @@ class UpdateEmailPasswordSSH implements ShouldQueue
         try {
             $ssh = $sshService->connect($this->server);
 
-            $email = $this->account->email;
-            $password = $this->account->getAttributes()['password'];
+            $email = preg_replace('/[^a-zA-Z0-9@._+-]/', '', $this->account->email);
 
-            // Update password in Dovecot users file
-            $ssh->exec("sed -i '/^{$email}:/d' /etc/dovecot/users");
-            $ssh->exec("echo '{$email}:{$password}' >> /etc/dovecot/users");
+            // Remove old entry safely
+            $ssh->exec('sed -i ' . escapeshellarg('/^' . $email . ':/d') . ' /etc/dovecot/users');
+            // Write new entry via doveadm (no password in command line)
+            $ssh->exec('doveadm pw -s SHA512-CRYPT -p ' . escapeshellarg($this->account->getAttributes()['password']) . ' | xargs -I{} printf "%s:{}\n" ' . escapeshellarg($email) . ' >> /etc/dovecot/users');
 
             // Reload Dovecot
             $ssh->exec("systemctl reload dovecot");

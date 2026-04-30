@@ -2431,9 +2431,10 @@ class ServerController extends Controller
             }
 
             // Create directory structure
-            $ssh->exec("echo '{$server->password}' | sudo -S mkdir -p /var/www/html/spikster-api");
-            $ssh->exec("echo '{$server->password}' | sudo -S chown -R www-data:www-data /var/www/html/spikster-api");
-            $ssh->exec("echo '{$server->password}' | sudo -S chmod -R 755 /var/www/html/spikster-api");
+            // Note: spikster user has passwordless sudo for these commands (set up by go.sh)
+            $ssh->exec("sudo mkdir -p /var/www/html/spikster-api");
+            $ssh->exec("sudo chown -R www-data:www-data /var/www/html/spikster-api");
+            $ssh->exec("sudo chmod -R 755 /var/www/html/spikster-api");
 
             // Upload the script
             $uploaded = $this->sshService->uploadFile($server, $localScriptPath, '/tmp/fail2ban-api.php');
@@ -2443,9 +2444,9 @@ class ServerController extends Controller
             }
 
             // Move to final location with sudo
-            $ssh->exec("echo '{$server->password}' | sudo -S mv /tmp/fail2ban-api.php /var/www/html/spikster-api/fail2ban.php");
-            $ssh->exec("echo '{$server->password}' | sudo -S chown www-data:www-data /var/www/html/spikster-api/fail2ban.php");
-            $ssh->exec("echo '{$server->password}' | sudo -S chmod 644 /var/www/html/spikster-api/fail2ban.php");
+            $ssh->exec("sudo mv /tmp/fail2ban-api.php /var/www/html/spikster-api/fail2ban.php");
+            $ssh->exec("sudo chown www-data:www-data /var/www/html/spikster-api/fail2ban.php");
+            $ssh->exec("sudo chmod 644 /var/www/html/spikster-api/fail2ban.php");
 
             // Configure sudo permissions for www-data to run fail2ban commands
             $sudoersContent = "www-data ALL=(ALL) NOPASSWD: /usr/bin/fail2ban-client\n";
@@ -2453,8 +2454,8 @@ class ServerController extends Controller
             $sudoersContent .= "www-data ALL=(ALL) NOPASSWD: /bin/systemctl status fail2ban\n";
             $sudoersContent .= "www-data ALL=(ALL) NOPASSWD: /usr/bin/tail -n * /var/log/fail2ban.log\n";
 
-            $ssh->exec("echo '{$sudoersContent}' | sudo tee /etc/sudoers.d/fail2ban-api > /dev/null");
-            $ssh->exec("echo '{$server->password}' | sudo -S chmod 440 /etc/sudoers.d/fail2ban-api");
+            $ssh->exec('printf "%s" ' . escapeshellarg($sudoersContent) . ' | sudo tee /etc/sudoers.d/fail2ban-api > /dev/null');
+            $ssh->exec("sudo chmod 440 /etc/sudoers.d/fail2ban-api");
 
             $ssh->disconnect();
 

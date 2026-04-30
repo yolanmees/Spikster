@@ -35,10 +35,10 @@ class DeleteAliasSSH implements ShouldQueue
         try {
             $ssh = $sshService->connect($this->server);
 
-            $aliasEmail = $this->alias->alias;
+            $aliasEmail = preg_replace('/[^a-zA-Z0-9@._+-]/', '', $this->alias->alias);
 
             // Remove from Postfix virtual alias map
-            $ssh->exec("sed -i '/^{$aliasEmail} /d' /etc/postfix/virtual");
+            $ssh->exec('sed -i ' . escapeshellarg('/^' . $aliasEmail . ' /d') . ' /etc/postfix/virtual');
             $ssh->exec("postmap /etc/postfix/virtual");
 
             // Reload Postfix
