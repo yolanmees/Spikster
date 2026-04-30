@@ -9,6 +9,7 @@ import (
 	"os/exec"
 
 	"github.com/yolanmees/spikster/daemon/internal/backup"
+	"github.com/yolanmees/spikster/daemon/internal/server"
 	"github.com/yolanmees/spikster/daemon/internal/cron"
 	"github.com/yolanmees/spikster/daemon/internal/ftp"
 	"github.com/yolanmees/spikster/daemon/internal/site"
@@ -241,6 +242,26 @@ func dispatch(req Request) (string, error) {
 	case "ftp.delete":
 		if err := ftp.DeleteUser(req.Params["username"]); err != nil { return "", err }
 		return "ftp user deleted", nil
+
+
+	// ── Server utils ─────────────────────────────────────────────────────────
+	case "server.fail2ban-list":
+		out, err := server.Fail2banList()
+		if err != nil { return "", err }
+		return out, nil
+
+	case "server.package-list":
+		out, err := server.PackageList()
+		if err != nil { return "", err }
+		return out, nil
+
+	case "server.package-install":
+		if err := server.PackageInstall(req.Params["package"]); err != nil { return "", err }
+		return "installed", nil
+
+	case "server.package-remove":
+		if err := server.PackageRemove(req.Params["package"]); err != nil { return "", err }
+		return "removed", nil
 
 
 	default:

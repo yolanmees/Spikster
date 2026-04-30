@@ -1605,16 +1605,8 @@ class ServerController extends Controller
         $server = Server::where('server_id', $server_id)->where('status', 1)->first();
 
         try {
-            $ssh = new SSH2($server->ip, 22);
-            if (! $ssh->login('spikster', $server->password)) {
-                return response()->json([
-                    'message' => __('spikster.server_error_ssh_error_message').$server->server_id,
-                    'errors' => __('spikster.server_error'),
-                ], 500);
-            }
-            $ssh->setTimeout(360);
-            $iptables = $ssh->exec("sqlite3 /var/lib/fail2ban/fail2ban.sqlite3 'select ip,jail from bips'");
-            $ssh->exec('exit');
+            $result = app(\App\Services\DaemonService::class)->send('server.fail2ban-list', []);
+            $iptables = $result['output'] ?? '';
         } catch (\Throwable $th) {
             return response()->json([
                 'message' => __('spikster.something_error_message'),
@@ -1641,16 +1633,8 @@ class ServerController extends Controller
         $server = Server::where('server_id', $server_id)->where('status', 1)->first();
 
         try {
-            $ssh = new SSH2($server->ip, 22);
-            if (! $ssh->login('spikster', $server->password)) {
-                return response()->json([
-                    'message' => __('spikster.server_error_ssh_error_message').$server->server_id,
-                    'errors' => __('spikster.server_error'),
-                ], 500);
-            }
-            $ssh->setTimeout(360);
-            $packages = $ssh->exec('dpkg --get-selections');
-            $ssh->exec('exit');
+            $result = app(\App\Services\DaemonService::class)->send('server.package-list', []);
+            $packages = $result['output'] ?? '';
         } catch (\Throwable $th) {
             return response()->json([
                 'message' => __('spikster.something_error_message'),
@@ -1691,16 +1675,7 @@ class ServerController extends Controller
         $server = Server::where('server_id', $server_id)->where('status', 1)->first();
         $package = $request->package;
         try {
-            $ssh = new SSH2($server->ip, 22);
-            if (! $ssh->login('spikster', $server->password)) {
-                return response()->json([
-                    'message' => __('spikster.server_error_ssh_error_message').$server->server_id,
-                    'errors' => __('spikster.server_error'),
-                ], 500);
-            }
-            $ssh->setTimeout(360);
-            $packages = $ssh->exec("echo '".$server->password."' | sudo -S apt-get install -y $package");
-            $ssh->exec('exit');
+            app(\App\Services\DaemonService::class)->send('server.package-install', ['package' => $package]);
         } catch (\Throwable $th) {
             return response()->json([
                 'message' => __('spikster.something_error_message'),
@@ -1718,16 +1693,7 @@ class ServerController extends Controller
         $server = Server::where('server_id', $server_id)->where('status', 1)->first();
         $package = $request->package;
         try {
-            $ssh = new SSH2($server->ip, 22);
-            if (! $ssh->login('spikster', $server->password)) {
-                return response()->json([
-                    'message' => __('spikster.server_error_ssh_error_message').$server->server_id,
-                    'errors' => __('spikster.server_error'),
-                ], 500);
-            }
-            $ssh->setTimeout(360);
-            $packages = $ssh->exec("echo '".$server->password."' | sudo -S apt-get remove -y $package");
-            $ssh->exec('exit');
+            app(\App\Services\DaemonService::class)->send('server.package-remove', ['package' => $package]);
         } catch (\Throwable $th) {
             return response()->json([
                 'message' => __('spikster.something_error_message'),
