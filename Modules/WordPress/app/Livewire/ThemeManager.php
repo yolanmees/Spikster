@@ -108,9 +108,18 @@ class ThemeManager extends Component
         }
     }
 
+    protected function validateSlug(string $slug): string
+    {
+        if (! preg_match('/^[a-zA-Z0-9\-_\.]+$/', $slug)) {
+            throw new \InvalidArgumentException("Invalid plugin/theme slug: {$slug}");
+        }
+        return $slug;
+    }
+
     public function deleteTheme($slug)
     {
         try {
+            $slug = $this->validateSlug($slug);
             $wpCli = app(WPCLIService::class);
             $result = $wpCli->executeCommand($this->installation, "theme delete {$slug} --force");
 

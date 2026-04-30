@@ -123,7 +123,7 @@ class CronManager extends Component
 
     public function edit($id)
     {
-        $cronJob = CronJob::findOrFail($id);
+        $cronJob = CronJob::where('id', $id)->where('server_id', $this->server->id)->firstOrFail();
         
         $this->editingId = $cronJob->id;
         $this->scope = $cronJob->scope;
@@ -143,7 +143,7 @@ class CronManager extends Component
         $this->validate();
 
         if ($this->editingId) {
-            $cronJob = CronJob::findOrFail($this->editingId);
+            $cronJob = CronJob::where('id', $this->editingId)->where('server_id', $this->server->id)->firstOrFail();
             $cronJob->update([
                 'scope' => $this->scope,
                 'site_id' => $this->scope === 'site' ? $this->site_id : null,
@@ -181,7 +181,7 @@ class CronManager extends Component
 
     public function delete($id)
     {
-        $cronJob = CronJob::findOrFail($id);
+        $cronJob = CronJob::where('id', $id)->where('server_id', $this->server->id)->firstOrFail();
         $cronJob->delete();
         
         session()->flash('message', 'Cron job deleted successfully.');
@@ -194,7 +194,7 @@ class CronManager extends Component
 
     public function toggle($id)
     {
-        $cronJob = CronJob::findOrFail($id);
+        $cronJob = CronJob::where('id', $id)->where('server_id', $this->server->id)->firstOrFail();
         $cronJob->update(['enabled' => !$cronJob->enabled]);
         
         session()->flash('message', 'Cron job ' . ($cronJob->enabled ? 'enabled' : 'disabled') . '.');

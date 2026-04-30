@@ -75,7 +75,7 @@ class PackagesInstalled extends Component
         $response = Http::post($url, $data);
         $response = $response->json();
 
-        $this->mount($this->server_id);
+        $this->packages = $this->getPackages();
     }
 
     public function uninstall($package)
@@ -85,8 +85,8 @@ class PackagesInstalled extends Component
             'package' => $package,
         ];
         $response = Http::post($url, $data);
-        dd($response->json());
-        $this->mount($this->server_id);
+        // dd($response->json()); // Removed debug statement
+        $this->packages = $this->getPackages();
     }
 
     public function installablePackages()
