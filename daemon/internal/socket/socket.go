@@ -11,6 +11,7 @@ import (
 	"os/exec"
 
 	"github.com/yolanmees/spikster/daemon/internal/backup"
+	"github.com/yolanmees/spikster/daemon/internal/email"
 	"github.com/yolanmees/spikster/daemon/internal/server"
 	"github.com/yolanmees/spikster/daemon/internal/cron"
 	"github.com/yolanmees/spikster/daemon/internal/ftp"
@@ -288,6 +289,99 @@ func dispatch(req Request) (string, error) {
 	case "server.package-remove":
 		if err := server.PackageRemove(req.Params["package"]); err != nil { return "", err }
 		return "removed", nil
+
+
+	// ── Email management ──────────────────────────────────────────────────────
+	case "email.create":
+		p := req.Params
+		quota := 0
+		if q := p["quota_mb"]; q != "" {
+			if n, err := strconv.Atoi(q); err == nil {
+				quota = n
+			}
+		}
+		a := email.Account{
+			Domain: p["domain"], Username: p["username"],
+			Email: p["email"], PasswordHash: p["password_hash"], QuotaMB: quota,
+		}
+		if err := email.Create(a); err != nil { return "", err }
+		return "email account created", nil
+
+	case "email.delete":
+		p := req.Params
+		a := email.Account{Domain: p["domain"], Username: p["username"], Email: p["email"]}
+		if err := email.Delete(a); err != nil { return "", err }
+		return "email account deleted", nil
+
+	case "email.update-password":
+		if err := email.UpdatePassword(req.Params["email"], req.Params["password_hash"]); err != nil { return "", err }
+		return "email password updated", nil
+
+	case "email.update-quota":
+		quota := 0
+		if q := req.Params["quota_mb"]; q != "" {
+			if n, err := strconv.Atoi(q); err == nil {
+				quota = n
+			}
+		}
+		if err := email.UpdateQuota(req.Params["email"], quota); err != nil { return "", err }
+		return "email quota updated", nil
+
+	case "email.forwarder-create":
+		if err := email.CreateForwarder(req.Params["source"], req.Params["destination"]); err != nil { return "", err }
+		return "forwarder created", nil
+
+	case "email.forwarder-delete":
+		if err := email.DeleteForwarder(req.Params["source"]); err != nil { return "", err }
+		return "forwarder deleted", nil
+
+	case "email.alias-create":
+		if err := email.CreateAlias(req.Params["alias"], req.Params["target"]); err != nil { return "", err }
+		return "email alias created", nil
+
+	case "email.alias-delete":
+		if err := email.DeleteAlias(req.Params["alias"]); err != nil { return "", err }
+		return "email alias deleted", nil
+
+	case "email.dkim-setup":
+		result, err := email.SetupDKIM(req.Params["domain"], req.Params["selector"])
+		if err != nil { return "", err }
+		enc, _ := json.Marshal(result)
+		return string(enc), nil
+
+	case "email.autoresponder-update":
+		p := req.Params
+		par := email.AutoresponderParams{
+			Domain: p["domain"], Username: p["username"],
+			Enabled: p["enabled"] == "true",
+			Subject: p["subject"], Message: p["message"],
+			StartDate: p["start_date"], EndDate: p["end_date"],
+		}
+		if err := email.UpdateAutoresponder(par); err != nil { return "", err }
+		return "autoresponder updated", nil
+
+	case "email.roundcube-install":
+		p := req.Params
+		par := email.RoundcubeParams{
+			Domain: p["domain"], SiteRoot: p["site_root"],
+			DBName: p["db_name"], DBUser: p["db_user"], DBPass: p["db_pass"],
+			PHP: p["php"],
+		}
+		if err := email.InstallRoundcube(par); err != nil { return "", err }
+		return "roundcube installed", nil
+
+	// ── Fail2ban management ───────────────────────────────────────────────────
+	case "fail2ban.ban":
+		if err := server.Fail2banBan(req.Params["ip"], req.Params["jail"]); err != nil { return "", err }
+		return "ip banned", nil
+
+	case "fail2ban.unban":
+		if err := server.Fail2banUnban(req.Params["ip"], req.Params["jail"]); err != nil { return "", err }
+		return "ip unbanned", nil
+
+	case "fail2ban.whitelist":
+		if err := server.Fail2banWhitelist(req.Params["ip"]); err != nil { return "", err }
+		return "ip whitelisted", nil
 
 
 	default:

@@ -136,4 +136,71 @@ class RemoteDaemonService
 
         return str_contains($output, 'SETUP COMPLETE');
     }
+
+    // ─── Backup management ────────────────────────────────────────────────────
+
+    public function createBackup(Server $server, array $params): array
+    {
+        return $this->send($server, 'backup.create', $params);
+    }
+
+    public function restoreBackup(Server $server, array $params): array
+    {
+        return $this->send($server, 'backup.restore', $params);
+    }
+
+    public function encryptBackup(Server $server, array $params): array
+    {
+        return $this->send($server, 'backup.encrypt', $params);
+    }
+
+    public function uploadBackupToFtp(Server $server, array $params): array
+    {
+        return $this->send($server, 'backup.upload-ftp', $params);
+    }
+
+    public function uploadBackupToS3(Server $server, array $params): array
+    {
+        return $this->send($server, 'backup.upload-s3', $params);
+    }
+
+    // ─── FTP management ───────────────────────────────────────────────────────
+
+    public function createFtpUser(Server $server, array $params): bool
+    {
+        return ($this->send($server, 'ftp.create', $params))['success'] ?? false;
+    }
+
+    public function deleteFtpUser(Server $server, string $username): bool
+    {
+        return ($this->send($server, 'ftp.delete', ['username' => $username]))['success'] ?? false;
+    }
+
+    public function updateFtpUser(Server $server, array $params): bool
+    {
+        return ($this->send($server, 'ftp.update-password', $params))['success'] ?? false;
+    }
+
+    public function getFtpDiskUsage(Server $server, string $username, string $homeDirectory): int
+    {
+        $result = $this->send($server, 'ftp.disk-usage', [
+            'username'       => $username,
+            'home_directory' => $homeDirectory,
+        ]);
+        return (int) ($result['usage_bytes'] ?? 0);
+    }
+
+    public function updateFtpQuota(Server $server, string $username, string $homeDirectory, int $quotaMb): bool
+    {
+        return ($this->send($server, 'ftp.update-quota', compact('username', 'homeDirectory', 'quotaMb')))['success'] ?? false;
+    }
+
+    public function testFtpConnection(Server $server, string $username, string $password): array
+    {
+        return $this->send($server, 'ftp.test', [
+            'username' => $username,
+            'password' => $password,
+            'host'     => '127.0.0.1',
+        ]);
+    }
 }
