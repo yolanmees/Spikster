@@ -1,16 +1,5 @@
 <div>
-    <!-- Flash Messages -->
-    @if (session()->has('success'))
-        <div class="mb-4">
-            <livewire:components.alert type="success" :message="session('success')" :dismissible="true" />
-        </div>
-    @endif
-
-    @if (session()->has('error'))
-        <div class="mb-4">
-            <livewire:components.alert type="error" :message="session('error')" :dismissible="true" />
-        </div>
-    @endif
+    <x-flash-messages />
 
     <div class="space-y-3">
         <!-- nginx -->
