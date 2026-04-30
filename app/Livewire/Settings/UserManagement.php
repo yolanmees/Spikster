@@ -3,6 +3,7 @@
 namespace App\Livewire\Settings;
 
 use App\Models\User;
+use App\Services\AuditService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -87,6 +88,7 @@ class UserManagement extends Component
             $user->syncRoles($roles);
         }
 
+        AuditService::logCreate($user, "User created: {$user->email}");
         session()->flash('success', 'User created successfully!');
         $this->showCreateModal = false;
         $this->resetForm();
@@ -112,6 +114,7 @@ class UserManagement extends Component
         $roles = Role::whereIn('id', $this->selectedRoles)->pluck('name')->toArray();
         $user->syncRoles($roles);
 
+        AuditService::logUpdate($user, ['name' => $user->getOriginal('name'), 'email' => $user->getOriginal('email')], "User updated: {$user->email}");
         session()->flash('success', 'User updated successfully!');
         $this->showEditModal = false;
         $this->resetForm();
@@ -128,6 +131,7 @@ class UserManagement extends Component
             return;
         }
 
+        AuditService::logDelete($user, "User deleted: {$user->email}");
         $user->delete();
 
         session()->flash('success', 'User deleted successfully!');

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Alias;
 use App\Models\Server;
 use App\Models\Site;
+use App\Services\AuditService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
@@ -120,6 +121,7 @@ class SiteService
             throw $e;
         }
 
+        AuditService::logCreate($site, "Site created: {$site->domain}");
         return $site;
     }
 
@@ -160,6 +162,7 @@ class SiteService
         // Delete all aliases then the site record
         $site->aliases()->delete();
 
+        AuditService::logDelete($site, "Site deleted: {$site->domain}");
         return $site->delete();
     }
 

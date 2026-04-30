@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Server;
+use App\Services\AuditService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
@@ -59,7 +60,9 @@ class ServerService
         $data['php'] = $data['php'] ?? config('spikster.default_php');
         $data['default'] = $data['default'] ?? false;
 
-        return Server::create($data);
+        $server = Server::create($data);
+        AuditService::logCreate($server, "Server created: {$server->name} ({$server->ip})");
+        return $server;
     }
 
     /**
@@ -82,6 +85,7 @@ class ServerService
             throw new \Exception('Cannot delete server with existing sites');
         }
 
+        AuditService::logDelete($server, "Server deleted: {$server->name} ({$server->ip})");
         return $server->delete();
     }
 
