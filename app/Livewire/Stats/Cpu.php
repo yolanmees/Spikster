@@ -9,8 +9,8 @@ use Illuminate\Support\Facades\Log;
 
 class Cpu extends Component
 {
-    private $server;
-    private $monitoringService;
+    protected $server;
+    protected $monitoringService;
 
     public array $dataset = [];
     public array $labels = [];
@@ -28,9 +28,13 @@ class Cpu extends Component
         '30d' => 'Last 30 Days',
     ];
 
-    public function mount($server_id, MonitoringService $monitoringService)
+    public function boot(MonitoringService $monitoringService): void
     {
         $this->monitoringService = $monitoringService;
+    }
+
+    public function mount($server_id): void
+    {
         // server_id parameter is actually the UUID string from the route
         // We need to find the server by this UUID to get its integer ID
         $this->server = Server::where('server_id', $server_id)->first();

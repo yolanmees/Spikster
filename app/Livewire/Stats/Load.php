@@ -8,8 +8,8 @@ use Livewire\Component;
 
 class Load extends Component
 {
-    private $server;
-    private $monitoringService;
+    protected $server;
+    protected $monitoringService;
 
     public array $dataset = [];
     public array $labels = [];
@@ -27,9 +27,13 @@ class Load extends Component
         '30d' => 'Last 30 Days',
     ];
 
-    public function mount($server_id, MonitoringService $monitoringService)
+    public function boot(MonitoringService $monitoringService): void
     {
         $this->monitoringService = $monitoringService;
+    }
+
+    public function mount($server_id): void
+    {
         $this->server = Server::where('server_id', $server_id)->first();
 
         if (!$this->server) {
