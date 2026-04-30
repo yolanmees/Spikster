@@ -30,6 +30,18 @@ class DeploymentService
         return $branch;
     }
 
+    /**
+     * Validate a Git repository URL to prevent shell injection.
+     * Allows https://, git://, git@, and ssh:// URLs only.
+     */
+    protected function validateRepositoryUrl(string $url): string
+    {
+        if (! preg_match('/^(https?:\/\/|git:\/\/|git@|ssh:\/\/)[\w\.\/\-_:@]+(\.git)?$/', $url)) {
+            throw new \InvalidArgumentException("Invalid or unsafe repository URL: {$url}");
+        }
+        return $url;
+    }
+
     public function deploySite(Site $site): array
     {
         if (! $site->hasRepository()) {
@@ -139,10 +151,10 @@ class DeploymentService
         // Remove existing directory
         $this->sshService->deleteDirectory($server, $sitePath);
 
-        // Clone repository
+        // Clone repository (validate URL to prevent shell injection)
         $this->sshService->executeCommand(
             $server,
-            "git clone {$site->repository} {$sitePath}"
+            "git clone " . $this->validateRepositoryUrl($site->repository) . " {$sitePath}"
         );
 
         // Checkout specific branch
