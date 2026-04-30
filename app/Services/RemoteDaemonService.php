@@ -37,6 +37,10 @@ class RemoteDaemonService
 
             stream_set_timeout($socket, $this->timeout);
 
+            // Authenticate with daemon token before sending the JSON payload
+            $token = config('spikster.daemon_token');
+            fwrite($socket, "TOKEN {$token}\n");
+
             fwrite($socket, json_encode(['action' => $action, 'params' => $params]));
 
             $response = '';

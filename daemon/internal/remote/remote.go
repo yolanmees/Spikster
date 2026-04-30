@@ -7,11 +7,12 @@ import (
 	"time"
 )
 
-// Client connects to a remote spikster daemon via TCP
-// Remote servers expose the daemon on a local port, tunneled via SSH or directly
+// Client connects to a remote spikster daemon via TCP.
+// Remote servers expose the daemon on a local port, tunneled via SSH or directly.
 type Client struct {
 	Host    string
 	Port    int
+	Token   string
 	Timeout time.Duration
 }
 
@@ -26,8 +27,8 @@ type Response struct {
 	Error   string `json:"error,omitempty"`
 }
 
-func NewClient(host string, port int) *Client {
-	return &Client{Host: host, Port: port, Timeout: 30 * time.Second}
+func NewClient(host string, port int, token string) *Client {
+	return &Client{Host: host, Port: port, Token: token, Timeout: 30 * time.Second}
 }
 
 func (c *Client) Send(action string, params map[string]string) (*Response, error) {
@@ -38,6 +39,11 @@ func (c *Client) Send(action string, params map[string]string) (*Response, error
 	}
 	defer conn.Close()
 	conn.SetDeadline(time.Now().Add(c.Timeout))
+
+	// Authenticate first — send token line before JSON payload
+	if _, err := fmt.Fprintf(conn, "TOKEN %s\n", c.Token); err != nil {
+		return nil, fmt.Errorf("send token: %w", err)
+	}
 
 	req := Request{Action: action, Params: params}
 	if err := json.NewEncoder(conn).Encode(req); err != nil {

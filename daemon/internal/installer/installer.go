@@ -51,6 +51,11 @@ var defaultOrder = []string{
 }
 
 func Install(component string, resume bool) {
+	// Ensure security files exist before any component install
+	if err := EnsureDaemonToken(); err != nil {
+		fmt.Printf("⚠️  Warning: could not generate daemon token: %v\n", err)
+	}
+
 	state := loadState()
 
 	if component != "" {

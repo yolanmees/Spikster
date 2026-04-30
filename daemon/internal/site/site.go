@@ -31,6 +31,9 @@ func (s Site) WebRoot() string {
 }
 
 func Create(s Site) error {
+	if err := ValidateSite(s); err != nil {
+		return err
+	}
 	steps := []struct {
 		name string
 		fn   func() error
@@ -54,13 +57,20 @@ func Create(s Site) error {
 }
 
 func Delete(s Site) error {
-	os.Remove(fmt.Sprintf("/etc/nginx/sites-enabled/%s.conf", s.Username))
-	os.Remove(fmt.Sprintf("/etc/nginx/sites-available/%s.conf", s.Username))
-	os.Remove(fmt.Sprintf("/etc/nginx/spikster/%s.conf", s.Username))
-	os.Remove(fmt.Sprintf("/etc/php/%s/fpm/pool.d/%s.conf", s.PHP, s.Username))
+	// Best-effort cleanup of config files; ignore "not found" errors
+	for _, f := range []string{
+		fmt.Sprintf("/etc/nginx/sites-enabled/%s.conf", s.Username),
+		fmt.Sprintf("/etc/nginx/sites-available/%s.conf", s.Username),
+		fmt.Sprintf("/etc/nginx/spikster/%s.conf", s.Username),
+		fmt.Sprintf("/etc/php/%s/fpm/pool.d/%s.conf", s.PHP, s.Username),
+	} {
+		os.Remove(f) // ignore not-found
+	}
 	reloadService("nginx")
 	reloadService(fmt.Sprintf("php%s-fpm", s.PHP))
-	dropDatabase(s)
+	if err := dropDatabase(s); err != nil {
+		return fmt.Errorf("drop database: %w", err)
+	}
 	return run("userdel", "-r", s.Username)
 }
 
@@ -73,7 +83,13 @@ func createUser(s Site) error {
 	if err := run("useradd", "-m", "-s", "/bin/bash", "-d", "/home/"+s.Username, "-G", "www-data", s.Username); err != nil {
 		return err
 	}
-	return run("bash", "-c", fmt.Sprintf("echo '%s:%s' | chpasswd", s.Username, s.Password))
+	cmd := exec.Command("chpasswd")
+	cmd.Stdin = strings.NewReader(s.Username + ":" + s.Password + "\n")
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("chpasswd: %s", strings.TrimSpace(string(out)))
+	}
+	return nil
 }
 
 func createDirs(s Site) error {
@@ -144,15 +160,43 @@ func writePHPPool(s Site) error {
 
 func createDatabase(s Site) error {
 	sql := fmt.Sprintf(
-		"CREATE DATABASE IF NOT EXISTS `%s`; CREATE USER '%s'@'%%' IDENTIFIED WITH mysql_native_password BY '%s'; GRANT ALL PRIVILEGES ON `%s`.* TO '%s'@'%%' WITH GRANT OPTION; FLUSH PRIVILEGES;",
+		"CREATE DATABASE IF NOT EXISTS `%s`; CREATE USER IF NOT EXISTS '%s'@'localhost' IDENTIFIED WITH mysql_native_password BY '%s'; GRANT ALL PRIVILEGES ON `%s`.* TO '%s'@'localhost' WITH GRANT OPTION; FLUSH PRIVILEGES;",
 		s.DBName, s.Username, s.DBPass, s.DBName, s.Username,
 	)
-	return run("mysql", "-uspikster", "-p"+s.DBRoot, "-e", sql)
+	return runWithDBPass(s.DBRoot, sql)
 }
 
 func dropDatabase(s Site) error {
-	sql := fmt.Sprintf("DROP DATABASE IF EXISTS `%s`; DROP USER IF EXISTS '%s'@'%%'; FLUSH PRIVILEGES;", s.DBName, s.Username)
-	return run("mysql", "-uspikster", "-p"+s.DBRoot, "-e", sql)
+	sql := fmt.Sprintf("DROP DATABASE IF EXISTS `%s`; DROP USER IF EXISTS '%s'@'localhost'; FLUSH PRIVILEGES;", s.DBName, s.Username)
+	return runWithDBPass(s.DBRoot, sql)
+}
+
+// readDBRootPass reads the spikster DB password from the state file.
+func readDBRootPass() (string, error) {
+	data, err := os.ReadFile("/etc/spikster/db.pass")
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(string(data)), nil
+}
+
+// runWithDBPass executes a MySQL statement using a credentials temp file to
+// avoid exposing the password in the process list.
+func runWithDBPass(pass, sql string) error {
+	cnf := fmt.Sprintf("[client]\nuser=spikster\npassword=%s\n", pass)
+	tmp, err := os.CreateTemp("", "spikster-mysql-*.cnf")
+	if err != nil {
+		return err
+	}
+	defer os.Remove(tmp.Name())
+	tmp.WriteString(cnf)
+	tmp.Close()
+	os.Chmod(tmp.Name(), 0600)
+	out, err := exec.Command("mysql", "--defaults-extra-file="+tmp.Name(), "-e", sql).CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("mysql: %s", strings.TrimSpace(string(out)))
+	}
+	return nil
 }
 
 func setPermissions(s Site) error {
@@ -372,12 +416,24 @@ func EnableAliasSSL(domain string) error {
 // ─── Site passwords ───────────────────────────────────────────────────────────
 
 func UpdateUserPassword(username, password string) error {
-	return run("bash", "-c", fmt.Sprintf("echo '%s:%s' | chpasswd", username, password))
+	cmd := exec.Command("chpasswd")
+	cmd.Stdin = strings.NewReader(username + ":" + password + "\n")
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("chpasswd: %s", strings.TrimSpace(string(out)))
+	}
+	return nil
 }
 
-func UpdateDBPassword(username, oldPass, newPass string) error {
-	sql := fmt.Sprintf("ALTER USER '%s'@'%%' IDENTIFIED BY '%s'; FLUSH PRIVILEGES;", username, newPass)
-	return run("mysql", "-u"+username, "-p"+oldPass, "-e", sql)
+func UpdateDBPassword(username, _, newPass string) error {
+	// Use spikster admin user (stored in /etc/spikster/db.pass) to change the password.
+	// Never pass passwords as CLI args (visible in ps aux).
+	rootPass, err := readDBRootPass()
+	if err != nil {
+		return fmt.Errorf("read db.pass: %w", err)
+	}
+	sql := fmt.Sprintf("ALTER USER '%s'@'%%%%' IDENTIFIED BY '%s'; FLUSH PRIVILEGES;", username, newPass)
+	return runWithDBPass(rootPass, sql)
 }
 
 // ─── Supervisor ───────────────────────────────────────────────────────────────
@@ -433,7 +489,13 @@ func WriteDeployScript(username, content string) error {
 // ─── Spikster user password reset ─────────────────────────────────────────────
 
 func ResetSpiksterPassword(newPass string) error {
-	return run("bash", "-c", fmt.Sprintf("echo 'spikster:%s' | chpasswd", newPass))
+	cmd := exec.Command("chpasswd")
+	cmd.Stdin = strings.NewReader("spikster:" + newPass + "\n")
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("chpasswd: %s", strings.TrimSpace(string(out)))
+	}
+	return nil
 }
 
 // ─── Panel nginx domain ───────────────────────────────────────────────────────

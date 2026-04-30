@@ -762,6 +762,12 @@ EOF
     # Replace database and application configurations using sed
     sed -i "s/DB_USERNAME=dbuser/DB_USERNAME=spikster/g" /var/www/html/.env
     sed -i "s/DB_PASSWORD=dbpass/DB_PASSWORD=$DBPASS/g" /var/www/html/.env
+    # Write daemon token to .env
+    if grep -q "DAEMON_TOKEN=" /var/www/html/.env; then
+        sed -i "s/DAEMON_TOKEN=.*/DAEMON_TOKEN=$DAEMON_TOKEN/" /var/www/html/.env
+    else
+        echo "DAEMON_TOKEN=$DAEMON_TOKEN" >> /var/www/html/.env
+    fi
     sed -i "s/DB_DATABASE=dbname/DB_DATABASE=spikster/g" /var/www/html/.env
     sed -i "s|APP_URL=http://localhost|APP_URL=http://$IP|g" /var/www/html/.env
     sed -i "s/APP_ENV=local/APP_ENV=production/g" /var/www/html/.env
@@ -938,8 +944,18 @@ if systemctl is-active --quiet spikster-daemon.service; then
     echo "${bggreen}${black}${bold}Spikster daemon is running${reset}"
 else
     log_message "WARNING: spikster daemon failed to start"
-    echo "${bgyellow}${black}${bold}WARNING: Agent service failed to start. Check logs with: journalctl -u spikster-agent${reset}"
+    echo "${bgyellow}${black}${bold}WARNING: Agent service failed to start. Check logs with: journalctl -u spikster-daemon${reset}"
 fi
+
+# Generate daemon token + db.pass via the installer (idempotent)
+log_message "Generating daemon security tokens..."
+mkdir -p /etc/spikster && chmod 750 /etc/spikster
+if [ ! -f /etc/spikster/daemon.token ]; then
+    openssl rand -hex 32 > /etc/spikster/daemon.token
+    chmod 600 /etc/spikster/daemon.token
+    log_message "daemon.token generated"
+fi
+DAEMON_TOKEN=$(cat /etc/spikster/daemon.token)
 
 # Cleanup
 cd /

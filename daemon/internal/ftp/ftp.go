@@ -8,7 +8,10 @@ import (
 )
 
 const (
-	vusersFile = "/etc/vsftpd/vusers.txt"
+	// vusersFile is the plaintext source for db_load.
+	// Stored in /etc/spikster/ (mode 0750, root only) not in /etc/vsftpd/
+	// to limit exposure. It is the only persistent record of FTP passwords.
+	vusersFile = "/etc/spikster/ftp-vusers.txt"
 	vusersDB   = "/etc/vsftpd/vusers.db"
 	usersDir   = "/etc/vsftpd/users"
 )
@@ -128,6 +131,8 @@ func rebuildDB() error {
 		return err
 	}
 	os.Chmod(vusersDB, 0600)
+	// Keep the source file for future add/remove operations, but enforce strict perms
+	os.Chmod(vusersFile, 0600)
 	return run("systemctl", "reload", "vsftpd")
 }
 

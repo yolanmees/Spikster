@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -30,6 +31,11 @@ type RestoreRequest struct {
 
 // CreateFull creates a full backup (files + database)
 func CreateFull(r BackupRequest) (string, error) {
+	// Pre-flight: check available disk space (require at least 512MB free)
+	if freeBytes, err := diskFreeBytes(backupBase); err == nil && freeBytes < 512*1024*1024 {
+		return "", fmt.Errorf("not enough disk space: only %dMB free in backup dir", freeBytes/1024/1024)
+	}
+
 	ts := time.Now().Format("20060102-150405")
 	backupName := fmt.Sprintf("%s-%s-full", r.Username, ts)
 	backupDir := filepath.Join(backupBase, r.SiteID, backupName)
@@ -46,10 +52,9 @@ func CreateFull(r BackupRequest) (string, error) {
 		return "", fmt.Errorf("tar files: %w", err)
 	}
 
-	// Database dump
+	// Database dump — use credentials file, never -p on cmdline
 	dbDump := filepath.Join(backupDir, "database.sql.gz")
-	dumpCmd := fmt.Sprintf("mysqldump -uspikster -p%s %s | gzip > %s", r.DBRoot, r.DBName, dbDump)
-	if err := run("bash", "-c", dumpCmd); err != nil {
+	if err := mysqldumpWithCreds(r.DBRoot, r.DBName, dbDump); err != nil {
 		return "", fmt.Errorf("mysqldump: %w", err)
 	}
 
@@ -92,16 +97,108 @@ func Restore(r RestoreRequest) error {
 		run("chown", "-R", r.Username+":www-data", r.SiteRoot)
 	}
 
-	// Restore database
+	// Restore database — use credentials file
 	dbDump := filepath.Join(innerDir, "database.sql.gz")
 	if _, err := os.Stat(dbDump); err == nil {
-		restoreCmd := fmt.Sprintf("zcat %s | mysql -uspikster -p%s %s", dbDump, r.DBRoot, r.DBName)
-		if err := run("bash", "-c", restoreCmd); err != nil {
+		if err := mysqlRestoreWithCreds(r.DBRoot, r.DBName, dbDump); err != nil {
 			return fmt.Errorf("restore db: %w", err)
 		}
 	}
 
 	return nil
+}
+
+// ─── MySQL credential helpers ─────────────────────────────────────────────────
+
+// mysqldumpWithCreds dumps a database using a temp credentials file.
+func mysqldumpWithCreds(rootPass, dbName, destGz string) error {
+	cnfFile, cleanup, err := writeTempCnf(rootPass)
+	if err != nil {
+		return err
+	}
+	defer cleanup()
+
+	outFile, err := os.Create(destGz)
+	if err != nil {
+		return err
+	}
+	defer outFile.Close()
+
+	dump := exec.Command("mysqldump",
+		"--defaults-extra-file="+cnfFile,
+		"--single-transaction", "--quick",
+		dbName,
+	)
+	gzip := exec.Command("gzip")
+	gzip.Stdout = outFile
+
+	pipe, err := dump.StdoutPipe()
+	if err != nil {
+		return err
+	}
+	gzip.Stdin = pipe
+
+	if err := gzip.Start(); err != nil {
+		return err
+	}
+	if err := dump.Run(); err != nil {
+		return err
+	}
+	return gzip.Wait()
+}
+
+// mysqlRestoreWithCreds restores a gzipped SQL dump.
+func mysqlRestoreWithCreds(rootPass, dbName, srcGz string) error {
+	cnfFile, cleanup, err := writeTempCnf(rootPass)
+	if err != nil {
+		return err
+	}
+	defer cleanup()
+
+	zcat := exec.Command("zcat", srcGz)
+	mysql := exec.Command("mysql", "--defaults-extra-file="+cnfFile, dbName)
+
+	pipe, err := zcat.StdoutPipe()
+	if err != nil {
+		return err
+	}
+	mysql.Stdin = pipe
+
+	if err := mysql.Start(); err != nil {
+		return err
+	}
+	if err := zcat.Run(); err != nil {
+		return err
+	}
+	return mysql.Wait()
+}
+
+// writeTempCnf writes a MySQL credentials file to a temp path.
+// Returns the file path and a cleanup func.
+func writeTempCnf(pass string) (string, func(), error) {
+	tmp, err := os.CreateTemp("", "spikster-mysql-*.cnf")
+	if err != nil {
+		return "", nil, err
+	}
+	fmt.Fprintf(tmp, "[client]\nuser=spikster\npassword=%s\n", pass)
+	tmp.Close()
+	os.Chmod(tmp.Name(), 0600)
+	return tmp.Name(), func() { os.Remove(tmp.Name()) }, nil
+}
+
+// diskFreeBytes returns available bytes on the filesystem containing path.
+func diskFreeBytes(path string) (uint64, error) {
+	os.MkdirAll(path, 0750)
+	out, err := exec.Command("df", "--output=avail", "-B1", path).Output()
+	if err != nil {
+		return 0, err
+	}
+	lines := strings.Split(strings.TrimSpace(string(out)), "\n")
+	if len(lines) < 2 {
+		return 0, fmt.Errorf("unexpected df output")
+	}
+	n, err := strconv.ParseUint(strings.TrimSpace(lines[1]), 10, 64)
+	return n, err
 }
 
 func run(args ...string) error {

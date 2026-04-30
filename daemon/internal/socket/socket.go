@@ -3,6 +3,8 @@ package socket
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
+	"time"
 	"log"
 	"net"
 	"os"
@@ -57,10 +59,29 @@ func handle(conn net.Conn) {
 	}
 	output, err := dispatch(req)
 	if err != nil {
+		auditLog(req.Action, false, err.Error())
 		respond(conn, false, output, err.Error())
 		return
 	}
+	auditLog(req.Action, true, "")
 	respond(conn, true, output, "")
+}
+
+// auditLog writes an action entry to /var/log/spikster-daemon.log.
+func auditLog(action string, success bool, errMsg string) {
+	f, err := os.OpenFile("/var/log/spikster-daemon.log",
+		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0640)
+	if err != nil {
+		log.Printf("audit log: %v", err)
+		return
+	}
+	defer f.Close()
+	status := "OK"
+	if !success {
+		status = "ERR: " + errMsg
+	}
+	fmt.Fprintf(f, "%s  action=%-40s  %s\n",
+		time.Now().Format("2006-01-02 15:04:05"), action, status)
 }
 
 func respond(conn net.Conn, success bool, output, errMsg string) {
@@ -199,6 +220,11 @@ func dispatch(req Request) (string, error) {
 	// ── Node.js ───────────────────────────────────────────────────────────────
 	case "nodejs.setup":
 		port := 3000
+		if p := req.Params["port"]; p != "" {
+			if n, err := strconv.Atoi(p); err == nil && n > 1024 && n < 65535 {
+				port = n
+			}
+		}
 		err := site.SetupNodejs(req.Params["username"], port, req.Params["script"])
 		if err != nil { return "", err }
 		return "nodejs setup", nil
