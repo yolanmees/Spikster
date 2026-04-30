@@ -1,42 +1,54 @@
-@props(['label' => null, 'placeholder' => '', 'type' => 'text', 'model' => null, 'debounce' => null])
+@props([
+    'label'    => null,
+    'placeholder' => '',
+    'type'     => 'text',
+    'model'    => null,
+    'debounce' => null,
+])
 
-<div class="relative">
+<div {{ $attributes->only('class')->merge(['class' => 'w-full']) }}>
     @if ($label)
-        <label {{ $attributes->only('for') }} class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <label {{ $attributes->only('for') }}
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
             {{ $label }}
         </label>
     @endif
 
-    @if (isset($icon))
-        <div class="relative">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+    <div class="relative">
+        @isset($icon)
+            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                 {{ $icon }}
             </div>
-            <input type="{{ $type }}"
-                @if ($model) @if ($debounce)
-                        wire:model.live.debounce.{{ $debounce }}="{{ $model }}"
-                    @else
-                        wire:model="{{ $model }}" @endif
-                @endif
-            placeholder="{{ $placeholder }}"
-            {{ $attributes->merge(['class' => 'block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm']) }}
-            >
-        </div>
-    @else
-        <input type="{{ $type }}"
-            @if ($model) @if ($debounce)
+        @endisset
+
+        <input
+            type="{{ $type }}"
+            @if ($model)
+                @if ($debounce)
                     wire:model.live.debounce.{{ $debounce }}="{{ $model }}"
                 @else
-                    wire:model="{{ $model }}" @endif
+                    wire:model="{{ $model }}"
+                @endif
             @endif
-        placeholder="{{ $placeholder }}"
-        {{ $attributes->merge(['class' => 'block w-full px-3 py-2 border border-gray-300 rounded-md leading-5 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm']) }}
+            placeholder="{{ $placeholder }}"
+            {{ $attributes->except(['class', 'for', 'label', 'model', 'debounce', 'type', 'placeholder'])->merge([
+                'class' => implode(' ', [
+                    'block w-full rounded-lg border border-gray-300 bg-white py-2 text-sm text-gray-900',
+                    'placeholder-gray-400 shadow-sm',
+                    'focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20',
+                    'disabled:opacity-60 disabled:cursor-not-allowed',
+                    'dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500',
+                    'dark:focus:border-blue-400 dark:focus:ring-blue-400/20',
+                    isset($icon) ? 'pl-10 pr-3' : 'px-3',
+                    isset($suffix) ? 'pr-10' : '',
+                ])
+            ]) }}
         >
-    @endif
 
-    @if (isset($suffix))
-        <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
-            {{ $suffix }}
-        </div>
-    @endif
+        @isset($suffix)
+            <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                {{ $suffix }}
+            </div>
+        @endisset
+    </div>
 </div>

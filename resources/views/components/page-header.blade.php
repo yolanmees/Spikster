@@ -1,15 +1,37 @@
-@props(['title', 'subtitle' => null])
+@props([
+    'title',
+    'subtitle'    => null,
+    'size'        => 'page',   {{-- 'page' (h1) | 'section' (h3) --}}
+    'back'        => null,     {{-- href for back button --}}
+    'backLabel'   => 'Back',
+])
 
-<div class="flex items-center justify-between mb-6">
-    <div>
-        <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">{{ $title }}</h1>
-        @if ($subtitle)
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ $subtitle }}</p>
+@php
+    $titleClass = $size === 'section'
+        ? 'text-lg font-semibold text-gray-900 dark:text-white'
+        : 'text-2xl font-bold text-gray-900 dark:text-white';
+    $tag = $size === 'section' ? 'h3' : 'h1';
+@endphp
+
+<div {{ $attributes->merge(['class' => 'flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6']) }}>
+    <div class="flex items-center gap-3">
+        @if($back)
+            <a href="{{ $back }}"
+               class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                <span class="sr-only">{{ $backLabel }}</span>
+            </a>
         @endif
-    </div>
-    @if (isset($actions))
-        <div class="flex items-center space-x-3">
-            {{ $actions }}
+        <div>
+            <{{ $tag }} class="{{ $titleClass }}">{{ $title }}</{{ $tag }}>
+            @if($subtitle)
+                <p class="mt-0.5 text-sm text-gray-500 dark:text-gray-400">{{ $subtitle }}</p>
+            @endif
         </div>
-    @endif
+    </div>
+    @isset($actions)
+        <div class="flex items-center gap-2 shrink-0">{{ $actions }}</div>
+    @endisset
 </div>

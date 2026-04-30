@@ -1,32 +1,25 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+@extends('layouts.guest')
 
-<head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <meta name="robots" content="noindex, nofollow">
-    <meta name="googlebot" content="noindex">
-    <title>{{ config('cipi.name') }} | {{ __('spikster.forbidden') }}</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
+@section('title', '403 — Forbidden')
 
-<body class="bg-gray-100 dark:bg-gray-900">
-    <div class="min-h-screen flex items-center justify-center px-4">
-        <div class="max-w-md w-full text-center">
-            <img class="mb-8 w-64 mx-auto" src="/assets/img/forbidden.jpg" alt="403" />
-            <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-2">{{ __('spikster.error') }} 403</h1>
-            <p class="text-lg text-gray-600 dark:text-gray-400 mb-8">{{ __('spikster.forbidden') }}</p>
-            <a href="/"
-                class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transform hover:scale-105 active:scale-95 transition-all duration-200">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                {{ __('spikster.return_to_dashboard') }}
-            </a>
+@section('content')
+<div class="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col items-center justify-center px-4">
+    <div class="text-center max-w-md">
+        <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-yellow-50 dark:bg-yellow-900/20 mb-6">
+            <svg class="w-10 h-10 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+            </svg>
         </div>
+        <h1 class="text-7xl font-black text-gray-900 dark:text-white mb-2">403</h1>
+        <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-3">Access Forbidden</h2>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-8">You don't have permission to access this resource.</p>
+        <a href="/dashboard"
+            class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition-colors shadow-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            Back to Dashboard
+        </a>
     </div>
-</body>
-
-</html>
+</div>
+@endsection

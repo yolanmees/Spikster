@@ -1,6 +1,12 @@
 @if (session()->has('success'))
-    <livewire:components.alert type="success" :message="session('success')" :dismissible="true" />
+    <x-alert type="success" :dismissible="true" class="mb-4">{{ session('success') }}</x-alert>
 @endif
 @if (session()->has('error'))
-    <livewire:components.alert type="error" :message="session('error')" :dismissible="true" />
+    <x-alert type="error" :dismissible="true" class="mb-4">{{ session('error') }}</x-alert>
+@endif
+@if (session()->has('warning'))
+    <x-alert type="warning" :dismissible="true" class="mb-4">{{ session('warning') }}</x-alert>
+@endif
+@if (session()->has('info'))
+    <x-alert type="info" :dismissible="true" class="mb-4">{{ session('info') }}</x-alert>
 @endif

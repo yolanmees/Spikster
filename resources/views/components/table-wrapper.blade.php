@@ -1,10 +1,15 @@
 <div class="relative">
-    <div wire:loading.delay class="absolute inset-0 bg-white/50 dark:bg-gray-900/50 z-10 flex items-center justify-center rounded-lg">
-        <livewire:components.loading-spinner size="lg" color="blue" message="Loading..." />
+    {{-- Livewire loading overlay --}}
+    <div wire:loading.delay class="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm">
+        <x-spinner size="lg" color="blue" />
     </div>
-    <div class="mt-4 -mx-4 ring-1 ring-gray-300 dark:ring-gray-700 sm:mx-0 sm:rounded-lg overflow-hidden">
+
+    {{-- Table container --}}
+    <div class="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700/50 shadow-sm">
         {{ $slot }}
     </div>
+
+    {{-- Pagination --}}
     @isset($pagination)
         <div class="mt-4">{{ $pagination }}</div>
     @endisset

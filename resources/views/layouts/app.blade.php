@@ -1,289 +1,134 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}"
+    x-data="{ sidebarOpen: false, darkMode: localStorage.getItem('darkMode') === 'true' }"
+    x-init="$watch('darkMode', v => localStorage.setItem('darkMode', v))"
+    :class="{ 'dark': darkMode }">
 
 <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="robots" content="noindex, nofollow">
     <meta name="googlebot" content="noindex">
-    <title>{{ config('cipi.name') }} | @yield('title')</title>
-    <meta name="cipi-version" content="{{ Storage::get('cipi/version.md') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <link rel="icon" type="image/png" href="/favicon.png" />
+    <title>{{ config('cipi.name', config('app.name')) }} · @yield('title')</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    <!-- Livewire Configuration -->
-    {{-- <script>
-        window.livewireScriptConfig = {
-            csrf: '{{ csrf_token() }}',
-            uri: '{{ rtrim(config('livewire.asset_url', '/livewire'), '/') }}',
-            progressBar: {{ config('livewire.navigate.show_progress_bar') ? 'true' : 'false' }},
-            nonce: ''
-        };
-    </script> --}}
-
-    <style>
-        [x-cloak] {
-            display: none !important;
-        }
-
-        .space {
-            min-height: 20px;
-        }
-
-        #mainloading {
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            position: fixed;
-            display: block;
-            opacity: 0.8;
-            background-color: #000;
-            z-index: 99;
-            text-align: center;
-            color: #fff;
-            font-family: Arial, Helvetica, sans-serif;
-        }
-
-        #mainloadingicon {
-            margin: 0 auto;
-            margin-top: 100px;
-            z-index: 100000;
-        }
-    </style>
+    <style>[x-cloak]{display:none!important}</style>
     @yield('css')
+    @stack('styles')
 </head>
 
-<body x-data="{ sidebarOpen: false, darkMode: false }" x-init="darkMode = JSON.parse(localStorage.getItem('darkMode')) || false;
-$watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))" x-bind:class="{ 'dark': darkMode }"
-    class="bg-gray-100 dark:bg-gray-900 dark:text-white">
-    <div>
-        @include('layouts.components.mobile-sidebar')
-        @include('layouts.components.sidebar')
+<body class="bg-gray-100 dark:bg-gray-950 antialiased">
 
-        <div class="xl:pl-72">
-            <!-- Sticky search header -->
-            <div
-                class="sticky top-0 z-40 flex items-center h-16 px-4 bg-gray-900 border-b shadow-sm shrink-0 gap-x-6 border-white/5 dark:bg-gray-800 sm:px-6 lg:px-8">
-                <button x-on:click="sidebarOpen = true" type="button" class="-m-2.5 p-2.5 text-white xl:hidden">
-                    <span class="sr-only">Open sidebar</span>
-                    <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                        <path fill-rule="evenodd"
-                            d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10zm0 5.25a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75a.75.75 0 01-.75-.75z"
-                            clip-rule="evenodd" />
+    {{-- Mobile sidebar overlay --}}
+    @include('layouts.components.mobile-sidebar')
+
+    {{-- Desktop sidebar --}}
+    @include('layouts.components.sidebar')
+
+    {{-- Main content wrapper --}}
+    <div class="xl:pl-72 flex flex-col min-h-screen">
+
+        {{-- Topbar --}}
+        <header class="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-white/10 bg-gray-900 dark:bg-gray-900 px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+            {{-- Mobile hamburger --}}
+            <button x-on:click="sidebarOpen = true" type="button"
+                class="-m-2.5 p-2.5 text-white xl:hidden hover:text-gray-300 transition-colors"
+                aria-label="Open sidebar">
+                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10zm0 5.25a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75a.75.75 0 01-.75-.75z" clip-rule="evenodd"/>
+                </svg>
+            </button>
+
+            <div class="flex flex-1 items-center justify-end gap-x-3">
+                {{-- Page title (injected by pages) --}}
+                <div class="mr-auto hidden sm:block text-sm text-gray-400 font-medium">
+                    @yield('topbar-title')
+                </div>
+
+                {{-- Dark mode toggle --}}
+                <button @click="darkMode = !darkMode" type="button"
+                    class="inline-flex items-center justify-center w-9 h-9 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-all duration-200"
+                    :aria-label="darkMode ? 'Switch to light mode' : 'Switch to dark mode'">
+                    <svg x-show="!darkMode" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                    </svg>
+                    <svg x-show="darkMode" x-cloak class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
                     </svg>
                 </button>
 
-
-                <div class="flex self-stretch flex-1 gap-x-4 lg:gap-x-6">
-                    <form class="flex flex-1" action="#" method="GET">
-                        <div class="relative w-full">
-                            {{-- <svg class="absolute inset-y-0 left-0 w-5 h-full text-gray-500 pointer-events-none dark:text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
-                            </svg> --}}
-                            {{-- <input id="search-field" class="block w-full h-full py-0 pl-8 pr-0 text-white bg-transparent border-0 dark:bg-gray-800 dark:text-gray-300 focus:ring-0 sm:text-sm" placeholder="Search..." type="search" name="search"> --}}
+                {{-- User avatar dropdown --}}
+                <div x-data="{ open: false }" class="relative">
+                    <button @click="open = !open" @click.away="open = false" type="button"
+                        class="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-white/10 transition-all duration-200">
+                        <div class="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs shrink-0">
+                            {{ strtoupper(substr(Auth::user()->name ?? 'U', 0, 2)) }}
                         </div>
-                    </form>
+                        <span class="hidden sm:block text-sm font-medium text-white">{{ Auth::user()->name ?? '' }}</span>
+                        <svg class="w-4 h-4 text-gray-400 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+
+                    <div x-show="open" x-cloak
+                        x-transition:enter="transition ease-out duration-100"
+                        x-transition:enter-start="transform opacity-0 scale-95"
+                        x-transition:enter-end="transform opacity-100 scale-100"
+                        x-transition:leave="transition ease-in duration-75"
+                        x-transition:leave-start="transform opacity-100 scale-100"
+                        x-transition:leave-end="transform opacity-0 scale-95"
+                        class="absolute right-0 mt-2 w-48 origin-top-right rounded-xl bg-white dark:bg-gray-800 shadow-xl ring-1 ring-black/10 dark:ring-white/10 py-1 z-50">
+                        <a href="{{ route('profile.show') }}"
+                            class="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                            Profile
+                        </a>
+                        <div class="my-1 border-t border-gray-100 dark:border-gray-700"></div>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit"
+                                class="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                                </svg>
+                                Logout
+                            </button>
+                        </form>
+                    </div>
                 </div>
-
-
             </div>
+        </header>
 
-            <main class="m-4">
-                @yield('content')
-            </main>
-            <div class="grid place-items-center">
+        {{-- Flash messages --}}
+        <div class="px-4 pt-4 sm:px-6 lg:px-8">
+            @if(session('success'))
+                <x-alert type="success" :dismissible="true">{{ session('success') }}</x-alert>
+            @endif
+            @if(session('error'))
+                <x-alert type="error" :dismissible="true">{{ session('error') }}</x-alert>
+            @endif
+        </div>
+
+        {{-- Page content --}}
+        <main class="flex-1 px-4 py-6 sm:px-6 lg:px-8">
+            @yield('content')
+        </main>
+
+        {{-- Extra slot --}}
+        @hasSection('extra')
+            <div class="px-4 sm:px-6 lg:px-8 pb-6">
                 @yield('extra')
             </div>
-        </div>
+        @endif
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
-    <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/responsive/2.2.7/js/dataTables.responsive.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js"></script>
 
-
-
-    <script>
-        //Init Datatable Data
-        localStorage.dtdata = '';
-
-        //Datatable Render Check
-        function dtRender() {
-            if (document.getElementById('dt').innerHTML == 'OFF') {
-                renderMake();
-            } else {
-                $('#dt').DataTable().clear().destroy();
-                renderMake();
-            }
-
-        }
-
-        //Vars in Page
-        $('#username').html(localStorage.username);
-        $('#panelversion').html($('meta[name="cipi-version"]').attr('content'));
-
-        //Success notification
-        function success(text) {
-            $('#successtext').empty();
-            $('#successtext').html(text);
-            $('#success').removeClass('d-none');
-        }
-
-        //Fail notification
-        function fail(text) {
-            $('#failtext').empty();
-            $('#failtext').html(text);
-            $('#fail').removeClass('d-none');
-        }
-
-        //Success notification hide
-        $('#successx').click(function() {
-            $('#success').addClass('d-none');
-            $('#successtext').empty();
-        });
-
-        //Fail notification hide
-        $('#failx').click(function() {
-            $('#fail').addClass('d-none');
-            $('#failtext').empty();
-        });
-
-        //IP Validation
-        function ipValidate(ip) {
-            return (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/
-                .test(ip))
-        }
-
-        //jQuery AJAX Authorization Header Setup & Default Error
-        $.ajaxSetup({
-            cache: false,
-            headers: {
-                'Authorization': 'Bearer ' + localStorage.access_token,
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            error: function(error) {
-                if (error.status == 401) {
-                    jwtrefresh().then(data => {
-                        this.headers = {
-                            'Authorization': 'Bearer ' + localStorage.access_token
-                        };
-                        $.ajax(this);
-                    }).catch(error => {
-                        $('#errorModal').modal();
-                    });
-                }
-
-                if (error.status == 500) {
-                    $('#errorModal').modal();
-                }
-                if (error.status == 503) {
-                    $('#serverping').empty();
-                    $('#serverping').html(
-                        '<svg class="w-4 h-4 inline-block text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>'
-                        );
-                }
-            }
-        });
-
-        //JWT Token Refresh
-        function jwtrefresh() {
-            return new Promise((resolve, reject) => {
-                $.ajax({
-                    url: '/auth',
-                    type: 'GET',
-                    data: {
-                        username: localStorage.username,
-                        refresh_token: localStorage.refresh_token
-                    },
-                    success: function(data) {
-                        localStorage.access_token = data.access_token;
-                        localStorage.refresh_token = data.refresh_token;
-                        localStorage.username = data.username;
-                        resolve(data);
-                    },
-                    error: function(error) {
-                        localStorage.clear();
-                        window.location.replace('/login');
-                        reject(error);
-                    }
-                });
-            });
-        }
-
-        //Get Data for DataTable
-        function getData(url, loading = true) {
-            if (loading) {
-                $('#mainloading').removeClass('d-none');
-            }
-            $.ajax({
-                type: 'GET',
-                url: url,
-                success: function(data) {
-                    localStorage.dtdata = '';
-                    localStorage.dtdata = JSON.stringify(data);
-                    dtRender();
-                    if (loading) {
-                        setTimeout(function() {
-                            $('#mainloading').addClass('d-none');
-                        }, 250);
-                    }
-                }
-            });
-        }
-
-        //Get Data for Other
-        function getDataNoDT(url) {
-            $.ajax({
-                type: 'GET',
-                url: url,
-                success: function(data) {
-                    localStorage.otherdata = '';
-                    localStorage.otherdata = JSON.stringify(data);
-                }
-            });
-        }
-
-        //Get Data for DataTable
-        function getDataNoUI(url) {
-            $.ajax({
-                type: 'GET',
-                url: url,
-                success: function(data) {
-                    localStorage.dtdata = '';
-                    localStorage.dtdata = JSON.stringify(data);
-                }
-            });
-        }
-
-        //Logout
-        $('#logout').click(function(e) {
-            e.preventDefault();
-            $.ajax({
-                url: '/auth',
-                type: 'DELETE',
-                headers: {
-                    'x-csrf-token': $('meta[name="csrf-token"]').attr('content'),
-                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-                },
-                data: {
-                    'username': localStorage.username,
-                    'refresh_token': localStorage.refresh_token
-                },
-                success: function(data) {
-                    localStorage.clear();
-                    window.location.replace('/login');
-                }
-            });
-        });
-    </script>
-    @yield('js')
     @stack('scripts')
+    @yield('js')
 </body>
-
 </html>
