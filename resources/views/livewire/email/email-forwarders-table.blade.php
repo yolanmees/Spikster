@@ -65,8 +65,9 @@
                             </td>
                             <td class="relative py-3.5 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                                 <x-danger-button wire:click="confirmDelete('{{ $forwarder->id }}')" type="button"
-                                    wire:loading.attr="disabled" wire:target="confirmDelete">
-                                    Delete
+                                    wire:loading.attr="disabled" wire:target="confirmDelete('{{ $forwarder->id }}')">
+                                    <span wire:loading.remove wire:target="confirmDelete('{{ $forwarder->id }}')">Delete</span>
+                                    <span wire:loading wire:target="confirmDelete('{{ $forwarder->id }}')"><x-wire-spinner size="sm" /></span>
                                 </x-danger-button>
                             </td>
                         </tr>
