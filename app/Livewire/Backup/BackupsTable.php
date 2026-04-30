@@ -91,7 +91,7 @@ class BackupsTable extends Component
 
     public function openRestoreModal($backupId)
     {
-        $this->selectedBackup = Backup::find($backupId);
+        $this->selectedBackup = Backup::where('site_id', $this->site->id)->find($backupId);
         $this->showRestoreModal = true;
     }
 
@@ -103,7 +103,7 @@ class BackupsTable extends Component
 
     public function openDeleteModal($backupId)
     {
-        $this->selectedBackup = Backup::find($backupId);
+        $this->selectedBackup = Backup::where('site_id', $this->site->id)->find($backupId);
         $this->showDeleteModal = true;
         $this->deleteFile = false;
     }
@@ -149,7 +149,7 @@ class BackupsTable extends Component
 
     public function downloadBackup($backupId)
     {
-        $backup = Backup::find($backupId);
+        $backup = Backup::where('site_id', $this->site->id)->find($backupId);
 
         if (!$backup || !$backup->isComplete()) {
             session()->flash('error', 'Backup file not available for download');

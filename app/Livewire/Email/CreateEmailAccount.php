@@ -78,14 +78,13 @@ class CreateEmailAccount extends Component
         $this->validate();
 
         try {
-            $account = $emailService->createEmailAccount([
-                'site_id' => $this->site->id,
-                'username' => $this->username,
+            $account = $emailService->createEmailAccount($this->site, [
+                'email' => $this->username . '@' . $this->site->domain,
                 'password' => $this->password,
                 'quota_mb' => $this->quota_mb,
-                'enable_spam_filter' => $this->enable_spam_filter,
-                'enable_virus_scan' => $this->enable_virus_scan,
-                'is_active' => $this->is_active,
+                'spam_filter' => $this->enable_spam_filter,
+                'antivirus' => $this->enable_virus_scan,
+                'active' => $this->is_active,
             ]);
 
             session()->flash('success', 'Email account created successfully. IMAP/SMTP settings are available in the account details.');

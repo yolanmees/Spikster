@@ -61,7 +61,7 @@ class EmailAccountsTable extends Component
 
         // Enrich accounts with quota usage
         foreach ($accounts as $account) {
-            $account->quota_info = $emailService->getQuotaUsage($account->id);
+            $account->quota_info = $emailService->getQuotaUsage($account);
         }
 
         return view('livewire.email.email-accounts-table', [

@@ -78,7 +78,7 @@ class BackupScheduleManager extends Component
 
     public function openEditModal($scheduleId)
     {
-        $this->selectedSchedule = BackupSchedule::find($scheduleId);
+        $this->selectedSchedule = BackupSchedule::where('site_id', $this->site->id)->find($scheduleId);
 
         if ($this->selectedSchedule) {
             $this->name = $this->selectedSchedule->name;
@@ -107,7 +107,7 @@ class BackupScheduleManager extends Component
 
     public function openDeleteModal($scheduleId)
     {
-        $this->selectedSchedule = BackupSchedule::find($scheduleId);
+        $this->selectedSchedule = BackupSchedule::where('site_id', $this->site->id)->find($scheduleId);
         $this->showDeleteModal = true;
     }
 
@@ -187,7 +187,7 @@ class BackupScheduleManager extends Component
 
     public function toggleSchedule($scheduleId)
     {
-        $schedule = BackupSchedule::find($scheduleId);
+        $schedule = BackupSchedule::where('site_id', $this->site->id)->find($scheduleId);
 
         if ($schedule) {
             $schedule->is_active = !$schedule->is_active;
