@@ -31,15 +31,8 @@
                         @endif
                     </div>
                     <div class="mt-3 flex gap-2">
-                        <button wire:click="showModal" type="button"
-                            class="text-sm text-green-700 dark:text-green-300 hover:text-green-900 dark:hover:text-green-100 font-medium">
-                            Edit
-                        </button>
-                        <button wire:click="disable" wire:confirm="Are you sure you want to disable the autoresponder?"
-                            type="button"
-                            class="text-sm text-red-700 dark:text-red-300 hover:text-red-900 dark:hover:text-red-100 font-medium">
-                            Disable
-                        </button>
+                        <x-secondary-button wire:click="showModal" type="button">Edit</x-secondary-button>
+                        <x-danger-button wire:click="disable" wire:confirm="Are you sure you want to disable the autoresponder?" type="button">Disable</x-danger-button>
                     </div>
                 </div>
             </div>
@@ -57,10 +50,7 @@
                     Set up an automatic reply for when you're away
                 </p>
                 <div class="mt-6">
-                    <button wire:click="showModal" type="button"
-                        class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        Create Autoresponder
-                    </button>
+                    <x-primary-button wire:click="showModal" type="button">Create Autoresponder</x-primary-button>
                 </div>
             </div>
         </div>
