@@ -43,6 +43,7 @@ class Backup extends Model
         'completed_at' => 'datetime',
         'includes_database' => 'boolean',
         'includes_files' => 'boolean',
+        'includes_email' => 'boolean',
         'metadata' => 'array',
     ];
 

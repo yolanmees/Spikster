@@ -47,9 +47,9 @@ class BackupController extends Controller
      */
     public function index(string $siteId): JsonResponse
     {
-        $site = Site::findOrFail($siteId);
+        $site = Site::where('site_id', $siteId)->firstOrFail();
 
-        $backups = Backup::where('site_id', $site->id)
+        $backups = Backup::where('site_id', $site->site_id)
             ->with(['backupSchedule', 'server'])
             ->orderBy('created_at', 'desc')
             ->paginate(20);
@@ -83,7 +83,7 @@ class BackupController extends Controller
      */
     public function createFullBackup(Request $request, string $siteId): JsonResponse
     {
-        $site = Site::findOrFail($siteId);
+        $site = Site::where('site_id', $siteId)->firstOrFail();
 
         $validator = Validator::make($request->all(), [
             'include_database' => 'boolean',
@@ -122,7 +122,7 @@ class BackupController extends Controller
      */
     public function createIncrementalBackup(Request $request, string $siteId): JsonResponse
     {
-        $site = Site::findOrFail($siteId);
+        $site = Site::where('site_id', $siteId)->firstOrFail();
 
         $backup = $this->backupService->createIncrementalBackup($site, $request->all());
 
@@ -148,7 +148,7 @@ class BackupController extends Controller
      */
     public function createDatabaseBackup(Request $request, string $siteId): JsonResponse
     {
-        $site = Site::findOrFail($siteId);
+        $site = Site::where('site_id', $siteId)->firstOrFail();
 
         $backup = $this->backupService->createDatabaseBackup($site, $request->all());
 
@@ -340,7 +340,7 @@ class BackupController extends Controller
      */
     public function stats(string $siteId): JsonResponse
     {
-        $site = Site::findOrFail($siteId);
+        $site = Site::where('site_id', $siteId)->firstOrFail();
 
         $stats = $this->backupService->getBackupStats($site);
 
@@ -367,9 +367,9 @@ class BackupController extends Controller
      */
     public function listSchedules(string $siteId): JsonResponse
     {
-        $site = Site::findOrFail($siteId);
+        $site = Site::where('site_id', $siteId)->firstOrFail();
 
-        $schedules = BackupSchedule::where('site_id', $site->id)
+        $schedules = BackupSchedule::where('site_id', $site->site_id)
             ->with('backups')
             ->orderBy('created_at', 'desc')
             ->get();
@@ -412,7 +412,7 @@ class BackupController extends Controller
      */
     public function createSchedule(Request $request, string $siteId): JsonResponse
     {
-        $site = Site::findOrFail($siteId);
+        $site = Site::where('site_id', $siteId)->firstOrFail();
 
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',

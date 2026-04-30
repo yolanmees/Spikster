@@ -24,8 +24,8 @@ class BackupService
     public function createFullBackup(Site $site, array $options = []): Backup
     {
         $backup = Backup::create([
-            'site_id' => $site->id,
-            'server_id' => $site->server_id,
+            'site_id' => $site->site_id,
+            'server_id' => $site->server->server_id,
             'backup_schedule_id' => $options['schedule_id'] ?? null,
             'type' => 'full',
             'status' => 'pending',
@@ -68,7 +68,7 @@ class BackupService
     public function createIncrementalBackup(Site $site, array $options = []): Backup
     {
         // Find the last full or incremental backup
-        $lastBackup = Backup::where('site_id', $site->id)
+        $lastBackup = Backup::where('site_id', $site->site_id)
             ->whereIn('type', ['full', 'incremental'])
             ->where('status', 'completed')
             ->orderBy('created_at', 'desc')
@@ -81,8 +81,8 @@ class BackupService
         }
 
         $backup = Backup::create([
-            'site_id' => $site->id,
-            'server_id' => $site->server_id,
+            'site_id' => $site->site_id,
+            'server_id' => $site->server->server_id,
             'backup_schedule_id' => $options['schedule_id'] ?? null,
             'type' => 'incremental',
             'status' => 'pending',
@@ -124,8 +124,8 @@ class BackupService
     public function createDatabaseBackup(Site $site, array $options = []): Backup
     {
         $backup = Backup::create([
-            'site_id' => $site->id,
-            'server_id' => $site->server_id,
+            'site_id' => $site->site_id,
+            'server_id' => $site->server->server_id,
             'backup_schedule_id' => $options['schedule_id'] ?? null,
             'type' => 'database',
             'status' => 'pending',
@@ -162,8 +162,8 @@ class BackupService
     public function createFilesBackup(Site $site, array $options = []): Backup
     {
         $backup = Backup::create([
-            'site_id' => $site->id,
-            'server_id' => $site->server_id,
+            'site_id' => $site->site_id,
+            'server_id' => $site->server->server_id,
             'backup_schedule_id' => $options['schedule_id'] ?? null,
             'type' => 'files',
             'status' => 'pending',
@@ -327,7 +327,7 @@ class BackupService
             $retentionDays = $schedule->retention_days;
 
             // Get backups for this schedule
-            $query = Backup::where('site_id', $site->id)
+            $query = Backup::where('site_id', $site->site_id)
                 ->where('backup_schedule_id', $schedule->id)
                 ->where('status', 'completed')
                 ->orderBy('created_at', 'desc');
@@ -336,7 +336,7 @@ class BackupService
             $retentionCount = 10;
             $retentionDays = 30;
 
-            $query = Backup::where('site_id', $site->id)
+            $query = Backup::where('site_id', $site->site_id)
                 ->where('status', 'completed')
                 ->orderBy('created_at', 'desc');
         }
@@ -353,7 +353,7 @@ class BackupService
         // Apply retention days
         if ($retentionDays) {
             $cutoffDate = Carbon::now()->subDays($retentionDays);
-            $oldBackups = Backup::where('site_id', $site->id)
+            $oldBackups = Backup::where('site_id', $site->site_id)
                 ->where('status', 'completed')
                 ->where('created_at', '<', $cutoffDate)
                 ->get();
@@ -367,7 +367,7 @@ class BackupService
         }
 
         Log::info("Backup rotation completed", [
-            'site_id' => $site->id,
+            'site_id' => $site->site_id,
             'schedule_id' => $schedule?->id,
             'deleted_count' => $deleted,
         ]);
@@ -385,7 +385,7 @@ class BackupService
     public function createSchedule(Site $site, array $data): BackupSchedule
     {
         $schedule = BackupSchedule::create([
-            'site_id' => $site->id,
+            'site_id' => $site->site_id,
             'name' => $data['name'],
             'type' => $data['type'] ?? 'full',
             'frequency' => $data['frequency'],
@@ -405,7 +405,7 @@ class BackupService
 
         Log::info("Backup schedule created", [
             'schedule_id' => $schedule->id,
-            'site_id' => $site->id,
+            'site_id' => $site->site_id,
             'frequency' => $schedule->frequency,
         ]);
 
@@ -571,7 +571,7 @@ class BackupService
      */
     public function getBackupStats(Site $site): array
     {
-        $backups = Backup::where('site_id', $site->id)->get();
+        $backups = Backup::where('site_id', $site->site_id)->get();
 
         $stats = [
             'total_backups' => $backups->count(),
