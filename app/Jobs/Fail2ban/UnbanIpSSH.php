@@ -3,7 +3,7 @@
 namespace App\Jobs\Fail2ban;
 
 use App\Models\Server;
-use App\Services\Fail2banService;
+use App\Services\RemoteDaemonService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -15,30 +15,23 @@ class UnbanIpSSH implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public $timeout = 300;
+    public $timeout = 60;
     public $tries = 3;
 
-    protected Server $server;
-    protected string $ip;
-    protected ?string $jail;
+    public function __construct(
+        protected Server $server,
+        protected string $ip,
+        protected ?string $jail = null
+    ) {}
 
-    /**
-     * Create a new job instance.
-     */
-    public function __construct(Server $server, string $ip, ?string $jail = null)
-    {
-        $this->server = $server;
-        $this->ip = $ip;
-        $this->jail = $jail;
-    }
-
-    /**
-     * Execute the job.
-     */
-    public function handle(Fail2banService $fail2banService): void
+    public function handle(RemoteDaemonService $daemon): void
     {
         try {
-            $fail2banService->unbanIp($this->server, $this->ip, $this->jail);
+            $success = $daemon->fail2banUnban($this->server, $this->ip, $this->jail ?? '');
+
+            if (! $success) {
+                throw new \RuntimeException("Daemon returned failure for fail2ban.unban: {$this->ip}");
+            }
 
             $jailInfo = $this->jail ? "from jail {$this->jail}" : "from all jails";
             Log::info("Fail2ban: Unbanned IP {$this->ip} {$jailInfo} on server {$this->server->name}");

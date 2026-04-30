@@ -3,7 +3,7 @@
 namespace App\Jobs\Fail2ban;
 
 use App\Models\Server;
-use App\Services\Fail2banService;
+use App\Services\RemoteDaemonService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -15,28 +15,22 @@ class WhitelistIpSSH implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public $timeout = 300;
+    public $timeout = 60;
     public $tries = 3;
 
-    protected Server $server;
-    protected string $ip;
+    public function __construct(
+        protected Server $server,
+        protected string $ip
+    ) {}
 
-    /**
-     * Create a new job instance.
-     */
-    public function __construct(Server $server, string $ip)
-    {
-        $this->server = $server;
-        $this->ip = $ip;
-    }
-
-    /**
-     * Execute the job.
-     */
-    public function handle(Fail2banService $fail2banService): void
+    public function handle(RemoteDaemonService $daemon): void
     {
         try {
-            $fail2banService->whitelistIp($this->server, $this->ip);
+            $success = $daemon->fail2banWhitelist($this->server, $this->ip);
+
+            if (! $success) {
+                throw new \RuntimeException("Daemon returned failure for fail2ban.whitelist: {$this->ip}");
+            }
 
             Log::info("Fail2ban: Whitelisted IP {$this->ip} on server {$this->server->name}");
         } catch (\Throwable $e) {
