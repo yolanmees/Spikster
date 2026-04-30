@@ -87,3 +87,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         Route::post('/{module}/disable', [\App\Http\Controllers\ModuleController::class, 'disable'])->name('disable');
     });
 });
+
+// Setup wizard — token-based, one time use, no auth required
+Route::get('/setup/{token}', [\App\Http\Controllers\SetupController::class, 'show'])->name('setup.show');
+Route::post('/setup/{token}', [\App\Http\Controllers\SetupController::class, 'complete'])->name('setup.complete');
