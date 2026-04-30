@@ -91,14 +91,15 @@ class DnsService
         $zone = htmlspecialchars($zone, ENT_QUOTES, 'utf-8');
 
         $zoneFile = '/root/zones/'.$zone;
-        unlink($zoneFile);
 
-        $namedContents = file_get_contents($this->namedConf);
-        $start = strpos($namedContents, "zone \"$zone\"");
-        $end = strpos($namedContents, '};', $start) + 2;
-        $zoneConfig = substr($namedContents, $start, $end - $start);
-        $namedContents = str_replace($zoneConfig, '', $namedContents);
-        file_put_contents($this->namedConf, $namedContents);
+        if (file_exists($zoneFile)) {
+            unlink($zoneFile);
+        }
+
+        exec('rndc delzone '.escapeshellarg($zone), $output, $return_var);
+        if ($return_var != 0) {
+            return json_encode(['code' => 1, 'message' => "Error: Failed to delete zone $zone. Error: ".implode("\n", $output)]);
+        }
 
         exec('rndc reload');
 
@@ -123,16 +124,17 @@ class DnsService
         $zoneFile = '/root/zones/'.$zone;
 
         if (! file_exists($zoneFile)) {
-            return 'Error: Zone file not found.';
+            throw new \Exception('Zone file not found.');
         }
 
         $zoneContents = file_get_contents($zoneFile);
         if (strpos($zoneContents, "$record\tIN\t$type\t$value") !== false) {
-            return 'Error: Record already exists.';
+            throw new \Exception('Record already exists.');
         }
 
-        $newRecord = "$record\tIN\t$type\t$value\n";
+        $newRecord = "$record\t$ttl\tIN\t$type\t$value\n";
         $zoneContents = rtrim($zoneContents).PHP_EOL.$newRecord;
+        $zoneContents = $this->bumpSerial($zoneContents);
         file_put_contents($zoneFile, $zoneContents);
 
         exec('rndc reload');
@@ -157,21 +159,50 @@ class DnsService
         $zoneFile = '/root/zones/'.$zone;
 
         if (! file_exists($zoneFile)) {
-            return 'Error: Zone file not found.';
+            throw new \Exception('Zone file not found.');
         }
 
         $zoneContents = file_get_contents($zoneFile);
-        $recordToRemove = "$record\tIN\t$type\t$value\n";
 
-        if (strpos($zoneContents, $recordToRemove) === false) {
-            return 'Error: Record not found.';
+        // Match record lines regardless of optional TTL field
+        $pattern = '/^'.preg_quote($record, '/').'\s+\S*\s*IN\s+'.preg_quote($type, '/').'\s+'.preg_quote($value, '/').'\s*$/m';
+        if (! preg_match($pattern, $zoneContents)) {
+            throw new \Exception('Record not found.');
         }
 
-        $zoneContents = str_replace($recordToRemove, '', $zoneContents);
+        $zoneContents = preg_replace($pattern, '', $zoneContents);
+        $zoneContents = $this->bumpSerial((string) $zoneContents);
         file_put_contents($zoneFile, $zoneContents);
 
         exec('rndc reload');
 
         return json_encode(['code' => 0, 'message' => "Record $record for $zone deleted successfully."]);
+    }
+
+    /**
+     * Bump the SOA serial number in zone file contents.
+     * Uses YYYYMMDDNN format: if today's date matches, increment NN; otherwise reset to YYYYMMDD01.
+     */
+    private function bumpSerial(string $zoneContents): string
+    {
+        $today = date('Ymd');
+
+        return preg_replace_callback(
+            '/(\d{10})\s*(;\s*serial)/i',
+            function (array $matches) use ($today): string {
+                $current = $matches[1];
+                $currentDate = substr($current, 0, 8);
+                $currentSeq = (int) substr($current, 8, 2);
+
+                if ($currentDate === $today) {
+                    $newSerial = $today.str_pad((string) ($currentSeq + 1), 2, '0', STR_PAD_LEFT);
+                } else {
+                    $newSerial = $today.'01';
+                }
+
+                return $newSerial.' '.$matches[2];
+            },
+            $zoneContents
+        );
     }
 }
