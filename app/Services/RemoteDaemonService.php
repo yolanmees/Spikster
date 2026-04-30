@@ -203,4 +203,103 @@ class RemoteDaemonService
             'host'     => '127.0.0.1',
         ]);
     }
+    // ─── Email management ─────────────────────────────────────────────────────
+
+    public function createEmailAccount(Server $server, string $domain, string $username, string $email, string $passwordHash, int $quotaMb = 0): bool
+    {
+        return ($this->send($server, 'email.create', compact('domain', 'username', 'email') + [
+            'password_hash' => $passwordHash,
+            'quota_mb' => (string) $quotaMb,
+        ]))['success'] ?? false;
+    }
+
+    public function deleteEmailAccount(Server $server, string $domain, string $username, string $email): bool
+    {
+        return ($this->send($server, 'email.delete', compact('domain', 'username', 'email')))['success'] ?? false;
+    }
+
+    public function updateEmailPassword(Server $server, string $email, string $passwordHash): bool
+    {
+        return ($this->send($server, 'email.update-password', ['email' => $email, 'password_hash' => $passwordHash]))['success'] ?? false;
+    }
+
+    public function updateEmailQuota(Server $server, string $email, int $quotaMb): bool
+    {
+        return ($this->send($server, 'email.update-quota', ['email' => $email, 'quota_mb' => (string) $quotaMb]))['success'] ?? false;
+    }
+
+    public function createEmailForwarder(Server $server, string $source, string $destination): bool
+    {
+        return ($this->send($server, 'email.forwarder-create', compact('source', 'destination')))['success'] ?? false;
+    }
+
+    public function deleteEmailForwarder(Server $server, string $source): bool
+    {
+        return ($this->send($server, 'email.forwarder-delete', ['source' => $source]))['success'] ?? false;
+    }
+
+    public function createEmailAlias(Server $server, string $alias, string $target): bool
+    {
+        return ($this->send($server, 'email.alias-create', compact('alias', 'target')))['success'] ?? false;
+    }
+
+    public function deleteEmailAlias(Server $server, string $alias): bool
+    {
+        return ($this->send($server, 'email.alias-delete', ['alias' => $alias]))['success'] ?? false;
+    }
+
+    /**
+     * @return array{private_key: string, public_key: string}|array{}
+     */
+    public function setupDKIM(Server $server, string $domain, string $selector): array
+    {
+        $result = $this->send($server, 'email.dkim-setup', compact('domain', 'selector'));
+        if (! ($result['success'] ?? false)) {
+            return [];
+        }
+        $decoded = json_decode($result['output'] ?? '', true);
+        return is_array($decoded) ? $decoded : [];
+    }
+
+    public function updateAutoresponder(
+        Server $server, string $domain, string $username, bool $enabled,
+        string $subject = '', string $message = '',
+        string $startDate = '', string $endDate = ''
+    ): bool {
+        return ($this->send($server, 'email.autoresponder-update', [
+            'domain' => $domain, 'username' => $username,
+            'enabled' => $enabled ? 'true' : 'false',
+            'subject' => $subject, 'message' => $message,
+            'start_date' => $startDate, 'end_date' => $endDate,
+        ]))['success'] ?? false;
+    }
+
+    public function installRoundcube(
+        Server $server, string $domain, string $siteRoot,
+        string $dbName, string $dbUser, string $dbPass, string $php
+    ): bool {
+        return ($this->send($server, 'email.roundcube-install', [
+            'domain' => $domain, 'site_root' => $siteRoot,
+            'db_name' => $dbName, 'db_user' => $dbUser, 'db_pass' => $dbPass,
+            'php' => $php,
+        ]))['success'] ?? false;
+    }
+
+    // ─── Fail2ban management ──────────────────────────────────────────────────
+
+    public function fail2banBan(Server $server, string $ip, string $jail = 'sshd'): bool
+    {
+        return ($this->send($server, 'fail2ban.ban', ['ip' => $ip, 'jail' => $jail]))['success'] ?? false;
+    }
+
+    public function fail2banUnban(Server $server, string $ip, string $jail = ''): bool
+    {
+        return ($this->send($server, 'fail2ban.unban', ['ip' => $ip, 'jail' => $jail]))['success'] ?? false;
+    }
+
+    public function fail2banWhitelist(Server $server, string $ip): bool
+    {
+        return ($this->send($server, 'fail2ban.whitelist', ['ip' => $ip]))['success'] ?? false;
+    }
+
 }

@@ -174,3 +174,103 @@ class DaemonService
         return ($this->send('cron.read', []))['output'] ?? '';
     }
 }
+
+    // ─── Email management ─────────────────────────────────────────────────────
+
+    public function createEmailAccount(string $domain, string $username, string $email, string $passwordHash, int $quotaMb = 0): bool
+    {
+        return ($this->send('email.create', compact('domain', 'username', 'email') + [
+            'password_hash' => $passwordHash,
+            'quota_mb' => (string) $quotaMb,
+        ]))['success'] ?? false;
+    }
+
+    public function deleteEmailAccount(string $domain, string $username, string $email): bool
+    {
+        return ($this->send('email.delete', compact('domain', 'username', 'email')))['success'] ?? false;
+    }
+
+    public function updateEmailPassword(string $email, string $passwordHash): bool
+    {
+        return ($this->send('email.update-password', ['email' => $email, 'password_hash' => $passwordHash]))['success'] ?? false;
+    }
+
+    public function updateEmailQuota(string $email, int $quotaMb): bool
+    {
+        return ($this->send('email.update-quota', ['email' => $email, 'quota_mb' => (string) $quotaMb]))['success'] ?? false;
+    }
+
+    public function createEmailForwarder(string $source, string $destination): bool
+    {
+        return ($this->send('email.forwarder-create', compact('source', 'destination')))['success'] ?? false;
+    }
+
+    public function deleteEmailForwarder(string $source): bool
+    {
+        return ($this->send('email.forwarder-delete', ['source' => $source]))['success'] ?? false;
+    }
+
+    public function createEmailAlias(string $alias, string $target): bool
+    {
+        return ($this->send('email.alias-create', compact('alias', 'target')))['success'] ?? false;
+    }
+
+    public function deleteEmailAlias(string $alias): bool
+    {
+        return ($this->send('email.alias-delete', ['alias' => $alias]))['success'] ?? false;
+    }
+
+    /**
+     * Setup DKIM. Returns ['private_key' => ..., 'public_key' => ...] or empty array on failure.
+     */
+    public function setupDKIM(string $domain, string $selector): array
+    {
+        $result = $this->send('email.dkim-setup', compact('domain', 'selector'));
+        if (! ($result['success'] ?? false)) {
+            return [];
+        }
+        $decoded = json_decode($result['output'] ?? '', true);
+        return is_array($decoded) ? $decoded : [];
+    }
+
+    public function updateAutoresponder(
+        string $domain, string $username, bool $enabled,
+        string $subject = '', string $message = '',
+        string $startDate = '', string $endDate = ''
+    ): bool {
+        return ($this->send('email.autoresponder-update', [
+            'domain' => $domain, 'username' => $username,
+            'enabled' => $enabled ? 'true' : 'false',
+            'subject' => $subject, 'message' => $message,
+            'start_date' => $startDate, 'end_date' => $endDate,
+        ]))['success'] ?? false;
+    }
+
+    public function installRoundcube(
+        string $domain, string $siteRoot, string $dbName,
+        string $dbUser, string $dbPass, string $php
+    ): bool {
+        return ($this->send('email.roundcube-install', [
+            'domain' => $domain, 'site_root' => $siteRoot,
+            'db_name' => $dbName, 'db_user' => $dbUser, 'db_pass' => $dbPass,
+            'php' => $php,
+        ]))['success'] ?? false;
+    }
+
+    // ─── Fail2ban management ──────────────────────────────────────────────────
+
+    public function fail2banBan(string $ip, string $jail = 'sshd'): bool
+    {
+        return ($this->send('fail2ban.ban', ['ip' => $ip, 'jail' => $jail]))['success'] ?? false;
+    }
+
+    public function fail2banUnban(string $ip, string $jail = ''): bool
+    {
+        return ($this->send('fail2ban.unban', ['ip' => $ip, 'jail' => $jail]))['success'] ?? false;
+    }
+
+    public function fail2banWhitelist(string $ip): bool
+    {
+        return ($this->send('fail2ban.whitelist', ['ip' => $ip]))['success'] ?? false;
+    }
+}
