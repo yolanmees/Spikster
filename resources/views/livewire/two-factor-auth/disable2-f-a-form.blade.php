@@ -14,7 +14,7 @@
         </div>
 
         @if (!$confirmDisable)
-            <button wire:click="$set('confirmDisable', true)" 
+            <button wire:click="$set('confirmDisable', true)"
                     class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition">
                 Yes, Disable 2FA
             </button>
@@ -23,8 +23,8 @@
                 <p class="mb-2 text-gray-700 dark:text-gray-300">
                     Enter your 2FA code or backup code to confirm:
                 </p>
-                <input type="text" 
-                       wire:model="verificationCode" 
+                <input type="text"
+                       wire:model="verificationCode"
                        placeholder="000000 or ABCD-1234"
                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
                 @error('verificationCode')
@@ -33,11 +33,11 @@
             </div>
 
             <div class="flex gap-2">
-                <button wire:click="disable2FA" 
+                <button wire:click="disable2FA"
                         class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition">
                     Disable 2FA
                 </button>
-                <button wire:click="$set('confirmDisable', false)" 
+                <button wire:click="$set('confirmDisable', false)"
                         class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition">
                     Cancel
                 </button>

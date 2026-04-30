@@ -55,13 +55,9 @@ class TrustedDevice extends Model
     /**
      * Update the last used timestamp and extend expiration.
      */
-    public function touch($attribute = null): bool
+    public function touch(): void
     {
-        if ($attribute) {
-            return parent::touch($attribute);
-        }
-        
-        return $this->update([
+        $this->update([
             'last_used_at' => now(),
             'expires_at' => now()->addDays(30),
         ]);

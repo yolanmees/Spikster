@@ -27,16 +27,16 @@ class WordPressServiceProvider extends ServiceProvider
         $this->registerConfig();
         $this->registerViews();
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
-        
+
         // Register Livewire components
         $this->registerLivewireComponents();
-        
+
         // Register module in Spikster Module System
         $this->registerModule();
         $this->registerMenuItems();
         $this->registerPermissions();
     }
-    
+
     /**
      * Register Livewire components.
      */
@@ -58,7 +58,7 @@ class WordPressServiceProvider extends ServiceProvider
     {
         $this->app->register(EventServiceProvider::class);
         $this->app->register(RouteServiceProvider::class);
-        
+
         // Register services
         $this->app->singleton(\Modules\WordPress\Services\WordPressInstallationService::class);
         $this->app->singleton(\Modules\WordPress\Services\WPCLIService::class);
@@ -94,7 +94,7 @@ class WordPressServiceProvider extends ServiceProvider
         try {
             $menuManager = app(\App\Services\ModuleMenuManager::class);
             $module = \App\Models\Module::where('alias', 'wordpress')->first();
-            
+
             if (!$module) {
                 return;
             }

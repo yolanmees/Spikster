@@ -1527,25 +1527,4 @@ class SiteController extends Controller
         return redirect()->to('mysecureadmin/index.php?username='.$site->username.'&password='.$site->database);
 
     }
-
-    /**
-     * Reset file permissions for a site
-     */
-    public function resetPermissions(string $site_id)
-    {
-        $site = Site::where('site_id', $site_id)->first();
-
-        if (! $site) {
-            return response()->json([
-                'message' => __('spikster.site_not_found_message'),
-                'errors' => __('spikster.site_not_found'),
-            ], 404);
-        }
-
-        \App\Jobs\ResetSitePermissionsSSH::dispatch($site)->delay(Carbon::now()->addSeconds(1));
-
-        return response()->json([
-            'message' => 'Permissions reset job dispatched successfully',
-        ]);
-    }
 }

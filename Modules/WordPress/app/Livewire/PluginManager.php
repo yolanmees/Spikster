@@ -15,14 +15,14 @@ class PluginManager extends Component
     public WordPressInstallation $installation;
     public $plugins = [];
     public $selectedPlugin = null;
-    
+
     // Browse WordPress.org
     public $showBrowseModal = false;
     public $wpOrgPlugins = [];
     public $searchTerm = '';
     public $selectedWpOrgPlugin = null;
     public $showPluginDetails = false;
-    
+
     // Manual install
     public $showInstallModal = false;
     public $newPluginSlug = '';
@@ -45,7 +45,7 @@ class PluginManager extends Component
             $wpCli = app(WPCLIService::class);
             $wpCli->syncPlugins($this->installation);
             $this->loadPlugins();
-            
+
             session()->flash('success', 'Plugins synced successfully');
         } catch (\Exception $e) {
             session()->flash('error', 'Sync failed: ' . $e->getMessage());
@@ -58,7 +58,7 @@ class PluginManager extends Component
             $wpCli = app(WPCLIService::class);
             $wpCli->activatePlugin($this->installation, $slug);
             $this->loadPlugins();
-            
+
             session()->flash('success', "Plugin '{$slug}' activated successfully");
         } catch (\Exception $e) {
             session()->flash('error', 'Activation failed: ' . $e->getMessage());
@@ -71,7 +71,7 @@ class PluginManager extends Component
             $wpCli = app(WPCLIService::class);
             $wpCli->deactivatePlugin($this->installation, $slug);
             $this->loadPlugins();
-            
+
             session()->flash('success', "Plugin '{$slug}' deactivated successfully");
         } catch (\Exception $e) {
             session()->flash('error', 'Deactivation failed: ' . $e->getMessage());
@@ -84,7 +84,7 @@ class PluginManager extends Component
             $wpCli = app(WPCLIService::class);
             $wpCli->updatePlugin($this->installation, $slug);
             $this->loadPlugins();
-            
+
             session()->flash('success', "Plugin '{$slug}' updated successfully");
         } catch (\Exception $e) {
             session()->flash('error', 'Update failed: ' . $e->getMessage());
@@ -113,7 +113,7 @@ class PluginManager extends Component
             $wpCli = app(WPCLIService::class);
             $wpCli->installPlugin($this->installation, $this->newPluginSlug, $this->activateAfterInstall);
             $this->loadPlugins();
-            
+
             $this->closeInstallModal();
             session()->flash('success', "Plugin '{$this->newPluginSlug}' installed successfully");
         } catch (\Exception $e) {
@@ -126,7 +126,7 @@ class PluginManager extends Component
         try {
             $wpCli = app(WPCLIService::class);
             $result = $wpCli->executeCommand($this->installation, "plugin delete {$slug} --deactivate");
-            
+
             if ($result['success']) {
                 $this->installation->plugins()->where('slug', $slug)->delete();
                 $this->loadPlugins();
@@ -161,7 +161,7 @@ class PluginManager extends Component
         try {
             $wpOrgService = app(WordPressOrgService::class);
             $result = $wpOrgService->searchPlugins($this->searchTerm, 1, 24);
-            
+
             if ($result['success']) {
                 $this->wpOrgPlugins = $result['plugins'] ?? [];
             } else {
@@ -179,7 +179,7 @@ class PluginManager extends Component
         try {
             $wpOrgService = app(WordPressOrgService::class);
             $result = $wpOrgService->getPluginDetails($slug);
-            
+
             if ($result['success']) {
                 $this->selectedWpOrgPlugin = $result['plugin'];
                 $this->showPluginDetails = true;
@@ -202,16 +202,16 @@ class PluginManager extends Component
         try {
             $wpCli = app(WPCLIService::class);
             $result = $wpCli->installPlugin($this->installation, $slug, $activate);
-            
+
             if ($result['success']) {
                 $this->loadPlugins();
                 $this->closeBrowseModal();
                 $this->closePluginDetails();
-                
-                $message = $activate 
-                    ? "Plugin '{$slug}' installed and activated successfully" 
+
+                $message = $activate
+                    ? "Plugin '{$slug}' installed and activated successfully"
                     : "Plugin '{$slug}' installed successfully";
-                    
+
                 session()->flash('success', $message);
             } else {
                 session()->flash('error', 'Installation failed: ' . $result['output']);

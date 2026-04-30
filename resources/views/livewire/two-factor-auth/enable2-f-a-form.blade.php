@@ -17,10 +17,10 @@
         @if ($step === 1)
             <div class="mb-6">
                 <p class="mb-4 text-gray-700 dark:text-gray-300">
-                    Two-factor authentication adds an extra layer of security to your account. 
+                    Two-factor authentication adds an extra layer of security to your account.
                     You'll need an authenticator app like Google Authenticator, Authy, or 1Password.
                 </p>
-                <button wire:click="generateSecret" 
+                <button wire:click="generateSecret"
                         class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
                     Get Started
                 </button>
@@ -52,8 +52,8 @@
                     <p class="mb-2 text-gray-700 dark:text-gray-300">
                         Enter the 6-digit code from your authenticator app:
                     </p>
-                    <input type="text" 
-                           wire:model="verificationCode" 
+                    <input type="text"
+                           wire:model="verificationCode"
                            placeholder="000000"
                            maxlength="6"
                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
@@ -66,8 +66,8 @@
                     <label class="block mb-2 text-gray-700 dark:text-gray-300">
                         Recovery Email (Optional)
                     </label>
-                    <input type="email" 
-                           wire:model="recoveryEmail" 
+                    <input type="email"
+                           wire:model="recoveryEmail"
                            placeholder="recovery@example.com"
                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
                     @error('recoveryEmail')
@@ -75,7 +75,7 @@
                     @enderror
                 </div>
 
-                <button wire:click="enable2FA" 
+                <button wire:click="enable2FA"
                         class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">
                     Enable 2FA
                 </button>
@@ -101,11 +101,11 @@
                 </div>
 
                 <div class="flex gap-2">
-                    <button wire:click="downloadBackupCodes" 
+                    <button wire:click="downloadBackupCodes"
                             class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
                         Download Codes
                     </button>
-                    <button wire:click="finish" 
+                    <button wire:click="finish"
                             class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">
                         Finish
                     </button>

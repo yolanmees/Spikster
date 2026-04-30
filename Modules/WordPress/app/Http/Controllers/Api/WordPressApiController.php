@@ -257,7 +257,7 @@ class WordPressApiController extends Controller
 
             return response()->json([
                 'success' => $result['success'],
-                'message' => $result['success'] 
+                'message' => $result['success']
                     ? "Theme '{$slug}' deleted successfully"
                     : 'Delete failed: ' . $result['output'],
             ], $result['success'] ? 200 : 500);
@@ -411,7 +411,7 @@ class WordPressApiController extends Controller
 
             return response()->json([
                 'success' => $result['success'],
-                'message' => $result['success'] 
+                'message' => $result['success']
                     ? "Plugin '{$slug}' deleted successfully"
                     : 'Delete failed: ' . $result['output'],
             ], $result['success'] ? 200 : 500);
@@ -433,7 +433,7 @@ class WordPressApiController extends Controller
         try {
             // Check core updates
             $coreUpdate = $this->wpCliService->checkCoreUpdate($installation);
-            
+
             // Sync themes and plugins to get latest update info
             $this->wpCliService->syncThemes($installation);
             $this->wpCliService->syncPlugins($installation);

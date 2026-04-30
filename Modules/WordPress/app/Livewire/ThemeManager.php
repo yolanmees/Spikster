@@ -15,14 +15,14 @@ class ThemeManager extends Component
     public WordPressInstallation $installation;
     public $themes = [];
     public $selectedTheme = null;
-    
+
     // Browse WordPress.org
     public $showBrowseModal = false;
     public $wpOrgThemes = [];
     public $searchTerm = '';
     public $selectedWpOrgTheme = null;
     public $showThemeDetails = false;
-    
+
     // Manual install
     public $showInstallModal = false;
     public $newThemeSlug = '';
@@ -45,7 +45,7 @@ class ThemeManager extends Component
             $wpCli = app(WPCLIService::class);
             $wpCli->syncThemes($this->installation);
             $this->loadThemes();
-            
+
             session()->flash('success', 'Themes synced successfully');
         } catch (\Exception $e) {
             session()->flash('error', 'Sync failed: ' . $e->getMessage());
@@ -58,7 +58,7 @@ class ThemeManager extends Component
             $wpCli = app(WPCLIService::class);
             $wpCli->activateTheme($this->installation, $slug);
             $this->loadThemes();
-            
+
             session()->flash('success', "Theme '{$slug}' activated successfully");
         } catch (\Exception $e) {
             session()->flash('error', 'Activation failed: ' . $e->getMessage());
@@ -71,7 +71,7 @@ class ThemeManager extends Component
             $wpCli = app(WPCLIService::class);
             $wpCli->updateTheme($this->installation, $slug);
             $this->loadThemes();
-            
+
             session()->flash('success', "Theme '{$slug}' updated successfully");
         } catch (\Exception $e) {
             session()->flash('error', 'Update failed: ' . $e->getMessage());
@@ -100,7 +100,7 @@ class ThemeManager extends Component
             $wpCli = app(WPCLIService::class);
             $wpCli->installTheme($this->installation, $this->newThemeSlug, $this->activateAfterInstall);
             $this->loadThemes();
-            
+
             $this->closeInstallModal();
             session()->flash('success', "Theme '{$this->newThemeSlug}' installed successfully");
         } catch (\Exception $e) {
@@ -113,7 +113,7 @@ class ThemeManager extends Component
         try {
             $wpCli = app(WPCLIService::class);
             $result = $wpCli->executeCommand($this->installation, "theme delete {$slug} --force");
-            
+
             if ($result['success']) {
                 $this->installation->themes()->where('slug', $slug)->delete();
                 $this->loadThemes();
@@ -148,7 +148,7 @@ class ThemeManager extends Component
         try {
             $wpOrgService = app(WordPressOrgService::class);
             $result = $wpOrgService->searchThemes($this->searchTerm, 1, 24);
-            
+
             if ($result['success']) {
                 $this->wpOrgThemes = $result['themes'] ?? [];
             } else {
@@ -166,7 +166,7 @@ class ThemeManager extends Component
         try {
             $wpOrgService = app(WordPressOrgService::class);
             $result = $wpOrgService->getThemeDetails($slug);
-            
+
             if ($result['success']) {
                 $this->selectedWpOrgTheme = $result['theme'];
                 $this->showThemeDetails = true;
@@ -189,16 +189,16 @@ class ThemeManager extends Component
         try {
             $wpCli = app(WPCLIService::class);
             $result = $wpCli->installTheme($this->installation, $slug, $activate);
-            
+
             if ($result['success']) {
                 $this->loadThemes();
                 $this->closeBrowseModal();
                 $this->closeThemeDetails();
-                
-                $message = $activate 
-                    ? "Theme '{$slug}' installed and activated successfully" 
+
+                $message = $activate
+                    ? "Theme '{$slug}' installed and activated successfully"
                     : "Theme '{$slug}' installed successfully";
-                    
+
                 session()->flash('success', $message);
             } else {
                 session()->flash('error', 'Installation failed: ' . $result['output']);

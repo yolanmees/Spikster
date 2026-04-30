@@ -57,9 +57,7 @@ class ConfController extends Controller
         $site = Site::where('site_id', $site_id)->firstOrFail();
 
         if ($site->basepath) {
-            // Remove leading slash from basepath to avoid double slashes
-            $cleanBasepath = ltrim($site->basepath, '/');
-            $basepath = '/home/'.$site->username.'/web/'.$cleanBasepath;
+            $basepath = '/home/'.$site->username.'/web/'.$site->basepath;
         } else {
             $basepath = '/home/'.$site->username.'/web';
         }
@@ -96,9 +94,7 @@ class ConfController extends Controller
         $alias = Alias::where('alias_id', $alias_id)->firstOrFail();
 
         if ($alias->site->basepath) {
-            // Remove leading slash from basepath to avoid double slashes
-            $cleanBasepath = ltrim($alias->site->basepath, '/');
-            $basepath = '/home/'.$alias->site->username.'/web/'.$cleanBasepath;
+            $basepath = '/home/'.$alias->site->username.'/web/'.$alias->site->basepath;
         } else {
             $basepath = '/home/'.$alias->site->username.'/web';
         }

@@ -44,7 +44,7 @@ class WordPressOrgService
             if (!empty($filters['tag'])) {
                 $queryArgs['tag'] = $filters['tag'];
             }
-            
+
             if (!empty($filters['browse'])) {
                 $queryArgs['browse'] = $filters['browse'];
             } else {
@@ -134,7 +134,7 @@ class WordPressOrgService
 
                 if ($response->successful()) {
                     $data = $response->json();
-                    
+
                     if (isset($data['error'])) {
                         return [
                             'success' => false,
@@ -296,7 +296,7 @@ class WordPressOrgService
 
                 if ($response->successful()) {
                     $data = $response->json();
-                    
+
                     if (isset($data['error'])) {
                         return [
                             'success' => false,

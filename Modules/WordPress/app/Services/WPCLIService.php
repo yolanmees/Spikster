@@ -19,13 +19,13 @@ class WPCLIService
         try {
             $server = $installation->site->server;
             $path = $installation->getFullPath();
-            
+
             $ssh = $this->sshService->connect($server);
-            
+
             // Execute WP-CLI command as www-data user
             $fullCommand = "echo '{$server->password}' | sudo -S -u www-data wp {$command} --path={$path} 2>&1";
             $output = $ssh->exec($fullCommand);
-            
+
             $ssh->disconnect();
 
             return [
@@ -50,9 +50,9 @@ class WPCLIService
     {
         // First update WordPress version
         $this->updateWordPressVersion($installation);
-        
+
         $result = $this->executeCommand($installation, 'theme list --format=json');
-        
+
         if (!$result['success']) {
             return $result;
         }
@@ -86,33 +86,33 @@ class WPCLIService
             'count' => count($themes),
         ];
     }
-    
+
     /**
      * Update WordPress version in database
      */
     protected function updateWordPressVersion(WordPressInstallation $installation): void
     {
         $result = $this->executeCommand($installation, 'core version');
-        
+
         Log::info('WP-CLI core version command', [
             'installation_id' => $installation->id,
             'success' => $result['success'],
             'output' => $result['output'],
         ]);
-        
+
         if ($result['success']) {
             $output = $result['output'];
-            
+
             // Extract version number from output (e.g., "6.3.1" or "WordPress 6.3.1")
             if (preg_match('/(\d+\.\d+(?:\.\d+)?)/', $output, $matches)) {
                 $version = $matches[1];
-                
+
                 Log::info('Updating WordPress version', [
                     'installation_id' => $installation->id,
                     'old_version' => $installation->version,
                     'new_version' => $version,
                 ]);
-                
+
                 $installation->update(['version' => $version]);
             } else {
                 Log::warning('Could not extract version from WP-CLI output', [
@@ -132,9 +132,9 @@ class WPCLIService
     {
         // First update WordPress version
         $this->updateWordPressVersion($installation);
-        
+
         $result = $this->executeCommand($installation, 'plugin list --format=json');
-        
+
         if (!$result['success']) {
             return $result;
         }
@@ -174,9 +174,9 @@ class WPCLIService
         // First update current version
         $this->updateWordPressVersion($installation);
         $installation->refresh();
-        
+
         $result = $this->executeCommand($installation, 'core check-update --format=json');
-        
+
         if (!$result['success']) {
             return [
                 'success' => true,
@@ -186,7 +186,7 @@ class WPCLIService
         }
 
         $updates = json_decode($result['output'], true);
-        
+
         if (empty($updates) || !is_array($updates)) {
             return [
                 'success' => true,
@@ -250,7 +250,7 @@ class WPCLIService
     public function getInfo(WordPressInstallation $installation): array
     {
         $result = $this->executeCommand($installation, 'core version');
-        
+
         if (!$result['success']) {
             return $result;
         }
@@ -267,7 +267,7 @@ class WPCLIService
     public function searchThemes(WordPressInstallation $installation, string $searchTerm = '', array $filters = []): array
     {
         $command = "theme search {$searchTerm} --format=json";
-        
+
         // Add filters
         if (!empty($filters['per_page'])) {
             $command .= " --per-page={$filters['per_page']}";
@@ -281,13 +281,13 @@ class WPCLIService
         }
 
         $result = $this->executeCommand($installation, $command);
-        
+
         if (!$result['success']) {
             return $result;
         }
 
         $themes = json_decode($result['output'], true);
-        
+
         return [
             'success' => true,
             'themes' => $themes ?? [],
@@ -301,7 +301,7 @@ class WPCLIService
     public function searchPlugins(WordPressInstallation $installation, string $searchTerm = '', array $filters = []): array
     {
         $command = "plugin search {$searchTerm} --format=json";
-        
+
         // Add filters
         if (!empty($filters['per_page'])) {
             $command .= " --per-page={$filters['per_page']}";
@@ -315,13 +315,13 @@ class WPCLIService
         }
 
         $result = $this->executeCommand($installation, $command);
-        
+
         if (!$result['success']) {
             return $result;
         }
 
         $plugins = json_decode($result['output'], true);
-        
+
         return [
             'success' => true,
             'plugins' => $plugins ?? [],
@@ -335,14 +335,14 @@ class WPCLIService
     public function getThemeInfo(WordPressInstallation $installation, string $themeSlug): array
     {
         $result = $this->executeCommand($installation, "theme search {$themeSlug} --format=json");
-        
+
         if (!$result['success']) {
             return $result;
         }
 
         $themes = json_decode($result['output'], true);
         $theme = collect($themes)->firstWhere('slug', $themeSlug);
-        
+
         if (!$theme) {
             return [
                 'success' => false,
@@ -362,14 +362,14 @@ class WPCLIService
     public function getPluginInfo(WordPressInstallation $installation, string $pluginSlug): array
     {
         $result = $this->executeCommand($installation, "plugin search {$pluginSlug} --format=json");
-        
+
         if (!$result['success']) {
             return $result;
         }
 
         $plugins = json_decode($result['output'], true);
         $plugin = collect($plugins)->firstWhere('slug', $pluginSlug);
-        
+
         if (!$plugin) {
             return [
                 'success' => false,

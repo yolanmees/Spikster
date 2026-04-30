@@ -3,7 +3,7 @@
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-xl font-bold text-gray-900 dark:text-white">Trusted Devices</h3>
             @if (count($devices) > 0)
-                <button wire:click="cleanupExpired" 
+                <button wire:click="cleanupExpired"
                         class="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700 transition">
                     Cleanup Expired
                 </button>
@@ -71,7 +71,7 @@
                                     {{ \Carbon\Carbon::parse($device['expires_at'])->diffForHumans() }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <button wire:click="removeDevice('{{ $device['id'] }}')" 
+                                    <button wire:click="removeDevice('{{ $device['id'] }}')"
                                             wire:confirm="Are you sure you want to remove this device?"
                                             class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
                                         Remove

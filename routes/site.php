@@ -38,9 +38,6 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     Route::put('/site/{site_id}/dns/{dns_id}', [DnsRecordsController::class, 'update'])->name('site.dns.update');
     Route::delete('/site/{site_id}/dns/{dns_id}/delete', [DnsRecordsController::class, 'delete'])->name('site.dns.delete');
 
-    // permissions
-    Route::post('/site/{site_id}/reset-permissions', [SiteController::class, 'resetPermissions'])->name('site.reset-permissions');
-
     // pdf after creation
     Route::get('/pdf/{site_id}/{token}', [SiteController::class, 'pdf']);
 });

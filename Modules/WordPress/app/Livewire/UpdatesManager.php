@@ -40,14 +40,14 @@ class UpdatesManager extends Component
 
         try {
             $wpCli = app(WPCLIService::class);
-            
+
             // Sync themes and plugins to get latest update info (also updates WP version)
             $wpCli->syncThemes($this->installation);
             $wpCli->syncPlugins($this->installation);
-            
+
             // Check core update
             $coreResult = $wpCli->checkCoreUpdate($this->installation);
-            
+
             // Only set coreUpdate if there's actually an update available
             if ($coreResult['success'] && $coreResult['has_update']) {
                 $this->coreUpdate = [
@@ -57,10 +57,10 @@ class UpdatesManager extends Component
             } else {
                 $this->coreUpdate = null;
             }
-            
+
             $this->installation = $this->installation->fresh();
             $this->loadUpdates();
-            
+
             session()->flash('success', 'Updates checked successfully');
         } catch (\Exception $e) {
             session()->flash('error', 'Check failed: ' . $e->getMessage());
@@ -76,7 +76,7 @@ class UpdatesManager extends Component
         try {
             $wpCli = app(WPCLIService::class);
             $wpCli->updateCore($this->installation);
-            
+
             $this->coreUpdate = null;
             session()->flash('success', 'WordPress core updated successfully');
         } catch (\Exception $e) {
@@ -91,7 +91,7 @@ class UpdatesManager extends Component
         try {
             $wpCli = app(WPCLIService::class);
             $wpCli->updateTheme($this->installation, $slug);
-            
+
             $this->loadUpdates();
             session()->flash('success', "Theme '{$slug}' updated successfully");
         } catch (\Exception $e) {
@@ -104,7 +104,7 @@ class UpdatesManager extends Component
         try {
             $wpCli = app(WPCLIService::class);
             $wpCli->updatePlugin($this->installation, $slug);
-            
+
             $this->loadUpdates();
             session()->flash('success', "Plugin '{$slug}' updated successfully");
         } catch (\Exception $e) {
@@ -152,7 +152,7 @@ class UpdatesManager extends Component
             }
 
             $this->loadUpdates();
-            
+
             $count = count($updated);
             session()->flash('success', "Updated {$count} item(s) successfully");
         } catch (\Exception $e) {
