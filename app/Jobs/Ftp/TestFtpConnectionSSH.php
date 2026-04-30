@@ -3,7 +3,7 @@
 namespace App\Jobs\Ftp;
 
 use App\Models\FtpUser;
-use App\Services\SSHService;
+use App\Services\RemoteDaemonService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -11,6 +11,13 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * Test FTP connectivity for a virtual user.
+ *
+ * Delegates to the daemon (ftp.test action) so the connection test runs on
+ * the same host as vsftpd, avoiding firewall/NAT issues from the panel server.
+ * The plain-text password is passed only at dispatch time and not stored here.
+ */
 class TestFtpConnectionSSH implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
@@ -23,28 +30,33 @@ class TestFtpConnectionSSH implements ShouldQueue
         public string $password
     ) {}
 
-    public function handle(): array
+    public function handle(RemoteDaemonService $daemon): array
     {
-        $ssh = new SSHService($this->ftpUser->server);
-
         try {
-            Log::info("Testing FTP connection", [
+            Log::info("Testing FTP connection via daemon", ['username' => $this->ftpUser->username]);
+
+            $result = $daemon->send($this->ftpUser->server, 'ftp.test', [
                 'username' => $this->ftpUser->username,
+                'password' => $this->password,
+                'host'     => '127.0.0.1',
             ]);
 
-            $result = $this->testConnection($ssh);
+            $success = $result['success'] ?? false;
 
-            Log::info("FTP connection test completed", [
+            Log::info("FTP connection test completed via daemon", [
                 'username' => $this->ftpUser->username,
-                'success' => $result['success'],
+                'success'  => $success,
             ]);
 
-            return $result;
+            return [
+                'success' => $success,
+                'message' => $result['message'] ?? ($success ? 'FTP connection successful' : 'FTP connection failed'),
+            ];
 
         } catch (\Exception $e) {
             Log::error("FTP connection test failed", [
                 'username' => $this->ftpUser->username,
-                'error' => $e->getMessage(),
+                'error'    => $e->getMessage(),
             ]);
 
             return [
@@ -52,35 +64,5 @@ class TestFtpConnectionSSH implements ShouldQueue
                 'message' => 'Connection test failed: ' . $e->getMessage(),
             ];
         }
-    }
-
-    protected function testConnection(SSHService $ssh): array
-    {
-        $host = $this->ftpUser->server->ip;
-        $username = $this->ftpUser->username;
-        $password = $this->password;
-
-        // Test using lftp
-        $testScript = <<<BASH
-lftp -u "{$username},{$password}" -e "pwd; exit" {$host} 2>&1
-BASH;
-
-        $output = $ssh->execute($testScript);
-
-        // Check if connection was successful
-        if (str_contains($output, $this->ftpUser->home_directory) ||
-            str_contains(strtolower($output), 'logged in')) {
-            return [
-                'success' => true,
-                'message' => 'FTP connection successful',
-                'output' => $output,
-            ];
-        }
-
-        return [
-            'success' => false,
-            'message' => 'FTP connection failed',
-            'output' => $output,
-        ];
     }
 }

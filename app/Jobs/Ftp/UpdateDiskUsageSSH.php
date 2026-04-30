@@ -3,7 +3,7 @@
 namespace App\Jobs\Ftp;
 
 use App\Models\FtpUser;
-use App\Services\SSHService;
+use App\Services\RemoteDaemonService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -22,32 +22,33 @@ class UpdateDiskUsageSSH implements ShouldQueue
         public FtpUser $ftpUser
     ) {}
 
-    public function handle(): void
+    public function handle(RemoteDaemonService $daemon): void
     {
-        $ssh = new SSHService($this->ftpUser->server);
-
         try {
-            $homeDir = $this->ftpUser->home_directory;
+            $result = $daemon->send($this->ftpUser->server, 'ftp.disk-usage', [
+                'username'       => $this->ftpUser->username,
+                'home_directory' => $this->ftpUser->home_directory,
+            ]);
 
-            // Get disk usage in bytes
-            $usage = $ssh->execute("du -sb {$homeDir} | awk '{print $1}'");
-            $usageBytes = (int) trim($usage);
+            if (empty($result['success'])) {
+                throw new \Exception($result['error'] ?? 'Daemon returned failure for ftp.disk-usage');
+            }
 
-            // Update database
+            $usageBytes = (int) ($result['usage_bytes'] ?? 0);
             $this->ftpUser->updateDiskUsage($usageBytes);
 
-            Log::info("Updated FTP user disk usage", [
-                'username' => $this->ftpUser->username,
+            Log::info("Updated FTP user disk usage via daemon", [
+                'username'    => $this->ftpUser->username,
                 'usage_bytes' => $usageBytes,
-                'usage_mb' => round($usageBytes / (1024 * 1024), 2),
+                'usage_mb'    => round($usageBytes / (1024 * 1024), 2),
             ]);
 
         } catch (\Exception $e) {
             Log::error("Failed to update FTP user disk usage", [
                 'username' => $this->ftpUser->username,
-                'error' => $e->getMessage(),
+                'error'    => $e->getMessage(),
             ]);
-            // Don't throw - this is not critical
+            // Non-critical: don't rethrow
         }
     }
 }

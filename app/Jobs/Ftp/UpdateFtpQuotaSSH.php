@@ -3,7 +3,7 @@
 namespace App\Jobs\Ftp;
 
 use App\Models\FtpUser;
-use App\Services\SSHService;
+use App\Services\RemoteDaemonService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -22,20 +22,25 @@ class UpdateFtpQuotaSSH implements ShouldQueue
         public FtpUser $ftpUser
     ) {}
 
-    public function handle(): void
+    public function handle(RemoteDaemonService $daemon): void
     {
-        $ssh = new SSHService($this->ftpUser->server);
-
         try {
-            Log::info("Updating FTP user quota on server", [
+            Log::info("Updating FTP user quota via daemon", [
                 'username' => $this->ftpUser->username,
                 'quota_mb' => $this->ftpUser->quota_mb,
             ]);
 
-            // Update quota file
-            $this->updateQuotaFile($ssh);
+            $result = $daemon->send($this->ftpUser->server, 'ftp.update-quota', [
+                'username'       => $this->ftpUser->username,
+                'home_directory' => $this->ftpUser->home_directory,
+                'quota_mb'       => $this->ftpUser->quota_mb,
+            ]);
 
-            Log::info("FTP user quota updated successfully", [
+            if (empty($result['success'])) {
+                throw new \Exception($result['error'] ?? 'Daemon returned failure for ftp.update-quota');
+            }
+
+            Log::info("FTP user quota updated successfully via daemon", [
                 'username' => $this->ftpUser->username,
                 'quota_mb' => $this->ftpUser->quota_mb,
             ]);
@@ -43,24 +48,17 @@ class UpdateFtpQuotaSSH implements ShouldQueue
         } catch (\Exception $e) {
             Log::error("Failed to update FTP user quota", [
                 'username' => $this->ftpUser->username,
-                'error' => $e->getMessage(),
+                'error'    => $e->getMessage(),
             ]);
             throw $e;
         }
     }
 
-    protected function updateQuotaFile(SSHService $ssh): void
+    public function failed(\Throwable $exception): void
     {
-        $homeDir = $this->ftpUser->home_directory;
-        $quotaBytes = $this->ftpUser->quota_mb * 1024 * 1024;
-
-        // Update .ftpquota file
-        $ssh->execute("echo '{$quotaBytes}' > {$homeDir}/.ftpquota");
-        $ssh->execute("chown www-data:www-data {$homeDir}/.ftpquota");
-
-        Log::info("Updated quota file", [
-            'quota_file' => "{$homeDir}/.ftpquota",
-            'quota_bytes' => $quotaBytes,
+        Log::error("UpdateFtpQuotaSSH job failed", [
+            'username' => $this->ftpUser->username,
+            'error'    => $exception->getMessage(),
         ]);
     }
 }
