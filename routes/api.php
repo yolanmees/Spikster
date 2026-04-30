@@ -6,7 +6,12 @@ use App\Http\Controllers\BackupController;
 use App\Http\Controllers\DatabaseController;
 use App\Http\Controllers\EmailController;
 use App\Http\Controllers\ServerController;
+use App\Http\Controllers\Server\Fail2banController;
+use App\Http\Controllers\Server\MonitoringController;
+use App\Http\Controllers\Server\PackagesController;
 use App\Http\Controllers\SiteController;
+use App\Http\Controllers\Site\AliasController;
+use App\Http\Controllers\Site\CredentialController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -41,33 +46,33 @@ Route::delete('/servers/{server_id}', [ServerController::class, 'destroy']);
 Route::get('/servers/{server_id}', [ServerController::class, 'show']);
 Route::patch('/servers/{server_id}', [ServerController::class, 'edit']);
 Route::get('/servers/{server_id}/ping', [ServerController::class, 'ping']);
-Route::get('/servers/{server_id}/stats/cpu', [ServerController::class, 'statsCpu']);
-Route::get('/servers/{server_id}/stats/mem', [ServerController::class, 'statsMem']);
-Route::get('/servers/{server_id}/stats/load', [ServerController::class, 'statsLoad']);
-Route::get('/servers/{server_id}/stats/disk', [ServerController::class, 'statsDisk']);
+Route::get('/servers/{server_id}/stats/cpu', [MonitoringController::class, 'statsCpu']);
+Route::get('/servers/{server_id}/stats/mem', [MonitoringController::class, 'statsMem']);
+Route::get('/servers/{server_id}/stats/load', [MonitoringController::class, 'statsLoad']);
+Route::get('/servers/{server_id}/stats/disk', [MonitoringController::class, 'statsDisk']);
 Route::get('/servers/{server_id}/metrics', [\App\Http\Controllers\ServerMetricsController::class, 'getChartData']);
 Route::post('/servers/{server_id}/rootreset', [ServerController::class, 'rootreset']);
 Route::post("/servers/{server_id}/servicerestart/{service}", [ServerController::class, "servicerestart"]);
 Route::get('/servers/{server_id}/sites', [ServerController::class, 'sites']);
 Route::get('/servers/{server_id}/domains', [ServerController::class, 'domains']);
 Route::get('/servers/{server_id}/fail2ban', [ServerController::class, 'fail2ban']);
-Route::get('/servers/{server_id}/packages', [ServerController::class, 'packages']);
-Route::post('/servers/{server_id}/packages/install', [ServerController::class, 'installPackage']);
-Route::post('/servers/{server_id}/packages/uninstall', [ServerController::class, 'uninstallPackage']);
-Route::get('/servers/{server_id}/services', [ServerController::class, 'listServices']);
-Route::post('/servers/{server_id}/services/manage', [ServerController::class, 'manageService']);
+Route::get('/servers/{server_id}/packages', [PackagesController::class, 'index']);
+Route::post('/servers/{server_id}/packages/install', [PackagesController::class, 'install']);
+Route::post('/servers/{server_id}/packages/uninstall', [PackagesController::class, 'uninstall']);
+Route::get('/servers/{server_id}/services', [MonitoringController::class, 'listServices']);
+Route::post('/servers/{server_id}/services/manage', [MonitoringController::class, 'manageService']);
 
 // Fail2ban endpoints
-Route::get('/servers/{server_id}/fail2ban/jails', [ServerController::class, 'fail2banJails']);
-Route::get('/servers/{server_id}/fail2ban/jails/{jail}', [ServerController::class, 'fail2banJailStatus']);
-Route::post('/servers/{server_id}/fail2ban/ban', [ServerController::class, 'fail2banBanIp']);
-Route::post('/servers/{server_id}/fail2ban/unban', [ServerController::class, 'fail2banUnbanIp']);
-Route::get('/servers/{server_id}/fail2ban/check/{ip}', [ServerController::class, 'fail2banCheckIp']);
-Route::get('/servers/{server_id}/fail2ban/stats', [ServerController::class, 'fail2banStats']);
-Route::get('/servers/{server_id}/fail2ban/logs', [ServerController::class, 'fail2banLogs']);
-Route::post('/servers/{server_id}/fail2ban/whitelist', [ServerController::class, 'fail2banWhitelistIp']);
-Route::get('/servers/{server_id}/fail2ban/whitelist', [ServerController::class, 'fail2banGetWhitelist']);
-Route::post('/servers/{server_id}/fail2ban/deploy', [ServerController::class, 'fail2banDeploy']);
+Route::get('/servers/{server_id}/fail2ban/jails', [Fail2banController::class, 'jails']);
+Route::get('/servers/{server_id}/fail2ban/jails/{jail}', [Fail2banController::class, 'jailStatus']);
+Route::post('/servers/{server_id}/fail2ban/ban', [Fail2banController::class, 'banIp']);
+Route::post('/servers/{server_id}/fail2ban/unban', [Fail2banController::class, 'unbanIp']);
+Route::get('/servers/{server_id}/fail2ban/check/{ip}', [Fail2banController::class, 'checkIp']);
+Route::get('/servers/{server_id}/fail2ban/stats', [Fail2banController::class, 'stats']);
+Route::get('/servers/{server_id}/fail2ban/logs', [Fail2banController::class, 'logs']);
+Route::post('/servers/{server_id}/fail2ban/whitelist', [Fail2banController::class, 'whitelistIp']);
+Route::get('/servers/{server_id}/fail2ban/whitelist', [Fail2banController::class, 'getWhitelist']);
+// fail2banDeploy removed - relied on deleted SSHService
 
 // Cron Job Execution endpoints
 Route::post('/cron-executions', [\App\Http\Controllers\CronExecutionController::class, 'store']);
@@ -83,11 +88,11 @@ Route::patch('/sites/{site_id}', [SiteController::class, 'edit']);
 Route::delete('/sites/{site_id}', [SiteController::class, 'destroy']);
 Route::get('/sites/{site_id}', [SiteController::class, 'show']);
 Route::post('/sites/{site_id}/ssl', [SiteController::class, 'ssl']);
-Route::post('/sites/{site_id}/reset/ssh', [SiteController::class, 'resetssh']);
-Route::post('/sites/{site_id}/reset/db', [SiteController::class, 'resetdb']);
-Route::get('/sites/{site_id}/aliases', [SiteController::class, 'aliases']);
-Route::post('/sites/{site_id}/aliases', [SiteController::class, 'createalias']);
-Route::delete('/sites/{site_id}/aliases/{alias_id}', [SiteController::class, 'destroyalias']);
+Route::post('/sites/{site_id}/reset/ssh', [CredentialController::class, 'resetSsh']);
+Route::post('/sites/{site_id}/reset/db', [CredentialController::class, 'resetDb']);
+Route::get('/sites/{site_id}/aliases', [AliasController::class, 'index']);
+Route::post('/sites/{site_id}/aliases', [AliasController::class, 'store']);
+Route::delete('/sites/{site_id}/aliases/{alias_id}', [AliasController::class, 'destroy']);
 
 // Email Management
 Route::get('/sites/{site_id}/email/accounts', [EmailController::class, 'indexAccounts']);
