@@ -1,0 +1,13 @@
+[Unit]
+Description=Spikster Daemon
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/spikster daemon
+Restart=always
+RestartSec=5
+User=root
+
+[Install]
+WantedBy=multi-user.target
