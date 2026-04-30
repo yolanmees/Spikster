@@ -48,7 +48,7 @@ class DatabaseService
             $pdo->exec("CREATE DATABASE IF NOT EXISTS `{$databaseName}`;");
 
             $database                = new Database;
-            $database->user_id       = Auth::id() ?? 1;
+            $database->user_id       = Auth::id();
             $database->database_name = $databaseName;
             $database->site_id       = $siteId;
             $database->save();
@@ -158,10 +158,15 @@ class DatabaseService
     public function unlinkDatabaseUser($linkId): array
     {
         $pdo  = $this->pdoConnect();
-        $link = DatabaseUserLink::find($linkId);
+        $link = DatabaseUserLink::with(['database', 'databaseUser'])->find($linkId);
 
         if (! $link) {
             return ['success' => false, 'message' => 'Link not found.'];
+        }
+
+        if (! $link->database || ! $link->databaseUser) {
+            $link->delete(); // orphaned link — clean it up
+            return ['success' => true, 'message' => 'Orphaned link removed.'];
         }
 
         try {
