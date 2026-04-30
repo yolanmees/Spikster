@@ -89,7 +89,17 @@ class SiteService
         $site = Site::create($data);
 
         // Dispatch SSH job to create the site on the server
-        \App\Jobs\NewSiteSSH::dispatch($server, $site)->delay(\Carbon\Carbon::now()->addSeconds(3));
+        app(\App\Services\DaemonService::class)->createSite([
+            'id'       => $site->site_id,
+            'domain'   => $site->domain,
+            'username' => $site->username,
+            'password' => $site->password,
+            'db_name'  => $site->username,
+            'db_pass'  => $site->database,
+            'db_root'  => $server->database,
+            'php'      => $site->php,
+            'basepath' => $site->basepath ?? '',
+        ]);
 
         return $site;
     }

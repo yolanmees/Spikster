@@ -8,7 +8,9 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/yolanmees/spikster/daemon/internal/backup"
 	"github.com/yolanmees/spikster/daemon/internal/cron"
+	"github.com/yolanmees/spikster/daemon/internal/ftp"
 	"github.com/yolanmees/spikster/daemon/internal/site"
 )
 
@@ -203,6 +205,43 @@ func dispatch(req Request) (string, error) {
 	case "nodejs.stop":
 		if err := site.StopNodejs(req.Params["username"]); err != nil { return "", err }
 		return "nodejs stopped", nil
+
+	// ── Backup ───────────────────────────────────────────────────────────────
+	case "backup.create":
+		p := req.Params
+		r := backup.BackupRequest{
+			SiteID: p["site_id"], Username: p["username"],
+			DBName: p["db_name"], DBPass: p["db_pass"], DBRoot: p["db_root"],
+			SiteRoot: p["site_root"],
+		}
+		path, err := backup.CreateFull(r)
+		if err != nil { return "", err }
+		return path, nil
+
+	case "backup.restore":
+		p := req.Params
+		r := backup.RestoreRequest{
+			ArchivePath: p["archive"], Username: p["username"],
+			DBName: p["db_name"], DBRoot: p["db_root"], SiteRoot: p["site_root"],
+		}
+		if err := backup.Restore(r); err != nil { return "", err }
+		return "restored", nil
+
+	// ── FTP ───────────────────────────────────────────────────────────────────
+	case "ftp.create":
+		p := req.Params
+		u := ftp.FTPUser{Username: p["username"], Password: p["password"], HomeDir: p["home_dir"]}
+		if err := ftp.CreateUser(u); err != nil { return "", err }
+		return "ftp user created", nil
+
+	case "ftp.update-password":
+		if err := ftp.UpdatePassword(req.Params["username"], req.Params["password"]); err != nil { return "", err }
+		return "ftp password updated", nil
+
+	case "ftp.delete":
+		if err := ftp.DeleteUser(req.Params["username"]); err != nil { return "", err }
+		return "ftp user deleted", nil
+
 
 	default:
 		return "", fmt.Errorf("unknown action: %s", req.Action)

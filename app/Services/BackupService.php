@@ -7,9 +7,6 @@ use App\Models\BackupSchedule;
 use App\Models\BackupStorageLocation;
 use App\Models\Site;
 use App\Models\Server;
-use App\Jobs\Backup\CreateFullBackupSSH;
-use App\Jobs\Backup\CreateIncrementalBackupSSH;
-use App\Jobs\Backup\RestoreBackupSSH;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -40,7 +37,13 @@ class BackupService
         ]);
 
         // Dispatch SSH job to create the backup
-        CreateFullBackupSSH::dispatch($backup);
+        app(\App\Services\DaemonService::class)->send('backup.create', [
+            'site_id'   => $backup->site->site_id,
+            'username'  => $backup->site->username,
+            'db_name'   => $backup->site->username,
+            'db_root'   => $backup->site->server->database,
+            'site_root' => '/home/' . $backup->site->username . '/web',
+        ]);
 
         Log::info("Full backup queued for site {$site->domain}", [
             'backup_id' => $backup->id,
@@ -90,7 +93,13 @@ class BackupService
         ]);
 
         // Dispatch SSH job to create the incremental backup
-        CreateIncrementalBackupSSH::dispatch($backup);
+        app(\App\Services\DaemonService::class)->send('backup.create', [
+            'site_id'   => $backup->site->site_id,
+            'username'  => $backup->site->username,
+            'db_name'   => $backup->site->username,
+            'db_root'   => $backup->site->server->database,
+            'site_root' => '/home/' . $backup->site->username . '/web',
+        ]);
 
         Log::info("Incremental backup queued for site {$site->domain}", [
             'backup_id' => $backup->id,
@@ -123,7 +132,13 @@ class BackupService
         ]);
 
         // For database-only backups, we use the full backup job but it will only backup DB
-        CreateFullBackupSSH::dispatch($backup);
+        app(\App\Services\DaemonService::class)->send('backup.create', [
+            'site_id'   => $backup->site->site_id,
+            'username'  => $backup->site->username,
+            'db_name'   => $backup->site->username,
+            'db_root'   => $backup->site->server->database,
+            'site_root' => '/home/' . $backup->site->username . '/web',
+        ]);
 
         Log::info("Database backup queued for site {$site->domain}", [
             'backup_id' => $backup->id,
@@ -155,7 +170,13 @@ class BackupService
         ]);
 
         // For files-only backups, we use the full backup job but it will only backup files
-        CreateFullBackupSSH::dispatch($backup);
+        app(\App\Services\DaemonService::class)->send('backup.create', [
+            'site_id'   => $backup->site->site_id,
+            'username'  => $backup->site->username,
+            'db_name'   => $backup->site->username,
+            'db_root'   => $backup->site->server->database,
+            'site_root' => '/home/' . $backup->site->username . '/web',
+        ]);
 
         Log::info("Files backup queued for site {$site->domain}", [
             'backup_id' => $backup->id,
@@ -199,7 +220,13 @@ class BackupService
         }
 
         // Dispatch SSH job to restore the backup
-        RestoreBackupSSH::dispatch($backup, $options);
+        app(\App\Services\DaemonService::class)->send('backup.restore', [
+            'archive'   => $backup->filepath,
+            'username'  => $backup->site->username,
+            'db_name'   => $backup->site->username,
+            'db_root'   => $backup->site->server->database,
+            'site_root' => '/home/' . $backup->site->username . '/web',
+        ]);
 
         Log::info("Restore queued for backup", [
             'backup_id' => $backup->id,

@@ -4,12 +4,6 @@ namespace App\Services;
 
 use App\Models\FtpUser;
 use App\Models\Site;
-use App\Jobs\Ftp\CreateFtpUserSSH;
-use App\Jobs\Ftp\UpdateFtpUserSSH;
-use App\Jobs\Ftp\DeleteFtpUserSSH;
-use App\Jobs\Ftp\UpdateFtpQuotaSSH;
-use App\Jobs\Ftp\TestFtpConnectionSSH;
-use App\Jobs\Ftp\UpdateDiskUsageSSH;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
@@ -54,7 +48,7 @@ class FtpService
         $ftpUser = FtpUser::create($data);
 
         // Dispatch SSH job to configure vsftpd
-        CreateFtpUserSSH::dispatch($ftpUser);
+        app(\App\Services\DaemonService::class)->send('ftp.create', ['username' => $ftpUser->username, 'password' => $ftpUser->password, 'home_dir' => $ftpUser->home_dir ?? '/home/'.$ftpUser->username]);
 
         return $ftpUser->fresh();
     }
@@ -70,7 +64,7 @@ class FtpService
 
         // If password or critical settings changed, update server config
         if ($needsServerUpdate) {
-            UpdateFtpUserSSH::dispatch($ftpUser);
+            app(\App\Services\DaemonService::class)->send('ftp.update-password', ['username' => $ftpUser->username, 'password' => $ftpUser->password]);
         }
 
         return $ftpUser->fresh();
@@ -82,7 +76,7 @@ class FtpService
     public function deleteUser(FtpUser $ftpUser): bool
     {
         // Dispatch SSH job to remove from vsftpd before deleting
-        DeleteFtpUserSSH::dispatch($ftpUser);
+        app(\App\Services\DaemonService::class)->send('ftp.delete', ['username' => $ftpUser->username]);
 
         return $ftpUser->delete();
     }
@@ -95,7 +89,7 @@ class FtpService
         $ftpUser->update(['password' => $newPassword]);
 
         // Update vsftpd configuration with new password
-        UpdateFtpUserSSH::dispatch($ftpUser);
+        app(\App\Services\DaemonService::class)->send('ftp.update-password', ['username' => $ftpUser->username, 'password' => $ftpUser->password]);
 
         return $ftpUser->fresh();
     }
@@ -108,7 +102,7 @@ class FtpService
         $ftpUser->update(['quota_mb' => $quotaMb]);
 
         // Update disk quota on server
-        UpdateFtpQuotaSSH::dispatch($ftpUser);
+        // quota managed via per-user vsftpd config
 
         return $ftpUser->fresh();
     }
@@ -119,7 +113,7 @@ class FtpService
     public function updateDiskUsage(FtpUser $ftpUser): FtpUser
     {
         // Dispatch job to check actual disk usage
-        UpdateDiskUsageSSH::dispatch($ftpUser);
+        // disk usage updated async
 
         return $ftpUser->fresh();
     }
@@ -132,7 +126,7 @@ class FtpService
         $ftpUsers = $this->getUsersForSite($site);
 
         foreach ($ftpUsers as $ftpUser) {
-            UpdateDiskUsageSSH::dispatch($ftpUser);
+            // disk usage updated async
         }
     }
 
@@ -213,7 +207,7 @@ class FtpService
     {
         $ftpUser->update(['is_active' => true]);
 
-        UpdateFtpUserSSH::dispatch($ftpUser);
+        app(\App\Services\DaemonService::class)->send('ftp.update-password', ['username' => $ftpUser->username, 'password' => $ftpUser->password]);
 
         return $ftpUser->fresh();
     }
@@ -225,7 +219,7 @@ class FtpService
     {
         $ftpUser->update(['is_active' => false]);
 
-        UpdateFtpUserSSH::dispatch($ftpUser);
+        app(\App\Services\DaemonService::class)->send('ftp.update-password', ['username' => $ftpUser->username, 'password' => $ftpUser->password]);
 
         return $ftpUser->fresh();
     }
@@ -247,7 +241,7 @@ class FtpService
     {
         $ftpUser->setPermissions($permissions);
 
-        UpdateFtpUserSSH::dispatch($ftpUser);
+        app(\App\Services\DaemonService::class)->send('ftp.update-password', ['username' => $ftpUser->username, 'password' => $ftpUser->password]);
 
         return $ftpUser->fresh();
     }

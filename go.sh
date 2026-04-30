@@ -905,39 +905,39 @@ else
     log_message "Go already installed, skipping installation"
 fi
 
-# Download and install spikster-agent
-log_message "Installing spikster-agent..."
-mkdir -p /tmp/spikster-agent-install
-cd /tmp/spikster-agent-install
+# Build and install spikster daemon
+log_message "Building spikster daemon..."
+mkdir -p /tmp/spikster-daemon-build
+cd /tmp/spikster-daemon-build
 
-# Download agent files from GitHub
-wget -q https://raw.githubusercontent.com/$REPO/$BRANCH/spikster-agent/main.go -O main.go || handle_error "downloading agent main.go"
-wget -q https://raw.githubusercontent.com/$REPO/$BRANCH/spikster-agent/go.mod -O go.mod || handle_error "downloading agent go.mod"
-wget -q https://raw.githubusercontent.com/$REPO/$BRANCH/spikster-agent/spikster-agent.service -O spikster-agent.service || handle_error "downloading agent service file"
+# Clone daemon source
+git clone --depth=1 --branch $BRANCH https://github.com/$REPO.git spikster-src || handle_error "cloning spikster repo"
+cd spikster-src/daemon
 
-# Build the agent
-log_message "Building spikster-agent..."
-/usr/local/go/bin/go mod download || handle_error "downloading Go dependencies"
-/usr/local/go/bin/go build -ldflags="-s -w" -o spikster-agent main.go || handle_error "building spikster-agent"
-
-# Install binary
-install -m 755 spikster-agent /usr/local/bin/spikster-agent || handle_error "installing spikster-agent binary"
+# Build
+/usr/local/go/bin/go build -ldflags="-s -w" -o /usr/local/bin/spikster ./cmd/main.go || handle_error "building spikster daemon"
 
 # Install systemd service
-install -m 644 spikster-agent.service /etc/systemd/system/spikster-agent.service || handle_error "installing systemd service"
+install -m 644 systemd/spikster-daemon.service /etc/systemd/system/spikster-daemon.service || handle_error "installing daemon service"
 
-# Reload systemd and start service
+# Setup socket dir + permissions
+mkdir -p /etc/spikster
+chmod 750 /etc/spikster
+
+# Reload systemd and start daemon
 systemctl daemon-reload || handle_error "reloading systemd"
-systemctl enable spikster-agent.service || handle_error "enabling spikster-agent service"
-systemctl start spikster-agent.service || handle_error "starting spikster-agent service"
+systemctl enable spikster-daemon.service || handle_error "enabling spikster daemon"
+systemctl start spikster-daemon.service || handle_error "starting spikster daemon"
 
-# Verify agent is running
+# Allow www-data to use socket
+usermod -aG spikster www-data 2>/dev/null || true
+
 sleep 2
-if systemctl is-active --quiet spikster-agent.service; then
-    log_message "spikster-agent installed and running successfully"
-    echo "${bggreen}${black}${bold}Spikster Monitoring Agent is running${reset}"
+if systemctl is-active --quiet spikster-daemon.service; then
+    log_message "spikster daemon installed and running"
+    echo "${bggreen}${black}${bold}Spikster daemon is running${reset}"
 else
-    log_message "WARNING: spikster-agent service failed to start"
+    log_message "WARNING: spikster daemon failed to start"
     echo "${bgyellow}${black}${bold}WARNING: Agent service failed to start. Check logs with: journalctl -u spikster-agent${reset}"
 fi
 
