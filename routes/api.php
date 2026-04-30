@@ -28,6 +28,9 @@ Route::get('/health', function () {
     ]);
 });
 
+// All protected routes
+Route::middleware(['auth:sanctum'])->group(function () {
+
 // Servers
 Route::get('/servers', [ServerController::class, 'index']);
 Route::post('/servers', [ServerController::class, 'create']);
@@ -111,14 +114,12 @@ Route::get('/sites/{site_id}/email/statistics', [EmailController::class, 'getSta
 Route::post('/sites/{site_id}/email/webmail/install', [EmailController::class, 'installWebmail']);
 Route::post('/sites/{site_id}/email/accounts/{account_id}/webmail', [EmailController::class, 'getWebmailUrl']);
 
+}); // end auth:sanctum
+
 // Get API Key From API login
 Route::post('/login', [AuthController::class, 'appLogin'])->middleware('throttle:10,3');
 
-Route::middleware('api')->group(function () {
-    // phpmyadmin route
-    Route::get('/pma', function () {
-        return redirect()->to('mysecureadmin/index.php');
-    });
+Route::middleware(['auth:sanctum'])->group(function () {
     // database
     Route::get('/data', [DatabaseController::class, 'viewdatabase'])->name('data');
     Route::post('/createdatab', [DatabaseController::class, 'createdatabase'])->name('createdatab');
@@ -128,39 +129,40 @@ Route::middleware('api')->group(function () {
 
 // File manager routes are defined in web.php (behind auth:sanctum)
 
-Route::get('logs', [LogManagerController::class, 'index'])->name('api.logs');
-Route::get('logs/{log}', [LogManagerController::class, 'show'])->name('api.logs.show');
-Route::get('logs/{log}/download', [LogManagerController::class, 'download'])->name('api.logs.download');
-Route::delete('logs/{log}', [LogManagerController::class, 'delete'])->name('api.logs.delete');
-
-// Backups - Site-specific backup routes
-Route::prefix('sites/{site_id}')->group(function () {
-    // Backups
-    Route::get('/backups', [BackupController::class, 'index']);
-    Route::post('/backups/full', [BackupController::class, 'createFullBackup']);
-    Route::post('/backups/incremental', [BackupController::class, 'createIncrementalBackup']);
-    Route::post('/backups/database', [BackupController::class, 'createDatabaseBackup']);
-    Route::get('/backups/stats', [BackupController::class, 'stats']);
-    Route::get('/backups/{backup_id}', [BackupController::class, 'show']);
-    Route::post('/backups/{backup_id}/restore', [BackupController::class, 'restore']);
-    Route::get('/backups/{backup_id}/download', [BackupController::class, 'download']);
-    Route::delete('/backups/{backup_id}', [BackupController::class, 'destroy']);
-
-    // Backup Schedules
-    Route::get('/backup-schedules', [BackupController::class, 'listSchedules']);
-    Route::post('/backup-schedules', [BackupController::class, 'createSchedule']);
-    Route::put('/backup-schedules/{schedule_id}', [BackupController::class, 'updateSchedule']);
-    Route::delete('/backup-schedules/{schedule_id}', [BackupController::class, 'deleteSchedule']);
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('logs', [LogManagerController::class, 'index'])->name('api.logs');
+    Route::get('logs/{log}', [LogManagerController::class, 'show'])->name('api.logs.show');
+    Route::get('logs/{log}/download', [LogManagerController::class, 'download'])->name('api.logs.download');
+    Route::delete('logs/{log}', [LogManagerController::class, 'delete'])->name('api.logs.delete');
 });
 
-// Backup Storage Locations (global, not site-specific)
-Route::get('/backup-storage-locations', [BackupController::class, 'listStorageLocations']);
-Route::post('/backup-storage-locations', [BackupController::class, 'createStorageLocation']);
-Route::post('/backup-storage-locations/{location_id}/test', [BackupController::class, 'testStorageConnection']);
-Route::delete('/backup-storage-locations/{location_id}', [BackupController::class, 'deleteStorageLocation']);
+// Backups + storage — all behind auth
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::prefix('sites/{site_id}')->group(function () {
+        Route::get('/backups', [BackupController::class, 'index']);
+        Route::post('/backups/full', [BackupController::class, 'createFullBackup']);
+        Route::post('/backups/incremental', [BackupController::class, 'createIncrementalBackup']);
+        Route::post('/backups/database', [BackupController::class, 'createDatabaseBackup']);
+        Route::get('/backups/stats', [BackupController::class, 'stats']);
+        Route::get('/backups/{backup_id}', [BackupController::class, 'show']);
+        Route::post('/backups/{backup_id}/restore', [BackupController::class, 'restore']);
+        Route::get('/backups/{backup_id}/download', [BackupController::class, 'download']);
+        Route::delete('/backups/{backup_id}', [BackupController::class, 'destroy']);
+
+        Route::get('/backup-schedules', [BackupController::class, 'listSchedules']);
+        Route::post('/backup-schedules', [BackupController::class, 'createSchedule']);
+        Route::put('/backup-schedules/{schedule_id}', [BackupController::class, 'updateSchedule']);
+        Route::delete('/backup-schedules/{schedule_id}', [BackupController::class, 'deleteSchedule']);
+    });
+
+    Route::get('/backup-storage-locations', [BackupController::class, 'listStorageLocations']);
+    Route::post('/backup-storage-locations', [BackupController::class, 'createStorageLocation']);
+    Route::post('/backup-storage-locations/{location_id}/test', [BackupController::class, 'testStorageConnection']);
+    Route::delete('/backup-storage-locations/{location_id}', [BackupController::class, 'deleteStorageLocation']);
+});
 
 // FTP Management - Site-specific FTP routes
-Route::prefix('sites/{site_id}')->group(function () {
+Route::middleware(['auth:sanctum'])->prefix('sites/{site_id}')->group(function () {
     // FTP Users
     Route::get('/ftp/users', [\App\Http\Controllers\FtpController::class, 'index']);
     Route::post('/ftp/users', [\App\Http\Controllers\FtpController::class, 'store']);

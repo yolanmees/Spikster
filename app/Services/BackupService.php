@@ -36,21 +36,26 @@ class BackupService
             'storage_location' => $options['storage_location'] ?? 'local',
         ]);
 
-        // Dispatch SSH job to create the backup
-        app(\App\Services\DaemonService::class)->send('backup.create', [
+        $daemon = app(\App\Services\DaemonService::class);
+        $result = $daemon->send('backup.create', [
             'site_id'   => $backup->site->site_id,
             'username'  => $backup->site->username,
             'db_name'   => $backup->site->username,
+            'db_pass'   => $backup->site->database,
             'db_root'   => $backup->site->server->database,
             'site_root' => '/home/' . $backup->site->username . '/web',
         ]);
 
-        Log::info("Full backup queued for site {$site->domain}", [
-            'backup_id' => $backup->id,
-            'type' => 'full',
+        $backup->update([
+            'status'   => $result['success'] ? 'completed' : 'failed',
+            'filename' => $result['output'] ?? null,
         ]);
 
-        return $backup;
+        Log::info("Full backup for site {$site->domain}: " . ($result['success'] ? 'completed' : 'failed'), [
+            'backup_id' => $backup->id,
+        ]);
+
+        return $backup->fresh();
     }
 
     /**
