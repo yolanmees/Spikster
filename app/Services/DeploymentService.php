@@ -155,14 +155,19 @@ class DeploymentService
         $server = $site->server;
         $sitePath = "/home/{$site->username}/{$site->domain}";
 
-        // Create temporary script file
+        // Write script via SFTP to avoid shell injection through echo-quoting
+        $localTmp = tempnam(sys_get_temp_dir(), 'deploy_');
+        file_put_contents($localTmp, $script);
+
         $scriptPath = "/tmp/deploy_{$site->site_id}.sh";
 
-        // Write script to server
-        $this->sshService->executeCommand(
-            $server,
-            "echo '{$script}' > {$scriptPath} && chmod +x {$scriptPath}"
-        );
+        try {
+            $this->sshService->uploadFile($server, $localTmp, $scriptPath);
+        } finally {
+            @unlink($localTmp);
+        }
+
+        $this->sshService->executeCommand($server, "chmod +x {$scriptPath}");
 
         // Execute script
         $output = $this->sshService->executeCommand(
@@ -171,7 +176,7 @@ class DeploymentService
         );
 
         // Cleanup
-        $this->sshService->executeCommand($server, "rm {$scriptPath}");
+        $this->sshService->executeCommand($server, "rm -f {$scriptPath}");
 
         return $output;
     }
@@ -213,6 +218,11 @@ class DeploymentService
      */
     public function rollback(Site $site, string $commitHash): bool
     {
+        // Validate commitHash to prevent shell injection (must be a valid git SHA)
+        if (! preg_match('/^[0-9a-f]{7,40}$/i', $commitHash)) {
+            throw new \InvalidArgumentException('Invalid commit hash format');
+        }
+
         $server = $site->server;
         $sitePath = "/home/{$site->username}/{$site->domain}";
 

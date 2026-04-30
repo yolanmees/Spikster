@@ -30,7 +30,7 @@ class SSHService
     /**
      * Execute a command on a server via SSH.
      */
-    public function executeCommand(Server $server, string $command, bool $sanitize = true): string
+    public function executeCommand(Server $server, string $command, bool $sanitize = false): string
     {
         if ($sanitize) {
             $command = $this->sanitizeCommand($command);

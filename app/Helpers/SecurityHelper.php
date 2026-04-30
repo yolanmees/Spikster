@@ -92,15 +92,35 @@ class SecurityHelper
     }
 
     /**
-     * Validate SSH command to prevent command injection
+     * Sanitize a user-supplied VALUE for safe inclusion in an SSH command.
+     *
+     * Use this only for user-controlled string fragments (e.g. usernames, domains)
+     * that get embedded inside a command string. Do NOT run entire command strings
+     * through this — it will break pipes, redirections, awk $N references, etc.
+     *
+     * For user input that should be treated as a literal shell argument, prefer
+     * wrapping with escapeshellarg() instead.
      */
     public static function sanitizeSshCommand(string $command): string
     {
-        // Remove dangerous characters
-        $dangerous = ['&', '|', ';', '`', '$', '(', ')', '<', '>', "\n", "\r"];
+        // Strip characters that are dangerous in an unquoted shell context.
+        // Note: '|', '&', ';', '$', '(', ')', '<', '>' are intentionally preserved
+        // here because callers pass full command strings that legitimately use them.
+        // Only strip null bytes and literal backtick-style command substitution.
+        $dangerous = ['`', "\0"];
         $command = str_replace($dangerous, '', $command);
 
         return trim($command);
+    }
+
+    /**
+     * Sanitize a user-supplied value that will be embedded in a shell command.
+     * Strips shell metacharacters. Use for individual values, not full commands.
+     */
+    public static function sanitizeShellValue(string $value): string
+    {
+        $dangerous = ['&', '|', ';', '`', '$', '(', ')', '<', '>', "\n", "\r", "\0", '"', "'"];
+        return trim(str_replace($dangerous, '', $value));
     }
 
     /**
