@@ -2,7 +2,7 @@
 export DEBIAN_FRONTEND=noninteractive
 
 ### CONFIGURATION ###
-BUILD=20240727
+BUILD=20260430
 PASS=$(openssl rand -base64 32 | sha256sum | base64 | head -c 32 | tr '[:upper:]' '[:lower:]')
 DBPASS=$(openssl rand -base64 24 | sha256sum | base64 | head -c 32 | tr '[:upper:]' '[:lower:]')
 SERVERID=$(openssl rand -base64 12 | sha256sum | base64 | head -c 32 | tr '[:upper:]' '[:lower:]')

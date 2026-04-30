@@ -46,7 +46,7 @@ Route::get('/servers/{server_id}/stats/load', [ServerController::class, 'statsLo
 Route::get('/servers/{server_id}/stats/disk', [ServerController::class, 'statsDisk']);
 Route::get('/servers/{server_id}/metrics', [\App\Http\Controllers\ServerMetricsController::class, 'getChartData']);
 Route::post('/servers/{server_id}/rootreset', [ServerController::class, 'rootreset']);
-// Route::post('/servers/{server_id}/servicerestart/{service}', [ServerController::class, 'servicerestart']);
+Route::post("/servers/{server_id}/servicerestart/{service}", [ServerController::class, "servicerestart"]);
 Route::get('/servers/{server_id}/sites', [ServerController::class, 'sites']);
 Route::get('/servers/{server_id}/domains', [ServerController::class, 'domains']);
 Route::get('/servers/{server_id}/fail2ban', [ServerController::class, 'fail2ban']);

@@ -1373,68 +1373,65 @@ class ServerController extends Controller
      *      ),
      * )
      */
-    // public function servicerestart(string $server_id, string $service)
-    // {
-    //     if (!in_array($service, config('cipi.services'))) {
-    //         return response()->json([
-    //             'message' => __('spikster.invalid_service_error_message'),
-    //             'errors' => __('spikster.bad_request')
-    //         ], 400);
-    //     }
+    public function servicerestart(string $server_id, string $service)
+    {
+        if (!in_array($service, config('cipi.services'))) {
+            return response()->json([
+                'message' => __('spikster.invalid_service_error_message'),
+                'errors' => __('spikster.bad_request')
+            ], 400);
+        }
 
-    //     $server = Server::where('server_id', $server_id)->where('status', 1)->first();
-    //     if (!$server) {
-    //         return response()->json([
-    //             'message' => __('spikster.server_not_found_message'),
-    //             'errors' => __('spikster.server_not_found')
-    //         ], 404);
-    //     }
+        $server = Server::where('server_id', $server_id)->where('status', 1)->first();
+        if (!$server) {
+            return response()->json([
+                'message' => __('spikster.server_not_found_message'),
+                'errors' => __('spikster.server_not_found')
+            ], 404);
+        }
 
-    //     try {
-    //         $ssh = new SSH2($server->ip, 22);
-    //         if (!$ssh->login('spikster', $server->password)) {
-    //             return response()->json([
-    //                 'message' => __('spikster.server_error_ssh_error_message').$server->server_id,
-    //                 'errors' => __('spikster.server_error')
-    //             ], 500);
-    //         }
+        try {
+            $ssh = new SSH2($server->ip, 22);
+            if (!$ssh->login('spikster', $server->password)) {
+                return response()->json([
+                    'message' => __('spikster.server_error_ssh_error_message').$server->server_id,
+                    'errors' => __('spikster.server_error')
+                ], 500);
+            }
 
-    //         $ssh->setTimeout(360);
-    //         switch ($service) {
-    //             case 'nginx':
-    //                 $ssh->exec('sudo systemctl restart nginx.service');
-    //                 break;
-    //             case 'php':
-    //                 $ssh->exec('sudo service php8.3-fpm restart');
-    //                 $ssh->exec('sudo service php8.2-fpm restart');
-    //                 $ssh->exec('sudo service php8.1-fpm restart');
-    //                 $ssh->exec('sudo service php8.0-fpm restart');
-    //                 $ssh->exec('sudo service php7.4-fpm restart');
-    //                 $ssh->exec('sudo service php7.3-fpm restart');
-    //                 break;
-    //             case 'mysql':
-    //                 $ssh->exec('sudo service mysql restart');
-    //                 break;
-    //             case 'redis':
-    //                 $ssh->exec('sudo systemctl restart redis.service');
-    //                 break;
-    //             case 'supervisor':
-    //                 $ssh->exec('service supervisor restart');
-    //                 break;
-    //             default:
-    //                 //
-    //                 break;
-    //         }
-    //         $ssh->exec('exit');
+            $ssh->setTimeout(360);
+            switch ($service) {
+                case 'nginx':
+                    $ssh->exec('sudo systemctl restart nginx.service');
+                    break;
+                case 'php':
+                    $ssh->exec('sudo service php8.4-fpm restart');
+                    $ssh->exec('sudo service php8.3-fpm restart');
+                    $ssh->exec('sudo service php8.2-fpm restart');
+                    $ssh->exec('sudo service php8.1-fpm restart');
+                    break;
+                case 'mysql':
+                    $ssh->exec('sudo service mysql restart');
+                    break;
+                case 'redis':
+                    $ssh->exec('sudo systemctl restart redis.service');
+                    break;
+                case 'supervisor':
+                    $ssh->exec('service supervisor restart');
+                    break;
+                default:
+                    break;
+            }
+            $ssh->exec('exit');
 
-    //         return response()->json([]);
-    //     } catch (\Throwable $th) {
-    //         return response()->json([
-    //             'message' => __('spikster.something_error_message'),
-    //             'errors' => __('spikster.error')
-    //         ], 500);
-    //     }
-    // }
+            return response()->json([]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => __('spikster.something_error_message'),
+                'errors' => __('spikster.error')
+            ], 500);
+        }
+    }
 
     /**
      * List all server sites
