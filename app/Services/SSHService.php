@@ -250,7 +250,7 @@ class SSHService
             }
         }
 
-        $this->executeCommand($server, "rm -rf {$path}");
+        $this->executeCommand($server, "rm -rf {$normalizedPath}");
 
         return true;
     }

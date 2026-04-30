@@ -134,7 +134,7 @@ class SiteController extends Controller
                 'site_id' => $site->site_id,
                 'domain' => $site->domain,
                 'username' => $site->username,
-                'server_id' => $stats['server']['name'] ?? null,
+                'server_id' => $site->server->server_id ?? null,
                 'server_name' => $site->server->name,
                 'server_ip' => $stats['server']['ip'] ?? null,
                 'php' => $site->php,
@@ -367,29 +367,42 @@ class SiteController extends Controller
 
         $site_id = Str::uuid();
 
+        // Build site data before touching DB or daemon
+        $username = config('spikster.users_prefix').hash('crc32', (Str::uuid()->toString())).rand(1, 9);
+        $password = Str::random(24);
+        $database = Str::random(24);
+
+        // Call daemon first — if it fails, nothing is written to DB
+        $daemonSuccess = app(DaemonService::class)->createSite([
+            'id'       => $site_id,
+            'domain'   => strtolower($request->domain),
+            'username' => $username,
+            'password' => $password,
+            'db_name'  => $username,
+            'db_pass'  => $database,
+            'db_root'  => $server->database,
+            'php'      => $php,
+            'basepath' => $request->basepath ?? '',
+        ]);
+
+        if (! $daemonSuccess) {
+            return response()->json([
+                'message' => __('spikster.server_connection_issue'),
+                'errors'  => __('spikster.server_connection_issue'),
+            ], 500);
+        }
+
         $site = new Site;
         $site->site_id = $site_id;
         $site->server_id = $server->id;
         $site->domain = strtolower($request->domain);
         $site->php = $php;
         $site->basepath = $request->basepath;
-        $site->username = config('spikster.users_prefix').hash('crc32', (Str::uuid()->toString())).rand(1, 9);
-        $site->password = Str::random(24);
-        $site->database = Str::random(24);
+        $site->username = $username;
+        $site->password = $password;
+        $site->database = $database;
         $site->deploy = ' ';
         $site->save();
-
-        app(DaemonService::class)->createSite([
-            'id'       => $site->site_id,
-            'domain'   => $site->domain,
-            'username' => $site->username,
-            'password' => $site->password,
-            'db_name'  => $site->username,
-            'db_pass'  => $site->database,
-            'db_root'  => $server->database,
-            'php'      => $site->php,
-            'basepath' => $site->basepath ?? '',
-        ]);
 
         return response()->json([
             'site_id' => $site->site_id,
@@ -988,6 +1001,10 @@ class SiteController extends Controller
             'db_name'  => $site->username,
             'db_root'  => $site->server->database,
         ]);
+
+        // Delete aliases and the site record from DB
+        $site->aliases()->delete();
+        $site->delete();
 
         return response()->json([]);
     }
