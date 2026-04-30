@@ -1,48 +1,20 @@
 <div>
-    <!-- Flash Messages -->
-    @if (session()->has('success'))
-        <livewire:components.alert type="success" :message="session('success')" :dismissible="true" />
-    @endif
+    <x-flash-messages />
 
-    @if (session()->has('error'))
-        <livewire:components.alert type="error" :message="session('error')" :dismissible="true" />
-    @endif
-
-    <!-- Header with Actions -->
-    <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white">Email Accounts</h3>
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Manage email accounts for {{ $site->domain }}
-            </p>
-        </div>
-        <x-primary-button wire:click="create">
-            <x-icon icon="plus" class="h-4 w-4 -ml-1 mr-1.5" />
-            Create Account
-        </x-primary-button>
-    </div>
+    <x-section-header title="Email Accounts" subtitle="Manage email accounts for {{ $site->domain }}">
+        <x-slot name="actions">
+            <x-primary-button wire:click="create">
+                <x-icon icon="plus" class="h-4 w-4 -ml-1 mr-1.5" />
+                Create Account
+            </x-primary-button>
+        </x-slot>
+    </x-section-header>
 
     <!-- Search and Filters -->
     <div class="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <!-- Search -->
         <div class="sm:col-span-2">
-            <x-text-input model="search" debounce="300" placeholder="Search by email or username...">
-                <x-slot name="icon">
-                    <x-icon icon="search" class="h-5 w-5 text-gray-400" />
-                </x-slot>
-                <x-slot name="suffix">
-                    <div wire:loading wire:target="search">
-                        <svg class="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg"
-                            fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                            </path>
-                        </svg>
-                    </div>
-                </x-slot>
-            </x-text-input>
+            <x-search-input model="search" placeholder="Search by email or username..." />
         </div>
 
         <!-- Active Filter -->
@@ -53,16 +25,7 @@
         </x-select>
     </div>
 
-    <!-- Table Container with Loading Overlay -->
-    <div class="relative">
-        <!-- Loading Overlay -->
-        <div wire:loading.delay
-            class="absolute inset-0 bg-white/50 dark:bg-gray-900/50 z-10 flex items-center justify-center rounded-lg">
-            <livewire:components.loading-spinner size="lg" color="blue" message="Loading..." />
-        </div>
-
-        <!-- Table -->
-        <div class="mt-4 -mx-4 ring-1 ring-gray-300 sm:mx-0 sm:rounded-lg overflow-hidden">
+    <x-table-wrapper>
             <table class="min-w-full divide-y divide-gray-300">
                 <thead class="bg-gray-50 dark:bg-gray-800">
                     <tr>
@@ -164,100 +127,28 @@
             </table>
         </div>
 
-        <!-- Pagination -->
-        @if ($accounts->hasPages())
-            <div class="mt-4">
-                {{ $accounts->links() }}
-            </div>
-        @endif
-    </div>
+        <x-slot name="pagination">@if ($accounts->hasPages()){{ $accounts->links() }}@endif</x-slot>
+    </x-table-wrapper>
 
-    <!-- Create Modal -->
+    {{-- Create Modal --}}
     @if ($showCreateModal)
-        <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog"
-            aria-modal="true">
-            <div class="flex min-h-screen items-center justify-center p-4 text-center sm:p-0">
-                <div wire:click="closeModals" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity">
-                </div>
-                <div
-                    class="relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl">
-                    <livewire:email.create-email-account :site="$site" :key="'create-account-' . now()" />
-                </div>
-            </div>
-        </div>
+        <x-modal title="Create Email Account" max-width="2xl">
+            <livewire:email.create-email-account :site="$site" :key="'create-account-' . now()" />
+        </x-modal>
     @endif
 
-    <!-- Edit Modal -->
+    {{-- Edit Modal --}}
     @if ($showEditModal && $editingAccount)
-        <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog"
-            aria-modal="true">
-            <div class="flex min-h-screen items-center justify-center p-4 text-center sm:p-0">
-                <div wire:click="closeModals" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity">
-                </div>
-                <div
-                    class="relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl">
-                    <livewire:email.edit-email-account :account-id="$editingAccount" :key="'edit-account-' . $editingAccount" />
-                </div>
-            </div>
-        </div>
+        <x-modal title="Edit Email Account" max-width="2xl">
+            <livewire:email.edit-email-account :account-id="$editingAccount" :key="'edit-account-' . $editingAccount" />
+        </x-modal>
     @endif
 
-    <!-- Delete Confirmation Modal -->
-    @if ($confirmingDeletion)
-        <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog"
-            aria-modal="true">
-            <div class="flex min-h-screen items-center justify-center p-4 text-center sm:p-0">
-                <div wire:click="cancelDelete" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity">
-                </div>
-                <div
-                    class="relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
-                    <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                        <div class="sm:flex sm:items-start">
-                            <div
-                                class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 dark:bg-red-900 sm:mx-0 sm:h-10 sm:w-10">
-                                <svg class="h-6 w-6 text-red-600 dark:text-red-400" fill="none"
-                                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-                                </svg>
-                            </div>
-                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                                <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-white"
-                                    id="modal-title">
-                                    Delete email account
-                                </h3>
-                                <div class="mt-2">
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                                        Are you sure you want to delete this email account? This action cannot be
-                                        undone.
-                                        All emails will be permanently removed from the server.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-                        <x-danger-button wire:click="delete" wire:loading.attr="disabled" wire:target="delete"
-                            class="w-full sm:ml-3 sm:w-auto">
-                            <span wire:loading.remove wire:target="delete">Delete</span>
-                            <span wire:loading wire:target="delete" class="flex items-center">
-                                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10"
-                                        stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor"
-                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                    </path>
-                                </svg>
-                                Deleting...
-                            </span>
-                        </x-danger-button>
-                        <x-secondary-button wire:click="cancelDelete" class="mt-3 w-full sm:mt-0 sm:w-auto">
-                            Cancel
-                        </x-secondary-button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endif
+    <x-delete-confirm-modal
+        :show="$confirmingDeletion"
+        title="Delete Email Account"
+        message="Are you sure you want to delete this email account? This action cannot be undone. All emails will be permanently removed from the server."
+        confirm-action="delete"
+        cancel-action="cancelDelete"
+    />
 </div>

@@ -1,34 +1,11 @@
 <div>
-    <!-- Flash Messages -->
-    @if (session()->has('success'))
-        <livewire:components.alert type="success" :message="session('success')" :dismissible="true" />
-    @endif
-
-    @if (session()->has('error'))
-        <livewire:components.alert type="error" :message="session('error')" :dismissible="true" />
-    @endif
+    <x-flash-messages />
 
     <!-- Search and Filters -->
     <div class="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <!-- Search -->
         <div class="sm:col-span-2">
-            <x-text-input model="search" debounce="300" placeholder="Search by domain or username...">
-                <x-slot name="icon">
-                    <x-icon icon="search" class="h-5 w-5 text-gray-400" />
-                </x-slot>
-                <x-slot name="suffix">
-                    <div wire:loading wire:target="search">
-                        <svg class="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg"
-                            fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                            </path>
-                        </svg>
-                    </div>
-                </x-slot>
-            </x-text-input>
+            <x-search-input model="search" placeholder="Search by domain or username..." />
         </div>
 
         <!-- PHP Version Filter -->
@@ -42,16 +19,7 @@
         </x-select>
     </div>
 
-    <!-- Table Container with Loading Overlay -->
-    <div class="relative">
-        <!-- Loading Overlay -->
-        <div wire:loading.delay
-            class="absolute inset-0 bg-white/50 dark:bg-gray-900/50 z-10 flex items-center justify-center rounded-lg">
-            <livewire:components.loading-spinner size="lg" color="blue" message="Loading..." />
-        </div>
-
-        <!-- Table -->
-        <div class="mt-4 -mx-4 ring-1 ring-gray-300 sm:mx-0 sm:rounded-lg overflow-hidden">
+    <x-table-wrapper>
             <table class="min-w-full divide-y divide-gray-300">
                 <thead class="bg-gray-50 dark:bg-gray-800">
                     <tr>
@@ -142,13 +110,8 @@
             </table>
         </div>
 
-        <!-- Pagination -->
-        @if ($sites->hasPages())
-            <div class="mt-4">
-                {{ $sites->links() }}
-            </div>
-        @endif
-    </div>
+        <x-slot name="pagination">@if ($sites->hasPages()){{ $sites->links() }}@endif</x-slot>
+    </x-table-wrapper>
 
     <x-delete-confirm-modal
         :show="$confirmingDeletion"
