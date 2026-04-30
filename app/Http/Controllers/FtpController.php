@@ -43,7 +43,7 @@ class FtpController extends Controller
      */
     public function index(Request $request, string $siteId)
     {
-        $site = Site::findOrFail($siteId);
+        $site = Site::where('site_id', $siteId)->firstOrFail();
         $ftpUsers = $this->ftpService->getUsersForSite($site);
 
         return response()->json([
@@ -69,7 +69,7 @@ class FtpController extends Controller
      */
     public function show(string $siteId, string $userId)
     {
-        $site = Site::findOrFail($siteId);
+        $site = Site::where('site_id', $siteId)->firstOrFail();
         $ftpUser = FtpUser::where('site_id', $siteId)
                          ->findOrFail($userId);
 
@@ -103,7 +103,7 @@ class FtpController extends Controller
      */
     public function store(Request $request, string $siteId)
     {
-        $site = Site::findOrFail($siteId);
+        $site = Site::where('site_id', $siteId)->firstOrFail();
 
         $validator = Validator::make($request->all(), [
             'username' => 'nullable|string|unique:ftp_users|max:255',
@@ -234,7 +234,7 @@ class FtpController extends Controller
             ], 422);
         }
 
-        $this->ftpService->resetPassword($ftpUser, $request->password);
+        $this->ftpService->resetPassword($ftpUser, $validator->validated()['password']);
 
         return response()->json([
             'message' => 'Password reset successfully',
@@ -371,7 +371,7 @@ class FtpController extends Controller
      */
     public function getSiteStatistics(string $siteId)
     {
-        $site = Site::findOrFail($siteId);
+        $site = Site::where('site_id', $siteId)->firstOrFail();
 
         $stats = $this->ftpService->getSiteStatistics($site);
 

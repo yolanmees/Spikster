@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\EmailAccount;
+use App\Models\FtpUser;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
@@ -128,6 +130,26 @@ class Site extends Model
     public function cronJobs(): HasMany
     {
         return $this->hasMany(CronJob::class);
+    }
+
+    /**
+     * Get all email accounts for this site.
+     *
+     * @return HasMany<EmailAccount>
+     */
+    public function emailAccounts(): HasMany
+    {
+        return $this->hasMany(EmailAccount::class);
+    }
+
+    /**
+     * Get all FTP users for this site.
+     *
+     * @return HasMany<FtpUser>
+     */
+    public function ftpUsers(): HasMany
+    {
+        return $this->hasMany(FtpUser::class);
     }
 
     /**

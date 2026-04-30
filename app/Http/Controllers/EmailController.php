@@ -487,13 +487,13 @@ class EmailController extends Controller
      */
     public function getWebmailUrl(Request $request, string $site_id, string $account_id): JsonResponse
     {
-        $account = EmailAccount::where('id', $account_id)
-            ->where('site_id', $site_id)
-            ->firstOrFail();
-
         $request->validate([
             'password' => 'required|string',
         ]);
+
+        $account = EmailAccount::where('id', $account_id)
+            ->whereHas('site', fn($q) => $q->where('site_id', $site_id))
+            ->firstOrFail();
 
         $webmailUrl = $this->emailService->getWebmailUrl($account, $request->password);
 
