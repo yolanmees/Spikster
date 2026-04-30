@@ -574,17 +574,8 @@ echo "Node/npm setup..."
 echo "${reset}"
 sleep 1s
 
-curl -s https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add -
-curl -sL https://deb.nodesource.com/setup_16.x | -E bash -
-NODE=/etc/apt/sources.list.d/nodesource.list
-unlink NODE
-touch $NODE
-cat >"$NODE" <<EOF
-deb https://deb.nodesource.com/node_16.x focal main
-deb-src https://deb.nodesource.com/node_16.x focal main
-EOF
-apt-get update
-apt -y install nodejs
+curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+apt-get install -y nodejs
 apt -y install npm
 
 # Exim installation and configuration
