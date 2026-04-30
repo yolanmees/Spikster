@@ -4,6 +4,7 @@ use App\Http\Controllers\DatabaseController;
 use App\Http\Controllers\DnsRecordsController;
 use App\Http\Controllers\Site\WordPressController;
 use App\Http\Controllers\SiteController;
+use App\Http\Controllers\Site\CredentialController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])->group(function () {
@@ -39,5 +40,5 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     Route::delete('/site/{site_id}/dns/{dns_id}/delete', [DnsRecordsController::class, 'delete'])->name('site.dns.delete');
 
     // pdf after creation
-    Route::get('/pdf/{site_id}/{token}', [SiteController::class, 'pdf']);
+    Route::get('/pdf/{site_id}/{token}', [CredentialController::class, 'pdf']);
 });
