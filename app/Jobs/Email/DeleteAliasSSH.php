@@ -4,7 +4,7 @@ namespace App\Jobs\Email;
 
 use App\Models\EmailAlias;
 use App\Models\Server;
-use App\Services\SSHService;
+use App\Services\RemoteDaemonService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -19,39 +19,23 @@ class DeleteAliasSSH implements ShouldQueue
     public $timeout = 120;
     public $tries = 3;
 
-    /**
-     * Create a new job instance.
-     */
     public function __construct(
         public Server $server,
         public EmailAlias $alias
     ) {}
 
-    /**
-     * Execute the job.
-     */
-    public function handle(SSHService $sshService): void
+    public function handle(RemoteDaemonService $daemon): void
     {
         try {
-            $ssh = $sshService->connect($this->server);
+            $success = $daemon->deleteEmailAlias($this->server, $this->alias->alias);
 
-            $aliasEmail = preg_replace('/[^a-zA-Z0-9@._+-]/', '', $this->alias->alias);
+            if (! $success) {
+                throw new \RuntimeException("Daemon returned failure for email.alias-delete: {$this->alias->alias}");
+            }
 
-            // Remove from Postfix virtual alias map
-            $ssh->exec('sed -i ' . escapeshellarg('/^' . $aliasEmail . ' /d') . ' /etc/postfix/virtual');
-            $ssh->exec("postmap /etc/postfix/virtual");
-
-            // Reload Postfix
-            $ssh->exec("systemctl reload postfix");
-
-            $sshService->disconnect();
-
-            Log::info("Email alias deleted: {$aliasEmail}");
-
+            Log::info("Email alias deleted via daemon: {$this->alias->alias}");
         } catch (\Exception $e) {
-            Log::error("Failed to delete email alias: {$this->alias->alias}", [
-                'error' => $e->getMessage()
-            ]);
+            Log::error("Failed to delete email alias: {$this->alias->alias}", ['error' => $e->getMessage()]);
             throw $e;
         }
     }

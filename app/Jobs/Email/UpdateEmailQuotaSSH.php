@@ -4,7 +4,7 @@ namespace App\Jobs\Email;
 
 use App\Models\EmailAccount;
 use App\Models\Server;
-use App\Services\SSHService;
+use App\Services\RemoteDaemonService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -19,43 +19,27 @@ class UpdateEmailQuotaSSH implements ShouldQueue
     public $timeout = 120;
     public $tries = 3;
 
-    /**
-     * Create a new job instance.
-     */
     public function __construct(
         public Server $server,
         public EmailAccount $account
     ) {}
 
-    /**
-     * Execute the job.
-     */
-    public function handle(SSHService $sshService): void
+    public function handle(RemoteDaemonService $daemon): void
     {
         try {
-            $ssh = $sshService->connect($this->server);
+            $success = $daemon->updateEmailQuota(
+                $this->server,
+                $this->account->email,
+                (int) ($this->account->quota_mb ?? 0)
+            );
 
-            $email = $this->account->email;
-            $quota = $this->account->quota_mb;
-
-            // Update quota in Dovecot quota file
-            $ssh->exec("sed -i '/^{$email}:/d' /etc/dovecot/quota 2>/dev/null || true");
-
-            if ($quota > 0) {
-                $ssh->exec("echo '{$email}:storage={$quota}M' >> /etc/dovecot/quota");
+            if (! $success) {
+                throw new \RuntimeException("Daemon returned failure for email.update-quota: {$this->account->email}");
             }
 
-            // Reload Dovecot
-            $ssh->exec("systemctl reload dovecot");
-
-            $sshService->disconnect();
-
-            Log::info("Email quota updated: {$email} = {$quota}MB");
-
+            Log::info("Email quota updated via daemon: {$this->account->email} = {$this->account->quota_mb}MB");
         } catch (\Exception $e) {
-            Log::error("Failed to update email quota: {$this->account->email}", [
-                'error' => $e->getMessage()
-            ]);
+            Log::error("Failed to update email quota: {$this->account->email}", ['error' => $e->getMessage()]);
             throw $e;
         }
     }

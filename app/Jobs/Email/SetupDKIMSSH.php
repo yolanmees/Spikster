@@ -4,7 +4,7 @@ namespace App\Jobs\Email;
 
 use App\Models\EmailDkimKey;
 use App\Models\Server;
-use App\Services\SSHService;
+use App\Services\RemoteDaemonService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -19,64 +19,29 @@ class SetupDKIMSSH implements ShouldQueue
     public $timeout = 300;
     public $tries = 3;
 
-    /**
-     * Create a new job instance.
-     */
     public function __construct(
         public Server $server,
         public EmailDkimKey $dkimKey
     ) {}
 
-    /**
-     * Execute the job.
-     */
-    public function handle(SSHService $sshService): void
+    public function handle(RemoteDaemonService $daemon): void
     {
         try {
-            $ssh = $sshService->connect($this->server);
+            $keys = $daemon->setupDKIM($this->server, $this->dkimKey->domain, $this->dkimKey->selector);
 
-            $domain = $this->dkimKey->domain;
-            $selector = $this->dkimKey->selector;
+            if (empty($keys)) {
+                throw new \RuntimeException("Daemon returned failure for email.dkim-setup: {$this->dkimKey->domain}");
+            }
 
-            // Create DKIM keys directory
-            $ssh->exec("mkdir -p /etc/opendkim/keys/{$domain}");
-
-            // Generate DKIM keypair
-            $ssh->exec("cd /etc/opendkim/keys/{$domain} && opendkim-genkey -b 2048 -d {$domain} -s {$selector}");
-            $ssh->exec("chown opendkim:opendkim /etc/opendkim/keys/{$domain}/{$selector}.private");
-
-            // Read generated keys
-            $privateKey = $ssh->exec("cat /etc/opendkim/keys/{$domain}/{$selector}.private");
-            $publicKeyRaw = $ssh->exec("cat /etc/opendkim/keys/{$domain}/{$selector}.txt");
-
-            // Extract public key (remove DKIM TXT record formatting)
-            preg_match('/p=([A-Za-z0-9+\/=\s]+)/', $publicKeyRaw, $matches);
-            $publicKey = isset($matches[1]) ? str_replace([' ', "\n", "\t"], '', $matches[1]) : '';
-
-            // Update database with keys
             $this->dkimKey->update([
-                'private_key' => $privateKey,
-                'public_key' => $publicKey,
-                'active' => true,
+                'private_key' => $keys['PrivateKey'] ?? $keys['private_key'] ?? '',
+                'public_key'  => $keys['PublicKey']  ?? $keys['public_key']  ?? '',
+                'active'      => true,
             ]);
 
-            // Add to OpenDKIM KeyTable
-            $ssh->exec("echo '{$selector}._domainkey.{$domain} {$domain}:{$selector}:/etc/opendkim/keys/{$domain}/{$selector}.private' >> /etc/opendkim/KeyTable");
-
-            // Add to OpenDKIM SigningTable
-            $ssh->exec("echo '*@{$domain} {$selector}._domainkey.{$domain}' >> /etc/opendkim/SigningTable");
-
-            // Reload OpenDKIM
-            $ssh->exec("systemctl reload opendkim");
-
-            $sshService->disconnect();
-
-            Log::info("DKIM setup completed for domain: {$domain}");
-
+            Log::info("DKIM setup completed via daemon for domain: {$this->dkimKey->domain}");
         } catch (\Exception $e) {
-            Log::error("Failed to setup DKIM: {$this->dkimKey->domain}", [
-                'error' => $e->getMessage()
-            ]);
+            Log::error("Failed to setup DKIM: {$this->dkimKey->domain}", ['error' => $e->getMessage()]);
             throw $e;
         }
     }

@@ -4,7 +4,7 @@ namespace App\Jobs\Email;
 
 use App\Models\EmailAlias;
 use App\Models\Server;
-use App\Services\SSHService;
+use App\Services\RemoteDaemonService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -19,41 +19,26 @@ class CreateAliasSSH implements ShouldQueue
     public $timeout = 120;
     public $tries = 3;
 
-    /**
-     * Create a new job instance.
-     */
     public function __construct(
         public Server $server,
         public EmailAlias $alias
     ) {}
 
-    /**
-     * Execute the job.
-     */
-    public function handle(SSHService $sshService): void
+    public function handle(RemoteDaemonService $daemon): void
     {
         try {
-            $ssh = $sshService->connect($this->server);
+            $aliasEmail  = $this->alias->alias;
+            $targetEmail = $this->alias->emailAccount->email;
 
-            $aliasEmail = preg_replace('/[^a-zA-Z0-9@._+-]/', '', $this->alias->alias);
-            $targetEmail = preg_replace('/[^a-zA-Z0-9@._+-]/', '', $this->alias->emailAccount->email);
+            $success = $daemon->createEmailAlias($this->server, $aliasEmail, $targetEmail);
 
-            // Add to Postfix virtual alias map
-            // Use printf to safely write without shell injection
-            $ssh->exec('printf "%s %s\n" ' . escapeshellarg($aliasEmail) . ' ' . escapeshellarg($targetEmail) . ' >> /etc/postfix/virtual');
-            $ssh->exec("postmap /etc/postfix/virtual");
+            if (! $success) {
+                throw new \RuntimeException("Daemon returned failure for email.alias-create: {$aliasEmail}");
+            }
 
-            // Reload Postfix
-            $ssh->exec("systemctl reload postfix");
-
-            $sshService->disconnect();
-
-            Log::info("Email alias created: {$aliasEmail} → {$targetEmail}");
-
+            Log::info("Email alias created via daemon: {$aliasEmail} → {$targetEmail}");
         } catch (\Exception $e) {
-            Log::error("Failed to create email alias: {$this->alias->alias}", [
-                'error' => $e->getMessage()
-            ]);
+            Log::error("Failed to create email alias: {$this->alias->alias}", ['error' => $e->getMessage()]);
             throw $e;
         }
     }

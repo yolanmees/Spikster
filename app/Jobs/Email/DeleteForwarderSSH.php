@@ -4,7 +4,7 @@ namespace App\Jobs\Email;
 
 use App\Models\EmailForwarder;
 use App\Models\Server;
-use App\Services\SSHService;
+use App\Services\RemoteDaemonService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -19,40 +19,26 @@ class DeleteForwarderSSH implements ShouldQueue
     public $timeout = 120;
     public $tries = 3;
 
-    /**
-     * Create a new job instance.
-     */
     public function __construct(
         public Server $server,
         public EmailForwarder $forwarder
     ) {}
 
-    /**
-     * Execute the job.
-     */
-    public function handle(SSHService $sshService): void
+    public function handle(RemoteDaemonService $daemon): void
     {
         try {
-            $ssh = $sshService->connect($this->server);
+            $success = $daemon->deleteEmailForwarder(
+                $this->server,
+                $this->forwarder->source
+            );
 
-            $source = $this->forwarder->source;
+            if (! $success) {
+                throw new \RuntimeException("Daemon returned failure for email.forwarder-delete: {$this->forwarder->source}");
+            }
 
-            // Remove from Postfix virtual alias map
-            $escapedSource = str_replace('/', '\/', $source);
-            $ssh->exec("sed -i '/^{$escapedSource} /d' /etc/postfix/virtual");
-            $ssh->exec("postmap /etc/postfix/virtual");
-
-            // Reload Postfix
-            $ssh->exec("systemctl reload postfix");
-
-            $sshService->disconnect();
-
-            Log::info("Email forwarder deleted: {$source}");
-
+            Log::info("Email forwarder deleted via daemon: {$this->forwarder->source}");
         } catch (\Exception $e) {
-            Log::error("Failed to delete email forwarder: {$this->forwarder->source}", [
-                'error' => $e->getMessage()
-            ]);
+            Log::error("Failed to delete email forwarder: {$this->forwarder->source}", ['error' => $e->getMessage()]);
             throw $e;
         }
     }

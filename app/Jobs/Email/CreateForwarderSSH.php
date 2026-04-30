@@ -4,7 +4,7 @@ namespace App\Jobs\Email;
 
 use App\Models\EmailForwarder;
 use App\Models\Server;
-use App\Services\SSHService;
+use App\Services\RemoteDaemonService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -19,40 +19,27 @@ class CreateForwarderSSH implements ShouldQueue
     public $timeout = 120;
     public $tries = 3;
 
-    /**
-     * Create a new job instance.
-     */
     public function __construct(
         public Server $server,
         public EmailForwarder $forwarder
     ) {}
 
-    /**
-     * Execute the job.
-     */
-    public function handle(SSHService $sshService): void
+    public function handle(RemoteDaemonService $daemon): void
     {
         try {
-            $ssh = $sshService->connect($this->server);
+            $success = $daemon->createEmailForwarder(
+                $this->server,
+                $this->forwarder->source,
+                $this->forwarder->destination
+            );
 
-            $source = $this->forwarder->source;
-            $destination = $this->forwarder->destination;
+            if (! $success) {
+                throw new \RuntimeException("Daemon returned failure for email.forwarder-create: {$this->forwarder->source}");
+            }
 
-            // Add to Postfix virtual alias map
-            $ssh->exec("echo '{$source} {$destination}' >> /etc/postfix/virtual");
-            $ssh->exec("postmap /etc/postfix/virtual");
-
-            // Reload Postfix
-            $ssh->exec("systemctl reload postfix");
-
-            $sshService->disconnect();
-
-            Log::info("Email forwarder created: {$source} → {$destination}");
-
+            Log::info("Email forwarder created via daemon: {$this->forwarder->source} → {$this->forwarder->destination}");
         } catch (\Exception $e) {
-            Log::error("Failed to create email forwarder: {$this->forwarder->source}", [
-                'error' => $e->getMessage()
-            ]);
+            Log::error("Failed to create email forwarder: {$this->forwarder->source}", ['error' => $e->getMessage()]);
             throw $e;
         }
     }
