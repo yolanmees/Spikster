@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreServerRequest;
-use App\Jobs\CronSSH;
 use App\Jobs\PanelDomainAddSSH;
 use App\Jobs\PanelDomainRemoveSSH;
 use App\Jobs\PanelDomainSslSSH;
@@ -1023,7 +1022,7 @@ class ServerController extends Controller
         if ($request->cron) {
             $server->cron = $request->cron;
             $server->save();
-            CronSSH::dispatch($server)->delay(Carbon::now()->addSeconds(3));
+            app(\App\Services\DaemonService::class)->writeCron($server->cron);
         }
 
         if ($request->php) {

@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/yolanmees/spikster/daemon/internal/cron"
 	"github.com/yolanmees/spikster/daemon/internal/site"
 )
 
@@ -112,6 +113,35 @@ func dispatch(req Request) (string, error) {
 		err := site.EnableSSL(req.Params["username"], req.Params["domain"])
 		if err != nil { return "", err }
 		return "ssl enabled", nil
+
+	// ── Alias management ─────────────────────────────────────────────────
+	case "alias.create":
+		a := site.Alias{
+			Domain:   req.Params["domain"],
+			Username: req.Params["username"],
+			PHP:      req.Params["php"],
+			Basepath: req.Params["basepath"],
+		}
+		if err := site.CreateAlias(a); err != nil { return "", err }
+		return "alias created", nil
+
+	case "alias.delete":
+		if err := site.DeleteAlias(req.Params["domain"]); err != nil { return "", err }
+		return "alias deleted", nil
+
+	case "alias.ssl":
+		if err := site.EnableAliasSSL(req.Params["domain"]); err != nil { return "", err }
+		return "alias ssl enabled", nil
+
+	// ── Cron management ──────────────────────────────────────────────────
+	case "cron.write":
+		if err := cron.Write(req.Params["content"]); err != nil { return "", err }
+		return "cron updated", nil
+
+	case "cron.read":
+		content, err := cron.Read()
+		if err != nil { return "", err }
+		return content, nil
 
 	default:
 		return "", fmt.Errorf("unknown action: %s", req.Action)

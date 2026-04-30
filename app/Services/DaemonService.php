@@ -141,4 +141,33 @@ class DaemonService
     {
         return ($this->send('site.ssl', compact('username', 'domain')))['success'] ?? false;
     }
+
+    // ─── Alias management ─────────────────────────────────────────────────────
+
+    public function createAlias(string $domain, string $username, string $php, string $basepath = ''): bool
+    {
+        return ($this->send('alias.create', compact('domain', 'username', 'php', 'basepath')))['success'] ?? false;
+    }
+
+    public function deleteAlias(string $domain): bool
+    {
+        return ($this->send('alias.delete', ['domain' => $domain]))['success'] ?? false;
+    }
+
+    public function enableAliasSSL(string $domain): bool
+    {
+        return ($this->send('alias.ssl', ['domain' => $domain]))['success'] ?? false;
+    }
+
+    // ─── Cron management ──────────────────────────────────────────────────────
+
+    public function writeCron(string $content): bool
+    {
+        return ($this->send('cron.write', ['content' => $content]))['success'] ?? false;
+    }
+
+    public function readCron(): string
+    {
+        return ($this->send('cron.read', []))['output'] ?? '';
+    }
 }

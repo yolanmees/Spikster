@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\DeleteAliasSSH;
 use App\Jobs\EditSiteDeploySSH;
 use App\Jobs\EditSiteSupervisorSSH;
 use App\Services\DaemonService;
-use App\Jobs\NewAliasSSH;
 use App\Jobs\SiteDbPwdSSH;
 use App\Jobs\SiteUserPwdSSH;
 use App\Models\Alias;
@@ -1443,7 +1441,7 @@ class SiteController extends Controller
         $alias->domain = strtolower($request->domain);
         $alias->save();
 
-        NewAliasSSH::dispatch($site, $alias)->delay(Carbon::now()->addSeconds(3));
+        app(\App\Services\DaemonService::class)->createAlias($alias->domain, $site->username, $site->php, $site->basepath ?? '');
 
         return response()->json([
             'alias_id' => $alias->alias_id,
@@ -1521,7 +1519,8 @@ class SiteController extends Controller
             ], 404);
         }
 
-        DeleteAliasSSH::dispatch($site, $alias)->delay(Carbon::now()->addSeconds(1));
+        app(\App\Services\DaemonService::class)->deleteAlias($alias->domain);
+        $alias->delete();
 
         return response()->json([]);
     }

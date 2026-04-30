@@ -286,3 +286,85 @@ func replaceInFile(path, old, new string) error {
 	replaced := strings.ReplaceAll(string(data), old, new)
 	return os.WriteFile(path, []byte(replaced), 0644)
 }
+
+// ─── Aliases ──────────────────────────────────────────────────────────────────
+
+type Alias struct {
+	Domain   string
+	Username string // parent site username
+	PHP      string
+	Basepath string
+}
+
+func (a Alias) WebRoot() string {
+	base := filepath.Join("/home", a.Username, "web")
+	if a.Basepath != "" {
+		return filepath.Join(base, strings.TrimPrefix(a.Basepath, "/"))
+	}
+	return base
+}
+
+var aliasTpl = `server {
+    listen 80;
+    listen [::]:80;
+    server_tokens off;
+    server_name {{.Domain}};
+    root {{.WebRoot}};
+    client_body_timeout 60s;
+    client_header_timeout 10s;
+    client_max_body_size 256M;
+    access_log /home/{{.Username}}/log/access.log;
+    error_log /home/{{.Username}}/log/error.log;
+    include /etc/nginx/spikster/{{.Username}}.conf;
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/var/run/php/php{{.PHP}}-fpm-{{.Username}}.sock;
+    }
+    location ~ /\.(?!well-known).* { deny all; }
+}
+`
+
+func CreateAlias(a Alias) error {
+	available := fmt.Sprintf("/etc/nginx/sites-available/%s.conf", a.Domain)
+	if err := writeTpl(available, aliasTpl, a); err != nil {
+		return err
+	}
+	enabled := fmt.Sprintf("/etc/nginx/sites-enabled/%s.conf", a.Domain)
+	os.Remove(enabled)
+	if err := os.Symlink(available, enabled); err != nil {
+		return err
+	}
+	run("systemctl", "reload", fmt.Sprintf("php%s-fpm", a.PHP))
+	return reloadService("nginx")
+}
+
+func DeleteAlias(domain string) error {
+	os.Remove(fmt.Sprintf("/etc/nginx/sites-enabled/%s.conf", domain))
+	os.Remove(fmt.Sprintf("/etc/nginx/sites-available/%s.conf", domain))
+	return reloadService("nginx")
+}
+
+func EnableAliasSSL(domain string) error {
+	steps := []struct {
+		name string
+		fn   func() error
+	}{
+		{"stop nginx", func() error { return run("systemctl", "stop", "nginx") }},
+		{"certbot", func() error {
+			return run("certbot", "--nginx", "-d", domain,
+				"--non-interactive", "--agree-tos", "--register-unsafely-without-email")
+		}},
+		{"enable http2", func() error {
+			conf := fmt.Sprintf("/etc/nginx/sites-enabled/%s.conf", domain)
+			return replaceInFile(conf, "443 ssl;", "443 ssl http2;")
+		}},
+		{"start nginx", func() error { return run("systemctl", "start", "nginx") }},
+	}
+	for _, step := range steps {
+		if err := step.fn(); err != nil {
+			run("systemctl", "start", "nginx")
+			return fmt.Errorf("[%s] %w", step.name, err)
+		}
+	}
+	return nil
+}
