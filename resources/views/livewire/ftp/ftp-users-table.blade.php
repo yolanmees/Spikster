@@ -62,14 +62,11 @@
 
                 {{-- Create Button --}}
                 <div>
-                    <button wire:click="openCreateModal" type="button"
-                        class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 4v16m8-8H4" />
-                        </svg>
-                        Create FTP User
-                    </button>
+                    <x-primary-button wire:click="openCreateModal" wire:loading.attr="disabled" wire:target="openCreateModal">
+                        <x-icon icon="plus" class="h-4 w-4 -ml-1 mr-1.5" />
+                        <span wire:loading.remove wire:target="openCreateModal">Create FTP User</span>
+                        <span wire:loading wire:target="openCreateModal"><x-wire-spinner size="sm" /></span>
+                    </x-primary-button>
                 </div>
             </div>
         </div>
@@ -145,7 +142,7 @@
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex justify-end space-x-2">
                                     {{-- Connection Info --}}
-                                    <button wire:click="openConnectionInfoModal('{{ $user->ftp_user_id }}')"
+                                    <button wire:loading.attr="disabled" wire:target="openConnectionInfoModal('{{ $user->ftp_user_id }}')" wire:click="openConnectionInfoModal('{{ $user->ftp_user_id }}')"
                                         title="Connection Info" class="text-indigo-600 hover:text-indigo-900">
                                         <svg class="h-5 w-5" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
@@ -155,7 +152,7 @@
                                     </button>
 
                                     {{-- Edit --}}
-                                    <button wire:click="openEditModal('{{ $user->ftp_user_id }}')" title="Edit"
+                                    <button wire:loading.attr="disabled" wire:target="openEditModal('{{ $user->ftp_user_id }}')" wire:click="openEditModal('{{ $user->ftp_user_id }}')" title="Edit"
                                         class="text-blue-600 hover:text-blue-900">
                                         <svg class="h-5 w-5" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
@@ -165,7 +162,7 @@
                                     </button>
 
                                     {{-- Password Reset --}}
-                                    <button wire:click="openPasswordModal('{{ $user->ftp_user_id }}')"
+                                    <button wire:loading.attr="disabled" wire:target="openPasswordModal('{{ $user->ftp_user_id }}')" wire:click="openPasswordModal('{{ $user->ftp_user_id }}')"
                                         title="Reset Password" class="text-yellow-600 hover:text-yellow-900">
                                         <svg class="h-5 w-5" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
@@ -175,7 +172,7 @@
                                     </button>
 
                                     {{-- Quota --}}
-                                    <button wire:click="openQuotaModal('{{ $user->ftp_user_id }}')"
+                                    <button wire:loading.attr="disabled" wire:target="openQuotaModal('{{ $user->ftp_user_id }}')" wire:click="openQuotaModal('{{ $user->ftp_user_id }}')"
                                         title="Update Quota" class="text-purple-600 hover:text-purple-900">
                                         <svg class="h-5 w-5" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
@@ -219,7 +216,7 @@
                                     @endif
 
                                     {{-- Delete --}}
-                                    <button wire:click="openDeleteModal('{{ $user->ftp_user_id }}')" title="Delete"
+                                    <button wire:loading.attr="disabled" wire:target="openDeleteModal('{{ $user->ftp_user_id }}')" wire:click="openDeleteModal('{{ $user->ftp_user_id }}')" title="Delete"
                                         class="text-red-600 hover:text-red-900">
                                         <svg class="h-5 w-5" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">

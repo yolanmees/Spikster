@@ -9,21 +9,21 @@
                 </p>
             </div>
             <div class="flex gap-2">
-                <x-secondary-button wire:click="showTemplates = true">
+                <x-secondary-button wire:click="showTemplates = true" wire:loading.attr="disabled" wire:target="showTemplates">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
                     </svg>
                     Templates
                 </x-secondary-button>
-                <x-secondary-button wire:click="syncToServer">
+                <x-secondary-button wire:click="syncToServer" wire:loading.attr="disabled" wire:target="syncToServer">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
                     Sync to Server
                 </x-secondary-button>
-                <x-secondary-button wire:click="importFromServer">
+                <x-secondary-button wire:click="importFromServer" wire:loading.attr="disabled" wire:target="importFromServer">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -364,8 +364,9 @@
 
                             <div
                                 class="bg-gray-50 dark:bg-gray-900 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2">
-                                <x-primary-button type="submit">
-                                    {{ $editingId ? 'Update' : 'Create' }}
+                                <x-primary-button type="submit" wire:loading.attr="disabled" wire:target="save">
+                                    <span wire:loading.remove wire:target="save">{{ $editingId ? 'Update' : 'Create' }}</span>
+                                    <span wire:loading wire:target="save" class="inline-flex items-center gap-1"><x-wire-spinner size="sm" /> Saving...</span>
                                 </x-primary-button>
                                 <x-secondary-button type="button" @click="show = false">
                                     Cancel

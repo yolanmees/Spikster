@@ -67,8 +67,8 @@
                 </div>
 
                 <div class="flex gap-2 shrink-0">
-                    <x-button variant="info" wire:click="createDatabaseBackup">Database Only</x-button>
-                    <x-primary-button wire:click="createFullBackup">
+                    <x-button variant="info" wire:click="createDatabaseBackup" wire:loading.attr="disabled" wire:target="createDatabaseBackup">Database Only</x-button>
+                    <x-primary-button wire:click="createFullBackup" wire:loading.attr="disabled" wire:target="createFullBackup">
                         <x-icon icon="plus" class="h-4 w-4 -ml-1 mr-1.5" />
                         Create Backup
                     </x-primary-button>
@@ -140,7 +140,7 @@
                                 <td colspan="6">
                                     <x-empty-state icon="backup" title="No backups found">
                                         <x-slot name="action">
-                                            <x-primary-button wire:click="createFullBackup">Create First Backup</x-primary-button>
+                                            <x-primary-button wire:click="createFullBackup" wire:loading.attr="disabled" wire:target="createFullBackup">Create First Backup</x-primary-button>
                                         </x-slot>
                                     </x-empty-state>
                                 </td>

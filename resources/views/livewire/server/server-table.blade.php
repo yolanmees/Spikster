@@ -59,9 +59,16 @@
                                 <x-action-button :href="route('server.edit', $server->server_id)">
                                     Manage
                                 </x-action-button>
-                                <x-danger-button wire:click="confirmDelete('{{ $server->server_id }}')" type="button"
+                                <x-danger-button
+                                    wire:click="confirmDelete('{{ $server->server_id }}')"
+                                    wire:loading.attr="disabled"
+                                    wire:target="confirmDelete('{{ $server->server_id }}')"
+                                    type="button"
                                     class="ml-2">
-                                    Delete
+                                    <span wire:loading.remove wire:target="confirmDelete('{{ $server->server_id }}')">Delete</span>
+                                    <span wire:loading wire:target="confirmDelete('{{ $server->server_id }}')">
+                                        <x-wire-spinner size="sm" />
+                                    </span>
                                 </x-danger-button>
                             </td>
                         </tr>

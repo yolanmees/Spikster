@@ -1,72 +1,68 @@
-<div class="p-4">
-
-    <div class="flex justify-between">
-        <h2 class="text-2xl font-semibold">Packages installed</h2>
-        {{-- <button class="btn btn-primary" wire:click="openInstaller">Install Package</button> --}}
-    </div>   
-    <div class="mt-8 flow-root">
-        <div class="mb-8">
-            <div class="flex flex-wrap justify-between">
-                <div class="w-full flex-1">
-                    <label for="search" class="sr-only">Search</label>
-                    <div class="relative rounded-md shadow-sm">
-                        <input wire:model="search" type="text" name="search" id="search" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-4 sm:text-sm border-gray-300 rounded-md" placeholder="Search">
-                        <div class="absolute inset-y-0 right-0 pl-8 flex items-center pointer-events-none">
-                            <svg class="pointer-events-none absolute inset-y-0 left-0 h-full w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd"></path>
-                            </svg>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-            <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-                <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
-                    <table class="min-w-full divide-y divide-gray-300">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Package</th>
-                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Installed</th>
-                                <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
-                                    <span class="sr-only">Edit</span>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 bg-white">
-
-                            @if(isset($packages))
-                                @foreach($packages as $package)
-                                <tr>
-                                    <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{{ $package['package'] }}</td>
-                                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                        @if($package['installed'] == 'true')
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold stroke-green-800">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-800 stroke-green-800"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>
-                                            </span>
-                                        @else
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold text-red-700">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-circle"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
-                                            </span>
-                                        @endif
-                                    <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                                        @if($package['installed'] == 'false')
-                                            <a wire:click="install('{{ $package['package'] }}')" class="text-indigo-600 hover:text-indigo-900">Install<span class="sr-only"></span></a>
-                                        @else
-                                            <a wire:click="uninstall('{{ $package['package'] }}')" class="text-red-700 hover:text-indigo-900">Uninstall<span class="sr-only"></span></a>
-                                        @endif
-                                    </td>
-                                </tr>
-                                @endforeach
-                            @endif
-
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+<div>
+    <div class="mb-4">
+        <x-search-input model="search" placeholder="Search packages..." />
     </div>
 
+    <x-table-wrapper>
+        <table class="min-w-full divide-y divide-gray-300">
+            <thead class="bg-gray-50 dark:bg-gray-800">
+                <tr>
+                    <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 dark:text-white sm:pl-6">Package</th>
+                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">Status</th>
+                    <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6 text-right text-sm font-semibold text-gray-900 dark:text-white">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 bg-white dark:bg-gray-900">
+                @if(isset($packages))
+                    @forelse($packages as $package)
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 dark:text-white sm:pl-6">
+                                {{ $package['package'] }}
+                            </td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm">
+                                @if($package['installed'] == 'true')
+                                    <x-badge color="green" text="Installed" />
+                                @else
+                                    <x-badge color="gray" text="Not installed" />
+                                @endif
+                            </td>
+                            <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                @if($package['installed'] == 'false')
+                                    <button
+                                        wire:click="install('{{ $package['package'] }}')"
+                                        wire:loading.attr="disabled"
+                                        wire:target="install('{{ $package['package'] }}')"
+                                        class="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium">
+                                        <span wire:loading.remove wire:target="install('{{ $package['package'] }}')">Install</span>
+                                        <span wire:loading wire:target="install('{{ $package['package'] }}')">
+                                            <x-wire-spinner size="sm" />
+                                        </span>
+                                    </button>
+                                @else
+                                    <button
+                                        wire:click="uninstall('{{ $package['package'] }}')"
+                                        wire:loading.attr="disabled"
+                                        wire:target="uninstall('{{ $package['package'] }}')"
+                                        class="inline-flex items-center gap-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 font-medium">
+                                        <span wire:loading.remove wire:target="uninstall('{{ $package['package'] }}')">Uninstall</span>
+                                        <span wire:loading wire:target="uninstall('{{ $package['package'] }}')">
+                                            <x-wire-spinner size="sm" />
+                                        </span>
+                                    </button>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="3">
+                                <x-empty-state icon="package" title="No packages found">
+                                    No packages available or matching your search.
+                                </x-empty-state>
+                            </td>
+                        </tr>
+                    @endforelse
+                @endif
+            </tbody>
+        </table>
+    </x-table-wrapper>
 </div>
-

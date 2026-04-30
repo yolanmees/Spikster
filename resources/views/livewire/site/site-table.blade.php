@@ -86,8 +86,9 @@
                                 </x-action-button>
                                 @if (!$site->isPanel())
                                     <x-danger-button wire:click="confirmDelete('{{ $site->site_id }}')" type="button"
-                                        class="ml-2" wire:loading.attr="disabled" wire:target="confirmDelete">
-                                        Delete
+                                        class="ml-2" wire:loading.attr="disabled" wire:target="confirmDelete('{{ $site->site_id }}')">
+                                        <span wire:loading.remove wire:target="confirmDelete('{{ $site->site_id }}')">Delete</span>
+                                        <span wire:loading wire:target="confirmDelete('{{ $site->site_id }}')"><x-wire-spinner size="sm" /></span>
                                     </x-danger-button>
                                 @else
                                     <span
