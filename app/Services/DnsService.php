@@ -14,14 +14,14 @@ class DnsService
         array $nameservers
     ): string {
         if (! $zone || ! $email || ! $nameservers) {
-            throw new Exception('Missing required parameter: zone, email or nameservers');
+            throw new \Exception('Missing required parameter: zone, email or nameservers');
         }
         $zone = htmlspecialchars($zone, ENT_QUOTES, 'utf-8');
         $email = htmlspecialchars($email, ENT_QUOTES, 'utf-8');
         if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $email = str_replace('@', '.', $email);
         } else {
-            throw new Exception('Invalid email address');
+            throw new \Exception('Invalid email address');
         }
         foreach ($nameservers as $key => $value) {
             $nameservers[$key] = htmlspecialchars($value, ENT_QUOTES, 'utf-8');
@@ -60,23 +60,21 @@ class DnsService
         }
 
         try {
-            // Check the file name
             if (preg_match('/[^a-zA-Z0-9\.\-_]/', basename($zoneFile))) {
-                throw new Exception('Invalid file name.');
+                throw new \Exception('Invalid file name.');
             }
-            // Check the template data
             $template = strip_tags($template);
             file_put_contents($zoneFile, $template);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return json_encode(['code' => 1, 'message' => $e->getMessage()]);
         }
 
-        $$zoneConfig = 'zone "'.$zone.'" {
+        $zoneConfig = 'zone "'.$zone.'" {
             type master;
             file "'.$zoneFile.'";
         };
         ';
-        exec('rndc addzone '.$zone.' '.escapeshellarg($$zoneConfig), $output, $return_var);
+        exec('rndc addzone '.$zone.' '.escapeshellarg($zoneConfig), $output, $return_var);
         if ($return_var != 0) {
             return json_encode(['code' => 1, 'message' => "Error: Failed to add zone $zone. Error: ".implode("\n", $output)]);
         }
@@ -85,24 +83,23 @@ class DnsService
         return json_encode(['code' => 0, 'message' => "Zone $zone created successfully."]);
     }
 
-    public function deleterZone(string $zone): string
+    public function deleteZone(string $zone): string
     {
         if (! $zone) {
-            throw new Exception('Missing required parameter: zone');
+            throw new \Exception('Missing required parameter: zone');
         }
         $zone = htmlspecialchars($zone, ENT_QUOTES, 'utf-8');
 
         $zoneFile = '/root/zones/'.$zone;
-        // remove the zone file
         unlink($zoneFile);
-        // remove the zone from named.conf
-        $$namedContents = file_get_contents($this->namedConf);
-        $start = strpos($$namedContents, "zone \"$zone\"");
-        $end = strpos($$namedContents, '};', $start) + 2;
-        $$zoneConfig = substr($$namedContents, $start, $end - $start);
-        $$namedContents = str_replace($$zoneConfig, '', $$namedContents);
-        file_put_contents($this->namedConf, $$namedContents);
-        // reload bind
+
+        $namedContents = file_get_contents($this->namedConf);
+        $start = strpos($namedContents, "zone \"$zone\"");
+        $end = strpos($namedContents, '};', $start) + 2;
+        $zoneConfig = substr($namedContents, $start, $end - $start);
+        $namedContents = str_replace($zoneConfig, '', $namedContents);
+        file_put_contents($this->namedConf, $namedContents);
+
         exec('rndc reload');
 
         return json_encode(['code' => 0, 'message' => "Zone $zone deleted successfully."]);
@@ -116,7 +113,7 @@ class DnsService
         int $ttl = 3600
     ): string {
         if (! $zone || ! $record || ! $type || ! $value) {
-            throw new Exception('Missing required parameter: zone, record, type or value');
+            throw new \Exception('Missing required parameter: zone, record, type or value');
         }
         $zone = htmlspecialchars($zone, ENT_QUOTES, 'utf-8');
         $record = htmlspecialchars($record, ENT_QUOTES, 'utf-8');
@@ -125,27 +122,19 @@ class DnsService
 
         $zoneFile = '/root/zones/'.$zone;
 
-        // Check if the zone file exists
         if (! file_exists($zoneFile)) {
             return 'Error: Zone file not found.';
         }
 
-        // Check if the record already exists in the zone file
         $zoneContents = file_get_contents($zoneFile);
         if (strpos($zoneContents, "$record\tIN\t$type\t$value") !== false) {
             return 'Error: Record already exists.';
         }
 
-        // Construct the new DNS record
-        $$newRecord = "$record\tIN\t$type\t$value\n";
-
-        // Append the new record to the zone file, add new line
-        $zoneContents = rtrim($zoneContents).PHP_EOL.$$newRecord;
-
-        // Write the updated contents back to the zone file
+        $newRecord = "$record\tIN\t$type\t$value\n";
+        $zoneContents = rtrim($zoneContents).PHP_EOL.$newRecord;
         file_put_contents($zoneFile, $zoneContents);
 
-        // Reload the BIND service to apply the changes
         exec('rndc reload');
 
         return json_encode(['code' => 0, 'message' => "Record $record for $zone created successfully."]);
@@ -157,9 +146,8 @@ class DnsService
         string $type,
         string $value
     ): string {
-        $result = $request->post();
         if (! $zone || ! $record || ! $type || ! $value) {
-            throw new Exception('Missing required parameter: zone, record, type or value');
+            throw new \Exception('Missing required parameter: zone, record, type or value');
         }
         $zone = htmlspecialchars($zone, ENT_QUOTES, 'utf-8');
         $record = htmlspecialchars($record, ENT_QUOTES, 'utf-8');
@@ -168,29 +156,22 @@ class DnsService
 
         $zoneFile = '/root/zones/'.$zone;
 
-        // Check if the zone file exists
         if (! file_exists($zoneFile)) {
             return 'Error: Zone file not found.';
         }
 
-        // Read the current contents of the zone file
         $zoneContents = file_get_contents($zoneFile);
-
-        // Construct the DNS record to be removed
         $recordToRemove = "$record\tIN\t$type\t$value\n";
 
-        // Remove the record from the zone file
-        $zoneContents = str_replace($recordToRemove, '', $zoneContents);
-        // check if the record is not existing in the zone file
-        if ($zoneContents === file_get_contents($zoneFile)) {
+        if (strpos($zoneContents, $recordToRemove) === false) {
             return 'Error: Record not found.';
         }
-        // Write the updated contents back to the zone file
+
+        $zoneContents = str_replace($recordToRemove, '', $zoneContents);
         file_put_contents($zoneFile, $zoneContents);
 
-        // Reload the BIND service to apply the changes
         exec('rndc reload');
 
-        return json_encode(['code' => 0, 'message' => "Record $record for $zone created successfully."]);
+        return json_encode(['code' => 0, 'message' => "Record $record for $zone deleted successfully."]);
     }
 }
