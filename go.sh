@@ -574,8 +574,17 @@ echo "Node/npm setup..."
 echo "${reset}"
 sleep 1s
 
-curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-apt-get install -y nodejs
+curl -s https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add -
+curl -sL https://deb.nodesource.com/setup_16.x | -E bash -
+NODE=/etc/apt/sources.list.d/nodesource.list
+unlink NODE
+touch $NODE
+cat >"$NODE" <<EOF
+deb https://deb.nodesource.com/node_16.x focal main
+deb-src https://deb.nodesource.com/node_16.x focal main
+EOF
+apt-get update
+apt -y install nodejs
 apt -y install npm
 
 # Exim installation and configuration
@@ -783,6 +792,7 @@ EOF
     }
 
     php artisan key:generate || handle_error "artisan key:generate"
+    php artisan config:clear || handle_error "artisan config:clear"
     php artisan cache:clear || handle_error "artisan cache:clear"
     php artisan storage:link || handle_error "artisan storage:link"
     php artisan view:cache || handle_error "artisan view:cache"

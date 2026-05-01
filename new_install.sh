@@ -7,7 +7,7 @@ PASS=$(openssl rand -base64 32 | sha256sum | base64 | head -c 32 | tr '[:upper:]
 DBPASS=$(openssl rand -base64 24 | sha256sum | base64 | head -c 32 | tr '[:upper:]' '[:lower:]')
 SERVERID=$(openssl rand -base64 12 | sha256sum | base64 | head -c 32 | tr '[:upper:]' '[:lower:]')
 REPO=yolanmees/Spikster
-BRANCH=v2-update
+BRANCH=master
 ADMIN_EMAIL="your_admin_email@example.com"
 USE_LOCAL_IP=false
 
@@ -784,6 +784,7 @@ EOF
     }
 
     php artisan key:generate || handle_error "artisan key:generate"
+    php artisan config:clear || handle_error "artisan config:clear"
     php artisan cache:clear || handle_error "artisan cache:clear"
     php artisan storage:link || handle_error "artisan storage:link"
     php artisan view:cache || handle_error "artisan view:cache"
