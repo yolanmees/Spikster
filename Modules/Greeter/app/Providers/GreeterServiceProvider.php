@@ -2,14 +2,15 @@
 
 namespace Modules\Greeter\Providers;
 
+use App\Models\Module;
 use App\Services\ModuleHookManager;
 use App\Services\ModuleMenuManager;
 use App\Services\ModuleRegistry;
 use App\Services\ModuleWidgetManager;
 use Illuminate\Support\ServiceProvider;
+use Livewire\Livewire;
 use Modules\Greeter\Livewire\Greeter;
 use Spatie\Permission\Models\Permission;
-use Livewire\Livewire;
 
 class GreeterServiceProvider extends ServiceProvider
 {
@@ -17,14 +18,17 @@ class GreeterServiceProvider extends ServiceProvider
     {
         $this->loadViewsFrom(__DIR__ . '/../../resources/views', 'greeter');
         $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations');
-        $this->loadTranslationsFrom(__DIR__ . '/../../lang', 'greeter');
         $this->mergeConfigFrom(__DIR__ . '/../../config/config.php', 'greeter');
 
-        $this->registerModule();
-        $this->registerMenuItems();
-        $this->registerPermissions();
-        $this->registerWidgets();
-        $this->registerHooks();
+        $module = $this->registerModule();
+        if (! $module) {
+            return;
+        }
+
+        $this->registerMenuItems($module);
+        $this->registerPermissions($module);
+        $this->registerWidgets($module);
+        $this->registerHooks($module);
         $this->registerLivewireComponents();
     }
 
@@ -32,18 +36,13 @@ class GreeterServiceProvider extends ServiceProvider
     {
     }
 
-    protected function registerModule(): void
+    protected function registerModule(): ?Module
     {
-        app(ModuleRegistry::class)->register('greeter');
+        return app(ModuleRegistry::class)->register('greeter');
     }
 
-    protected function registerMenuItems(): void
+    protected function registerMenuItems(Module $module): void
     {
-        $module = app(ModuleRegistry::class)->getModule('greeter');
-        if (! $module) {
-            return;
-        }
-
         app(ModuleMenuManager::class)->registerMenuItem($module, [
             'title' => 'Greeter',
             'route_name' => 'greeter.index',
@@ -55,40 +54,32 @@ class GreeterServiceProvider extends ServiceProvider
         ]);
     }
 
-    protected function registerPermissions(): void
+    protected function registerPermissions(Module $module): void
     {
         $perms = ['greeter.view', 'greeter.manage'];
         foreach ($perms as $perm) {
             Permission::firstOrCreate(['name' => $perm, 'guard_name' => 'web']);
         }
 
-        $module = app(ModuleRegistry::class)->getModule('greeter');
-        if ($module) {
-            foreach ($perms as $perm) {
-                $permission = Permission::findByName($perm);
-                $module->permissions()->firstOrCreate([
-                    'permission_id' => $permission->id,
-                    'is_required' => false,
-                    'description' => match ($perm) {
-                        'greeter.view' => 'View the Greeter module page and widget',
-                        'greeter.manage' => 'Manage Greeter module settings',
-                    },
-                ]);
-            }
+        foreach ($perms as $perm) {
+            $permission = Permission::findByName($perm);
+            $module->permissions()->firstOrCreate([
+                'permission_id' => $permission->id,
+                'is_required' => false,
+                'description' => match ($perm) {
+                    'greeter.view' => 'View the Greeter module page and widget',
+                    'greeter.manage' => 'Manage Greeter module settings',
+                },
+            ]);
         }
     }
 
-    protected function registerWidgets(): void
+    protected function registerWidgets(Module $module): void
     {
-        $module = app(ModuleRegistry::class)->getModule('greeter');
-        if (! $module) {
-            return;
-        }
-
         app(ModuleWidgetManager::class)->registerWidget($module, [
-            'widget_key' => 'greeter_welcome',
-            'widget_name' => 'Welcome Widget',
-            'component_class' => \Modules\Greeter\Livewire\Greeter::class,
+            'key' => 'greeter_welcome',
+            'name' => 'Welcome Widget',
+            'component' => \Modules\Greeter\Livewire\Greeter::class,
             'title' => 'Welcome',
             'description' => 'A friendly greeting widget for the dashboard',
             'icon' => '👋',
@@ -99,13 +90,8 @@ class GreeterServiceProvider extends ServiceProvider
         ]);
     }
 
-    protected function registerHooks(): void
+    protected function registerHooks(Module $module): void
     {
-        $module = app(ModuleRegistry::class)->getModule('greeter');
-        if (! $module) {
-            return;
-        }
-
         app(ModuleHookManager::class)->registerHook($module, [
             'name' => 'greeter.greeting',
             'type' => 'filter',

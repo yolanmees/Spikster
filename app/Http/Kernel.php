@@ -6,6 +6,7 @@ use App\Http\Middleware\AssignRequestId;
 use App\Http\Middleware\Authenticate;
 use App\Http\Middleware\CipiAuth;
 use App\Http\Middleware\EncryptCookies;
+use App\Http\Middleware\EnforceProductionSafety;
 use App\Http\Middleware\EnsureApiUserAuthenticated;
 use App\Http\Middleware\IpAllowlist;
 use App\Http\Middleware\LogSecurityEvents;
@@ -52,6 +53,7 @@ class Kernel extends HttpKernel
         SecurityHeaders::class,
         IpAllowlist::class,
         LogSecurityEvents::class,
+        EnforceProductionSafety::class,
     ];
 
     /**

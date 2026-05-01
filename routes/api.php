@@ -102,9 +102,9 @@ Route::middleware(['api.unified-auth'])->group(function () {
     Route::delete('/sites/{site_id}/aliases/{alias_id}', [AliasController::class, 'destroy']);
 
     // Deployments
-    Route::post('/sites/{site_id}/deploy', [DeployController::class, 'deploy']);
+    Route::post('/sites/{site_id}/deploy', [DeployController::class, 'deploy'])->middleware('idempotency');
     Route::get('/sites/{site_id}/deployments', [DeployController::class, 'history']);
-    Route::post('/sites/{site_id}/deployments/{deployment}/rollback', [DeployController::class, 'rollback']);
+    Route::post('/sites/{site_id}/deployments/{deployment}/rollback', [DeployController::class, 'rollback'])->middleware('idempotency');
     Route::get('/sites/{site_id}/git-history', [DeployController::class, 'gitHistory']);
 
     // Email Management
@@ -158,12 +158,12 @@ Route::middleware(['api.unified-auth'])->group(function () {
 Route::middleware(['api.unified-auth'])->group(function () {
     Route::prefix('sites/{site_id}')->group(function () {
         Route::get('/backups', [BackupController::class, 'index']);
-        Route::post('/backups/full', [BackupController::class, 'createFullBackup']);
-        Route::post('/backups/incremental', [BackupController::class, 'createIncrementalBackup']);
-        Route::post('/backups/database', [BackupController::class, 'createDatabaseBackup']);
+        Route::post('/backups/full', [BackupController::class, 'createFullBackup'])->middleware('idempotency');
+        Route::post('/backups/incremental', [BackupController::class, 'createIncrementalBackup'])->middleware('idempotency');
+        Route::post('/backups/database', [BackupController::class, 'createDatabaseBackup'])->middleware('idempotency');
         Route::get('/backups/stats', [BackupController::class, 'stats']);
         Route::get('/backups/{backup_id}', [BackupController::class, 'show']);
-        Route::post('/backups/{backup_id}/restore', [BackupController::class, 'restore']);
+        Route::post('/backups/{backup_id}/restore', [BackupController::class, 'restore'])->middleware('idempotency');
         Route::get('/backups/{backup_id}/download', [BackupController::class, 'download']);
         Route::delete('/backups/{backup_id}', [BackupController::class, 'destroy']);
 
