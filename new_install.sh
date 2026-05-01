@@ -765,11 +765,12 @@ EOF
     sed -i "s|APP_URL=http://localhost|APP_URL=http://$IP|g" /var/www/html/.env
     sed -i "s/APP_ENV=local/APP_ENV=production/g" /var/www/html/.env
 
-    # Replace additional placeholders in the seeder file
-    sed -i "s|CIPISERVERID|$SERVERID|g" /var/www/html/database/seeders/DatabaseSeeder.php
-    sed -i "s|CIPIIP|$IP|g" /var/www/html/database/seeders/DatabaseSeeder.php
-    sed -i "s|CIPIPASS|$PASS|g" /var/www/html/database/seeders/DatabaseSeeder.php
-    sed -i "s|CIPIDB|$DBPASS|g" /var/www/html/database/seeders/DatabaseSeeder.php
+    # Write panel server vars to .env — read by DatabaseSeeder
+    grep -q "PANEL_SERVER_ID" /var/www/html/.env || echo "" >> /var/www/html/.env
+    sed -i "s|^PANEL_SERVER_ID=.*|PANEL_SERVER_ID=$SERVERID|" /var/www/html/.env || echo "PANEL_SERVER_ID=$SERVERID" >> /var/www/html/.env
+    sed -i "s|^PANEL_SERVER_IP=.*|PANEL_SERVER_IP=$IP|" /var/www/html/.env || echo "PANEL_SERVER_IP=$IP" >> /var/www/html/.env
+    sed -i "s|^PANEL_SERVER_PASS=.*|PANEL_SERVER_PASS=$PASS|" /var/www/html/.env || echo "PANEL_SERVER_PASS=$PASS" >> /var/www/html/.env
+    sed -i "s|^PANEL_SERVER_DB=.*|PANEL_SERVER_DB=$DBPASS|" /var/www/html/.env || echo "PANEL_SERVER_DB=$DBPASS" >> /var/www/html/.env
 
     chmod -R o+w /var/www/html/storage
     chmod -R 777 /var/www/html/storage
