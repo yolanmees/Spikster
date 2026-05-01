@@ -795,6 +795,7 @@ EOF
     php artisan config:clear || handle_error "artisan config:clear"
     php artisan cache:clear || handle_error "artisan cache:clear"
     php artisan storage:link || handle_error "artisan storage:link"
+    php artisan livewire:publish --assets || handle_error "artisan livewire:publish --assets"
     php artisan view:cache || handle_error "artisan view:cache"
     php artisan migrate --seed --force || handle_error "artisan migrate --seed --force"
     SETUP_TOKEN=$(php artisan spikster:setup-token 2>/dev/null | grep 'http' | tr -d ' ')
