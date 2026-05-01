@@ -11,6 +11,8 @@ class SiteTable extends Component
 {
     use WithPagination;
 
+    private const CREATE_WAIT_TIMEOUT_SECONDS = 90;
+
     public $search = '';
 
     public $sortField = 'created_at';
@@ -24,6 +26,12 @@ class SiteTable extends Component
     public $confirmingDeletion = false;
 
     public $siteToDelete = null;
+
+    public bool $waitingForCreatedSite = false;
+
+    public int $siteCountBeforeCreate = 0;
+
+    public ?int $createWaitStartedAt = null;
 
     /**
      * Render the component.
@@ -149,8 +157,33 @@ class SiteTable extends Component
      * Refresh the component when a site is created.
      */
     #[On('site-created')]
-    public function refresh(): void
+    public function refreshTable(): void
     {
-        // Component will auto-refresh
+        // New sites are sorted by creation date; reset to page 1 for visibility.
+        $this->resetPage();
+
+        // Start temporary polling while async create job is processing.
+        $this->waitingForCreatedSite = true;
+        $this->siteCountBeforeCreate = app(SiteService::class)->getAllSitesQuery()->count();
+        $this->createWaitStartedAt = time();
+    }
+
+    /**
+     * Poll only while waiting for a queued site creation to complete.
+     */
+    public function checkForCreatedSite(SiteService $siteService): void
+    {
+        if (! $this->waitingForCreatedSite) {
+            return;
+        }
+
+        $currentCount = $siteService->getAllSitesQuery()->count();
+        $isTimedOut = $this->createWaitStartedAt !== null
+            && (time() - $this->createWaitStartedAt) >= self::CREATE_WAIT_TIMEOUT_SECONDS;
+
+        if ($currentCount > $this->siteCountBeforeCreate || $isTimedOut) {
+            $this->waitingForCreatedSite = false;
+            $this->createWaitStartedAt = null;
+        }
     }
 }

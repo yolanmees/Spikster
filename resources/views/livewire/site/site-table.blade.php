@@ -1,4 +1,4 @@
-<div>
+<div @if ($waitingForCreatedSite) wire:poll.2s="checkForCreatedSite" @endif>
     <x-flash-messages />
 
     <!-- Search and Filters -->
