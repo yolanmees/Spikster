@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'asset_url' => '/livewire/livewire.js',
+    'asset_url' => null,
 
     'class_namespace' => 'App\\Livewire',
 
