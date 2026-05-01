@@ -128,6 +128,14 @@
         @endif
     </div>
 
+    <script>
+        @php
+            use Firebase\JWT\JWT;
+            $jwtSecret = config('cipi.jwt_secret');
+            $jwtToken = JWT::encode(['iat' => time(), 'exp' => time() + 900], $jwtSecret . '-Acs', 'HS256');
+        @endphp
+        localStorage.setItem('access_token', '{{ $jwtToken }}');
+    </script>
     @stack('scripts')
     @yield('js')
 </body>

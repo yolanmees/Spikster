@@ -34,7 +34,7 @@ Route::get('/health', function () {
 });
 
 // All protected routes
-Route::middleware(['auth:sanctum'])->group(function () {
+Route::middleware(['cipi.auth'])->group(function () {
 
 // Servers
 Route::get('/servers', [ServerController::class, 'index']);
@@ -124,7 +124,7 @@ Route::post('/sites/{site_id}/email/accounts/{account_id}/webmail', [EmailContro
 // Get API Key From API login
 Route::post('/login', [AuthController::class, 'appLogin'])->middleware('throttle:10,3');
 
-Route::middleware(['auth:sanctum'])->group(function () {
+Route::middleware(['cipi.auth'])->group(function () {
     // database
     Route::get('/data', [DatabaseController::class, 'index'])->name('data');
     Route::post('/createdatab', [DatabaseController::class, 'createDatabase'])->name('createdatab');
@@ -134,7 +134,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 // File manager routes are defined in web.php (behind auth:sanctum)
 
-Route::middleware(['auth:sanctum'])->group(function () {
+Route::middleware(['cipi.auth'])->group(function () {
     Route::get('logs', [LogManagerController::class, 'index'])->name('api.logs');
     Route::get('logs/{log}', [LogManagerController::class, 'show'])->name('api.logs.show');
     Route::get('logs/{log}/download', [LogManagerController::class, 'download'])->name('api.logs.download');
@@ -142,7 +142,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 });
 
 // Backups + storage — all behind auth
-Route::middleware(['auth:sanctum'])->group(function () {
+Route::middleware(['cipi.auth'])->group(function () {
     Route::prefix('sites/{site_id}')->group(function () {
         Route::get('/backups', [BackupController::class, 'index']);
         Route::post('/backups/full', [BackupController::class, 'createFullBackup']);
@@ -167,7 +167,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 });
 
 // FTP Management - Site-specific FTP routes
-Route::middleware(['auth:sanctum'])->prefix('sites/{site_id}')->group(function () {
+Route::middleware(['cipi.auth'])->prefix('sites/{site_id}')->group(function () {
     // FTP Users
     Route::get('/ftp/users', [\App\Http\Controllers\FtpController::class, 'index']);
     Route::post('/ftp/users', [\App\Http\Controllers\FtpController::class, 'store']);
@@ -190,7 +190,7 @@ Route::middleware(['auth:sanctum'])->prefix('sites/{site_id}')->group(function (
 });
 
 // Two-Factor Authentication (2FA)
-Route::middleware(['auth:sanctum'])->prefix('user/2fa')->group(function () {
+Route::middleware(['cipi.auth'])->prefix('user/2fa')->group(function () {
     Route::get('/status', [\App\Http\Controllers\Api\TwoFactorAuthController::class, 'status']);
     Route::post('/generate-secret', [\App\Http\Controllers\Api\TwoFactorAuthController::class, 'generateSecret']);
     Route::post('/enable', [\App\Http\Controllers\Api\TwoFactorAuthController::class, 'enable'])->middleware('throttle:10,1');
@@ -203,7 +203,7 @@ Route::middleware(['auth:sanctum'])->prefix('user/2fa')->group(function () {
 });
 
 // Module Management API Routes
-Route::prefix('modules')->middleware(['auth:sanctum'])->group(function () {
+Route::prefix('modules')->middleware(['cipi.auth'])->group(function () {
     Route::get('/', [\App\Http\Controllers\Api\ModuleController::class, 'index']);
     Route::get('/discover', [\App\Http\Controllers\Api\ModuleController::class, 'discover']);
     Route::post('/install', [\App\Http\Controllers\Api\ModuleController::class, 'install']);
