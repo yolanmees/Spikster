@@ -1,0 +1,19 @@
+{
+    "name": "spikster/greeter-module",
+    "description": "Example Greeter module for Spikster",
+    "type": "module",
+    "autoload": {
+        "psr-4": {
+            "Modules\\Greeter\\": "app/",
+            "Modules\\Greeter\\Database\\Factories\\": "database/factories/",
+            "Modules\\Greeter\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Modules\\Greeter\\Providers\\GreeterServiceProvider"
+            ]
+        }
+    }
+}

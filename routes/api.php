@@ -44,7 +44,7 @@ Route::middleware(['api.unified-auth'])->group(function () {
 
     // Servers
     Route::get('/servers', [ServerController::class, 'index']);
-    Route::post('/servers', [ServerController::class, 'create']);
+    Route::post('/servers', [ServerController::class, 'create'])->middleware('idempotency');
     Route::get('/servers/panel', [ServerController::class, 'panel']);
     Route::patch('/servers/panel/domain', [ServerController::class, 'paneldomain']);
     Route::post('/servers/panel/ssl', [ServerController::class, 'panelssl']);
@@ -90,7 +90,7 @@ Route::middleware(['api.unified-auth'])->group(function () {
 
     // Sites
     Route::get('/sites', [SiteController::class, 'index']);
-    Route::post('/sites', [SiteController::class, 'create']);
+    Route::post('/sites', [SiteController::class, 'create'])->middleware('idempotency');
     Route::patch('/sites/{site_id}', [SiteController::class, 'edit']);
     Route::delete('/sites/{site_id}', [SiteController::class, 'destroy']);
     Route::get('/sites/{site_id}', [SiteController::class, 'show']);

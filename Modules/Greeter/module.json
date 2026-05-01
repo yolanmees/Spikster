@@ -1,0 +1,14 @@
+{
+    "name": "Greeter",
+    "alias": "greeter",
+    "description": "Example module demonstrating the Spikster module API. Provides a greeting dashboard widget and a simple Livewire page.",
+    "version": "1.0.0",
+    "keywords": ["example", "demo", "greeter"],
+    "priority": 100,
+    "is_core": false,
+    "providers": [
+        "Modules\\Greeter\\Providers\\GreeterServiceProvider",
+        "Modules\\Greeter\\Providers\\RouteServiceProvider"
+    ],
+    "files": []
+}

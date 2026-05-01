@@ -120,5 +120,6 @@ class Kernel extends HttpKernel
         'verified' => EnsureEmailIsVerified::class,
         'api.unified-auth' => EnsureApiUserAuthenticated::class,
         'cipi.auth' => CipiAuth::class,
+        'idempotency' => \App\Http\Middleware\IdempotencyKey::class,
     ];
 }
