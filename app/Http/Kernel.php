@@ -8,6 +8,7 @@ use App\Http\Middleware\CipiAuth;
 use App\Http\Middleware\EncryptCookies;
 use App\Http\Middleware\EnforceProductionSafety;
 use App\Http\Middleware\EnsureApiUserAuthenticated;
+use App\Http\Middleware\IdempotencyKey;
 use App\Http\Middleware\IpAllowlist;
 use App\Http\Middleware\LogSecurityEvents;
 use App\Http\Middleware\PreventRequestsDuringMaintenance;
@@ -122,6 +123,6 @@ class Kernel extends HttpKernel
         'verified' => EnsureEmailIsVerified::class,
         'api.unified-auth' => EnsureApiUserAuthenticated::class,
         'cipi.auth' => CipiAuth::class,
-        'idempotency' => \App\Http\Middleware\IdempotencyKey::class,
+        'idempotency' => IdempotencyKey::class,
     ];
 }

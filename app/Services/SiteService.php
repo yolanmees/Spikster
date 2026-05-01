@@ -121,6 +121,11 @@ class SiteService
         }
 
         AuditService::logCreate($site, "Site created: {$site->domain}");
+        app(WebhookService::class)->dispatch('site.created', [
+            'site_id' => $site->site_id,
+            'domain' => $site->domain,
+            'server_id' => $site->server_id,
+        ]);
 
         return $site;
     }
@@ -163,6 +168,11 @@ class SiteService
         $site->aliases()->delete();
 
         AuditService::logDelete($site, "Site deleted: {$site->domain}");
+        app(WebhookService::class)->dispatch('site.deleted', [
+            'site_id' => $site->site_id,
+            'domain' => $site->domain,
+            'server_id' => $site->server_id,
+        ]);
 
         return $site->delete();
     }

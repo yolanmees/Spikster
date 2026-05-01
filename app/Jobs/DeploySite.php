@@ -6,6 +6,7 @@ use App\Models\Deployment;
 use App\Notifications\SiteDeployFailedNotification;
 use App\Services\DeploymentService;
 use App\Services\ModuleHookManager;
+use App\Services\WebhookService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -41,6 +42,14 @@ class DeploySite implements ShouldQueue
 
                 $this->deployment->markAsCompleted([
                     'steps' => $result['steps'],
+                ]);
+
+                app(WebhookService::class)->dispatch('site.deployed', [
+                    'site_id' => $site->site_id,
+                    'domain' => $site->domain,
+                    'server_id' => $site->server_id,
+                    'branch' => $site->branch,
+                    'deployment_id' => $this->deployment->id,
                 ]);
             } else {
                 $this->deployment->markAsFailed($result['error'] ?? 'Unknown error');

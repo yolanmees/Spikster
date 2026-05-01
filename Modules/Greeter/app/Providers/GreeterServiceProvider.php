@@ -10,20 +10,26 @@ use App\Services\ModuleWidgetManager;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 use Modules\Greeter\Livewire\Greeter;
+use Modules\Greeter\Services\GreeterService;
 use Spatie\Permission\Models\Permission;
 
 class GreeterServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        $this->loadViewsFrom(__DIR__ . '/../../resources/views', 'greeter');
-        $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations');
-        $this->mergeConfigFrom(__DIR__ . '/../../config/config.php', 'greeter');
+        $this->loadViewsFrom(__DIR__.'/../../resources/views', 'greeter');
+        $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
+        $this->mergeConfigFrom(__DIR__.'/../../config/config.php', 'greeter');
 
         $module = $this->registerModule();
         if (! $module) {
             return;
         }
+
+        $module->menuItems()->delete();
+        $module->widgets()->delete();
+        $module->hooks()->delete();
+        $module->permissions()->delete();
 
         $this->registerMenuItems($module);
         $this->registerPermissions($module);
@@ -32,13 +38,15 @@ class GreeterServiceProvider extends ServiceProvider
         $this->registerLivewireComponents();
     }
 
-    public function register(): void
-    {
-    }
+    public function register(): void {}
 
     protected function registerModule(): ?Module
     {
-        return app(ModuleRegistry::class)->register('greeter');
+        try {
+            return app(ModuleRegistry::class)->register('greeter');
+        } catch (\Throwable) {
+            return null;
+        }
     }
 
     protected function registerMenuItems(Module $module): void
@@ -79,7 +87,7 @@ class GreeterServiceProvider extends ServiceProvider
         app(ModuleWidgetManager::class)->registerWidget($module, [
             'key' => 'greeter_welcome',
             'name' => 'Welcome Widget',
-            'component' => \Modules\Greeter\Livewire\Greeter::class,
+            'component' => Greeter::class,
             'title' => 'Welcome',
             'description' => 'A friendly greeting widget for the dashboard',
             'icon' => '👋',
@@ -95,7 +103,7 @@ class GreeterServiceProvider extends ServiceProvider
         app(ModuleHookManager::class)->registerHook($module, [
             'name' => 'greeter.greeting',
             'type' => 'filter',
-            'class' => \Modules\Greeter\Services\GreeterService::class,
+            'class' => GreeterService::class,
             'method' => 'filterGreeting',
             'priority' => 10,
             'accepted_args' => 1,

@@ -61,6 +61,11 @@ class ServerService
 
         $server = Server::create($data);
         AuditService::logCreate($server, "Server created: {$server->name} ({$server->ip})");
+        app(WebhookService::class)->dispatch('server.created', [
+            'server_id' => $server->server_id,
+            'name' => $server->name,
+            'ip' => $server->ip,
+        ]);
 
         return $server;
     }
@@ -86,6 +91,11 @@ class ServerService
         }
 
         AuditService::logDelete($server, "Server deleted: {$server->name} ({$server->ip})");
+        app(WebhookService::class)->dispatch('server.deleted', [
+            'server_id' => $server->server_id,
+            'name' => $server->name,
+            'ip' => $server->ip,
+        ]);
 
         return $server->delete();
     }

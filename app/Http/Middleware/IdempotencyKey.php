@@ -43,7 +43,7 @@ class IdempotencyKey
         if ($response->getStatusCode() >= 200 && $response->getStatusCode() < 300) {
             Cache::put($cacheKey, [
                 'status' => $response->getStatusCode(),
-                'body'   => json_decode($response->getContent(), true),
+                'body' => json_decode($response->getContent(), true),
             ], self::TTL);
         }
 

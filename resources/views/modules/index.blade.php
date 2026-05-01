@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="space-y-6">
-        <x-page-header title="Module Manager" subtitle="Manage and configure your Spikster modules" />
+        <x-page-header />
 
         <x-flash-messages />
 

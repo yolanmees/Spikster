@@ -22,6 +22,6 @@ class RouteServiceProvider extends ServiceProvider
         Route::middleware(['web', 'auth', 'verified'])
             ->prefix('greeter')
             ->name('greeter.')
-            ->group(__DIR__ . '/../../routes/web.php');
+            ->group(__DIR__.'/../../routes/web.php');
     }
 }

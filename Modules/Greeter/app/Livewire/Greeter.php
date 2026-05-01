@@ -4,11 +4,14 @@ namespace Modules\Greeter\Livewire;
 
 use App\Services\ModuleHookManager;
 use Livewire\Component;
+use Modules\Greeter\Models\Greeting;
 
 class Greeter extends Component
 {
     public string $name = '';
+
     public string $greeting = 'Hello!';
+
     public bool $showHistory = false;
 
     public function greet(): void
@@ -19,7 +22,7 @@ class Greeter extends Component
         $this->greeting = app(ModuleHookManager::class)
             ->applyFilter('greeter.greeting', $greeting);
 
-        \Modules\Greeter\Models\Greeting::create([
+        Greeting::create([
             'name' => $displayName,
             'message' => $this->greeting,
         ]);
@@ -34,7 +37,7 @@ class Greeter extends Component
     {
         return view('greeter::livewire.greeter', [
             'greetings' => $this->showHistory
-                ? \Modules\Greeter\Models\Greeting::latest()->take(10)->get()
+                ? Greeting::latest()->take(10)->get()
                 : collect(),
         ]);
     }

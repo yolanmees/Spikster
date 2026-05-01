@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\DeployController;
 use App\Http\Controllers\Api\LogManagerController;
 use App\Http\Controllers\Api\ModuleController;
 use App\Http\Controllers\Api\TwoFactorAuthController;
+use App\Http\Controllers\Api\WebhookController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BackupController;
 use App\Http\Controllers\CronExecutionController;
@@ -17,6 +18,7 @@ use App\Http\Controllers\ServerController;
 use App\Http\Controllers\ServerMetricsController;
 use App\Http\Controllers\Site\AliasController;
 use App\Http\Controllers\Site\CredentialController;
+use App\Http\Controllers\Site\SshKeyController;
 use App\Http\Controllers\SiteController;
 use Illuminate\Support\Facades\Route;
 
@@ -97,6 +99,12 @@ Route::middleware(['api.unified-auth'])->group(function () {
     Route::post('/sites/{site_id}/ssl', [SiteController::class, 'ssl']);
     Route::post('/sites/{site_id}/reset/ssh', [CredentialController::class, 'resetSsh']);
     Route::post('/sites/{site_id}/reset/db', [CredentialController::class, 'resetDb']);
+
+    // SSH Key Management
+    Route::get('/sites/{site_id}/ssh-keys', [SshKeyController::class, 'index']);
+    Route::post('/sites/{site_id}/ssh-keys', [SshKeyController::class, 'store']);
+    Route::delete('/sites/{site_id}/ssh-keys/{key_id}', [SshKeyController::class, 'destroy']);
+
     Route::get('/sites/{site_id}/aliases', [AliasController::class, 'index']);
     Route::post('/sites/{site_id}/aliases', [AliasController::class, 'store']);
     Route::delete('/sites/{site_id}/aliases/{alias_id}', [AliasController::class, 'destroy']);
@@ -213,6 +221,17 @@ Route::middleware(['api.unified-auth'])->prefix('user/2fa')->group(function () {
     Route::get('/trusted-devices', [TwoFactorAuthController::class, 'getTrustedDevices']);
     Route::delete('/trusted-devices/{deviceId}', [TwoFactorAuthController::class, 'removeTrustedDevice'])->middleware('throttle:sensitive');
     Route::get('/audit-logs', [TwoFactorAuthController::class, 'getAuditLogs']);
+});
+
+// Webhook Management
+Route::middleware(['api.unified-auth'])->prefix('webhooks')->group(function () {
+    Route::get('/', [WebhookController::class, 'index']);
+    Route::post('/', [WebhookController::class, 'store']);
+    Route::get('/events', [WebhookController::class, 'events']);
+    Route::get('/{webhook}', [WebhookController::class, 'show']);
+    Route::patch('/{webhook}', [WebhookController::class, 'update']);
+    Route::delete('/{webhook}', [WebhookController::class, 'destroy']);
+    Route::post('/{webhook}/test', [WebhookController::class, 'test']);
 });
 
 // Module Management API Routes
