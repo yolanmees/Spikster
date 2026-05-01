@@ -11,7 +11,7 @@
     <div class="space-y-6">
         <x-page-header title="{{ __('spikster.titles.site') }}">
             <x-slot name="actions">
-                <x-back-button :href="route('servers.show', $server_id ?? '')" />
+                <x-back-button :href="route('server.list')" />
             </x-slot>
         </x-page-header>
 

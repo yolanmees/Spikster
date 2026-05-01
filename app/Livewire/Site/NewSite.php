@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Site;
 
+use App\Jobs\CreateSiteJob;
 use App\Services\ServerService;
 use App\Services\SiteService;
 use Livewire\Attributes\Validate;
@@ -69,8 +70,8 @@ class NewSite extends Component
             // Validate the form
             $validated = $this->validate();
 
-            // Create site using service
-            $site = $siteService->createSite([
+            // Dispatch site creation as background job (avoids 502 from php-fpm reload)
+            CreateSiteJob::dispatch([
                 'server_id' => (int) $validated['serverId'],
                 'domain' => strtolower($validated['domain']),
                 'php' => $validated['php'],
@@ -80,7 +81,7 @@ class NewSite extends Component
             ]);
 
             // Flash success message
-            session()->flash('success', 'Site created successfully.');
+            session()->flash('success', 'Site is being created. It will appear shortly.');
 
             // Dispatch event to refresh site list
             $this->dispatch('site-created');
