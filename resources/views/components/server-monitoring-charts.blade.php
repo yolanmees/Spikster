@@ -209,7 +209,7 @@
         function loadCharts(hours = 24) {
             console.log('Loading metrics for server:', serverId, 'hours:', hours);
 
-            fetch(`/api/servers/${serverId}/metrics?hours=${hours}`)
+            fetch(`/api/servers/${serverId}/metrics?hours=${hours}`, { headers: { "Authorization": "Bearer " + localStorage.access_token } })
                 .then(response => {
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);

@@ -1489,4 +1489,30 @@ class ServerController extends Controller
         }
     }
 
+    /**
+     * Get server health metrics (cpu, ram, hdd percentages).
+     */
+    public function healthy(string $server_id)
+    {
+        $server = Server::where('server_id', $server_id)->first();
+        if (! $server) {
+            return response()->json(['cpu' => 0, 'ram' => 0, 'hdd' => 0, 'status' => 'unknown']);
+        }
+        try {
+            $latest = \App\Models\ServerMetric::where('server_id', $server->id)
+                ->orderByDesc('measured_at')
+                ->first();
+            if ($latest) {
+                return response()->json([
+                    'cpu'    => (int) $latest->cpu,
+                    'ram'    => (int) $latest->memory,
+                    'hdd'    => (int) $latest->disk,
+                    'status' => 'online',
+                ]);
+            }
+            return response()->json(['cpu' => 0, 'ram' => 0, 'hdd' => 0, 'status' => 'online']);
+        } catch (\Throwable $th) {
+            return response()->json(['cpu' => 0, 'ram' => 0, 'hdd' => 0, 'status' => 'unknown']);
+        }
+    }
 }

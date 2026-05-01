@@ -173,7 +173,6 @@ class DaemonService
     {
         return ($this->send('cron.read', []))['output'] ?? '';
     }
-}
 
     // ─── Email management ─────────────────────────────────────────────────────
 

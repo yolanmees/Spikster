@@ -41,17 +41,18 @@ Route::get('/servers', [ServerController::class, 'index']);
 Route::post('/servers', [ServerController::class, 'create']);
 Route::get('/servers/panel', [ServerController::class, 'panel']);
 Route::patch('/servers/panel/domain', [ServerController::class, 'paneldomain']);
-Route::post('/servers/panel/ssl', [ServerController::class, 'panelssl'])->middleware('throttle:10,1');
+Route::post('/servers/panel/ssl', [ServerController::class, 'panelssl']);
 Route::delete('/servers/{server_id}', [ServerController::class, 'destroy']);
 Route::get('/servers/{server_id}', [ServerController::class, 'show']);
 Route::patch('/servers/{server_id}', [ServerController::class, 'edit']);
 Route::get('/servers/{server_id}/ping', [ServerController::class, 'ping']);
+    Route::get('/servers/{server_id}/healthy', [ServerController::class, 'healthy']);
 Route::get('/servers/{server_id}/stats/cpu', [MonitoringController::class, 'statsCpu']);
 Route::get('/servers/{server_id}/stats/mem', [MonitoringController::class, 'statsMem']);
 Route::get('/servers/{server_id}/stats/load', [MonitoringController::class, 'statsLoad']);
 Route::get('/servers/{server_id}/stats/disk', [MonitoringController::class, 'statsDisk']);
 Route::get('/servers/{server_id}/metrics', [\App\Http\Controllers\ServerMetricsController::class, 'getChartData']);
-Route::post('/servers/{server_id}/rootreset', [ServerController::class, 'rootreset'])->middleware('throttle:5,1');
+Route::post('/servers/{server_id}/rootreset', [ServerController::class, 'rootreset']);
 Route::post("/servers/{server_id}/servicerestart/{service}", [ServerController::class, "servicerestart"]);
 Route::get('/servers/{server_id}/sites', [ServerController::class, 'sites']);
 Route::get('/servers/{server_id}/domains', [ServerController::class, 'domains']);
@@ -88,8 +89,8 @@ Route::patch('/sites/{site_id}', [SiteController::class, 'edit']);
 Route::delete('/sites/{site_id}', [SiteController::class, 'destroy']);
 Route::get('/sites/{site_id}', [SiteController::class, 'show']);
 Route::post('/sites/{site_id}/ssl', [SiteController::class, 'ssl']);
-Route::post('/sites/{site_id}/reset/ssh', [CredentialController::class, 'resetSsh'])->middleware('throttle:10,1');
-Route::post('/sites/{site_id}/reset/db', [CredentialController::class, 'resetDb'])->middleware('throttle:10,1');
+Route::post('/sites/{site_id}/reset/ssh', [CredentialController::class, 'resetSsh']);
+Route::post('/sites/{site_id}/reset/db', [CredentialController::class, 'resetDb']);
 Route::get('/sites/{site_id}/aliases', [AliasController::class, 'index']);
 Route::post('/sites/{site_id}/aliases', [AliasController::class, 'store']);
 Route::delete('/sites/{site_id}/aliases/{alias_id}', [AliasController::class, 'destroy']);
@@ -176,7 +177,7 @@ Route::middleware(['cipi.auth'])->prefix('sites/{site_id}')->group(function () {
     Route::delete('/ftp/users/{user_id}', [\App\Http\Controllers\FtpController::class, 'destroy']);
 
     // FTP User Actions
-    Route::post('/ftp/users/{user_id}/reset-password', [\App\Http\Controllers\FtpController::class, 'resetPassword'])->middleware('throttle:10,1');
+    Route::post('/ftp/users/{user_id}/reset-password', [\App\Http\Controllers\FtpController::class, 'resetPassword']);
     Route::put('/ftp/users/{user_id}/quota', [\App\Http\Controllers\FtpController::class, 'updateQuota']);
     Route::get('/ftp/users/{user_id}/usage', [\App\Http\Controllers\FtpController::class, 'getUsageStats']);
     Route::post('/ftp/users/{user_id}/test-connection', [\App\Http\Controllers\FtpController::class, 'testConnection']);
@@ -193,9 +194,9 @@ Route::middleware(['cipi.auth'])->prefix('sites/{site_id}')->group(function () {
 Route::middleware(['cipi.auth'])->prefix('user/2fa')->group(function () {
     Route::get('/status', [\App\Http\Controllers\Api\TwoFactorAuthController::class, 'status']);
     Route::post('/generate-secret', [\App\Http\Controllers\Api\TwoFactorAuthController::class, 'generateSecret']);
-    Route::post('/enable', [\App\Http\Controllers\Api\TwoFactorAuthController::class, 'enable'])->middleware('throttle:10,1');
+    Route::post('/enable', [\App\Http\Controllers\Api\TwoFactorAuthController::class, 'enable']);
     Route::post('/disable', [\App\Http\Controllers\Api\TwoFactorAuthController::class, 'disable']);
-    Route::post('/verify', [\App\Http\Controllers\Api\TwoFactorAuthController::class, 'verify'])->middleware('throttle:10,1');
+    Route::post('/verify', [\App\Http\Controllers\Api\TwoFactorAuthController::class, 'verify']);
     Route::post('/backup-codes/regenerate', [\App\Http\Controllers\Api\TwoFactorAuthController::class, 'regenerateBackupCodes']);
     Route::get('/trusted-devices', [\App\Http\Controllers\Api\TwoFactorAuthController::class, 'getTrustedDevices']);
     Route::delete('/trusted-devices/{deviceId}', [\App\Http\Controllers\Api\TwoFactorAuthController::class, 'removeTrustedDevice']);
