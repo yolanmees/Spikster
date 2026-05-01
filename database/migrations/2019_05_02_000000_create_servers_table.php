@@ -18,8 +18,9 @@ class CreateServersTable extends Migration
             $table->string('server_id')->unique()->index();
             $table->string('ip');
             $table->string('name');
-            $table->string('password');
-            $table->string('database');
+            // Encrypted casts can exceed VARCHAR length; store as TEXT.
+            $table->text('password');
+            $table->text('database');
             $table->string('provider')->nullable();
             $table->string('location')->nullable();
             $table->string('php')->default('8.3');
