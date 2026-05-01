@@ -7,7 +7,7 @@ PASS=$(openssl rand -base64 32 | sha256sum | base64 | head -c 32 | tr '[:upper:]
 DBPASS=$(openssl rand -base64 24 | sha256sum | base64 | head -c 32 | tr '[:upper:]' '[:lower:]')
 SERVERID=$(openssl rand -base64 12 | sha256sum | base64 | head -c 32 | tr '[:upper:]' '[:lower:]')
 REPO=yolanmees/Spikster
-BRANCH=master
+BRANCH=v2-update
 ADMIN_EMAIL="your_admin_email@example.com"
 USE_LOCAL_IP=false
 
