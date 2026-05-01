@@ -558,336 +558,218 @@
 
 @section('js')
     <script>
-        // Get Server info
-        $('#mainloading').removeClass('d-none');
+        const SITE_ID = '{{ $site_id }}';
+        const TOKEN = localStorage.getItem('access_token') || '';
+
+        function api(url, method = 'GET', body = null) {
+            const opts = {
+                method,
+                headers: {
+                    'Authorization': 'Bearer ' + TOKEN,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+            };
+            if (body) opts.body = JSON.stringify(body);
+            return fetch(url, opts).then(r => r.json());
+        }
+
+        function el(id) { return document.getElementById(id); }
+        function hide(id) { const e = el(id); if (e) e.classList.add('hidden'); }
+        function show(id) { const e = el(id); if (e) e.classList.remove('hidden'); }
+        function html(id, val) { const e = el(id); if (e) e.innerHTML = val; }
+        function val(id, v) { const e = el(id); if (e && v !== undefined) e.value = v; }
+        function on(id, ev, fn) { const e = el(id); if (e) e.addEventListener(ev, fn); }
+        function setSpinner(id) { const e = el(id); if (e) e.innerHTML = '<svg class="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>'; }
 
         // Site Init
         function siteInit() {
-            $.ajax({
-                url: '/api/sites/{{ $site_id }}',
-                type: 'GET',
-                success: function(data) {
-                    $('#mainloading').addClass('d-none');
-                    $('#siteip').html(data.server_ip);
-                    $('#sitealiases').html(data.aliases);
-                    $('#sitephp').html(data.php);
-                    $('#sitebasepathinfo').html(data.basepath);
-                    $('#siteuserinfo').html(data.username);
-                    $('#maintitle').html('- ' + data.domain);
-                    $('#sitedomain').val(data.domain);
-                    $('#sitebasepath').val(data.basepath);
-                    $('#siteuuid').val(data.rootpath);
-                    $('#currentdomain').val(data.domain);
-                    $('#server_id').val(data.server_id);
-                    $('#sitesupervisor').val(data.supervisor);
-                    $('#deploykey').html(data.deploy_key)
-                    $('#repodeployinfouser1').html(data.username);
-                    $('#repodeployinfouser2').html(data.username);
-                    $('#repodeployinfoip').html(data.server_ip);
-                    $('#repositoryproject').val(data.repository);
-                    $('#repositorybranch').val(data.branch);
-                    deploy.session.setValue(data.deploy);
-                    getDataNoDT('/api/servers/' + data.server_id + '/domains');
-                    switch (data.php) {
-                        case '8.3':
-                            $('#php83').attr("selected", "selected");
-                            break;
-                        case '8.2':
-                            $('#php82').attr("selected", "selected");
-                            break;
-                        case '8.1':
-                            $('#php81').attr("selected", "selected");
-                            break;
-                        case '8.0':
-                            $('#php80').attr("selected", "selected");
-                            break;
-                        case '7.4':
-                            $('#php74').attr("selected", "selected");
-                            break;
-                        case '7.3':
-                            // Append legacy php 7.3
-                            $('#phpver').append('<option value="7.3" selected>7.3</option>');
-                            break;
-                        default:
-                            break;
+            api('/api/sites/' + SITE_ID).then(data => {
+                hide('mainloading');
+                html('siteip', data.server_ip);
+                html('sitealiases', data.aliases);
+                html('sitephp', data.php);
+                html('sitebasepathinfo', data.basepath);
+                html('siteuserinfo', data.username);
+                html('maintitle', '- ' + data.domain);
+                val('sitedomain', data.domain);
+                val('sitebasepath', data.basepath);
+                val('siteuuid', data.rootpath);
+                val('currentdomain', data.domain);
+                val('server_id', data.server_id);
+                val('sitesupervisor', data.supervisor);
+                html('deploykey', data.deploy_key);
+                html('repodeployinfouser1', data.username);
+                html('repodeployinfouser2', data.username);
+                html('repodeployinfoip', data.server_ip);
+                val('repositoryproject', data.repository);
+                val('repositorybranch', data.branch);
+                if (typeof deploy !== 'undefined') deploy.session.setValue(data.deploy || '');
+                if (data.server_id) api('/api/servers/' + data.server_id + '/domains');
+                const phpSel = el('sitephpver');
+                if (phpSel) {
+                    Array.from(phpSel.options).forEach(o => o.selected = (o.value === data.php));
+                    if (data.php === '7.3' && !Array.from(phpSel.options).find(o => o.value === '7.3')) {
+                        phpSel.insertAdjacentHTML('beforeend', '<option value="7.3" selected>7.3</option>');
                     }
-                },
+                }
             });
-            $.ajax({
-                url: '/api/sites/{{ $site_id }}/aliases',
-                type: 'GET',
-                success: function(data) {
-                    $('#sitealiaseslist').empty();
-                    jQuery(data).each(function(i, item) {
-                        $('#sitealiaseslist').append(
-                            '<span class="inline-flex items-center gap-2 px-3 py-1.5 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700/50 text-purple-700 dark:text-purple-300 text-sm rounded-lg">' +
-                            item.domain + '<button data-id="' + item.alias_id +
-                            '" class="transition-colors sitealiasdel hover:text-purple-900 dark:hover:text-purple-100"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button></span>'
-                        );
-                    });
-                },
+
+            api('/api/sites/' + SITE_ID + '/aliases').then(data => {
+                const list = el('sitealiaseslist');
+                if (!list || !Array.isArray(data)) return;
+                list.innerHTML = data.map(item =>
+                    '<span class="inline-flex items-center gap-2 px-3 py-1.5 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700/50 text-purple-700 dark:text-purple-300 text-sm rounded-lg">' +
+                    item.domain + '<button data-id="' + item.alias_id +
+                    '" class="transition-colors sitealiasdel hover:text-purple-900 dark:hover:text-purple-100"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button></span>'
+                ).join('');
+                aliasesDelete();
             });
         }
-        $(document).ajaxSuccess(function() {
-            aliasesDelete();
-        });
 
-        // Init variables
-        siteInit();
-
-        // Password reset
-        $('#sitesshreset').click(function() {
-            window.dispatchEvent(new CustomEvent('open-modal', { detail: 'ssh-reset-modal' }));
-        });
-        $('#sshresetsubmit').click(function() {
-            $.ajax({
-                url: '/api/sites/{{ $site_id }}/reset/ssh',
-                type: 'POST',
-                beforeSend: function() {
-                    $('#sshresetloading').removeClass('d-none');
-                },
-                success: function(data) {
-                    success('{{ __('spikster.new_ssh_password_success') }}:<br><b>' + data.password +
-                        '</b><br><a href="' + data.pdf +
-                        '" target="_blank" style="color:#ffffff">{{ __('spikster.download_site_data') }}</a>'
-                    );
-                    $('#sshresetloading').addClass('d-none');
-                    window.dispatchEvent(new CustomEvent('close-modal'));
-                    $(window).scrollTop(0);
-                }
+        // SSH Password reset
+        on('sitesshreset', 'click', () => window.dispatchEvent(new CustomEvent('open-modal', { detail: 'ssh-reset-modal' })));
+        on('sshresetsubmit', 'click', () => {
+            show('sshresetloading');
+            api('/api/sites/' + SITE_ID + '/reset/ssh', 'POST').then(data => {
+                hide('sshresetloading');
+                window.dispatchEvent(new CustomEvent('close-modal'));
+                window.scrollTo(0, 0);
             });
         });
 
         // DB Password reset
-        $('#sitemysqlreset').click(function() {
-            window.dispatchEvent(new CustomEvent('open-modal', { detail: 'mysql-reset-modal' }));
-        });
-        $('#mysqlresetsubmit').click(function() {
-            $.ajax({
-                url: '/api/sites/{{ $site_id }}/reset/db',
-                type: 'POST',
-                beforeSend: function() {
-                    $('#mysqlresetloading').removeClass('d-none');
-                },
-                success: function(data) {
-                    success('{{ __('spikster.new_mysql_password_success') }}:<br><b>' + data.password +
-                        '</b><br><a href="' + data.pdf +
-                        '" target="_blank" style="color:#ffffff">{{ __('spikster.download_site_data') }}</a>'
-                    );
-                    $('#mysqlresetloading').addClass('d-none');
-                    window.dispatchEvent(new CustomEvent('close-modal'));
-                    $(window).scrollTop(0);
-                }
+        on('sitemysqlreset', 'click', () => window.dispatchEvent(new CustomEvent('open-modal', { detail: 'mysql-reset-modal' })));
+        on('mysqlresetsubmit', 'click', () => {
+            show('mysqlresetloading');
+            api('/api/sites/' + SITE_ID + '/reset/db', 'POST').then(data => {
+                hide('mysqlresetloading');
+                window.dispatchEvent(new CustomEvent('close-modal'));
+                window.scrollTo(0, 0);
             });
         });
 
-        // SSLs Require
-        $('#sitessl').click(function() {
-            $.ajax({
-                url: '/api/sites/{{ $site_id }}/ssl',
-                type: 'POST',
-                beforeSend: function() {
-                    $('#sitesslloading').removeClass('d-none');
-                },
-                success: function(data) {
-                    $('#sitesslloading').addClass('d-none');
-                }
-            });
+        // SSL
+        on('sitessl', 'click', () => {
+            show('sitesslloading');
+            api('/api/sites/' + SITE_ID + '/ssl', 'POST').then(() => hide('sitesslloading'));
         });
-
 
         // Repository
-        $('#sitesetrepo').click(function() {
-            window.dispatchEvent(new CustomEvent('open-modal', { detail: 'repository-modal' }));
-        });
-
-        // Repository Submit
-        $('#repositorysubmit').click(function() {
-            $.ajax({
-                url: '/api/sites/{{ $site_id }}',
-                type: 'PATCH',
-                contentType: 'application/json',
-                dataType: 'json',
-                data: JSON.stringify({
-                    'repository': $('#repositoryproject').val(),
-                    'branch': $('#repositorybranch').val(),
-                }),
-                beforeSend: function() {
-                    $('#repositoryloading').removeClass('d-none');
-                },
-                success: function(data) {
-                    $('#repositoryloading').addClass('d-none');
-                    window.dispatchEvent(new CustomEvent('close-modal'));
-                    siteInit();
-                },
+        on('sitesetrepo', 'click', () => window.dispatchEvent(new CustomEvent('open-modal', { detail: 'repository-modal' })));
+        on('repositorysubmit', 'click', () => {
+            show('repositoryloading');
+            api('/api/sites/' + SITE_ID, 'PATCH', {
+                repository: el('repositoryproject')?.value,
+                branch: el('repositorybranch')?.value,
+            }).then(() => {
+                hide('repositoryloading');
+                window.dispatchEvent(new CustomEvent('close-modal'));
+                siteInit();
             });
         });
 
-        //Deploy Key Copy
-        $("#copykey").click(function() {
-            $("#deploykey").select();
-            document.execCommand('copy');
+        // Copy deploy key
+        on('copykey', 'click', () => {
+            const key = el('deploykey');
+            if (key) navigator.clipboard?.writeText(key.innerText) || (key.select?.(), document.execCommand('copy'));
         });
 
-        // Deploy editor
-        var deploy = ace.edit("deploy");
-        deploy.setTheme("ace/theme/monokai");
-        deploy.session.setMode("ace/mode/sh");
-
-        // Deploy Edit
-        $('#editdeploy').click(function() {
-            window.dispatchEvent(new CustomEvent('open-modal', { detail: 'deploy-modal' }));
-        });
-
-        // Deploy Submit
-        $('#deploysubmit').click(function() {
-            $.ajax({
-                url: '/api/sites/{{ $site_id }}',
-                type: 'PATCH',
-                contentType: 'application/json',
-                dataType: 'json',
-                data: JSON.stringify({
-                    'deploy': deploy.getSession().getValue(),
-                }),
-                beforeSend: function() {
-                    $('#deployloading').removeClass('d-none');
-                },
-                success: function(data) {
-                    $('#deployloading').addClass('d-none');
-                    window.dispatchEvent(new CustomEvent('close-modal'));
-                    siteInit();
-                },
-            });
-        });
-
-
-        //Check Domain Conflict
-        function domainConflict(domain) {
-            conflict = 0;
-            JSON.parse(localStorage.otherdata).forEach(item => {
-                if (item == domain) {
-                    conflict = conflict + 1;
-                }
-            });
-            return conflict;
+        // Deploy editor (ace)
+        let deploy;
+        if (typeof ace !== 'undefined') {
+            deploy = ace.edit('deploy');
+            deploy.setTheme('ace/theme/monokai');
+            deploy.session.setMode('ace/mode/sh');
         }
 
-
-        // Site Aliases
-        $('#siteaddalias').keyup(function() {
-            $('#siteaddalias').removeClass('border-red-500').addClass('border-gray-200 dark:border-gray-600');
+        on('editdeploy', 'click', () => window.dispatchEvent(new CustomEvent('open-modal', { detail: 'deploy-modal' })));
+        on('deploysubmit', 'click', () => {
+            show('deployloading');
+            api('/api/sites/' + SITE_ID, 'PATCH', {
+                deploy: typeof deploy !== 'undefined' ? deploy.getSession().getValue() : '',
+            }).then(() => {
+                hide('deployloading');
+                window.dispatchEvent(new CustomEvent('close-modal'));
+                siteInit();
+            });
         });
-        $('#siteaddaliassubmit').click(function() {
-            if (domainConflict($('#siteaddalias').val()) < 1 && $('#siteaddalias').val() != '') {
-                $.ajax({
-                    url: '/api/sites/{{ $site_id }}/aliases',
-                    type: 'POST',
-                    contentType: 'application/json',
-                    dataType: 'json',
-                    data: JSON.stringify({
-                        'domain': $('#siteaddalias').val(),
-                    }),
-                    beforeSend: function() {
-                        $('#siteaddaliassubmit').html(
-                            '<svg class="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>'
-                        );
-                    },
-                    success: function(data) {
-                        $('#siteaddalias').val('');
-                        $('#siteaddaliassubmit').empty();
-                        $('#siteaddaliassubmit').html(
-                            '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>'
-                        );
-                        siteInit();
-                    },
-                });
-            } else {
-                $('#siteaddalias').removeClass('border-gray-200 dark:border-gray-600').addClass('border-red-500');
+
+        // Domain conflict check
+        function domainConflict(domain) {
+            try {
+                const data = JSON.parse(localStorage.getItem('otherdata') || '[]');
+                return data.filter(item => item === domain).length;
+            } catch { return 0; }
+        }
+
+        // Aliases
+        on('siteaddalias', 'keyup', () => {
+            el('siteaddalias')?.classList.remove('border-red-500');
+            el('siteaddalias')?.classList.add('border-gray-200', 'dark:border-gray-600');
+        });
+        on('siteaddaliassubmit', 'click', () => {
+            const input = el('siteaddalias');
+            const domain = input?.value || '';
+            if (!domain || domainConflict(domain) > 0) {
+                input?.classList.remove('border-gray-200');
+                input?.classList.add('border-red-500');
+                return;
             }
+            setSpinner('siteaddaliassubmit');
+            api('/api/sites/' + SITE_ID + '/aliases', 'POST', { domain }).then(() => {
+                if (input) input.value = '';
+                const btn = el('siteaddaliassubmit');
+                if (btn) btn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>';
+                siteInit();
+            });
         });
 
-        //Delete Aliases
         function aliasesDelete() {
-            $(".sitealiasdel").on("click", function() {
-                $.ajax({
-                    url: '/api/sites/{{ $site_id }}/aliases/' + $(this).attr('data-id'),
-                    type: 'DELETE',
-                    success: function(data) {
-                        $('#mainloading').removeClass('d-none');
-                    },
-                    complete: function() {
-                        setTimeout(() => {
-                            siteInit();
-                        }, 5000);
-                    }
+            document.querySelectorAll('.sitealiasdel').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.getAttribute('data-id');
+                    api('/api/sites/' + SITE_ID + '/aliases/' + id, 'DELETE').then(() => {
+                        show('mainloading');
+                        setTimeout(() => siteInit(), 5000);
+                    });
                 });
             });
         }
 
         // Change PHP
-        $('#sitephpversubmit').click(function() {
-            $.ajax({
-                url: '/api/sites/{{ $site_id }}',
-                type: 'PATCH',
-                contentType: 'application/json',
-                dataType: 'json',
-                data: JSON.stringify({
-                    'php': $('#sitephpver').val(),
-                }),
-                beforeSend: function() {
-                    $('#sitephpversubmit').html(
-                        '<svg class="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>'
-                    );
-                },
-                success: function(data) {
-                    $('#sitephpversubmit').empty();
-                    $('#sitephpversubmit').html(
-                        '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>'
-                    );
-                    siteInit();
-                },
+        on('sitephpversubmit', 'click', () => {
+            setSpinner('sitephpversubmit');
+            api('/api/sites/' + SITE_ID, 'PATCH', { php: el('sitephpver')?.value }).then(() => {
+                const btn = el('sitephpversubmit');
+                if (btn) btn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>';
+                siteInit();
             });
         });
 
         // Supervisor
-        $('#sitesupervisorupdate').click(function() {
-            $.ajax({
-                url: '/api/sites/{{ $site_id }}',
-                type: 'PATCH',
-                contentType: 'application/json',
-                dataType: 'json',
-                data: JSON.stringify({
-                    'supervisor': $('#sitesupervisor').val(),
-                }),
-                beforeSend: function() {
-                    $('#sitesupervisorupdateloading').removeClass('d-none');
-                },
-                success: function(data) {
-                    $('#sitesupervisorupdateloading').addClass('d-none');
-                    siteInit();
-                },
+        on('sitesupervisorupdate', 'click', () => {
+            show('sitesupervisorupdateloading');
+            api('/api/sites/' + SITE_ID, 'PATCH', { supervisor: el('sitesupervisor')?.value }).then(() => {
+                hide('sitesupervisorupdateloading');
+                siteInit();
             });
         });
 
         // Basic info
-        $('#updateSite').click(function() {
-            $.ajax({
-                url: '/api/sites/{{ $site_id }}',
-                type: 'PATCH',
-                contentType: 'application/json',
-                dataType: 'json',
-                data: JSON.stringify({
-                    'domain': $('#sitedomain').val(),
-                    'basepath': $('#sitebasepath').val(),
-                }),
-                beforeSend: function() {
-                    $('#updateSiteloadingloading').removeClass('d-none');
-                },
-                success: function(data) {
-                    $('#updateSiteloadingloading').addClass('d-none');
-                    siteInit();
-                },
+        on('updateSite', 'click', () => {
+            show('updateSiteloadingloading');
+            api('/api/sites/' + SITE_ID, 'PATCH', {
+                domain: el('sitedomain')?.value,
+                basepath: el('sitebasepath')?.value,
+            }).then(() => {
+                hide('updateSiteloadingloading');
+                siteInit();
             });
         });
+
+        // Init
+        show('mainloading');
+        siteInit();
     </script>
 @endsection

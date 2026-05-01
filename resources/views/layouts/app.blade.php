@@ -19,6 +19,7 @@
     <style>[x-cloak]{display:none!important}</style>
     @yield('css')
     @stack('styles')
+
 </head>
 
 <body class="bg-gray-100 dark:bg-gray-950 antialiased">
