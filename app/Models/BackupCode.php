@@ -43,7 +43,7 @@ class BackupCode extends Model
      */
     public static function generateCode(): string
     {
-        return strtoupper(Str::random(4)) . '-' . str_pad(random_int(0, 9999), 4, '0', STR_PAD_LEFT);
+        return strtoupper(Str::random(4)).'-'.str_pad(random_int(0, 9999), 4, '0', STR_PAD_LEFT);
     }
 
     /**

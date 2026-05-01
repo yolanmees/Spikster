@@ -7,7 +7,7 @@
 <div class="pb-4">
     <div class="sm:hidden">
         <label for="tabs-select" class="sr-only">Select a tab</label>
-        <select id="tabs-select" name="{{ $selectName }}" class="block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:text-white dark:border-gray-600 focus:border-indigo-500 focus:ring-indigo-500" onChange="location.href=this.value;">
+        <select id="tabs-select" name="{{ $selectName }}" class="block w-full rounded-md border-zinc-300 dark:bg-zinc-800 dark:text-white dark:border-zinc-600 focus:border-purple-700 focus:ring-purple-700" onChange="location.href=this.value;">
             @foreach($tabs as $tab)
                 <option value="{{ $tab['url'] }}" {{ $activeTab === $tab['name'] ? 'selected' : '' }}>
                     {{ $tab['name'] }}

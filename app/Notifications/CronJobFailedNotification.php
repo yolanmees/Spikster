@@ -39,21 +39,21 @@ class CronJobFailedNotification extends Notification
 
         return (new MailMessage)
             ->error()
-            ->subject('Cron Job Failed: ' . ($cronJob->description ?: $cronJob->command))
+            ->subject('Cron Job Failed: '.($cronJob->description ?: $cronJob->command))
             ->line('A scheduled cron job has failed on your server.')
-            ->line('**Server:** ' . $server->name . ' (' . $server->ip . ')')
-            ->line('**Description:** ' . ($cronJob->description ?: 'No description'))
-            ->line('**Command:** `' . $cronJob->command . '`')
-            ->line('**Exit Code:** ' . $this->execution->exit_code)
-            ->line('**Duration:** ' . $this->execution->formatted_duration)
-            ->line('**Started:** ' . $this->execution->started_at->format('Y-m-d H:i:s'))
+            ->line('**Server:** '.$server->name.' ('.$server->ip.')')
+            ->line('**Description:** '.($cronJob->description ?: 'No description'))
+            ->line('**Command:** `'.$cronJob->command.'`')
+            ->line('**Exit Code:** '.$this->execution->exit_code)
+            ->line('**Duration:** '.$this->execution->formatted_duration)
+            ->line('**Started:** '.$this->execution->started_at->format('Y-m-d H:i:s'))
             ->when($this->execution->error_output, function ($mail) {
                 return $mail->line('**Error Output:**')
                     ->line('```')
                     ->line(substr($this->execution->error_output, 0, 500))
                     ->line('```');
             })
-            ->action('View Execution Details', url('/servers/' . $server->server_id . '/cron'));
+            ->action('View Execution Details', url('/servers/'.$server->server_id.'/cron'));
     }
 
     /**

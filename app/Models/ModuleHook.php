@@ -35,14 +35,14 @@ class ModuleHook extends Model
 
     public function execute(...$args)
     {
-        if (!$this->is_active) {
+        if (! $this->is_active) {
             return $this->hook_type === 'filter' ? ($args[0] ?? null) : null;
         }
 
         $class = $this->callback_class;
         $method = $this->callback_method;
 
-        if (!class_exists($class) || !method_exists($class, $method)) {
+        if (! class_exists($class) || ! method_exists($class, $method)) {
             return $this->hook_type === 'filter' ? ($args[0] ?? null) : null;
         }
 

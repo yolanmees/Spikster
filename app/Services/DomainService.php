@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\Domain;
 use App\Models\DnsRecord;
+use App\Models\Domain;
 use App\Models\Site;
 use Illuminate\Support\Str;
 

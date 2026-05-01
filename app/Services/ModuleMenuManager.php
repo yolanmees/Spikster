@@ -24,7 +24,7 @@ class ModuleMenuManager
 
         if ($checkPermissions) {
             $items = $items->filter(fn ($item) => $item->hasPermission());
-            
+
             // Filter children by permission
             $items->each(function ($item) {
                 if ($item->children) {
@@ -82,7 +82,7 @@ class ModuleMenuManager
             $parent = ModuleMenuItem::where('module_id', $module->id)
                 ->where('title', $data['parent_title'])
                 ->first();
-            
+
             $data['parent_id'] = $parent?->id;
             unset($data['parent_title']);
         }

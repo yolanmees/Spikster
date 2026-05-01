@@ -5,27 +5,35 @@ namespace Modules\WordPress\Livewire;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Modules\WordPress\Models\WordPressInstallation;
-use Modules\WordPress\Services\WPCLIService;
 use Modules\WordPress\Services\WordPressOrgService;
+use Modules\WordPress\Services\WPCLIService;
 
 class ThemeManager extends Component
 {
     use WithPagination;
 
     public WordPressInstallation $installation;
+
     public $themes = [];
+
     public $selectedTheme = null;
 
     // Browse WordPress.org
     public $showBrowseModal = false;
+
     public $wpOrgThemes = [];
+
     public $searchTerm = '';
+
     public $selectedWpOrgTheme = null;
+
     public $showThemeDetails = false;
 
     // Manual install
     public $showInstallModal = false;
+
     public $newThemeSlug = '';
+
     public $activateAfterInstall = false;
 
     public function mount(WordPressInstallation $installation)
@@ -48,7 +56,7 @@ class ThemeManager extends Component
 
             session()->flash('success', 'Themes synced successfully');
         } catch (\Exception $e) {
-            session()->flash('error', 'Sync failed: ' . $e->getMessage());
+            session()->flash('error', 'Sync failed: '.$e->getMessage());
         }
     }
 
@@ -61,7 +69,7 @@ class ThemeManager extends Component
 
             session()->flash('success', "Theme '{$slug}' activated successfully");
         } catch (\Exception $e) {
-            session()->flash('error', 'Activation failed: ' . $e->getMessage());
+            session()->flash('error', 'Activation failed: '.$e->getMessage());
         }
     }
 
@@ -74,7 +82,7 @@ class ThemeManager extends Component
 
             session()->flash('success', "Theme '{$slug}' updated successfully");
         } catch (\Exception $e) {
-            session()->flash('error', 'Update failed: ' . $e->getMessage());
+            session()->flash('error', 'Update failed: '.$e->getMessage());
         }
     }
 
@@ -104,7 +112,7 @@ class ThemeManager extends Component
             $this->closeInstallModal();
             session()->flash('success', "Theme '{$this->newThemeSlug}' installed successfully");
         } catch (\Exception $e) {
-            session()->flash('error', 'Installation failed: ' . $e->getMessage());
+            session()->flash('error', 'Installation failed: '.$e->getMessage());
         }
     }
 
@@ -113,6 +121,7 @@ class ThemeManager extends Component
         if (! preg_match('/^[a-zA-Z0-9\-_\.]+$/', $slug)) {
             throw new \InvalidArgumentException("Invalid plugin/theme slug: {$slug}");
         }
+
         return $slug;
     }
 
@@ -128,10 +137,10 @@ class ThemeManager extends Component
                 $this->loadThemes();
                 session()->flash('success', "Theme '{$slug}' deleted successfully");
             } else {
-                session()->flash('error', 'Delete failed: ' . $result['output']);
+                session()->flash('error', 'Delete failed: '.$result['output']);
             }
         } catch (\Exception $e) {
-            session()->flash('error', 'Delete failed: ' . $e->getMessage());
+            session()->flash('error', 'Delete failed: '.$e->getMessage());
         }
     }
 
@@ -166,7 +175,7 @@ class ThemeManager extends Component
             }
         } catch (\Exception $e) {
             $this->wpOrgThemes = [];
-            session()->flash('error', 'Search failed: ' . $e->getMessage());
+            session()->flash('error', 'Search failed: '.$e->getMessage());
         }
     }
 
@@ -183,7 +192,7 @@ class ThemeManager extends Component
                 session()->flash('error', 'Failed to load theme details');
             }
         } catch (\Exception $e) {
-            session()->flash('error', 'Failed to load details: ' . $e->getMessage());
+            session()->flash('error', 'Failed to load details: '.$e->getMessage());
         }
     }
 
@@ -210,10 +219,10 @@ class ThemeManager extends Component
 
                 session()->flash('success', $message);
             } else {
-                session()->flash('error', 'Installation failed: ' . $result['output']);
+                session()->flash('error', 'Installation failed: '.$result['output']);
             }
         } catch (\Exception $e) {
-            session()->flash('error', 'Installation failed: ' . $e->getMessage());
+            session()->flash('error', 'Installation failed: '.$e->getMessage());
         }
     }
 

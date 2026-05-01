@@ -6,12 +6,12 @@
 
 @php
     $wrapperClass = match($variant) {
-        'glass' => 'rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md shadow-xl dark:bg-gray-800/40 dark:border-gray-700/30',
-        'flat'  => 'rounded-xl border border-gray-200 dark:border-gray-700/50 bg-transparent',
-        default => 'rounded-xl border border-gray-200 dark:border-gray-700/50 bg-white dark:bg-gray-800/50 shadow-sm hover:shadow-md transition-shadow duration-200',
+        'glass' => 'rounded-2xl border border-zinc-200/50 bg-white/5 backdrop-blur-md shadow-xl dark:bg-zinc-800/40 dark:border-zinc-700/30',
+        'flat'  => 'rounded-xl border border-zinc-200 dark:border-zinc-700/50 bg-transparent',
+        default => 'rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm hover:shadow-md transition-shadow duration-200',
     };
 
-    $headerClass = 'flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-700/60 font-semibold text-sm text-gray-700 dark:text-gray-300';
+    $headerClass = 'flex items-center justify-between px-6 py-4 border-b border-zinc-100 dark:border-zinc-800 font-semibold text-sm text-zinc-700 dark:text-zinc-300';
     $bodyClass   = $noPad ? '' : 'p-6';
     $sizeClass   = ['sm' => 'text-sm', 'md' => '', 'lg' => 'text-base'][$size] ?? '';
 

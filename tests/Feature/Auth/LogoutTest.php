@@ -19,7 +19,7 @@ class LogoutTest extends TestCase
         $user = Auth::create([
             'username' => 'testuser',
             'password' => Hash::make('password123'),
-            'apikey' => 'test-api-key-' . now()->timestamp,
+            'apikey' => 'test-api-key-'.now()->timestamp,
         ]);
 
         // Login first
@@ -86,7 +86,7 @@ class LogoutTest extends TestCase
         Auth::create([
             'username' => 'testuser',
             'password' => Hash::make('password123'),
-            'apikey' => 'test-api-key-' . now()->timestamp,
+            'apikey' => 'test-api-key-'.now()->timestamp,
             'jwt' => 'valid-jwt-token',
         ]);
 

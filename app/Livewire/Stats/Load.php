@@ -9,10 +9,13 @@ use Livewire\Component;
 class Load extends Component
 {
     protected $server;
+
     protected $monitoringService;
 
     public array $dataset = [];
+
     public array $labels = [];
+
     public $load;
 
     // Time range selector
@@ -36,7 +39,7 @@ class Load extends Component
     {
         $this->server = Server::where('server_id', $server_id)->first();
 
-        if (!$this->server) {
+        if (! $this->server) {
             return;
         }
 
@@ -77,7 +80,7 @@ class Load extends Component
 
     private function getHoursFromRange(string $range): int
     {
-        return match($range) {
+        return match ($range) {
             '1h' => 1,
             '6h' => 6,
             '12h' => 12,

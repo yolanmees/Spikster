@@ -8,12 +8,13 @@ use Illuminate\Console\Command;
 class GenerateSetupToken extends Command
 {
     protected $signature = 'spikster:setup-token';
+
     protected $description = 'Generate a one-time setup token for first-run wizard';
 
     public function handle(): void
     {
         $token = SetupController::generateToken();
-        $url = config('app.url') . '/setup/' . $token;
+        $url = config('app.url').'/setup/'.$token;
 
         $this->line('');
         $this->line('***********************************************************');

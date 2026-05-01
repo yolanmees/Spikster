@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ModuleMarketplace extends Model
 {
@@ -47,7 +48,7 @@ class ModuleMarketplace extends Model
         'last_updated' => 'datetime',
     ];
 
-    public function module(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function module(): BelongsTo
     {
         return $this->belongsTo(Module::class, 'package_name', 'alias');
     }
@@ -69,7 +70,7 @@ class ModuleMarketplace extends Model
 
     public function isCompatible(string $coreVersion): bool
     {
-        if (!$this->minimum_core_version) {
+        if (! $this->minimum_core_version) {
             return true;
         }
 

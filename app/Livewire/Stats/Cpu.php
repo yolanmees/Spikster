@@ -4,16 +4,19 @@ namespace App\Livewire\Stats;
 
 use App\Models\Server;
 use App\Services\MonitoringService;
-use Livewire\Component;
 use Illuminate\Support\Facades\Log;
+use Livewire\Component;
 
 class Cpu extends Component
 {
     protected $server;
+
     protected $monitoringService;
 
     public array $dataset = [];
+
     public array $labels = [];
+
     public $cpu;
 
     // Time range selector
@@ -39,7 +42,7 @@ class Cpu extends Component
         // We need to find the server by this UUID to get its integer ID
         $this->server = Server::where('server_id', $server_id)->first();
 
-        if (!$this->server) {
+        if (! $this->server) {
             return;
         }
 
@@ -94,7 +97,7 @@ class Cpu extends Component
 
     private function getHoursFromRange(string $range): int
     {
-        return match($range) {
+        return match ($range) {
             '1h' => 1,
             '6h' => 6,
             '12h' => 12,

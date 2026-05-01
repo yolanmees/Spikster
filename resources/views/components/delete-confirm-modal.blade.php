@@ -36,10 +36,10 @@
     <div class="flex min-h-screen items-center justify-center p-4 sm:p-0">
         {{-- Backdrop --}}
         <div wire:click="{{ $cancelAction }}"
-            class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity"></div>
+            class="fixed inset-0 bg-zinc-950/70 backdrop-blur-md transition-opacity"></div>
 
         {{-- Panel --}}
-        <div class="relative transform overflow-hidden rounded-xl bg-white dark:bg-gray-800 text-left shadow-2xl ring-1 ring-black/10 dark:ring-white/10 transition-all sm:my-8 sm:w-full sm:max-w-lg">
+        <div class="relative transform overflow-hidden rounded-3xl border border-zinc-200/80 dark:border-zinc-700/70 bg-white/95 dark:bg-zinc-900/95 text-left shadow-2xl shadow-zinc-900/15 dark:shadow-black/40 ring-1 ring-zinc-950/5 dark:ring-white/10 transition-all sm:my-8 sm:w-full sm:max-w-lg">
             <div class="px-6 pt-6 pb-4">
                 <div class="flex items-start gap-4">
                     {{-- Warning icon --}}
@@ -51,8 +51,8 @@
                     </div>
 
                     <div class="flex-1 min-w-0">
-                        <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ $title }}</h3>
-                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ $message }}</p>
+                        <h3 class="text-base font-semibold text-zinc-900 dark:text-zinc-100">{{ $title }}</h3>
+                        <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-300">{{ $message }}</p>
 
                         @if ($note)
                             <div class="mt-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 px-3 py-2">
@@ -67,7 +67,7 @@
                 </div>
             </div>
 
-            <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+            <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50/80 dark:bg-zinc-950/40">
                 <x-secondary-button type="button" wire:click="{{ $cancelAction }}">
                     {{ $cancelLabel }}
                 </x-secondary-button>

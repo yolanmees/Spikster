@@ -17,6 +17,7 @@
         "laravel/browser-kit-testing": "^7.0",
         "laravel/framework": "^12.0",
         "laravel/jetstream": "^5.0",
+        "laravel/reverb": "^1.10",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.10",
         "livewire/livewire": "^3.6",

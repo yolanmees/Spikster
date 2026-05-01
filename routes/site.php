@@ -2,9 +2,8 @@
 
 use App\Http\Controllers\DatabaseController;
 use App\Http\Controllers\DnsRecordsController;
-use App\Http\Controllers\Site\WordPressController;
-use App\Http\Controllers\SiteController;
 use App\Http\Controllers\Site\CredentialController;
+use App\Http\Controllers\Site\WordPressController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])->group(function () {
@@ -14,8 +13,16 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     })->name('site.list');
 
     Route::get('/sites/{site_id}', function ($site_id) {
-        return view('site.edit', compact('site_id'));
+        return redirect()->route('site.edit.section', ['site_id' => $site_id, 'section' => 'overview']);
     })->name('site.edit');
+
+    Route::get('/sites/{site_id}/manage/{section}', function ($site_id, $section) {
+        $allowedSections = ['overview', 'configuration', 'security', 'integrations', 'services'];
+
+        abort_unless(in_array($section, $allowedSections, true), 404);
+
+        return view('site.edit', compact('site_id', 'section'));
+    })->name('site.edit.section');
 
     // database
     Route::get('/site/{site_id}/database', [DatabaseController::class, 'index'])->name('site.database');

@@ -25,7 +25,7 @@ return new class extends Migration
             $table->json('requires')->nullable(); // PHP/WP version requirements
             $table->timestamp('last_checked')->nullable();
             $table->timestamps();
-            
+
             $table->unique(['wordpress_installation_id', 'slug']);
             $table->index(['wordpress_installation_id', 'is_active']);
         });

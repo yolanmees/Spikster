@@ -20,63 +20,96 @@
     </div>
 
     {{-- Users Table --}}
-    <x-card>
-        <div class="-m-6 overflow-x-auto">
-            <table class="table min-w-full">
-                <thead class="table-header">
+    <div class="rounded-lg border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-zinc-200 text-sm dark:divide-zinc-800">
+                <thead class="bg-zinc-50 text-left text-xs font-medium uppercase text-zinc-500 dark:bg-zinc-950 dark:text-zinc-400">
                     <tr>
-                        <th class="table-header-cell">User</th>
-                        <th class="table-header-cell">Email</th>
-                        <th class="table-header-cell">Roles</th>
-                        <th class="table-header-cell text-right">Actions</th>
+                        <th class="px-5 py-3">User</th>
+                        <th class="px-5 py-3">Email</th>
+                        <th class="px-5 py-3">Roles</th>
+                        <th class="px-5 py-3 text-right">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="table-body">
+                <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
                     @forelse($users as $user)
-                        <tr class="table-row">
-                            <td class="table-cell">
+                        <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
+                            <td class="whitespace-nowrap px-5 py-4">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
-                                        {{ strtoupper(substr($user->name, 0, 1)) }}
+                                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-950 text-xs font-bold">
+                                        {{ strtoupper(substr($user->name, 0, 2)) }}
+                                    </span>
+                                    <div>
+                                        <p class="font-medium text-zinc-900 dark:text-white">{{ $user->name }}</p>
                                     </div>
-                                    <span class="font-medium text-gray-900 dark:text-white">{{ $user->name }}</span>
                                 </div>
                             </td>
-                            <td class="table-cell">{{ $user->email }}</td>
-                            <td class="table-cell">
+                            <td class="whitespace-nowrap px-5 py-4 text-zinc-600 dark:text-zinc-300">{{ $user->email }}</td>
+                            <td class="px-5 py-4">
                                 <div class="flex flex-wrap gap-1.5">
                                     @forelse($user->roles as $role)
-                                        <x-badge color="purple" :text="$role->name" />
+                                        <span class="rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-medium text-purple-700 dark:bg-purple-700/15 dark:text-purple-300">{{ $role->name }}</span>
                                     @empty
-                                        <span class="text-sm text-gray-400 italic">No roles</span>
+                                        <span class="text-xs text-zinc-400 italic">No roles</span>
                                     @endforelse
                                 </div>
                             </td>
-                            <td class="table-cell text-right">
+                            <td class="whitespace-nowrap px-5 py-4 text-right">
                                 <div class="flex items-center justify-end gap-2">
-                                    <x-button variant="warning" size="sm" outline wire:click="openEditModal({{ $user->id }})">
+                                    <button wire:click="openEditModal({{ $user->id }})"
+                                        class="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 px-2.5 py-1.5 text-xs font-medium hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800">
                                         Edit
-                                    </x-button>
+                                    </button>
                                     @if ($user->id !== auth()->id())
-                                        <x-danger-button size="sm" wire:click="openDeleteModal({{ $user->id }})">
-                                            Delete
-                                        </x-danger-button>
+                                        <div class="relative" x-data="{ open: false }">
+                                            <button @click="open = !open"
+                                                class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-colors"
+                                                aria-label="More options">
+                                                <i data-lucide="more-horizontal" class="h-4 w-4 text-zinc-500"></i>
+                                            </button>
+                                            <div x-show="open"
+                                                 x-cloak
+                                                 @click.outside="open = false"
+                                                 class="absolute right-0 z-20 mt-1 w-44 rounded-lg border border-zinc-200 bg-white py-1 shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
+                                                <button wire:click="openEditModal({{ $user->id }})"
+                                                    @click="open = false"
+                                                    class="block w-full px-3 py-2 text-left text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
+                                                    Edit user
+                                                </button>
+                                                <div class="my-1 h-px bg-zinc-100 dark:bg-zinc-800"></div>
+                                                <button wire:click="openDeleteModal({{ $user->id }})"
+                                                    @click="open = false"
+                                                    class="block w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/10 transition-colors">
+                                                    Delete user
+                                                </button>
+                                            </div>
+                                        </div>
                                     @endif
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4">
-                                <x-empty-state icon="user" title="No users found" />
+                            <td colspan="4" class="px-5 py-12 text-center">
+                                <div class="flex flex-col items-center gap-2">
+                                    <span class="flex h-12 w-12 items-center justify-center rounded-lg bg-zinc-100 text-zinc-400 dark:bg-zinc-800">
+                                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                                    </span>
+                                    <p class="text-sm font-medium text-zinc-700 dark:text-zinc-300">No users found</p>
+                                    <p class="text-xs text-zinc-400">Try adjusting your search.</p>
+                                </div>
                             </td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-        <div class="mt-4">{{ $users->links() }}</div>
-    </x-card>
+        @if($users->hasPages())
+            <div class="border-t border-zinc-200 px-5 py-3 dark:border-zinc-800">
+                {{ $users->links() }}
+            </div>
+        @endif
+    </div>
 
     {{-- Create User Modal --}}
     @if ($showCreateModal)
@@ -103,11 +136,11 @@
                 </div>
                 <div>
                     <x-label value="Roles" />
-                    <div class="mt-1 space-y-2 max-h-40 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-lg p-3">
+                    <div class="mt-1 space-y-2 max-h-40 overflow-y-auto border border-zinc-200 dark:border-zinc-700 rounded-lg p-3">
                         @foreach ($roles as $role)
                             <label class="flex items-center gap-2 cursor-pointer">
                                 <x-checkbox wire:model="selectedRoles" value="{{ $role->id }}" />
-                                <span class="text-sm text-gray-700 dark:text-gray-300">{{ $role->name }}</span>
+                                <span class="text-sm text-zinc-700 dark:text-zinc-300">{{ $role->name }}</span>
                             </label>
                         @endforeach
                     </div>
@@ -146,11 +179,11 @@
                 </div>
                 <div>
                     <x-label value="Roles" />
-                    <div class="mt-1 space-y-2 max-h-40 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-lg p-3">
+                    <div class="mt-1 space-y-2 max-h-40 overflow-y-auto border border-zinc-200 dark:border-zinc-700 rounded-lg p-3">
                         @foreach ($roles as $role)
                             <label class="flex items-center gap-2 cursor-pointer">
                                 <x-checkbox wire:model="selectedRoles" value="{{ $role->id }}" />
-                                <span class="text-sm text-gray-700 dark:text-gray-300">{{ $role->name }}</span>
+                                <span class="text-sm text-zinc-700 dark:text-zinc-300">{{ $role->name }}</span>
                             </label>
                         @endforeach
                     </div>

@@ -20,12 +20,8 @@ class ApiKey extends Component
     public function mount()
     {
         $server = Server::where('default', 1)->first();
-        $site = Site::where('server_id', $server->id)->where('panel', 1)->first();
-        if (! $site) {
-            $domain = '';
-        } else {
-            $domain = $site->domain;
-        }
+        $site = $server ? Site::where('server_id', $server->id)->where('panel', 1)->first() : null;
+        $domain = $site ? $site->domain : '';
         $this->panel_domain = $domain;
         $this->api_endpoint = $this->panel_domain.'api';
     }

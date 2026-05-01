@@ -118,6 +118,7 @@ class EmailAccount extends Model
         }
 
         $usage = $this->quotaUsage;
+
         return $usage && $usage->used_mb >= $this->quota_mb;
     }
 
@@ -131,7 +132,7 @@ class EmailAccount extends Model
         }
 
         $usage = $this->quotaUsage;
-        if (!$usage) {
+        if (! $usage) {
             return 0;
         }
 

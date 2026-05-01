@@ -2,8 +2,19 @@
 
 namespace App\Console;
 
+use App\Console\Commands\ActiveSetupCount;
+use App\Console\Commands\CipiUpdate;
+use App\Console\Commands\LogRotate;
+use App\Console\Commands\ServerSetupCheck;
+use App\Jobs\FetchServerMetricsJob;
+use App\Models\Backup;
+use App\Models\Server;
+use App\Models\ServerMetric;
+use App\Models\Site;
+use App\Services\BackupService;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use Illuminate\Support\Facades\Log;
 
 class Kernel extends ConsoleKernel
 {
@@ -13,10 +24,10 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        \App\Console\Commands\ActiveSetupCount::class,
-        \App\Console\Commands\LogRotate::class,
-        \App\Console\Commands\ServerSetupCheck::class,
-        \App\Console\Commands\CipiUpdate::class,
+        ActiveSetupCount::class,
+        LogRotate::class,
+        ServerSetupCheck::class,
+        CipiUpdate::class,
     ];
 
     /**
@@ -33,58 +44,58 @@ class Kernel extends ConsoleKernel
 
         // New monitoring system - fetch metrics from spikster-agent
         $schedule->call(function () {
-            $servers = \App\Models\Server::active()->get();
+            $servers = Server::active()->get();
             foreach ($servers as $server) {
-                \App\Jobs\FetchServerMetricsJob::dispatch($server);
+                FetchServerMetricsJob::dispatch($server);
             }
         })->everyMinute()->name('fetch-server-metrics');
 
         // Cleanup old metrics daily
         $schedule->call(function () {
-            $deleted = \App\Models\ServerMetric::cleanupOldMetrics(
+            $deleted = ServerMetric::cleanupOldMetrics(
                 config('monitoring.metrics_retention_days', 30)
             );
-            \Illuminate\Support\Facades\Log::info("Cleaned up {$deleted} old server metrics");
+            Log::info("Cleaned up {$deleted} old server metrics");
         })->dailyAt('03:00')->name('cleanup-old-metrics');
 
         $schedule->command('audit:cleanup')->weekly()->sundays()->at('02:00');
 
         // Backup System - Process scheduled backups
         $schedule->call(function () {
-            $backupService = app(\App\Services\BackupService::class);
+            $backupService = app(BackupService::class);
             $created = $backupService->processScheduledBackups();
-            \Illuminate\Support\Facades\Log::info("Processed scheduled backups: {$created} backups created");
+            Log::info("Processed scheduled backups: {$created} backups created");
         })->everyFiveMinutes()->name('process-scheduled-backups');
 
         // Backup System - Cleanup old backups daily
         $schedule->call(function () {
-            $sites = \App\Models\Site::all();
+            $sites = Site::all();
             $totalDeleted = 0;
 
             foreach ($sites as $site) {
-                $backupService = app(\App\Services\BackupService::class);
+                $backupService = app(BackupService::class);
                 $deleted = $backupService->rotateBackups($site);
                 $totalDeleted += $deleted;
             }
 
-            \Illuminate\Support\Facades\Log::info("Backup rotation completed: {$totalDeleted} old backups removed");
+            Log::info("Backup rotation completed: {$totalDeleted} old backups removed");
         })->dailyAt('04:00')->name('rotate-backups');
 
         // Backup System - Cleanup failed backups weekly
         $schedule->call(function () {
-            $failedBackups = \App\Models\Backup::where('status', 'failed')
+            $failedBackups = Backup::where('status', 'failed')
                 ->where('created_at', '<', now()->subDays(7))
                 ->get();
 
             $deleted = 0;
-            $backupService = app(\App\Services\BackupService::class);
+            $backupService = app(BackupService::class);
 
             foreach ($failedBackups as $backup) {
                 $backupService->deleteBackup($backup, true);
                 $deleted++;
             }
 
-            \Illuminate\Support\Facades\Log::info("Cleaned up {$deleted} failed backups older than 7 days");
+            Log::info("Cleaned up {$deleted} failed backups older than 7 days");
         })->weekly()->sundays()->at('05:00')->name('cleanup-failed-backups');
     }
 

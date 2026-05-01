@@ -17,6 +17,7 @@ class InstallRoundcubeSSH implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $timeout = 600;
+
     public $tries = 2;
 
     public function __construct(
@@ -33,14 +34,14 @@ class InstallRoundcubeSSH implements ShouldQueue
 
         Log::info('Installing Roundcube webmail via daemon', [
             'site_id' => $this->site->site_id,
-            'domain'  => $this->site->domain,
+            'domain' => $this->site->domain,
         ]);
 
         $siteRoot = "/home/{$this->site->username}/web/{$this->site->domain}/public_html";
-        $dbName   = $this->site->database_name ?? "site_{$this->site->site_id}";
-        $dbUser   = $this->site->username;
-        $dbPass   = $this->site->database_password ?? Str::random(32);
-        $php      = $this->site->php ?? '8.3';
+        $dbName = $this->site->database_name ?? "site_{$this->site->site_id}";
+        $dbUser = $this->site->username;
+        $dbPass = $this->site->database_password ?? Str::random(32);
+        $php = $this->site->php ?? '8.3';
 
         $success = $daemon->installRoundcube(
             $server,
@@ -65,7 +66,7 @@ class InstallRoundcubeSSH implements ShouldQueue
     {
         Log::error('Roundcube installation failed', [
             'site_id' => $this->site->site_id,
-            'error'   => $exception->getMessage(),
+            'error' => $exception->getMessage(),
         ]);
     }
 }

@@ -2,12 +2,13 @@
 
 namespace Database\Factories;
 
+use App\Models\Alias;
 use App\Models\Site;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Alias>
+ * @extends Factory<Alias>
  */
 class AliasFactory extends Factory
 {

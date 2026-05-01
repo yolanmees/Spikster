@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\Server;
 use App\Models\CronJob;
+use App\Models\Server;
 use phpseclib3\Net\SSH2;
 
 class CronService
@@ -29,7 +29,7 @@ class CronService
     protected function buildCrontabContent($cronJobs): string
     {
         $content = "# Spikster Managed Cron Jobs\n";
-        $content .= "# Generated: " . now()->toDateTimeString() . "\n\n";
+        $content .= '# Generated: '.now()->toDateTimeString()."\n\n";
 
         foreach ($cronJobs as $cronJob) {
             // Add description as comment
@@ -38,7 +38,7 @@ class CronService
             }
 
             // Add the cron line
-            $content .= $cronJob->cron_line . "\n\n";
+            $content .= $cronJob->cron_line."\n\n";
         }
 
         return $content;
@@ -51,13 +51,13 @@ class CronService
     {
         $ssh = new SSH2($server->ip);
 
-        if (!$ssh->login('spikster', $server->password)) {
+        if (! $ssh->login('spikster', $server->password)) {
             throw new \Exception('SSH authentication failed');
         }
 
         // Create temporary file with crontab content
-        $tempFile = '/tmp/spikster_crontab_' . uniqid();
-        
+        $tempFile = '/tmp/spikster_crontab_'.uniqid();
+
         // Write content to temp file
         $ssh->exec("cat > {$tempFile} << 'EOL'\n{$content}\nEOL");
 
@@ -69,7 +69,7 @@ class CronService
 
         // Verify installation
         $currentCrontab = $ssh->exec('crontab -l');
-        
+
         if (strpos($currentCrontab, '# Spikster Managed Cron Jobs') === false) {
             throw new \Exception('Failed to update crontab on server');
         }
@@ -84,7 +84,7 @@ class CronService
     {
         $ssh = new SSH2($server->ip);
 
-        if (!$ssh->login('spikster', $server->password)) {
+        if (! $ssh->login('spikster', $server->password)) {
             throw new \Exception('SSH authentication failed');
         }
 
@@ -100,7 +100,7 @@ class CronService
     public function importFromServer(Server $server): int
     {
         $crontab = $this->getCurrentCrontab($server);
-        
+
         if (empty($crontab)) {
             return 0;
         }
@@ -120,12 +120,13 @@ class CronService
             // Check if it's a comment (potential description)
             if (strpos($line, '#') === 0) {
                 $description = trim(substr($line, 1));
+
                 continue;
             }
 
             // Parse cron line
             $parts = preg_split('/\s+/', $line, 6);
-            
+
             if (count($parts) >= 6) {
                 $schedule = implode(' ', array_slice($parts, 0, 5));
                 $command = $parts[5];
@@ -139,7 +140,7 @@ class CronService
                     ->where('schedule', $schedule)
                     ->exists();
 
-                if (!$exists) {
+                if (! $exists) {
                     CronJob::create([
                         'server_id' => $server->id,
                         'command' => $command,
@@ -164,7 +165,7 @@ class CronService
     {
         $ssh = new SSH2($server->ip);
 
-        if (!$ssh->login('spikster', $server->password)) {
+        if (! $ssh->login('spikster', $server->password)) {
             throw new \Exception('SSH authentication failed');
         }
 

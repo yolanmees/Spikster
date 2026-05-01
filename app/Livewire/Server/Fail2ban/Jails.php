@@ -4,15 +4,19 @@ namespace App\Livewire\Server\Fail2ban;
 
 use App\Models\Server;
 use Illuminate\Support\Facades\Http;
-use Livewire\Component;
 use Livewire\Attributes\On;
+use Livewire\Component;
 
 class Jails extends Component
 {
     public $server_id;
+
     public $server;
+
     public $jails = [];
+
     public $statistics = [];
+
     public $isLoading = true;
 
     public function render()
@@ -31,7 +35,7 @@ class Jails extends Component
     public function loadJails()
     {
         try {
-            $url = config('app.url') . '/api/servers/' . $this->server->server_id . '/fail2ban/jails';
+            $url = config('app.url').'/api/servers/'.$this->server->server_id.'/fail2ban/jails';
             $response = Http::get($url);
 
             if ($response->successful()) {
@@ -39,7 +43,7 @@ class Jails extends Component
                 $this->jails = $data['jails'] ?? [];
             }
         } catch (\Exception $e) {
-            session()->flash('error', 'Failed to load jails: ' . $e->getMessage());
+            session()->flash('error', 'Failed to load jails: '.$e->getMessage());
         } finally {
             $this->isLoading = false;
         }
@@ -48,7 +52,7 @@ class Jails extends Component
     public function loadStatistics()
     {
         try {
-            $url = config('app.url') . '/api/servers/' . $this->server->server_id . '/fail2ban/stats';
+            $url = config('app.url').'/api/servers/'.$this->server->server_id.'/fail2ban/stats';
             $response = Http::get($url);
 
             if ($response->successful()) {

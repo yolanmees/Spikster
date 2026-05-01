@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\FileManager;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -74,17 +75,17 @@ class FileManagerController extends Controller
 
         return view('file_manager.index', [
             'pathContents' => $result['pathContents'],
-            'params'       => $result['params'],
-            'path'         => $result['path'],
-            'queryPath'    => $result['queryPath'],
-            'headers'      => $result['headers'],
+            'params' => $result['params'],
+            'path' => $result['path'],
+            'queryPath' => $result['queryPath'],
+            'headers' => $result['headers'],
         ]);
     }
 
     /**
      * Show the form for creating a new resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function create()
     {
@@ -242,7 +243,7 @@ class FileManagerController extends Controller
      * Update the specified resource in storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function update(Request $request, $id)
     {
@@ -276,7 +277,7 @@ class FileManagerController extends Controller
         $pathName = realpath($validated['pathName']);
 
         // Restrict deletions to site home directories only
-        if (!$pathName || !str_starts_with($pathName, '/home/')) {
+        if (! $pathName || ! str_starts_with($pathName, '/home/')) {
             abort(403, 'Access denied: path outside allowed directory.');
         }
 

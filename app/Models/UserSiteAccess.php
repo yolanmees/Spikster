@@ -39,7 +39,7 @@ class UserSiteAccess extends Model
      */
     public function site(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\Site::class);
+        return $this->belongsTo(Site::class);
     }
 
     /**
@@ -65,7 +65,7 @@ class UserSiteAccess extends Model
     {
         return $query->where(function ($q) {
             $q->whereNull('expires_at')
-              ->orWhere('expires_at', '>', now());
+                ->orWhere('expires_at', '>', now());
         });
     }
 
@@ -75,6 +75,6 @@ class UserSiteAccess extends Model
     public function scopeExpired($query)
     {
         return $query->whereNotNull('expires_at')
-                    ->where('expires_at', '<=', now());
+            ->where('expires_at', '<=', now());
     }
 }

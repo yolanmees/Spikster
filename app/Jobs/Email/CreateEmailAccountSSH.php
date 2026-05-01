@@ -17,6 +17,7 @@ class CreateEmailAccountSSH implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $timeout = 300;
+
     public $tries = 3;
 
     public function __construct(

@@ -17,6 +17,7 @@ class SetupDKIMSSH implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $timeout = 300;
+
     public $tries = 3;
 
     public function __construct(
@@ -35,8 +36,8 @@ class SetupDKIMSSH implements ShouldQueue
 
             $this->dkimKey->update([
                 'private_key' => $keys['PrivateKey'] ?? $keys['private_key'] ?? '',
-                'public_key'  => $keys['PublicKey']  ?? $keys['public_key']  ?? '',
-                'active'      => true,
+                'public_key' => $keys['PublicKey'] ?? $keys['public_key'] ?? '',
+                'active' => true,
             ]);
 
             Log::info("DKIM setup completed via daemon for domain: {$this->dkimKey->domain}");

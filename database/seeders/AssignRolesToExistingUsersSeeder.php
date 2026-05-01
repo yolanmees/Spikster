@@ -2,9 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\User;
+use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class AssignRolesToExistingUsersSeeder extends Seeder
 {
@@ -16,32 +17,46 @@ class AssignRolesToExistingUsersSeeder extends Seeder
      */
     public function run(): void
     {
-        // Get the first user and make them Super Admin
-        $firstUser = User::first();
-        if ($firstUser) {
-            $superAdminRole = Role::where('name', 'Super Admin')->first();
-            if ($superAdminRole) {
-                $firstUser->assignRole($superAdminRole);
-                $this->command->info("Assigned Super Admin role to: {$firstUser->email}");
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+
+        $superAdminRole = Role::where('name', 'Super Admin')->first();
+        if (! $superAdminRole) {
+            $this->command->warn('Super Admin role not found. Run RolesAndPermissionsSeeder first.');
+
+            return;
+        }
+
+        $configuredAdminEmail = (string) config('cipi.username');
+        $adminCandidates = array_values(array_filter([
+            $configuredAdminEmail,
+            'administrator@localhost',
+        ]));
+
+        foreach ($adminCandidates as $adminEmail) {
+            $adminUser = User::where('email', $adminEmail)->first();
+            if ($adminUser) {
+                $adminUser->syncRoles([$superAdminRole->name]);
+                $this->command->info("Assigned Super Admin role to: {$adminUser->email}");
             }
         }
 
-        // Optional: Assign roles to other specific users by email
-        // Example:
-        // $user = User::where('email', 'admin@example.com')->first();
-        // if ($user) {
-        //     $user->assignRole('Admin');
-        //     $this->command->info("Assigned Admin role to: {$user->email}");
-        // }
+        // Fallback: ensure at least one super admin exists.
+        if (! User::role($superAdminRole->name)->exists()) {
+            $firstUser = User::first();
+            if ($firstUser) {
+                $firstUser->syncRoles([$superAdminRole->name]);
+                $this->command->info("Assigned Super Admin role to fallback user: {$firstUser->email}");
+            }
+        }
 
-        // Or assign default role to all users without roles
+        // Assign default end-user role to all users without roles.
         $usersWithoutRoles = User::doesntHave('roles')->get();
-        $viewerRole = Role::where('name', 'Viewer')->first();
+        $defaultRole = Role::where('name', 'Customer')->first() ?? Role::where('name', 'User')->first();
 
-        if ($viewerRole) {
+        if ($defaultRole) {
             foreach ($usersWithoutRoles as $user) {
-                $user->assignRole($viewerRole);
-                $this->command->info("Assigned Viewer role to: {$user->email}");
+                $user->assignRole($defaultRole);
+                $this->command->info("Assigned {$defaultRole->name} role to: {$user->email}");
             }
         }
 

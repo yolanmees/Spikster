@@ -8,6 +8,10 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     // Domain list
     Route::get('/domains', [DomainController::class, 'index'])->name('domain.list');
 
+    // Create domain
+    Route::get('/domains/create', [DomainController::class, 'create'])->name('domain.create');
+    Route::post('/domains', [DomainController::class, 'store'])->name('domain.store');
+
     // View domain with DNS records
     Route::get('/domains/{domain_id}', [DomainController::class, 'show'])->name('domain.show');
 

@@ -7,13 +7,13 @@ use App\Models\TrustedDevice;
 use App\Models\TwoFactorAuditLog;
 use App\Models\User;
 use App\Models\User2FASetting;
+use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Renderer\ImageRenderer;
+use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use BaconQrCode\Writer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use PragmaRX\Google2FA\Google2FA;
-use BaconQrCode\Renderer\ImageRenderer;
-use BaconQrCode\Renderer\Image\SvgImageBackEnd;
-use BaconQrCode\Renderer\RendererStyle\RendererStyle;
-use BaconQrCode\Writer;
 
 class TwoFactorAuthService
 {
@@ -21,7 +21,7 @@ class TwoFactorAuthService
 
     public function __construct()
     {
-        $this->google2fa = new Google2FA();
+        $this->google2fa = new Google2FA;
     }
 
     /**
@@ -105,7 +105,7 @@ class TwoFactorAuthService
     {
         $settings = $user->twoFactorSettings;
 
-        if (!$settings || !$settings->is_enabled) {
+        if (! $settings || ! $settings->is_enabled) {
             return false;
         }
 
@@ -115,7 +115,7 @@ class TwoFactorAuthService
         }
 
         $secret = $settings->decrypted_secret_key;
-        if (!$secret) {
+        if (! $secret) {
             return false;
         }
 
@@ -156,7 +156,7 @@ class TwoFactorAuthService
     {
         $settings = $user->twoFactorSettings;
 
-        if (!$settings || !$settings->is_enabled) {
+        if (! $settings || ! $settings->is_enabled) {
             return false;
         }
 
@@ -258,7 +258,7 @@ class TwoFactorAuthService
 
         $renderer = new ImageRenderer(
             new RendererStyle(200),
-            new SvgImageBackEnd()
+            new SvgImageBackEnd
         );
         $writer = new Writer($renderer);
 
@@ -304,6 +304,7 @@ class TwoFactorAuthService
         if ($device) {
             // Update last used timestamp
             $device->touch();
+
             return true;
         }
 
@@ -344,6 +345,7 @@ class TwoFactorAuthService
     public function has2FAEnabled(User $user): bool
     {
         $settings = $user->twoFactorSettings;
+
         return $settings && $settings->is_enabled;
     }
 

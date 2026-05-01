@@ -36,7 +36,7 @@ return new class extends Migration
             $table->json('compatibility')->nullable();
             $table->timestamp('last_updated')->nullable();
             $table->timestamps();
-            
+
             $table->index(['is_active', 'is_verified']);
             $table->index(['license_type', 'rating']);
         });

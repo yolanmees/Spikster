@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
 class WordPressService
 {
     protected $databaseService;
+
     protected $sshService;
 
     public function __construct(DatabaseService $databaseService, SSHService $sshService)
@@ -23,27 +24,27 @@ class WordPressService
         try {
             // Get the site to access server details
             $site = Site::where('site_id', $site_id)->first();
-            if (!$site) {
+            if (! $site) {
                 return ['success' => false, 'message' => 'Site not found'];
             }
 
             $server = $site->server;
-            if (!$server) {
+            if (! $server) {
                 return ['success' => false, 'message' => 'Server not found'];
             }
 
             // Create database and user
-            $dbName = 'wp_' . Str::random(8);
-            $dbUser = 'user_' . Str::random(8);
+            $dbName = 'wp_'.Str::random(8);
+            $dbUser = 'user_'.Str::random(8);
             $dbPassword = Str::random(16);
 
             $databaseResponse = $this->databaseService->createDatabase($dbName, $site_id);
-            if (!$databaseResponse['success']) {
+            if (! $databaseResponse['success']) {
                 return $databaseResponse;
             }
 
             $userResponse = $this->databaseService->createUser($dbUser, $dbPassword, $site_id);
-            if (!$userResponse['success']) {
+            if (! $userResponse['success']) {
                 return $userResponse;
             }
 
@@ -52,7 +53,7 @@ class WordPressService
                 $databaseResponse['database']->id,
                 $site_id
             );
-            if (!$linkResponse['success']) {
+            if (! $linkResponse['success']) {
                 return $linkResponse;
             }
 
@@ -67,6 +68,7 @@ class WordPressService
             $dirCheck = trim($ssh->exec("test -d {$path} && echo 'exists' || echo 'not found'"));
             if ($dirCheck !== 'exists') {
                 Log::error('Failed to create directory', ['path' => $path]);
+
                 return ['success' => false, 'message' => 'Failed to create installation directory'];
             }
 
@@ -80,6 +82,7 @@ class WordPressService
             $checkDownload = trim($ssh->exec("test -f {$path}/wordpress.tar.gz && echo 'exists' || echo 'not found'"));
             if ($checkDownload !== 'exists') {
                 Log::error('WordPress download failed - file not found', ['result' => $downloadResult, 'path' => $path]);
+
                 return ['success' => false, 'message' => 'Failed to download WordPress. File not created.'];
             }
 
@@ -92,6 +95,7 @@ class WordPressService
                 // Show file content for debugging
                 $fileContent = $ssh->exec("sudo head -20 {$path}/wordpress.tar.gz");
                 Log::error('File content preview', ['content' => $fileContent]);
+
                 return ['success' => false, 'message' => 'Failed to download WordPress. Downloaded file is too small or corrupt.'];
             }
 
@@ -106,8 +110,9 @@ class WordPressService
             if ($checkWordPressDir !== 'exists') {
                 Log::error('WordPress extraction failed - wordpress directory not created', [
                     'extract_result' => $extractResult,
-                    'path' => $path
+                    'path' => $path,
                 ]);
+
                 return ['success' => false, 'message' => 'Failed to extract WordPress archive.'];
             }
 
@@ -127,8 +132,9 @@ class WordPressService
                     'path' => $path,
                     'extract_result' => $extractResult,
                     'move_result' => $moveResult,
-                    'files' => $listFiles
+                    'files' => $listFiles,
                 ]);
+
                 return ['success' => false, 'message' => 'Failed to extract WordPress files. wp-config-sample.php not found.'];
             }
 
@@ -168,19 +174,19 @@ class WordPressService
                 'wordpress' => $wordpress,
                 'db_name' => $dbName,
                 'db_user' => $dbUser,
-                'db_password' => $dbPassword
+                'db_password' => $dbPassword,
             ];
 
         } catch (\Exception $e) {
-            Log::error('WordPress deployment exception: ' . $e->getMessage(), [
+            Log::error('WordPress deployment exception: '.$e->getMessage(), [
                 'path' => $path,
                 'site_id' => $site_id,
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return [
                 'success' => false,
-                'message' => 'WordPress deployment failed: ' . $e->getMessage()
+                'message' => 'WordPress deployment failed: '.$e->getMessage(),
             ];
         }
     }

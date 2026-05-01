@@ -1,9 +1,9 @@
 <?php
 
-use App\Models\Domain;
-use App\Models\Site;
 use App\Models\Alias;
 use App\Models\DnsRecord;
+use App\Models\Domain;
+use App\Models\Site;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Str;
 

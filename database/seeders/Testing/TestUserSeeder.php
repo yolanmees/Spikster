@@ -18,7 +18,6 @@ class TestUserSeeder extends Seeder
             'name' => 'Test Admin',
             'email' => 'admin@test.com',
             'password' => Hash::make('password'),
-            'role' => 'admin',
         ]);
 
         // Create regular user

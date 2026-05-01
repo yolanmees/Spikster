@@ -19,7 +19,7 @@ class SessionRefreshTest extends TestCase
         $user = Auth::create([
             'username' => 'testuser',
             'password' => Hash::make('password123'),
-            'apikey' => 'test-api-key-' . now()->timestamp,
+            'apikey' => 'test-api-key-'.now()->timestamp,
         ]);
 
         // Login first
@@ -31,7 +31,7 @@ class SessionRefreshTest extends TestCase
         $refreshToken = $loginResponse->json('refresh_token');
 
         // Refresh token using query parameters
-        $response = $this->get('/auth?' . http_build_query([
+        $response = $this->get('/auth?'.http_build_query([
             'username' => 'testuser',
             'refresh_token' => $refreshToken,
         ]));
@@ -50,10 +50,10 @@ class SessionRefreshTest extends TestCase
         Auth::create([
             'username' => 'testuser',
             'password' => Hash::make('password123'),
-            'apikey' => 'test-api-key-' . now()->timestamp,
+            'apikey' => 'test-api-key-'.now()->timestamp,
         ]);
 
-        $response = $this->get('/auth?' . http_build_query([
+        $response = $this->get('/auth?'.http_build_query([
             'username' => 'testuser',
             'refresh_token' => 'invalid-token',
         ]));
@@ -69,7 +69,7 @@ class SessionRefreshTest extends TestCase
 
         $this->withoutExceptionHandling();
 
-        $this->get('/auth?' . http_build_query([
+        $this->get('/auth?'.http_build_query([
             'refresh_token' => 'some-token',
         ]));
     }
@@ -82,7 +82,7 @@ class SessionRefreshTest extends TestCase
 
         $this->withoutExceptionHandling();
 
-        $this->get('/auth?' . http_build_query([
+        $this->get('/auth?'.http_build_query([
             'username' => 'testuser',
         ]));
     }
@@ -93,7 +93,7 @@ class SessionRefreshTest extends TestCase
         $user = Auth::create([
             'username' => 'testuser',
             'password' => Hash::make('password123'),
-            'apikey' => 'test-api-key-' . now()->timestamp,
+            'apikey' => 'test-api-key-'.now()->timestamp,
         ]);
 
         // Login
@@ -108,7 +108,7 @@ class SessionRefreshTest extends TestCase
         sleep(1);
 
         // Refresh using query parameters
-        $refreshResponse = $this->get('/auth?' . http_build_query([
+        $refreshResponse = $this->get('/auth?'.http_build_query([
             'username' => 'testuser',
             'refresh_token' => $oldRefreshToken,
         ]));
@@ -125,7 +125,7 @@ class SessionRefreshTest extends TestCase
         $user = Auth::create([
             'username' => 'testuser',
             'password' => Hash::make('password123'),
-            'apikey' => 'test-api-key-' . now()->timestamp,
+            'apikey' => 'test-api-key-'.now()->timestamp,
         ]);
 
         // Login
@@ -140,7 +140,7 @@ class SessionRefreshTest extends TestCase
         sleep(1);
 
         // Refresh using query parameters
-        $refreshResponse = $this->get('/auth?' . http_build_query([
+        $refreshResponse = $this->get('/auth?'.http_build_query([
             'username' => 'testuser',
             'refresh_token' => $loginResponse->json('refresh_token'),
         ]));

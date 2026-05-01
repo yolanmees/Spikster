@@ -42,7 +42,7 @@ class WordPressPlugin extends Model
 
     public function hasUpdate(): bool
     {
-        return !is_null($this->update_available);
+        return ! is_null($this->update_available);
     }
 
     public function scopeActive($query)

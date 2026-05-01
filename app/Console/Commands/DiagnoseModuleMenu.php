@@ -32,7 +32,7 @@ class DiagnoseModuleMenu extends Command
         $moduleAlias = $this->argument('alias');
         $autoFix = $this->option('fix');
 
-        if (!$moduleAlias) {
+        if (! $moduleAlias) {
             $this->diagnoseAllMenuItems($autoFix);
         } else {
             $this->diagnoseModuleMenu($moduleAlias, $autoFix);
@@ -70,14 +70,14 @@ class DiagnoseModuleMenu extends Command
         if ($autoFix) {
             $this->newLine();
             $this->info('Auto-fixing issues...');
-            
+
             foreach ($allMenuItems as $item) {
-                if (!$item->module->is_active) {
+                if (! $item->module->is_active) {
                     $item->module->update(['is_active' => true]);
                     $this->info("✓ Activated module: {$item->module->name}");
                 }
-                
-                if (!$item->is_active) {
+
+                if (! $item->is_active) {
                     $item->update(['is_active' => true]);
                     $this->info("✓ Activated menu item: {$item->title}");
                 }
@@ -95,12 +95,13 @@ class DiagnoseModuleMenu extends Command
 
         // Find module
         $module = Module::where('alias', $alias)->first();
-        
-        if (!$module) {
+
+        if (! $module) {
             $this->error("❌ Module '{$alias}' not found in database!");
             $this->newLine();
-            $this->info("Available modules:");
-            Module::all()->each(fn($m) => $this->line("  - {$m->alias} ({$m->name})"));
+            $this->info('Available modules:');
+            Module::all()->each(fn ($m) => $this->line("  - {$m->alias} ({$m->name})"));
+
             return;
         }
 
@@ -108,43 +109,42 @@ class DiagnoseModuleMenu extends Command
         $this->info('MODULE STATUS:');
         $this->line("  Name: {$module->name}");
         $this->line("  Alias: {$module->alias}");
-        $this->line("  Active: " . ($module->is_active ? '✅ Yes' : '❌ No'));
-        $this->line("  Installed: " . ($module->is_installed ? '✅ Yes' : '❌ No'));
+        $this->line('  Active: '.($module->is_active ? '✅ Yes' : '❌ No'));
+        $this->line('  Installed: '.($module->is_installed ? '✅ Yes' : '❌ No'));
         $this->newLine();
 
         // Menu items
         $menuItems = $module->menuItems()->byLocation('main')->get();
-        
+
         if ($menuItems->isEmpty()) {
             $this->warn("⚠️  No menu items found for location 'main'");
-            
+
             $allMenuItems = $module->menuItems;
             if ($allMenuItems->isNotEmpty()) {
                 $this->info("Found {$allMenuItems->count()} menu items in other locations:");
-                $allMenuItems->each(fn($item) => 
-                    $this->line("  - {$item->title} (location: {$item->menu_location})")
+                $allMenuItems->each(fn ($item) => $this->line("  - {$item->title} (location: {$item->menu_location})")
                 );
             }
             $this->newLine();
         } else {
             $this->info("MENU ITEMS ({$menuItems->count()}):");
-            
+
             foreach ($menuItems as $item) {
                 $this->newLine();
                 $this->line("  Title: {$item->title}");
-                $this->line("  Route: " . ($item->route_name ?? $item->url ?? '-'));
-                $this->line("  Active: " . ($item->is_active ? '✅ Yes' : '❌ No'));
+                $this->line('  Route: '.($item->route_name ?? $item->url ?? '-'));
+                $this->line('  Active: '.($item->is_active ? '✅ Yes' : '❌ No'));
                 $this->line("  Location: {$item->menu_location}");
-                $this->line("  Permission: " . ($item->permission ?? 'None'));
-                
+                $this->line('  Permission: '.($item->permission ?? 'None'));
+
                 // Check permission
                 if ($item->permission) {
                     $permission = Permission::where('name', $item->permission)->first();
-                    $this->line("  Permission exists: " . ($permission ? '✅ Yes' : '❌ No'));
-                    
+                    $this->line('  Permission exists: '.($permission ? '✅ Yes' : '❌ No'));
+
                     if ($permission && auth()->check()) {
                         $hasPermission = auth()->user()->can($item->permission);
-                        $this->line("  User has permission: " . ($hasPermission ? '✅ Yes' : '❌ No'));
+                        $this->line('  User has permission: '.($hasPermission ? '✅ Yes' : '❌ No'));
                     }
                 }
             }
@@ -154,8 +154,8 @@ class DiagnoseModuleMenu extends Command
         // Test visibility
         $menuManager = app(ModuleMenuManager::class);
         $visibleItems = $menuManager->getMenuItems('main');
-        $moduleVisibleItems = $visibleItems->filter(fn($item) => $item->module_id === $module->id);
-        
+        $moduleVisibleItems = $visibleItems->filter(fn ($item) => $item->module_id === $module->id);
+
         $this->info('VISIBILITY:');
         $this->line("  Items that should be visible: {$menuItems->count()}");
         $this->line("  Items actually visible: {$moduleVisibleItems->count()}");
@@ -163,19 +163,19 @@ class DiagnoseModuleMenu extends Command
 
         // Issues found
         $issues = [];
-        
-        if (!$module->is_active) {
+
+        if (! $module->is_active) {
             $issues[] = 'Module is not active';
         }
-        
+
         foreach ($menuItems as $item) {
-            if (!$item->is_active) {
+            if (! $item->is_active) {
                 $issues[] = "Menu item '{$item->title}' is not active";
             }
-            
+
             if ($item->permission) {
                 $permission = Permission::where('name', $item->permission)->first();
-                if (!$permission) {
+                if (! $permission) {
                     $issues[] = "Permission '{$item->permission}' does not exist";
                 }
             }
@@ -192,31 +192,31 @@ class DiagnoseModuleMenu extends Command
 
             if ($autoFix) {
                 $this->info('Applying fixes...');
-                
-                if (!$module->is_active) {
+
+                if (! $module->is_active) {
                     $module->update(['is_active' => true]);
                     $this->info('  ✓ Activated module');
                 }
-                
+
                 foreach ($menuItems as $item) {
-                    if (!$item->is_active) {
+                    if (! $item->is_active) {
                         $item->update(['is_active' => true]);
                         $this->info("  ✓ Activated menu item: {$item->title}");
                     }
-                    
+
                     if ($item->permission) {
                         $permission = Permission::firstOrCreate(['name' => $item->permission]);
                         if ($permission->wasRecentlyCreated) {
                             $this->info("  ✓ Created permission: {$item->permission}");
                         }
-                        
-                        if (auth()->check() && !auth()->user()->can($item->permission)) {
+
+                        if (auth()->check() && ! auth()->user()->can($item->permission)) {
                             auth()->user()->givePermissionTo($item->permission);
                             $this->info("  ✓ Granted permission to current user: {$item->permission}");
                         }
                     }
                 }
-                
+
                 $this->newLine();
                 $this->info('✅ All fixes applied! Menu should now be visible.');
             } else {

@@ -29,7 +29,7 @@ class WPCLIService
             $ssh->disconnect();
 
             return [
-                'success' => !str_contains(strtolower($output), 'error'),
+                'success' => ! str_contains(strtolower($output), 'error'),
                 'output' => $output,
             ];
 
@@ -53,12 +53,12 @@ class WPCLIService
 
         $result = $this->executeCommand($installation, 'theme list --format=json');
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             return $result;
         }
 
         $themes = json_decode($result['output'], true);
-        if (!is_array($themes)) {
+        if (! is_array($themes)) {
             return ['success' => false, 'message' => 'Invalid response from WP-CLI'];
         }
 
@@ -135,12 +135,12 @@ class WPCLIService
 
         $result = $this->executeCommand($installation, 'plugin list --format=json');
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             return $result;
         }
 
         $plugins = json_decode($result['output'], true);
-        if (!is_array($plugins)) {
+        if (! is_array($plugins)) {
             return ['success' => false, 'message' => 'Invalid response from WP-CLI'];
         }
 
@@ -177,7 +177,7 @@ class WPCLIService
 
         $result = $this->executeCommand($installation, 'core check-update --format=json');
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             return [
                 'success' => true,
                 'has_update' => false,
@@ -187,7 +187,7 @@ class WPCLIService
 
         $updates = json_decode($result['output'], true);
 
-        if (empty($updates) || !is_array($updates)) {
+        if (empty($updates) || ! is_array($updates)) {
             return [
                 'success' => true,
                 'has_update' => false,
@@ -199,7 +199,7 @@ class WPCLIService
 
         return [
             'success' => true,
-            'has_update' => !empty($latestVersion),
+            'has_update' => ! empty($latestVersion),
             'current_version' => $installation->version,
             'new_version' => $latestVersion,
         ];
@@ -223,12 +223,14 @@ class WPCLIService
     public function installTheme(WordPressInstallation $installation, string $themeSlug, bool $activate = false): array
     {
         $activateFlag = $activate ? '--activate' : '';
+
         return $this->executeCommand($installation, "theme install {$themeSlug} {$activateFlag}");
     }
 
     public function installPlugin(WordPressInstallation $installation, string $pluginSlug, bool $activate = false): array
     {
         $activateFlag = $activate ? '--activate' : '';
+
         return $this->executeCommand($installation, "plugin install {$pluginSlug} {$activateFlag}");
     }
 
@@ -244,14 +246,14 @@ class WPCLIService
 
     public function updateCore(WordPressInstallation $installation): array
     {
-        return $this->executeCommand($installation, "core update");
+        return $this->executeCommand($installation, 'core update');
     }
 
     public function getInfo(WordPressInstallation $installation): array
     {
         $result = $this->executeCommand($installation, 'core version');
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             return $result;
         }
 
@@ -269,20 +271,20 @@ class WPCLIService
         $command = "theme search {$searchTerm} --format=json";
 
         // Add filters
-        if (!empty($filters['per_page'])) {
+        if (! empty($filters['per_page'])) {
             $command .= " --per-page={$filters['per_page']}";
         }
-        if (!empty($filters['page'])) {
+        if (! empty($filters['page'])) {
             $command .= " --page={$filters['page']}";
         }
-        if (!empty($filters['fields'])) {
+        if (! empty($filters['fields'])) {
             $fields = implode(',', $filters['fields']);
             $command .= " --fields={$fields}";
         }
 
         $result = $this->executeCommand($installation, $command);
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             return $result;
         }
 
@@ -303,20 +305,20 @@ class WPCLIService
         $command = "plugin search {$searchTerm} --format=json";
 
         // Add filters
-        if (!empty($filters['per_page'])) {
+        if (! empty($filters['per_page'])) {
             $command .= " --per-page={$filters['per_page']}";
         }
-        if (!empty($filters['page'])) {
+        if (! empty($filters['page'])) {
             $command .= " --page={$filters['page']}";
         }
-        if (!empty($filters['fields'])) {
+        if (! empty($filters['fields'])) {
             $fields = implode(',', $filters['fields']);
             $command .= " --fields={$fields}";
         }
 
         $result = $this->executeCommand($installation, $command);
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             return $result;
         }
 
@@ -336,14 +338,14 @@ class WPCLIService
     {
         $result = $this->executeCommand($installation, "theme search {$themeSlug} --format=json");
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             return $result;
         }
 
         $themes = json_decode($result['output'], true);
         $theme = collect($themes)->firstWhere('slug', $themeSlug);
 
-        if (!$theme) {
+        if (! $theme) {
             return [
                 'success' => false,
                 'message' => 'Theme not found in WordPress.org repository',
@@ -363,14 +365,14 @@ class WPCLIService
     {
         $result = $this->executeCommand($installation, "plugin search {$pluginSlug} --format=json");
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             return $result;
         }
 
         $plugins = json_decode($result['output'], true);
         $plugin = collect($plugins)->firstWhere('slug', $pluginSlug);
 
-        if (!$plugin) {
+        if (! $plugin) {
             return [
                 'success' => false,
                 'message' => 'Plugin not found in WordPress.org repository',

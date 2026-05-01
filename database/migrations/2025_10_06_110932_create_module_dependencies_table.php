@@ -20,7 +20,7 @@ return new class extends Migration
             $table->enum('dependency_type', ['module', 'package', 'php', 'extension'])->default('module');
             $table->boolean('is_satisfied')->default(false);
             $table->timestamps();
-            
+
             $table->foreign('module_id')->references('id')->on('modules')->onDelete('cascade');
             $table->foreign('required_module_id')->references('id')->on('modules')->onDelete('cascade');
             $table->index(['module_id']);

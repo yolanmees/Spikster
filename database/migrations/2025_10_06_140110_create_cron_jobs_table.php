@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('output_file')->nullable(); // Log output path
             $table->boolean('notify_on_error')->default(false);
             $table->timestamps();
-            
+
             $table->index(['server_id', 'enabled']);
         });
     }

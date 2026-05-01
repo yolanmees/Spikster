@@ -2,8 +2,9 @@
 
 namespace Tests;
 
-use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -28,7 +29,7 @@ abstract class TestCase extends BaseTestCase
      */
     protected function actingAsUser($user = null): self
     {
-        $user = $user ?? \App\Models\User::factory()->create();
+        $user = $user ?? User::factory()->create();
 
         return $this->actingAs($user);
     }
@@ -38,7 +39,7 @@ abstract class TestCase extends BaseTestCase
      */
     protected function actingAsAdmin($user = null): self
     {
-        $user = $user ?? \App\Models\User::factory()->create([
+        $user = $user ?? User::factory()->create([
             'role' => 'admin',
         ]);
 

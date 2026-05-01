@@ -12,11 +12,13 @@ use Illuminate\Console\Command;
 class CipiUpdate extends Command
 {
     protected $signature = 'cipi:update';
+
     protected $description = '[deprecated] Legacy 2021 patch — no-op';
 
     public function handle(): int
     {
         $this->info('cipi:update is deprecated and does nothing. Use spikster:logrotate for maintenance tasks.');
+
         return 0;
     }
 }

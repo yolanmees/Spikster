@@ -10,7 +10,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles;
+    use HasApiTokens, HasFactory, HasRoles, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -87,12 +87,12 @@ class User extends Authenticatable
      */
     public function accessibleSites()
     {
-        return $this->belongsToMany(\App\Models\Site::class, 'user_site_access')
-                    ->withPivot('access_level', 'granted_by', 'granted_at', 'expires_at')
-                    ->wherePivot(function ($query) {
-                        $query->whereNull('expires_at')
-                              ->orWhere('expires_at', '>', now());
-                    });
+        return $this->belongsToMany(Site::class, 'user_site_access')
+            ->withPivot('access_level', 'granted_by', 'granted_at', 'expires_at')
+            ->wherePivot(function ($query) {
+                $query->whereNull('expires_at')
+                    ->orWhere('expires_at', '>', now());
+            });
     }
 
     /**

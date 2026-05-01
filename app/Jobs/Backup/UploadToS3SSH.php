@@ -25,9 +25,11 @@ class UploadToS3SSH implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $timeout = 3600;
+
     public $tries = 2;
 
     protected Backup $backup;
+
     protected ?BackupStorageLocation $storageLocation;
 
     public function __construct(Backup $backup)
@@ -47,26 +49,26 @@ class UploadToS3SSH implements ShouldQueue
         }
 
         try {
-            Log::info("Starting S3 upload via daemon", [
-                'backup_id'        => $this->backup->id,
+            Log::info('Starting S3 upload via daemon', [
+                'backup_id' => $this->backup->id,
                 'storage_location' => $this->storageLocation->name,
             ]);
 
             $credentials = $this->storageLocation->getCredentials();
-            $path        = trim($credentials['path'] ?? 'backups', '/');
-            $s3Key       = "{$path}/{$this->backup->site->domain}/{$this->backup->filename}";
+            $path = trim($credentials['path'] ?? 'backups', '/');
+            $s3Key = "{$path}/{$this->backup->site->domain}/{$this->backup->filename}";
 
             $result = $daemon->send($this->backup->site->server, 'backup.upload-s3', [
-                'backup_id'     => $this->backup->id,
-                'filepath'      => $this->backup->filepath,
-                'bucket'        => $credentials['bucket'],
-                'region'        => $credentials['region'] ?? 'us-east-1',
-                'access_key'    => $credentials['access_key'],
-                'secret_key'    => $credentials['secret_key'],
-                'endpoint'      => $credentials['endpoint'] ?? null,
+                'backup_id' => $this->backup->id,
+                'filepath' => $this->backup->filepath,
+                'bucket' => $credentials['bucket'],
+                'region' => $credentials['region'] ?? 'us-east-1',
+                'access_key' => $credentials['access_key'],
+                'secret_key' => $credentials['secret_key'],
+                'endpoint' => $credentials['endpoint'] ?? null,
                 'storage_class' => $credentials['storage_class'] ?? null,
-                's3_key'        => $s3Key,
-                'delete_local'  => config('backup.delete_local_after_remote_upload', false),
+                's3_key' => $s3Key,
+                'delete_local' => config('backup.delete_local_after_remote_upload', false),
             ]);
 
             if (empty($result['success'])) {
@@ -75,23 +77,23 @@ class UploadToS3SSH implements ShouldQueue
 
             $metadata = $this->backup->metadata ?? [];
             $metadata['s3_upload'] = [
-                'bucket'      => $credentials['bucket'],
-                'key'         => $s3Key,
-                'region'      => $credentials['region'] ?? 'us-east-1',
+                'bucket' => $credentials['bucket'],
+                'key' => $s3Key,
+                'region' => $credentials['region'] ?? 'us-east-1',
                 'uploaded_at' => now()->toIso8601String(),
             ];
             $this->backup->metadata = $metadata;
             $this->backup->save();
 
-            Log::info("Backup uploaded to S3 successfully", [
+            Log::info('Backup uploaded to S3 successfully', [
                 'backup_id' => $this->backup->id,
-                's3_key'    => $s3Key,
+                's3_key' => $s3Key,
             ]);
 
         } catch (\Exception $e) {
-            Log::error("S3 upload failed", [
+            Log::error('S3 upload failed', [
                 'backup_id' => $this->backup->id,
-                'error'     => $e->getMessage(),
+                'error' => $e->getMessage(),
             ]);
             throw $e;
         }
@@ -99,10 +101,10 @@ class UploadToS3SSH implements ShouldQueue
 
     public function failed(\Throwable $exception): void
     {
-        Log::error("UploadToS3SSH job failed", [
-            'backup_id'        => $this->backup->id,
+        Log::error('UploadToS3SSH job failed', [
+            'backup_id' => $this->backup->id,
             'storage_location' => $this->storageLocation?->name,
-            'error'            => $exception->getMessage(),
+            'error' => $exception->getMessage(),
         ]);
     }
 }

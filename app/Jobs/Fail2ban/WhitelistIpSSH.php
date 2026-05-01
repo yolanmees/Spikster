@@ -16,6 +16,7 @@ class WhitelistIpSSH implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $timeout = 60;
+
     public $tries = 3;
 
     public function __construct(
@@ -34,7 +35,7 @@ class WhitelistIpSSH implements ShouldQueue
 
             Log::info("Fail2ban: Whitelisted IP {$this->ip} on server {$this->server->name}");
         } catch (\Throwable $e) {
-            Log::error("Fail2ban: Failed to whitelist IP {$this->ip}: " . $e->getMessage());
+            Log::error("Fail2ban: Failed to whitelist IP {$this->ip}: ".$e->getMessage());
             throw $e;
         }
     }

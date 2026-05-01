@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\CronJobFailed;
 use App\Models\CronJob;
 use App\Models\CronJobExecution;
 use Illuminate\Http\Request;
@@ -58,7 +59,7 @@ class CronExecutionController extends Controller
         // Check if we need to send notifications
         if ($execution->isFailed() && $execution->cronJob->notify_on_error) {
             // TODO: Send notification
-            event(new \App\Events\CronJobFailed($execution));
+            event(new CronJobFailed($execution));
         }
 
         return response()->json($execution);

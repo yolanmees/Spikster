@@ -27,6 +27,7 @@ class DeploymentService
         if (! preg_match('/^[a-zA-Z0-9\/\-_\.]+$/', $branch)) {
             throw new \InvalidArgumentException("Invalid branch name: {$branch}");
         }
+
         return $branch;
     }
 
@@ -39,6 +40,7 @@ class DeploymentService
         if (! preg_match('/^(https?:\/\/|git:\/\/|git@|ssh:\/\/)[\w\.\/\-_:@]+(\.git)?$/', $url)) {
             throw new \InvalidArgumentException("Invalid or unsafe repository URL: {$url}");
         }
+
         return $url;
     }
 
@@ -63,7 +65,7 @@ class DeploymentService
             // Pull latest code
             $this->sshService->executeCommand(
                 $server,
-                "cd {$sitePath} && git pull origin " . $this->validateBranch($site->branch)
+                "cd {$sitePath} && git pull origin ".$this->validateBranch($site->branch)
             );
             $steps['pull_code'] = true;
 
@@ -154,14 +156,14 @@ class DeploymentService
         // Clone repository (validate URL to prevent shell injection)
         $this->sshService->executeCommand(
             $server,
-            "git clone " . $this->validateRepositoryUrl($site->repository) . " {$sitePath}"
+            'git clone '.$this->validateRepositoryUrl($site->repository)." {$sitePath}"
         );
 
         // Checkout specific branch
         if ($site->branch && $site->branch !== 'main' && $site->branch !== 'master') {
             $this->sshService->executeCommand(
                 $server,
-                "cd {$sitePath} && git checkout " . $this->validateBranch($site->branch)
+                "cd {$sitePath} && git checkout ".$this->validateBranch($site->branch)
             );
         }
 

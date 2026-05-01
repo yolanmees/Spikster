@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Http\Middleware\VerifyCsrfToken;
 use App\Models\AuditLog;
 use App\Models\User;
 use App\Services\AuditService;
@@ -30,7 +31,7 @@ class SecurityTest extends TestCase
     public function test_csrf_protection_is_enabled(): void
     {
         // Disable exception handling to see raw HTTP status
-        $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
+        $this->withoutMiddleware(VerifyCsrfToken::class);
 
         $response = $this->post('/auth', [
             'username' => 'testuser',

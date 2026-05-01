@@ -2,7 +2,7 @@
 
 @php
     $sizeClass = ['sm' => 'h-4 w-4', 'md' => 'h-5 w-5', 'lg' => 'h-8 w-8'][$size] ?? 'h-5 w-5';
-    $colorClass = ['blue' => 'text-blue-500', 'white' => 'text-white', 'gray' => 'text-gray-400'][$color] ?? 'text-blue-500';
+    $colorClass = ['blue' => 'text-purple-700', 'white' => 'text-white', 'gray' => 'text-zinc-400'][$color] ?? 'text-purple-700';
 @endphp
 
 <svg {{ $attributes->merge(['class' => "animate-spin $sizeClass $colorClass"]) }}

@@ -2,23 +2,24 @@
 
 namespace App\Services;
 
+use App\Jobs\Email\CreateAliasSSH;
+use App\Jobs\Email\CreateEmailAccountSSH;
+use App\Jobs\Email\CreateForwarderSSH;
+use App\Jobs\Email\DeleteAliasSSH;
+use App\Jobs\Email\DeleteEmailAccountSSH;
+use App\Jobs\Email\DeleteForwarderSSH;
+use App\Jobs\Email\InstallRoundcubeSSH;
+use App\Jobs\Email\SetupDKIMSSH;
+use App\Jobs\Email\UpdateAutoResponderSSH;
+use App\Jobs\Email\UpdateEmailPasswordSSH;
+use App\Jobs\Email\UpdateEmailQuotaSSH;
 use App\Models\EmailAccount;
-use App\Models\EmailForwarder;
 use App\Models\EmailAlias;
 use App\Models\EmailAutoresponder;
 use App\Models\EmailDkimKey;
+use App\Models\EmailForwarder;
 use App\Models\Site;
-use App\Jobs\Email\CreateEmailAccountSSH;
-use App\Jobs\Email\DeleteEmailAccountSSH;
-use App\Jobs\Email\UpdateEmailPasswordSSH;
-use App\Jobs\Email\UpdateEmailQuotaSSH;
-use App\Jobs\Email\CreateForwarderSSH;
-use App\Jobs\Email\DeleteForwarderSSH;
-use App\Jobs\Email\CreateAliasSSH;
-use App\Jobs\Email\DeleteAliasSSH;
-use App\Jobs\Email\SetupDKIMSSH;
-use App\Jobs\Email\UpdateAutoResponderSSH;
-use App\Jobs\Email\InstallRoundcubeSSH;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
@@ -27,9 +28,6 @@ class EmailService
     /**
      * Create a new email account.
      *
-     * @param Site $site
-     * @param array $data
-     * @return EmailAccount
      * @throws ValidationException
      */
     public function createEmailAccount(Site $site, array $data): EmailAccount
@@ -49,7 +47,7 @@ class EmailService
         }
 
         // Validate email domain belongs to site
-        if (!$this->validateEmailDomain($data['email'], $site)) {
+        if (! $this->validateEmailDomain($data['email'], $site)) {
             throw ValidationException::withMessages([
                 'email' => ['Email domain does not belong to this site.'],
             ]);
@@ -76,9 +74,6 @@ class EmailService
     /**
      * Update email account settings.
      *
-     * @param EmailAccount $account
-     * @param array $data
-     * @return EmailAccount
      * @throws ValidationException
      */
     public function updateEmailAccount(EmailAccount $account, array $data): EmailAccount
@@ -117,9 +112,6 @@ class EmailService
 
     /**
      * Delete email account.
-     *
-     * @param EmailAccount $account
-     * @return bool
      */
     public function deleteEmailAccount(EmailAccount $account): bool
     {
@@ -133,9 +125,6 @@ class EmailService
     /**
      * Create email forwarder.
      *
-     * @param Site $site
-     * @param array $data
-     * @return EmailForwarder
      * @throws ValidationException
      */
     public function createForwarder(Site $site, array $data): EmailForwarder
@@ -151,9 +140,9 @@ class EmailService
         }
 
         // Validate source domain
-        if (!str_starts_with($data['source'], '@')) {
+        if (! str_starts_with($data['source'], '@')) {
             // Not a catch-all, validate full email
-            if (!$this->validateEmailDomain($data['source'], $site)) {
+            if (! $this->validateEmailDomain($data['source'], $site)) {
                 throw ValidationException::withMessages([
                     'source' => ['Source email domain does not belong to this site.'],
                 ]);
@@ -177,22 +166,17 @@ class EmailService
 
     /**
      * Delete email forwarder.
-     *
-     * @param EmailForwarder $forwarder
-     * @return bool
      */
     public function deleteForwarder(EmailForwarder $forwarder): bool
     {
         DeleteForwarderSSH::dispatch($forwarder->site->server, $forwarder);
+
         return $forwarder->delete();
     }
 
     /**
      * Create email alias.
      *
-     * @param EmailAccount $account
-     * @param string $alias
-     * @return EmailAlias
      * @throws ValidationException
      */
     public function createAlias(EmailAccount $account, string $alias): EmailAlias
@@ -206,7 +190,7 @@ class EmailService
         }
 
         // Validate alias domain belongs to site
-        if (!$this->validateEmailDomain($alias, $account->site)) {
+        if (! $this->validateEmailDomain($alias, $account->site)) {
             throw ValidationException::withMessages([
                 'alias' => ['Alias domain does not belong to this site.'],
             ]);
@@ -226,22 +210,16 @@ class EmailService
 
     /**
      * Delete email alias.
-     *
-     * @param EmailAlias $alias
-     * @return bool
      */
     public function deleteAlias(EmailAlias $alias): bool
     {
         DeleteAliasSSH::dispatch($alias->emailAccount->site->server, $alias);
+
         return $alias->delete();
     }
 
     /**
      * Setup DKIM for domain.
-     *
-     * @param Site $site
-     * @param string|null $selector
-     * @return EmailDkimKey
      */
     public function setupDKIM(Site $site, ?string $selector = 'default'): EmailDkimKey
     {
@@ -273,10 +251,6 @@ class EmailService
 
     /**
      * Generate SPF record for domain.
-     *
-     * @param Site $site
-     * @param array $config
-     * @return string
      */
     public function generateSPFRecord(Site $site, array $config = []): string
     {
@@ -308,10 +282,6 @@ class EmailService
 
     /**
      * Generate DMARC record for domain.
-     *
-     * @param Site $site
-     * @param array $config
-     * @return string
      */
     public function generateDMARCRecord(Site $site, array $config = []): string
     {
@@ -332,9 +302,6 @@ class EmailService
     /**
      * Set or update autoresponder.
      *
-     * @param EmailAccount $account
-     * @param array $data
-     * @return EmailAutoresponder
      * @throws ValidationException
      */
     public function setAutoresponder(EmailAccount $account, array $data): EmailAutoresponder
@@ -365,9 +332,6 @@ class EmailService
 
     /**
      * Get quota usage for email account.
-     *
-     * @param EmailAccount $account
-     * @return array
      */
     public function getQuotaUsage(EmailAccount $account): array
     {
@@ -386,10 +350,6 @@ class EmailService
 
     /**
      * Validate email domain belongs to site.
-     *
-     * @param string $email
-     * @param Site $site
-     * @return bool
      */
     protected function validateEmailDomain(string $email, Site $site): bool
     {
@@ -402,14 +362,14 @@ class EmailService
 
         // Check aliases
         $aliases = $site->aliases()->pluck('domain')->toArray();
+
         return in_array($emailDomain, $aliases);
     }
 
     /**
      * Get all email accounts for a site.
      *
-     * @param Site $site
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return Collection
      */
     public function getAccountsBySite(Site $site)
     {
@@ -422,8 +382,7 @@ class EmailService
     /**
      * Get all forwarders for a site.
      *
-     * @param Site $site
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return Collection
      */
     public function getForwardersBySite(Site $site)
     {
@@ -435,9 +394,7 @@ class EmailService
     /**
      * Search email accounts.
      *
-     * @param Site $site
-     * @param string $query
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return Collection
      */
     public function searchAccounts(Site $site, string $query)
     {
@@ -449,9 +406,6 @@ class EmailService
 
     /**
      * Get email statistics for site.
-     *
-     * @param Site $site
-     * @return array
      */
     public function getSiteStatistics(Site $site): array
     {
@@ -464,18 +418,15 @@ class EmailService
             'total_forwarders' => $forwarders->count(),
             'total_quota_mb' => $accounts->sum('quota_mb'),
             'total_used_mb' => $accounts->with('quotaUsage')->get()
-                ->sum(fn($a) => $a->quotaUsage?->used_mb ?? 0),
+                ->sum(fn ($a) => $a->quotaUsage?->used_mb ?? 0),
             'accounts_over_quota' => $accounts->get()
-                ->filter(fn($a) => $a->isQuotaExceeded())
+                ->filter(fn ($a) => $a->isQuotaExceeded())
                 ->count(),
         ];
     }
 
     /**
      * Install Roundcube webmail for site.
-     *
-     * @param Site $site
-     * @return void
      */
     public function installRoundcube(Site $site): void
     {
@@ -484,10 +435,6 @@ class EmailService
 
     /**
      * Generate Roundcube auto-login token.
-     *
-     * @param EmailAccount $account
-     * @param string $password
-     * @return string
      */
     public function generateWebmailToken(EmailAccount $account, string $password): string
     {
@@ -505,10 +452,6 @@ class EmailService
 
     /**
      * Get webmail URL with auto-login token.
-     *
-     * @param EmailAccount $account
-     * @param string $password
-     * @return string
      */
     public function getWebmailUrl(EmailAccount $account, string $password): string
     {

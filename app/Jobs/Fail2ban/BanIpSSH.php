@@ -16,6 +16,7 @@ class BanIpSSH implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $timeout = 60;
+
     public $tries = 3;
 
     public function __construct(
@@ -35,7 +36,7 @@ class BanIpSSH implements ShouldQueue
 
             Log::info("Fail2ban: Banned IP {$this->ip} in jail {$this->jail} on server {$this->server->name}");
         } catch (\Throwable $e) {
-            Log::error("Fail2ban: Failed to ban IP {$this->ip}: " . $e->getMessage());
+            Log::error("Fail2ban: Failed to ban IP {$this->ip}: ".$e->getMessage());
             throw $e;
         }
     }

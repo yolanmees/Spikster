@@ -14,6 +14,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="cipi-version" content="{{ Storage::get('cipi/version.md') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/js/all.min.js"></script>
     <link href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap4.min.css" rel="stylesheet" />
     <link href="https://cdn.datatables.net/responsive/2.2.7/css/responsive.bootstrap4.min.css" rel="stylesheet" />
@@ -138,23 +139,16 @@
             <p><i class="fas fa-circle-notch fa-spin" id="mainloadingicon"></i> Loading data...</p>
         </div>
         @yield('extra')
-        <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="errorModalLabel">System Error</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <p>Ops! Something went wrong... try later!</p>
-                        <div class="space"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <x-modal id="error-modal" title="System Error" max-width="md">
+            <p class="text-sm text-zinc-700 dark:text-zinc-300">Ops! Something went wrong... try later!</p>
+            <div class="space"></div>
+            <x-slot name="footer">
+                <button type="button" @click="open = false"
+                    class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-zinc-950 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-900 text-sm font-semibold transition-colors">
+                    Close
+                </button>
+            </x-slot>
+        </x-modal>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -221,14 +215,14 @@
                         };
                         $.ajax(this);
                     }).catch(error => {
-                        $('#errorModal').modal();
+                        window.dispatchEvent(new CustomEvent('open-modal', { detail: 'error-modal' }));
                     });
                 }
                 if (error.status == 404) {
                     window.location.replace('/error-file-not-found');
                 }
                 if (error.status == 500) {
-                    $('#errorModal').modal();
+                    window.dispatchEvent(new CustomEvent('open-modal', { detail: 'error-modal' }));
                 }
                 if (error.status == 503) {
                     $('#serverping').empty();

@@ -21,15 +21,15 @@
     ][$colCount] ?? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4';
 
     $colorMap = [
-        'blue'   => ['bg' => 'bg-blue-50 dark:bg-blue-900/20',   'icon' => 'text-blue-600 dark:text-blue-400'],
+        'blue'   => ['bg' => 'bg-purple-50 dark:bg-purple-900/20',  'icon' => 'text-purple-700 dark:text-purple-400'],
         'purple' => ['bg' => 'bg-purple-50 dark:bg-purple-900/20', 'icon' => 'text-purple-600 dark:text-purple-400'],
         'green'  => ['bg' => 'bg-green-50 dark:bg-green-900/20',  'icon' => 'text-green-600 dark:text-green-400'],
         'orange' => ['bg' => 'bg-orange-50 dark:bg-orange-900/20', 'icon' => 'text-orange-600 dark:text-orange-400'],
-        'gray'   => ['bg' => 'bg-gray-100 dark:bg-gray-700/30',   'icon' => 'text-gray-500 dark:text-gray-400'],
+        'gray'   => ['bg' => 'bg-zinc-100 dark:bg-zinc-800',       'icon' => 'text-zinc-500 dark:text-zinc-400'],
     ];
 @endphp
 
-<div class="p-4 mb-6 bg-white border border-gray-200 dark:bg-gray-800/30 rounded-xl dark:border-gray-700/50 backdrop-blur-sm">
+<div class="p-4 mb-6 bg-white border border-zinc-200 dark:bg-zinc-900 rounded-xl dark:border-zinc-800">
     <div class="grid {{ $gridCols }} gap-4">
         @foreach ($items as $item)
             @php $c = $colorMap[$item['color'] ?? 'blue'] ?? $colorMap['blue']; @endphp
@@ -40,8 +40,8 @@
                     </div>
                 @endif
                 <div class="min-w-0">
-                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ $item['label'] }}</p>
-                    <p class="text-sm font-semibold text-gray-900 dark:text-white truncate">{{ $item['value'] ?? '—' }}</p>
+                    <p class="text-xs text-zinc-500 dark:text-zinc-400">{{ $item['label'] }}</p>
+                    <p class="text-sm font-semibold text-zinc-950 dark:text-white truncate">{{ $item['value'] ?? '—' }}</p>
                 </div>
             </div>
         @endforeach

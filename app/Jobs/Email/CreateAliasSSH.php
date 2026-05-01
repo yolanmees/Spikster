@@ -17,6 +17,7 @@ class CreateAliasSSH implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $timeout = 120;
+
     public $tries = 3;
 
     public function __construct(
@@ -27,7 +28,7 @@ class CreateAliasSSH implements ShouldQueue
     public function handle(RemoteDaemonService $daemon): void
     {
         try {
-            $aliasEmail  = $this->alias->alias;
+            $aliasEmail = $this->alias->alias;
             $targetEmail = $this->alias->emailAccount->email;
 
             $success = $daemon->createEmailAlias($this->server, $aliasEmail, $targetEmail);

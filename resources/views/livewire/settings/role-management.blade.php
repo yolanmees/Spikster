@@ -13,64 +13,83 @@
             <x-slot name="icon"><x-icon icon="search" class="h-5 w-5 text-gray-400" /></x-slot>
             <x-slot name="suffix"><x-wire-spinner target="search" /></x-slot>
         </x-text-input>
-        <x-button variant="info" wire:click="openCreateModal">
-            <x-icon icon="plus" class="-ml-1 mr-1.5 h-5 w-5" />
+        <x-primary-button wire:click="openCreateModal">
             Create Role
-        </x-button>
+        </x-primary-button>
     </div>
 
     {{-- Roles Table --}}
-    <x-card>
-        <div class="-m-6 overflow-x-auto">
-            <table class="table min-w-full">
-                <thead class="table-header">
+    <div class="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-zinc-200 text-sm dark:divide-zinc-800">
+                <thead class="bg-zinc-50 text-left text-xs font-medium uppercase text-zinc-500 dark:bg-zinc-950 dark:text-zinc-400">
                     <tr>
-                        <th class="table-header-cell">Role</th>
-                        <th class="table-header-cell">Users</th>
-                        <th class="table-header-cell">Permissions</th>
-                        <th class="table-header-cell text-right">Actions</th>
+                        <th class="px-5 py-3">Role</th>
+                        <th class="px-5 py-3">Users</th>
+                        <th class="px-5 py-3">Permissions</th>
+                        <th class="px-5 py-3 text-right">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="table-body">
+                <tbody class="divide-y divide-zinc-200 bg-white dark:divide-zinc-800 dark:bg-zinc-900">
                     @forelse($roles as $role)
-                        <tr class="table-row">
-                            <td class="table-cell">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shrink-0">
-                                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-                                        </svg>
-                                    </div>
-                                    <span class="font-semibold text-gray-900 dark:text-white">{{ $role->name }}</span>
-                                </div>
+                        <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
+                            <td class="whitespace-nowrap px-5 py-4">
+                                <span class="font-semibold text-zinc-900 dark:text-white">{{ $role->name }}</span>
                             </td>
-                            <td class="table-cell">
-                                <span class="text-sm text-gray-700 dark:text-gray-300">
-                                    {{ $role->users_count }} {{ Str::plural('user', $role->users_count) }}
-                                </span>
+                            <td class="whitespace-nowrap px-5 py-4 text-zinc-600 dark:text-zinc-300">
+                                {{ $role->users_count }} {{ Str::plural('user', $role->users_count) }}
                             </td>
-                            <td class="table-cell">
-                                <div class="flex flex-wrap gap-1">
+                            <td class="px-5 py-4">
+                                <div class="flex flex-wrap gap-1.5">
                                     @forelse($role->permissions->take(3) as $permission)
-                                        <x-badge color="blue" :text="Str::limit($permission->name, 20)" />
+                                        <span class="rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-medium text-purple-700 dark:bg-purple-700/15 dark:text-purple-300">
+                                            {{ Str::limit($permission->name, 20) }}
+                                        </span>
                                     @empty
-                                        <span class="text-sm text-gray-400 italic">No permissions</span>
+                                        <span class="text-xs italic text-zinc-400">No permissions</span>
                                     @endforelse
                                     @if ($role->permissions->count() > 3)
-                                        <x-badge color="gray" :text="'+' . ($role->permissions->count() - 3) . ' more'" />
+                                        <span class="rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
+                                            +{{ $role->permissions->count() - 3 }} more
+                                        </span>
                                     @endif
                                 </div>
                             </td>
-                            <td class="table-cell text-right">
-                                <div class="flex items-center justify-end gap-2">
-                                    <x-button variant="warning" size="sm" outline wire:click="openEditModal({{ $role->id }})">Edit</x-button>
-                                    <x-danger-button size="sm" wire:click="openDeleteModal({{ $role->id }})">Delete</x-danger-button>
+                            <td class="whitespace-nowrap px-5 py-4 text-right">
+                                <div class="inline-flex items-center justify-end gap-2">
+                                    <button wire:click="openEditModal({{ $role->id }})"
+                                        class="inline-flex items-center rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-medium hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-colors">
+                                        Edit
+                                    </button>
+                                    <div class="relative" x-data="{ open: false }">
+                                        <button @click="open = !open"
+                                            class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-colors"
+                                            aria-label="More options">
+                                            <i data-lucide="more-horizontal" class="h-4 w-4 text-zinc-500"></i>
+                                        </button>
+                                        <div x-show="open"
+                                             x-cloak
+                                             @click.outside="open = false"
+                                             class="absolute right-0 z-20 mt-1 w-44 rounded-lg border border-zinc-200 bg-white py-1 shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
+                                            <button wire:click="openEditModal({{ $role->id }})"
+                                                @click="open = false"
+                                                class="block w-full px-3 py-2 text-left text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
+                                                Edit role
+                                            </button>
+                                            <div class="my-1 h-px bg-zinc-100 dark:bg-zinc-800"></div>
+                                            <button wire:click="openDeleteModal({{ $role->id }})"
+                                                @click="open = false"
+                                                class="block w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/10 transition-colors">
+                                                Delete role
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4">
+                            <td colspan="4" class="px-5 py-12 text-center">
                                 <x-empty-state icon="tag" title="No roles found" />
                             </td>
                         </tr>
@@ -78,11 +97,12 @@
                 </tbody>
             </table>
         </div>
-    </x-card>
-
-    @if ($roles->hasPages())
-        <div class="mt-4">{{ $roles->links() }}</div>
-    @endif
+        @if ($roles->hasPages())
+            <div class="border-t border-zinc-200 px-5 py-3 dark:border-zinc-800">
+                {{ $roles->links() }}
+            </div>
+        @endif
+    </div>
 
     {{-- Permissions form partial (shared between create & edit) --}}
     @php
@@ -102,15 +122,15 @@
                 </div>
                 <div>
                     <x-label value="Permissions" />
-                    <div class="mt-1 max-h-80 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-lg p-4 space-y-4">
+                    <div class="mt-1 max-h-80 overflow-y-auto border border-zinc-200 dark:border-zinc-700 rounded-lg p-4 space-y-4">
                         @foreach ($permissions as $group => $groupPermissions)
                             <div>
-                                <h4 class="text-sm font-semibold text-gray-900 dark:text-white capitalize mb-2">{{ $group }}</h4>
+                                <h4 class="text-sm font-semibold text-zinc-900 dark:text-white capitalize mb-2">{{ $group }}</h4>
                                 <div class="grid grid-cols-2 gap-2">
                                     @foreach ($groupPermissions as $permission)
                                         <label class="flex items-center gap-2 cursor-pointer">
                                             <x-checkbox wire:model="selectedPermissions" value="{{ $permission->id }}" class="text-purple-600" />
-                                            <span class="text-sm text-gray-700 dark:text-gray-300">{{ $permission->name }}</span>
+                                            <span class="text-sm text-zinc-700 dark:text-zinc-300">{{ $permission->name }}</span>
                                         </label>
                                     @endforeach
                                 </div>
@@ -121,7 +141,7 @@
 
                 <x-slot name="footer">
                     <x-secondary-button wire:click="resetForm">Cancel</x-secondary-button>
-                    <x-button variant="info" type="submit">Create Role</x-button>
+                    <x-primary-button type="submit">Create Role</x-primary-button>
                 </x-slot>
             </form>
         </x-modal>
@@ -138,15 +158,15 @@
                 </div>
                 <div>
                     <x-label value="Permissions" />
-                    <div class="mt-1 max-h-80 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-lg p-4 space-y-4">
+                    <div class="mt-1 max-h-80 overflow-y-auto border border-zinc-200 dark:border-zinc-700 rounded-lg p-4 space-y-4">
                         @foreach ($permissions as $group => $groupPermissions)
                             <div>
-                                <h4 class="text-sm font-semibold text-gray-900 dark:text-white capitalize mb-2">{{ $group }}</h4>
+                                <h4 class="text-sm font-semibold text-zinc-900 dark:text-white capitalize mb-2">{{ $group }}</h4>
                                 <div class="grid grid-cols-2 gap-2">
                                     @foreach ($groupPermissions as $permission)
                                         <label class="flex items-center gap-2 cursor-pointer">
                                             <x-checkbox wire:model="selectedPermissions" value="{{ $permission->id }}" class="text-purple-600" />
-                                            <span class="text-sm text-gray-700 dark:text-gray-300">{{ $permission->name }}</span>
+                                            <span class="text-sm text-zinc-700 dark:text-zinc-300">{{ $permission->name }}</span>
                                         </label>
                                     @endforeach
                                 </div>
@@ -157,7 +177,7 @@
 
                 <x-slot name="footer">
                     <x-secondary-button wire:click="resetForm">Cancel</x-secondary-button>
-                    <x-button variant="info" type="submit">Update Role</x-button>
+                    <x-primary-button type="submit">Update Role</x-primary-button>
                 </x-slot>
             </form>
         </x-modal>

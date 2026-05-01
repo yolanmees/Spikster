@@ -19,7 +19,7 @@
 @endphp
 
 <div
-    x-data="{ open: false }"
+    x-data="{ open: {{ $id ? 'false' : 'true' }} }"
     @if($id) id="{{ $id }}-wrapper" @endif
     @if($id) x-on:open-modal.window="$event.detail === '{{ $id }}' && (open = true)" @endif
     x-on:close-modal.window="open = false"
@@ -40,12 +40,12 @@
         x-transition:leave="ease-in duration-150"
         x-transition:leave-start="opacity-100"
         x-transition:leave-end="opacity-0"
-        class="fixed inset-0 bg-gray-900/75 backdrop-blur-sm"
+        class="fixed inset-0 bg-zinc-950/70 backdrop-blur-md"
         @if($closeable) @click="open = false" @endif
     ></div>
 
     {{-- Panel --}}
-    <div class="flex min-h-screen items-center justify-center p-4 sm:p-0">
+    <div class="flex min-h-screen items-center justify-center p-4 sm:p-6">
         <div
             x-ref="panel"
             x-show="open"
@@ -55,17 +55,17 @@
             x-transition:leave="ease-in duration-150"
             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-            class="relative w-full {{ $maxWidthClass }} transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-2xl ring-1 ring-black/10 dark:ring-white/10 sm:my-8"
+            class="relative w-full {{ $maxWidthClass }} transform overflow-hidden rounded-3xl border border-zinc-200/80 dark:border-zinc-700/70 bg-white/95 dark:bg-zinc-900/95 shadow-2xl shadow-zinc-900/15 dark:shadow-black/40 ring-1 ring-zinc-950/5 dark:ring-white/10 sm:my-8"
         >
             {{-- Header --}}
             @if($title || isset($header))
-                <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-700">
-                    <h3 class="text-base font-semibold text-gray-900 dark:text-white">
+                <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50/80 dark:bg-zinc-950/40">
+                    <h3 class="text-base font-semibold text-zinc-900 dark:text-zinc-100">
                         {{ $title ?? $header }}
                     </h3>
                     @if($closeable)
                         <button type="button" @click="open = false"
-                            class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            class="inline-flex items-center justify-center w-8 h-8 rounded-xl border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 bg-white/80 dark:bg-zinc-900/80 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                             </svg>
@@ -76,13 +76,13 @@
             @endif
 
             {{-- Body --}}
-            <div class="px-6 py-5">
+            <div class="px-6 py-5 text-zinc-800 dark:text-zinc-200">
                 {{ $slot }}
             </div>
 
             {{-- Footer --}}
             @isset($footer)
-                <div class="px-6 py-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 flex items-center justify-end gap-3">
+                <div class="px-6 py-4 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50/80 dark:bg-zinc-950/40 flex items-center justify-end gap-3">
                     {{ $footer }}
                 </div>
             @endisset

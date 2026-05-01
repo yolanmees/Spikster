@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\DaemonService;
 use App\Models\Server;
 use App\Models\Site;
+use App\Services\DaemonService;
 use App\Services\ServerService;
 use App\Services\SiteService;
 use Illuminate\Http\Request;
@@ -110,6 +110,8 @@ class SiteController extends Controller
      */
     public function index()
     {
+        $this->authorize('viewAny', Site::class);
+
         $sites = $this->siteService->getAllSites();
         $response = [];
 
@@ -302,6 +304,8 @@ class SiteController extends Controller
      */
     public function create(Request $request)
     {
+        $this->authorize('create', Site::class);
+
         $validator = Validator::make($request->all(), [
             'domain' => 'required',
             'server_id' => 'required',
@@ -359,30 +363,30 @@ class SiteController extends Controller
         try {
             $site = $this->siteService->createSite([
                 'server_id' => $server->server_id,
-                'domain'    => $requestedDomain,
-                'php'       => $php,
-                'basepath'  => $request->basepath,
+                'domain' => $requestedDomain,
+                'php' => $php,
+                'basepath' => $request->basepath,
             ]);
         } catch (\RuntimeException $e) {
             return response()->json([
                 'message' => __('spikster.server_connection_issue'),
-                'errors'  => __('spikster.server_connection_issue'),
+                'errors' => __('spikster.server_connection_issue'),
             ], 500);
         }
 
         return response()->json([
-            'site_id'           => $site->site_id,
-            'domain'            => $site->domain,
-            'username'          => $site->username,
-            'password'          => $site->password,
-            'database'          => $site->username,
+            'site_id' => $site->site_id,
+            'domain' => $site->domain,
+            'username' => $site->username,
+            'password' => $site->password,
+            'database' => $site->username,
             'database_username' => $site->username,
             'database_password' => $site->database,
-            'server_id'         => $server->server_id,
-            'server_name'       => $server->name,
-            'server_ip'         => $server->ip,
-            'php'               => $site->php,
-            'basepath'          => $site->basepath,
+            'server_id' => $server->server_id,
+            'server_name' => $server->name,
+            'server_ip' => $server->ip,
+            'php' => $site->php,
+            'basepath' => $site->basepath,
         ]);
     }
 
@@ -595,6 +599,8 @@ class SiteController extends Controller
             ], 404);
         }
 
+        $this->authorize('update', $site);
+
         if (strtolower($request->domain)) {
             $validator = Validator::make($request->all(), [
                 'domain' => 'required',
@@ -656,7 +662,7 @@ class SiteController extends Controller
             if ($site->supervisor != $request->supervisor) {
                 $site->supervisor = $request->supervisor;
                 $site->save();
-                app(\App\Services\DaemonService::class)->send('site.supervisor', ['username' => $site->username, 'script' => $site->supervisor ?? '']);
+                app(DaemonService::class)->send('site.supervisor', ['username' => $site->username, 'script' => $site->supervisor ?? '']);
             }
         }
 
@@ -687,7 +693,7 @@ class SiteController extends Controller
         }
 
         if ($deploy_patch) {
-            app(\App\Services\DaemonService::class)->send('site.deploy-script', ['username' => $site->username, 'content' => $site->deploy ?? '']);
+            app(DaemonService::class)->send('site.deploy-script', ['username' => $site->username, 'content' => $site->deploy ?? '']);
         }
 
         $site->save();
@@ -874,6 +880,8 @@ class SiteController extends Controller
             ], 404);
         }
 
+        $this->authorize('view', $site);
+
         return response()->json([
             'site_id' => $site->site_id,
             'domain' => $site->domain,
@@ -953,6 +961,8 @@ class SiteController extends Controller
             ], 404);
         }
 
+        $this->authorize('delete', $site);
+
         if ($site->panel) {
             return response()->json([
                 'message' => __('spikster.bad_request_default_site_delete'),
@@ -962,9 +972,9 @@ class SiteController extends Controller
 
         app(DaemonService::class)->deleteSite([
             'username' => $site->username,
-            'php'      => $site->php,
-            'db_name'  => $site->username,
-            'db_root'  => $site->server->database,
+            'php' => $site->php,
+            'db_name' => $site->username,
+            'db_root' => $site->server->database,
         ]);
 
         // Delete aliases and the site record from DB
@@ -1026,9 +1036,10 @@ class SiteController extends Controller
             ], 404);
         }
 
+        $this->authorize('manageSsl', $site);
+
         app(DaemonService::class)->enableSSL($site->username, $site->domain);
 
         return response()->json([]);
     }
-
 }

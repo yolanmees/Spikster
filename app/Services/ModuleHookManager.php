@@ -22,12 +22,12 @@ class ModuleHookManager
     public function applyFilter(string $hookName, $value, ...$args): mixed
     {
         $hooks = $this->getHooks($hookName, 'filter');
-        
+
         array_unshift($args, $value);
 
         foreach ($hooks as $hook) {
             $result = $hook->execute(...$args);
-            
+
             if ($result !== null) {
                 $value = $result;
                 $args[0] = $value; // Update first arg for next filter
@@ -54,14 +54,14 @@ class ModuleHookManager
     public function unregisterHooks(Module $module): void
     {
         ModuleHook::where('module_id', $module->id)->delete();
-        
+
         // Clear cached hooks
         $this->hooks = [];
     }
 
     public function getHooks(string $hookName, ?string $type = null): Collection
     {
-        $cacheKey = $hookName . ($type ? ":{$type}" : '');
+        $cacheKey = $hookName.($type ? ":{$type}" : '');
 
         if (isset($this->hooks[$cacheKey])) {
             return collect($this->hooks[$cacheKey]);
@@ -80,7 +80,7 @@ class ModuleHookManager
         }
 
         $hooks = $query->get();
-        
+
         // Cache for this request
         $this->hooks[$cacheKey] = $hooks->toArray();
 
@@ -97,24 +97,24 @@ class ModuleHookManager
             'module.after_disable' => 'After a module is disabled',
             'module.before_install' => 'Before a module is installed',
             'module.after_install' => 'After a module is installed',
-            
+
             // UI hooks
             'dashboard.widgets' => 'Modify dashboard widgets',
             'menu.items' => 'Modify menu items',
             'settings.tabs' => 'Add settings tabs',
-            
+
             // Server hooks
             'server.before_create' => 'Before a server is created',
             'server.after_create' => 'After a server is created',
             'server.before_delete' => 'Before a server is deleted',
             'server.after_delete' => 'After a server is deleted',
-            
+
             // Site hooks
             'site.before_create' => 'Before a site is created',
             'site.after_create' => 'After a site is created',
             'site.before_deploy' => 'Before a site is deployed',
             'site.after_deploy' => 'After a site is deployed',
-            
+
             // User hooks
             'user.login' => 'After user login',
             'user.logout' => 'After user logout',

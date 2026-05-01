@@ -16,6 +16,7 @@ class DeleteFtpUserSSH implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $timeout = 180;
+
     public $tries = 3;
 
     public function __construct(
@@ -25,7 +26,7 @@ class DeleteFtpUserSSH implements ShouldQueue
     public function handle(RemoteDaemonService $daemon): void
     {
         try {
-            Log::info("Deleting FTP user via daemon", ['username' => $this->ftpUser->username]);
+            Log::info('Deleting FTP user via daemon', ['username' => $this->ftpUser->username]);
 
             $result = $daemon->send($this->ftpUser->server, 'ftp.delete', [
                 'username' => $this->ftpUser->username,
@@ -35,12 +36,12 @@ class DeleteFtpUserSSH implements ShouldQueue
                 throw new \Exception($result['error'] ?? 'Daemon returned failure for ftp.delete');
             }
 
-            Log::info("FTP user deleted successfully via daemon", ['username' => $this->ftpUser->username]);
+            Log::info('FTP user deleted successfully via daemon', ['username' => $this->ftpUser->username]);
 
         } catch (\Exception $e) {
-            Log::error("Failed to delete FTP user", [
+            Log::error('Failed to delete FTP user', [
                 'username' => $this->ftpUser->username,
-                'error'    => $e->getMessage(),
+                'error' => $e->getMessage(),
             ]);
             throw $e;
         }
@@ -48,9 +49,9 @@ class DeleteFtpUserSSH implements ShouldQueue
 
     public function failed(\Throwable $exception): void
     {
-        Log::error("DeleteFtpUserSSH job failed", [
+        Log::error('DeleteFtpUserSSH job failed', [
             'username' => $this->ftpUser->username,
-            'error'    => $exception->getMessage(),
+            'error' => $exception->getMessage(),
         ]);
     }
 }

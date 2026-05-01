@@ -9,10 +9,15 @@ use Livewire\Component;
 class BanIpForm extends Component
 {
     public $server_id;
+
     public $server;
+
     public $ip = '';
+
     public $jail = 'sshd';
+
     public $jails = [];
+
     public $action = 'ban'; // 'ban' or 'whitelist'
 
     protected $rules = [
@@ -41,7 +46,7 @@ class BanIpForm extends Component
     public function loadJails()
     {
         try {
-            $url = config('app.url') . '/api/servers/' . $this->server->server_id . '/fail2ban/jails';
+            $url = config('app.url').'/api/servers/'.$this->server->server_id.'/fail2ban/jails';
             $response = Http::get($url);
 
             if ($response->successful()) {
@@ -59,7 +64,7 @@ class BanIpForm extends Component
         $this->validate();
 
         try {
-            $url = config('app.url') . '/api/servers/' . $this->server->server_id . '/fail2ban/ban';
+            $url = config('app.url').'/api/servers/'.$this->server->server_id.'/fail2ban/ban';
             $response = Http::post($url, [
                 'ip' => $this->ip,
                 'jail' => $this->jail,
@@ -74,7 +79,7 @@ class BanIpForm extends Component
                 session()->flash('error', $data['message'] ?? 'Failed to ban IP address.');
             }
         } catch (\Exception $e) {
-            session()->flash('error', 'Error: ' . $e->getMessage());
+            session()->flash('error', 'Error: '.$e->getMessage());
         }
     }
 
@@ -83,7 +88,7 @@ class BanIpForm extends Component
         $this->validate(['ip' => 'required|ip']);
 
         try {
-            $url = config('app.url') . '/api/servers/' . $this->server->server_id . '/fail2ban/whitelist';
+            $url = config('app.url').'/api/servers/'.$this->server->server_id.'/fail2ban/whitelist';
             $response = Http::post($url, [
                 'ip' => $this->ip,
             ]);
@@ -97,7 +102,7 @@ class BanIpForm extends Component
                 session()->flash('error', $data['message'] ?? 'Failed to whitelist IP address.');
             }
         } catch (\Exception $e) {
-            session()->flash('error', 'Error: ' . $e->getMessage());
+            session()->flash('error', 'Error: '.$e->getMessage());
         }
     }
 
@@ -112,18 +117,18 @@ class BanIpForm extends Component
 
     public function checkIpStatus()
     {
-        if (empty($this->ip) || !filter_var($this->ip, FILTER_VALIDATE_IP)) {
+        if (empty($this->ip) || ! filter_var($this->ip, FILTER_VALIDATE_IP)) {
             return;
         }
 
         try {
-            $url = config('app.url') . '/api/servers/' . $this->server->server_id . '/fail2ban/check/' . $this->ip;
+            $url = config('app.url').'/api/servers/'.$this->server->server_id.'/fail2ban/check/'.$this->ip;
             $response = Http::get($url);
 
             if ($response->successful()) {
                 $data = $response->json();
                 if ($data['is_banned']) {
-                    session()->flash('info', "IP {$this->ip} is currently banned in " . count($data['ban_details']) . " jail(s).");
+                    session()->flash('info', "IP {$this->ip} is currently banned in ".count($data['ban_details']).' jail(s).');
                 } else {
                     session()->flash('info', "IP {$this->ip} is not currently banned.");
                 }

@@ -5,21 +5,22 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 /**
  * CronJobExecution Model
  *
  * @property int $id
  * @property int $cron_job_id
- * @property \Illuminate\Support\Carbon $started_at
- * @property \Illuminate\Support\Carbon|null $finished_at
+ * @property Carbon $started_at
+ * @property Carbon|null $finished_at
  * @property int|null $duration
  * @property string $status
  * @property int|null $exit_code
  * @property string|null $output
  * @property string|null $error_output
- * @property \Illuminate\Support\Carbon $created_at
- * @property \Illuminate\Support\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class CronJobExecution extends Model
 {
@@ -102,12 +103,12 @@ class CronJobExecution extends Model
      */
     public function getFormattedDurationAttribute(): string
     {
-        if (!$this->duration) {
+        if (! $this->duration) {
             return 'N/A';
         }
 
         if ($this->duration < 60) {
-            return $this->duration . 's';
+            return $this->duration.'s';
         }
 
         $minutes = floor($this->duration / 60);

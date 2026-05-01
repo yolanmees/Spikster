@@ -90,6 +90,7 @@ class BackupStorageLocation extends Model
                 'last_test_status' => 'failed',
                 'last_test_error' => $e->getMessage(),
             ]);
+
             return false;
         }
     }
@@ -132,11 +133,11 @@ class BackupStorageLocation extends Model
     {
         $path = $this->config['path'] ?? '/backups';
 
-        if (!is_dir($path)) {
+        if (! is_dir($path)) {
             throw new \Exception("Directory does not exist: {$path}");
         }
 
-        if (!is_writable($path)) {
+        if (! is_writable($path)) {
             throw new \Exception("Directory is not writable: {$path}");
         }
 
@@ -153,7 +154,7 @@ class BackupStorageLocation extends Model
      */
     public function getCredentials(): array
     {
-        return match($this->type) {
+        return match ($this->type) {
             's3' => [
                 'key' => $this->config['access_key'] ?? '',
                 'secret' => $this->config['secret_key'] ?? '',

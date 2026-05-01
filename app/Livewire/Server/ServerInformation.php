@@ -9,10 +9,15 @@ use Livewire\Component;
 class ServerInformation extends Component
 {
     public $server_id;
+
     public $serverName = '';
+
     public $serverIp = '';
+
     public $serverProvider = '';
+
     public $serverLocation = '';
+
     public $isSubmitting = false;
 
     protected $rules = [
@@ -52,8 +57,9 @@ class ServerInformation extends Component
         try {
             $server = Server::where('server_id', $this->server_id)->first();
 
-            if (!$server) {
+            if (! $server) {
                 session()->flash('error', 'Server not found.');
+
                 return;
             }
 
@@ -65,6 +71,7 @@ class ServerInformation extends Component
             if ($ipConflict) {
                 $this->addError('serverIp', 'This IP address is already in use by another server.');
                 $this->isSubmitting = false;
+
                 return;
             }
 
@@ -80,7 +87,7 @@ class ServerInformation extends Component
             $this->dispatch('server-updated');
             $this->loadServerData();
         } catch (\Exception $e) {
-            session()->flash('error', 'Error updating server: ' . $e->getMessage());
+            session()->flash('error', 'Error updating server: '.$e->getMessage());
         } finally {
             $this->isSubmitting = false;
         }

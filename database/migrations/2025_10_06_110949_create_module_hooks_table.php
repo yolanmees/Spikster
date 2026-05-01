@@ -23,7 +23,7 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->text('description')->nullable();
             $table->timestamps();
-            
+
             $table->foreign('module_id')->references('id')->on('modules')->onDelete('cascade');
             $table->index(['hook_name', 'hook_type', 'priority']);
             $table->index('is_active');

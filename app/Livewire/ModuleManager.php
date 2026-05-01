@@ -12,10 +12,13 @@ class ModuleManager extends Component
     use WithPagination;
 
     public $search = '';
+
     public $category = '';
+
     public $statusFilter = 'all'; // all, active, inactive
 
     public $showingModule = null;
+
     public $moduleDetails = null;
 
     protected $queryString = [
@@ -106,11 +109,12 @@ class ModuleManager extends Component
     {
         $module = Module::find($moduleId);
 
-        if (!$module) {
+        if (! $module) {
             $this->dispatch('notify', [
                 'type' => 'error',
-                'message' => 'Module not found'
+                'message' => 'Module not found',
             ]);
+
             return;
         }
 
@@ -121,13 +125,13 @@ class ModuleManager extends Component
                 $registry->disable($module);
                 $this->dispatch('notify', [
                     'type' => 'success',
-                    'message' => "{$module->name} disabled successfully"
+                    'message' => "{$module->name} disabled successfully",
                 ]);
             } else {
                 $registry->enable($module);
                 $this->dispatch('notify', [
                     'type' => 'success',
-                    'message' => "{$module->name} enabled successfully"
+                    'message' => "{$module->name} enabled successfully",
                 ]);
             }
 
@@ -138,7 +142,7 @@ class ModuleManager extends Component
         } catch (\Exception $e) {
             $this->dispatch('notify', [
                 'type' => 'error',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ]);
         }
     }
@@ -147,7 +151,7 @@ class ModuleManager extends Component
     {
         $module = Module::find($moduleId);
 
-        if (!$module) {
+        if (! $module) {
             return;
         }
 
@@ -157,7 +161,7 @@ class ModuleManager extends Component
 
             $this->dispatch('notify', [
                 'type' => $health['status'] === 'healthy' ? 'success' : 'warning',
-                'message' => "Health check complete: {$health['status']}"
+                'message' => "Health check complete: {$health['status']}",
             ]);
 
             // Refresh module details if showing
@@ -167,7 +171,7 @@ class ModuleManager extends Component
         } catch (\Exception $e) {
             $this->dispatch('notify', [
                 'type' => 'error',
-                'message' => 'Health check failed: ' . $e->getMessage()
+                'message' => 'Health check failed: '.$e->getMessage(),
             ]);
         }
     }
@@ -180,4 +184,3 @@ class ModuleManager extends Component
         ]);
     }
 }
-

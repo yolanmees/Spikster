@@ -3,17 +3,20 @@
 namespace App\Livewire\Server\Fail2ban;
 
 use App\Models\Server;
-use App\Services\Fail2banService;
 use Illuminate\Support\Facades\Http;
-use Livewire\Component;
 use Livewire\Attributes\On;
+use Livewire\Component;
 
 class Iptables extends Component
 {
     public $server_id;
+
     public $server;
+
     public $iptables;
+
     public $selectedJail = 'all';
+
     public $searchIp = '';
 
     public function render()
@@ -30,7 +33,7 @@ class Iptables extends Component
 
     public function getIptables()
     {
-        $url = config('app.url') . '/api/servers/' . $this->server->server_id . '/fail2ban';
+        $url = config('app.url').'/api/servers/'.$this->server->server_id.'/fail2ban';
         $response = Http::get($url);
 
         return $response->json();
@@ -45,7 +48,7 @@ class Iptables extends Component
     public function unbanIp($ip, $jail = null)
     {
         try {
-            $url = config('app.url') . '/api/servers/' . $this->server->server_id . '/fail2ban/unban';
+            $url = config('app.url').'/api/servers/'.$this->server->server_id.'/fail2ban/unban';
             $response = Http::post($url, [
                 'ip' => $ip,
                 'jail' => $jail,
@@ -58,13 +61,13 @@ class Iptables extends Component
                 session()->flash('error', "Failed to unban IP {$ip}.");
             }
         } catch (\Exception $e) {
-            session()->flash('error', "Error: " . $e->getMessage());
+            session()->flash('error', 'Error: '.$e->getMessage());
         }
     }
 
     public function getFilteredIptables()
     {
-        if (!isset($this->iptables[0]) || !is_array($this->iptables[0])) {
+        if (! isset($this->iptables[0]) || ! is_array($this->iptables[0])) {
             return [];
         }
 
@@ -78,7 +81,7 @@ class Iptables extends Component
         }
 
         // Filter by IP search
-        if (!empty($this->searchIp)) {
+        if (! empty($this->searchIp)) {
             $filtered = array_filter($filtered, function ($ip) {
                 return isset($ip[0]) && str_contains($ip[0], $this->searchIp);
             });

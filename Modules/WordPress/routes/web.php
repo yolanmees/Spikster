@@ -9,7 +9,7 @@ Route::middleware(['auth', 'verified'])->prefix('wordpress')->name('wordpress.')
     Route::post('/', [WordPressController::class, 'store'])->name('store');
     Route::get('/{id}', [WordPressController::class, 'show'])->name('show');
     Route::delete('/{id}', [WordPressController::class, 'destroy'])->name('destroy');
-    
+
     // WP-CLI Actions
     Route::post('/{id}/sync-themes', [WordPressController::class, 'syncThemes'])->name('sync-themes');
     Route::post('/{id}/sync-plugins', [WordPressController::class, 'syncPlugins'])->name('sync-plugins');

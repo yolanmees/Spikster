@@ -6,30 +6,41 @@ use App\Models\CronJob;
 use App\Models\Server;
 use App\Services\CronService;
 use Livewire\Component;
-use Livewire\Attributes\On;
 
 class CronManager extends Component
 {
     public Server $server;
+
     public $cronJobs = [];
+
     public $sites = [];
-    
+
     // Form fields
     public $editingId = null;
+
     public $scope = 'server';
+
     public $site_id = null;
+
     public $command = '';
+
     public $schedule = '';
+
     public $description = '';
+
     public $enabled = true;
+
     public $output_file = '';
+
     public $notify_on_error = false;
-    
+
     // UI state
     public $showForm = false;
+
     public $showPreview = false;
+
     public $showTemplates = false;
-    
+
     // Predefined schedules
     public $presetSchedules = [
         '* * * * *' => 'Every minute',
@@ -91,7 +102,7 @@ class CronManager extends Component
             'scope' => 'site',
         ],
     ];
-    
+
     protected $rules = [
         'scope' => 'required|in:server,site',
         'site_id' => 'nullable|required_if:scope,site|exists:sites,id',
@@ -124,7 +135,7 @@ class CronManager extends Component
     public function edit($id)
     {
         $cronJob = CronJob::where('id', $id)->where('server_id', $this->server->id)->firstOrFail();
-        
+
         $this->editingId = $cronJob->id;
         $this->scope = $cronJob->scope;
         $this->site_id = $cronJob->site_id;
@@ -134,7 +145,7 @@ class CronManager extends Component
         $this->enabled = $cronJob->enabled;
         $this->output_file = $cronJob->output_file ?? '';
         $this->notify_on_error = $cronJob->notify_on_error;
-        
+
         $this->showForm = true;
     }
 
@@ -154,7 +165,7 @@ class CronManager extends Component
                 'output_file' => $this->output_file ?: null,
                 'notify_on_error' => $this->notify_on_error,
             ]);
-            
+
             session()->flash('message', 'Cron job updated successfully.');
         } else {
             CronJob::create([
@@ -168,13 +179,13 @@ class CronManager extends Component
                 'output_file' => $this->output_file ?: null,
                 'notify_on_error' => $this->notify_on_error,
             ]);
-            
+
             session()->flash('message', 'Cron job created successfully.');
         }
 
         // Sync to server
         $this->syncToServer();
-        
+
         $this->resetForm();
         $this->loadCronJobs();
     }
@@ -183,25 +194,25 @@ class CronManager extends Component
     {
         $cronJob = CronJob::where('id', $id)->where('server_id', $this->server->id)->firstOrFail();
         $cronJob->delete();
-        
+
         session()->flash('message', 'Cron job deleted successfully.');
-        
+
         // Sync to server
         $this->syncToServer();
-        
+
         $this->loadCronJobs();
     }
 
     public function toggle($id)
     {
         $cronJob = CronJob::where('id', $id)->where('server_id', $this->server->id)->firstOrFail();
-        $cronJob->update(['enabled' => !$cronJob->enabled]);
-        
-        session()->flash('message', 'Cron job ' . ($cronJob->enabled ? 'enabled' : 'disabled') . '.');
-        
+        $cronJob->update(['enabled' => ! $cronJob->enabled]);
+
+        session()->flash('message', 'Cron job '.($cronJob->enabled ? 'enabled' : 'disabled').'.');
+
         // Sync to server
         $this->syncToServer();
-        
+
         $this->loadCronJobs();
     }
 
@@ -211,7 +222,7 @@ class CronManager extends Component
             $cronService = app(CronService::class);
             $cronService->syncCronJobsToServer($this->server);
         } catch (\Exception $e) {
-            session()->flash('error', 'Failed to sync cron jobs to server: ' . $e->getMessage());
+            session()->flash('error', 'Failed to sync cron jobs to server: '.$e->getMessage());
         }
     }
 
@@ -220,11 +231,11 @@ class CronManager extends Component
         try {
             $cronService = app(CronService::class);
             $imported = $cronService->importFromServer($this->server);
-            
+
             session()->flash('message', "Imported {$imported} cron job(s) from server.");
             $this->loadCronJobs();
         } catch (\Exception $e) {
-            session()->flash('error', 'Failed to import cron jobs from server: ' . $e->getMessage());
+            session()->flash('error', 'Failed to import cron jobs from server: '.$e->getMessage());
         }
     }
 
@@ -244,20 +255,20 @@ class CronManager extends Component
 
     public function useTemplate($templateKey)
     {
-        if (!isset($this->templates[$templateKey])) {
+        if (! isset($this->templates[$templateKey])) {
             return;
         }
 
         $template = $this->templates[$templateKey];
-        
+
         $this->description = $template['name'];
         $this->command = $template['command'];
         $this->schedule = $template['schedule'];
         $this->scope = $template['scope'];
-        
+
         $this->showTemplates = false;
         $this->showForm = true;
-        
+
         session()->flash('message', 'Template loaded. Please customize placeholders as needed.');
     }
 

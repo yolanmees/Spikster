@@ -1,8 +1,11 @@
 <?php
 
 use App\Http\Controllers\FileManagerController;
+use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\NodejsController;
+use App\Http\Controllers\SetupController;
 use App\Http\Controllers\SiteController;
+use App\Models\Site;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -17,7 +20,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    if (filter_var(request()->getHttpHost(), FILTER_VALIDATE_IP) || request()->getHttpHost() == \App\Models\Site::where(['panel' => 1])->pluck('domain')->first()) {
+    if (filter_var(request()->getHttpHost(), FILTER_VALIDATE_IP) || request()->getHttpHost() == Site::where(['panel' => 1])->pluck('domain')->first()) {
         return view('welcome');
     }
 
@@ -64,30 +67,30 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     Route::get('show-media-file/{id}', [FileManagerController::class, 'showMediaFile']);
 
     // Backup Management
-    Route::get('/sites/{site}/backups', function (\App\Models\Site $site) {
+    Route::get('/sites/{site}/backups', function (Site $site) {
         return view('backup.index', ['site' => $site]);
     })->name('backups.index');
 
     // Email Management
-    Route::get('/sites/{site}/email', function (\App\Models\Site $site) {
+    Route::get('/sites/{site}/email', function (Site $site) {
         return view('email.index', ['site' => $site]);
     })->name('email.index');
 
     // FTP Management
-    Route::get('/sites/{site}/ftp', function (\App\Models\Site $site) {
+    Route::get('/sites/{site}/ftp', function (Site $site) {
         return view('ftp.index', ['site' => $site]);
     })->name('ftp.index');
 
     // Module Management
     Route::prefix('modules')->name('modules.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\ModuleController::class, 'index'])->name('index');
-        Route::get('/{module}', [\App\Http\Controllers\ModuleController::class, 'show'])->name('show');
-        Route::post('/{module}/toggle', [\App\Http\Controllers\ModuleController::class, 'toggle'])->name('toggle');
-        Route::post('/{module}/enable', [\App\Http\Controllers\ModuleController::class, 'enable'])->name('enable');
-        Route::post('/{module}/disable', [\App\Http\Controllers\ModuleController::class, 'disable'])->name('disable');
+        Route::get('/', [ModuleController::class, 'index'])->name('index');
+        Route::get('/{module}', [ModuleController::class, 'show'])->name('show');
+        Route::post('/{module}/toggle', [ModuleController::class, 'toggle'])->name('toggle');
+        Route::post('/{module}/enable', [ModuleController::class, 'enable'])->name('enable');
+        Route::post('/{module}/disable', [ModuleController::class, 'disable'])->name('disable');
     });
 });
 
 // Setup wizard — token-based, one time use, no auth required
-Route::get('/setup/{token}', [\App\Http\Controllers\SetupController::class, 'show'])->name('setup.show');
-Route::post('/setup/{token}', [\App\Http\Controllers\SetupController::class, 'complete'])->name('setup.complete');
+Route::get('/setup/{token}', [SetupController::class, 'show'])->name('setup.show');
+Route::post('/setup/{token}', [SetupController::class, 'complete'])->name('setup.complete');

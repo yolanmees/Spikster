@@ -32,7 +32,7 @@ return new class extends Migration
             $table->json('health_data')->nullable();
             $table->timestamp('last_checked_at')->nullable();
             $table->timestamps();
-            
+
             $table->foreign('installed_by')->references('id')->on('users')->onDelete('set null');
             $table->index('is_active');
             $table->index('category');

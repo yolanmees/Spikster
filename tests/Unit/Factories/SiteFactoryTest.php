@@ -4,7 +4,6 @@ namespace Tests\Unit\Factories;
 
 use App\Models\Server;
 use App\Models\Site;
-use App\Models\User;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\Unit\UnitTestCase;
 

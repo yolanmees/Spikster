@@ -7,7 +7,9 @@ use App\Services\AuditService;
 use Firebase\JWT\JWT;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
+use Laravel\Fortify\Rules\Password;
 
 class AuthController extends Controller
 {
@@ -21,14 +23,29 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
+        $lockoutKey = 'login:'.$request->ip();
+
+        if (RateLimiter::tooManyAttempts($lockoutKey, 5)) {
+            $seconds = RateLimiter::availableIn($lockoutKey);
+
+            return response()->json([
+                'message' => __('auth.throttle', ['seconds' => $seconds, 'minutes' => ceil($seconds / 60)]),
+                'errors' => 'too_many_attempts',
+            ], 429);
+        }
+
         $user = Auth::attempt($request->username, $request->password);
 
         if (! $user) {
+            RateLimiter::hit($lockoutKey, 300);
+
             return response()->json([
                 'message' => __('spikster.invalid_login_message'),
                 'errors' => __('spikster.invalid_login'),
             ], 401);
         }
+
+        RateLimiter::clear($lockoutKey);
 
         return response()->json([
             'username' => $user->username,
@@ -46,10 +63,21 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
+        $lockoutKey = 'login:'.$request->ip();
+
+        if (RateLimiter::tooManyAttempts($lockoutKey, 5)) {
+            $seconds = RateLimiter::availableIn($lockoutKey);
+
+            return response()->json([
+                'message' => __('auth.throttle', ['seconds' => $seconds, 'minutes' => ceil($seconds / 60)]),
+                'errors' => 'too_many_attempts',
+            ], 429);
+        }
+
         $user = Auth::attempt($request->username, $request->password);
 
         if (! $user) {
-            // Log failed login attempt
+            RateLimiter::hit($lockoutKey, 300);
             AuditService::logFailedLogin($request->username);
 
             return response()->json([
@@ -57,6 +85,8 @@ class AuthController extends Controller
                 'errors' => __('spikster.invalid_login'),
             ], 401);
         }
+
+        RateLimiter::clear($lockoutKey);
 
         $user->jwt = JWT::encode(['iat' => time(), 'exp' => time() + config('cipi.jwt_refresh')], config('cipi.jwt_secret').'-Rfs', 'HS256');
         $user->save();
@@ -81,9 +111,21 @@ class AuthController extends Controller
             'refresh_token' => 'required',
         ]);
 
+        $lockoutKey = 'refresh:'.$request->ip();
+
+        if (RateLimiter::tooManyAttempts($lockoutKey, 10)) {
+            $seconds = RateLimiter::availableIn($lockoutKey);
+
+            return response()->json([
+                'message' => __('auth.throttle', ['seconds' => $seconds, 'minutes' => ceil($seconds / 60)]),
+                'errors' => 'too_many_attempts',
+            ], 429);
+        }
+
         $user = Auth::check($request->username, $request->refresh_token);
 
         if ($user) {
+            RateLimiter::clear($lockoutKey);
             $user->jwt = JWT::encode(['iat' => time(), 'exp' => time() + config('cipi.jwt_refresh')], config('cipi.jwt_secret').'-Rfs', 'HS256');
             $user->save();
 
@@ -93,6 +135,8 @@ class AuthController extends Controller
                 'username' => $user->username,
             ]);
         } else {
+            RateLimiter::hit($lockoutKey, 300);
+
             return response()->json([
                 'message' => __('spikster.invalid_token_message'),
                 'errors' => __('spikster.invalid_token'),
@@ -136,9 +180,24 @@ class AuthController extends Controller
             }
         }
 
-        if ($request->newpassword && ! Hash::check($request->newpassword, $user->password)) {
+        if ($request->newpassword) {
+            if (Hash::check($request->newpassword, $user->password)) {
+                return response()->json([
+                    'message' => 'New password must differ from the current password.',
+                    'errors' => 'password_reuse',
+                ], 422);
+            }
+
             $request->validate([
-                'newpassword' => 'required|min:8|max:64',
+                'newpassword' => [
+                    'required',
+                    'max:64',
+                    (new Password)
+                        ->length(12)
+                        ->requireUppercase()
+                        ->requireNumeric()
+                        ->requireSpecialCharacter(),
+                ],
             ]);
             $user->password = Hash::make($request->newpassword);
         }

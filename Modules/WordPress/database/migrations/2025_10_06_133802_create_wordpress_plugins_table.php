@@ -26,7 +26,7 @@ return new class extends Migration
             $table->boolean('auto_update')->default(false);
             $table->timestamp('last_checked')->nullable();
             $table->timestamps();
-            
+
             $table->unique(['wordpress_installation_id', 'slug']);
             $table->index(['wordpress_installation_id', 'is_active']);
             $table->index(['wordpress_installation_id', 'status']);

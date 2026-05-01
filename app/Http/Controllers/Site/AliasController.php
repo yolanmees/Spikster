@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Site;
 use App\Http\Controllers\Controller;
 use App\Models\Alias;
 use App\Models\Site;
+use App\Services\DaemonService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -18,7 +19,7 @@ class AliasController extends Controller
     {
         $site = Site::where('site_id', $site_id)->first();
 
-        if (!$site) {
+        if (! $site) {
             return response()->json([
                 'message' => __('spikster.site_not_found_message'),
                 'errors' => __('spikster.site_not_found'),
@@ -43,7 +44,7 @@ class AliasController extends Controller
     {
         $site = Site::where('site_id', $site_id)->first();
 
-        if (!$site) {
+        if (! $site) {
             return response()->json([
                 'message' => __('spikster.site_not_found_message'),
                 'errors' => __('spikster.site_not_found'),
@@ -83,7 +84,7 @@ class AliasController extends Controller
         $alias->domain = strtolower($request->domain);
         $alias->save();
 
-        app(\App\Services\DaemonService::class)->createAlias(
+        app(DaemonService::class)->createAlias(
             $alias->domain,
             $site->username,
             $site->php,
@@ -103,7 +104,7 @@ class AliasController extends Controller
     {
         $site = Site::where('site_id', $site_id)->first();
 
-        if (!$site) {
+        if (! $site) {
             return response()->json([
                 'message' => __('spikster.site_not_found_message'),
                 'errors' => __('spikster.site_not_found'),
@@ -112,14 +113,14 @@ class AliasController extends Controller
 
         $alias = Alias::where('alias_id', $alias_id)->first();
 
-        if (!$alias) {
+        if (! $alias) {
             return response()->json([
                 'message' => __('spikster.alias_not_found_message'),
                 'errors' => __('spikster.alias_not_found'),
             ], 404);
         }
 
-        app(\App\Services\DaemonService::class)->deleteAlias($alias->domain);
+        app(DaemonService::class)->deleteAlias($alias->domain);
         $alias->delete();
 
         return response()->json([]);

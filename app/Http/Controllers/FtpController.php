@@ -25,16 +25,21 @@ class FtpController extends Controller
      *     path="/api/sites/{site_id}/ftp/users",
      *     tags={"FTP Management"},
      *     summary="List all FTP users for a site",
+     *
      *     @OA\Parameter(
      *         name="site_id",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="string", format="uuid")
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="List of FTP users",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/FtpUser")),
      *             @OA\Property(property="meta", type="object")
      *         )
@@ -44,6 +49,7 @@ class FtpController extends Controller
     public function index(Request $request, string $siteId)
     {
         $site = Site::where('site_id', $siteId)->firstOrFail();
+        $this->authorize('ftp.view');
         $ftpUsers = $this->ftpService->getUsersForSite($site);
 
         return response()->json([
@@ -53,7 +59,7 @@ class FtpController extends Controller
                 'active' => $ftpUsers->where('is_active', true)->count(),
                 'inactive' => $ftpUsers->where('is_active', false)->count(),
                 'locked' => $ftpUsers->filter->isLocked()->count(),
-            ]
+            ],
         ]);
     }
 
@@ -62,16 +68,19 @@ class FtpController extends Controller
      *     path="/api/sites/{site_id}/ftp/users/{user_id}",
      *     tags={"FTP Management"},
      *     summary="Get specific FTP user details",
+     *
      *     @OA\Parameter(name="site_id", in="path", required=true, @OA\Schema(type="string")),
      *     @OA\Parameter(name="user_id", in="path", required=true, @OA\Schema(type="string")),
+     *
      *     @OA\Response(response=200, description="FTP user details")
      * )
      */
     public function show(string $siteId, string $userId)
     {
         $site = Site::where('site_id', $siteId)->firstOrFail();
+        $this->authorize('ftp.view');
         $ftpUser = FtpUser::where('site_id', $siteId)
-                         ->findOrFail($userId);
+            ->findOrFail($userId);
 
         return response()->json([
             'data' => $ftpUser,
@@ -85,11 +94,15 @@ class FtpController extends Controller
      *     path="/api/sites/{site_id}/ftp/users",
      *     tags={"FTP Management"},
      *     summary="Create new FTP user",
+     *
      *     @OA\Parameter(name="site_id", in="path", required=true, @OA\Schema(type="string")),
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"password"},
+     *
      *             @OA\Property(property="username", type="string", example="user@domain.com"),
      *             @OA\Property(property="password", type="string", example="SecurePass123!"),
      *             @OA\Property(property="quota_mb", type="integer", example=1024),
@@ -98,12 +111,14 @@ class FtpController extends Controller
      *             @OA\Property(property="home_directory", type="string", example="/var/www/vhosts/domain.com/httpdocs")
      *         )
      *     ),
+     *
      *     @OA\Response(response=201, description="FTP user created successfully")
      * )
      */
     public function store(Request $request, string $siteId)
     {
         $site = Site::where('site_id', $siteId)->firstOrFail();
+        $this->authorize('ftp.create');
 
         $validator = Validator::make($request->all(), [
             'username' => 'nullable|string|unique:ftp_users|max:255',
@@ -120,7 +135,7 @@ class FtpController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -138,21 +153,27 @@ class FtpController extends Controller
      *     path="/api/sites/{site_id}/ftp/users/{user_id}",
      *     tags={"FTP Management"},
      *     summary="Update FTP user",
+     *
      *     @OA\Parameter(name="site_id", in="path", required=true, @OA\Schema(type="string")),
      *     @OA\Parameter(name="user_id", in="path", required=true, @OA\Schema(type="string")),
+     *
      *     @OA\RequestBody(
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="quota_mb", type="integer"),
      *             @OA\Property(property="max_connections", type="integer"),
      *             @OA\Property(property="is_active", type="boolean"),
      *             @OA\Property(property="notes", type="string")
      *         )
      *     ),
+     *
      *     @OA\Response(response=200, description="FTP user updated")
      * )
      */
     public function update(Request $request, string $siteId, string $userId)
     {
+        $this->authorize('ftp.edit');
         $ftpUser = FtpUser::where('site_id', $siteId)->findOrFail($userId);
 
         $validator = Validator::make($request->all(), [
@@ -169,7 +190,7 @@ class FtpController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -186,13 +207,16 @@ class FtpController extends Controller
      *     path="/api/sites/{site_id}/ftp/users/{user_id}",
      *     tags={"FTP Management"},
      *     summary="Delete FTP user",
+     *
      *     @OA\Parameter(name="site_id", in="path", required=true, @OA\Schema(type="string")),
      *     @OA\Parameter(name="user_id", in="path", required=true, @OA\Schema(type="string")),
+     *
      *     @OA\Response(response=200, description="FTP user deleted")
      * )
      */
     public function destroy(string $siteId, string $userId)
     {
+        $this->authorize('ftp.delete');
         $ftpUser = FtpUser::where('site_id', $siteId)->findOrFail($userId);
 
         $this->ftpService->deleteUser($ftpUser);
@@ -207,20 +231,26 @@ class FtpController extends Controller
      *     path="/api/sites/{site_id}/ftp/users/{user_id}/reset-password",
      *     tags={"FTP Management"},
      *     summary="Reset FTP user password",
+     *
      *     @OA\Parameter(name="site_id", in="path", required=true, @OA\Schema(type="string")),
      *     @OA\Parameter(name="user_id", in="path", required=true, @OA\Schema(type="string")),
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"password"},
+     *
      *             @OA\Property(property="password", type="string", example="NewSecurePass123!")
      *         )
      *     ),
+     *
      *     @OA\Response(response=200, description="Password reset successful")
      * )
      */
     public function resetPassword(Request $request, string $siteId, string $userId)
     {
+        $this->authorize('ftp.edit');
         $ftpUser = FtpUser::where('site_id', $siteId)->findOrFail($userId);
 
         $validator = Validator::make($request->all(), [
@@ -230,7 +260,7 @@ class FtpController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -246,20 +276,26 @@ class FtpController extends Controller
      *     path="/api/sites/{site_id}/ftp/users/{user_id}/quota",
      *     tags={"FTP Management"},
      *     summary="Update FTP user quota",
+     *
      *     @OA\Parameter(name="site_id", in="path", required=true, @OA\Schema(type="string")),
      *     @OA\Parameter(name="user_id", in="path", required=true, @OA\Schema(type="string")),
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"quota_mb"},
+     *
      *             @OA\Property(property="quota_mb", type="integer", example=2048)
      *         )
      *     ),
+     *
      *     @OA\Response(response=200, description="Quota updated")
      * )
      */
     public function updateQuota(Request $request, string $siteId, string $userId)
     {
+        $this->authorize('ftp.edit');
         $ftpUser = FtpUser::where('site_id', $siteId)->findOrFail($userId);
 
         $validator = Validator::make($request->all(), [
@@ -269,7 +305,7 @@ class FtpController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -286,13 +322,16 @@ class FtpController extends Controller
      *     path="/api/sites/{site_id}/ftp/users/{user_id}/usage",
      *     tags={"FTP Management"},
      *     summary="Get FTP user usage statistics",
+     *
      *     @OA\Parameter(name="site_id", in="path", required=true, @OA\Schema(type="string")),
      *     @OA\Parameter(name="user_id", in="path", required=true, @OA\Schema(type="string")),
+     *
      *     @OA\Response(response=200, description="Usage statistics")
      * )
      */
     public function getUsageStats(string $siteId, string $userId)
     {
+        $this->authorize('ftp.view');
         $ftpUser = FtpUser::where('site_id', $siteId)->findOrFail($userId);
 
         $stats = $this->ftpService->getUsageStats($ftpUser);
@@ -307,20 +346,26 @@ class FtpController extends Controller
      *     path="/api/sites/{site_id}/ftp/users/{user_id}/test-connection",
      *     tags={"FTP Management"},
      *     summary="Test FTP connection",
+     *
      *     @OA\Parameter(name="site_id", in="path", required=true, @OA\Schema(type="string")),
      *     @OA\Parameter(name="user_id", in="path", required=true, @OA\Schema(type="string")),
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"password"},
+     *
      *             @OA\Property(property="password", type="string")
      *         )
      *     ),
+     *
      *     @OA\Response(response=200, description="Connection test result")
      * )
      */
     public function testConnection(Request $request, string $siteId, string $userId)
     {
+        $this->authorize('ftp.view');
         $ftpUser = FtpUser::where('site_id', $siteId)->findOrFail($userId);
 
         $validator = Validator::make($request->all(), [
@@ -330,7 +375,7 @@ class FtpController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -344,13 +389,16 @@ class FtpController extends Controller
      *     path="/api/sites/{site_id}/ftp/users/{user_id}/connection-info",
      *     tags={"FTP Management"},
      *     summary="Get FTP connection information",
+     *
      *     @OA\Parameter(name="site_id", in="path", required=true, @OA\Schema(type="string")),
      *     @OA\Parameter(name="user_id", in="path", required=true, @OA\Schema(type="string")),
+     *
      *     @OA\Response(response=200, description="Connection information")
      * )
      */
     public function getConnectionInfo(string $siteId, string $userId)
     {
+        $this->authorize('ftp.view');
         $ftpUser = FtpUser::where('site_id', $siteId)->findOrFail($userId);
 
         $info = $this->ftpService->getConnectionInfo($ftpUser);
@@ -365,13 +413,16 @@ class FtpController extends Controller
      *     path="/api/sites/{site_id}/ftp/statistics",
      *     tags={"FTP Management"},
      *     summary="Get FTP statistics for site",
+     *
      *     @OA\Parameter(name="site_id", in="path", required=true, @OA\Schema(type="string")),
+     *
      *     @OA\Response(response=200, description="Site FTP statistics")
      * )
      */
     public function getSiteStatistics(string $siteId)
     {
         $site = Site::where('site_id', $siteId)->firstOrFail();
+        $this->authorize('ftp.view');
 
         $stats = $this->ftpService->getSiteStatistics($site);
 
@@ -385,13 +436,16 @@ class FtpController extends Controller
      *     path="/api/sites/{site_id}/ftp/users/{user_id}/enable",
      *     tags={"FTP Management"},
      *     summary="Enable FTP user",
+     *
      *     @OA\Parameter(name="site_id", in="path", required=true, @OA\Schema(type="string")),
      *     @OA\Parameter(name="user_id", in="path", required=true, @OA\Schema(type="string")),
+     *
      *     @OA\Response(response=200, description="FTP user enabled")
      * )
      */
     public function enable(string $siteId, string $userId)
     {
+        $this->authorize('ftp.edit');
         $ftpUser = FtpUser::where('site_id', $siteId)->findOrFail($userId);
 
         $this->ftpService->enableUser($ftpUser);
@@ -407,13 +461,16 @@ class FtpController extends Controller
      *     path="/api/sites/{site_id}/ftp/users/{user_id}/disable",
      *     tags={"FTP Management"},
      *     summary="Disable FTP user",
+     *
      *     @OA\Parameter(name="site_id", in="path", required=true, @OA\Schema(type="string")),
      *     @OA\Parameter(name="user_id", in="path", required=true, @OA\Schema(type="string")),
+     *
      *     @OA\Response(response=200, description="FTP user disabled")
      * )
      */
     public function disable(string $siteId, string $userId)
     {
+        $this->authorize('ftp.edit');
         $ftpUser = FtpUser::where('site_id', $siteId)->findOrFail($userId);
 
         $this->ftpService->disableUser($ftpUser);
@@ -429,13 +486,16 @@ class FtpController extends Controller
      *     path="/api/sites/{site_id}/ftp/users/{user_id}/unlock",
      *     tags={"FTP Management"},
      *     summary="Unlock FTP user account",
+     *
      *     @OA\Parameter(name="site_id", in="path", required=true, @OA\Schema(type="string")),
      *     @OA\Parameter(name="user_id", in="path", required=true, @OA\Schema(type="string")),
+     *
      *     @OA\Response(response=200, description="FTP user unlocked")
      * )
      */
     public function unlock(string $siteId, string $userId)
     {
+        $this->authorize('ftp.edit');
         $ftpUser = FtpUser::where('site_id', $siteId)->findOrFail($userId);
 
         $this->ftpService->unlockUser($ftpUser);

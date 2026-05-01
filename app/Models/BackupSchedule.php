@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -76,7 +77,7 @@ class BackupSchedule extends Model
      */
     public function calculateNextRun(): void
     {
-        $nextRun = match($this->frequency) {
+        $nextRun = match ($this->frequency) {
             'daily' => now()->setHour($this->hour)->setMinute(0)->setSecond(0)->addDay(),
             'weekly' => now()->setHour($this->hour)->setMinute(0)->setSecond(0)
                 ->next($this->day_of_week ?? 0),
@@ -92,7 +93,7 @@ class BackupSchedule extends Model
     /**
      * Calculate next run from cron expression.
      */
-    protected function calculateFromCron(): \Carbon\Carbon
+    protected function calculateFromCron(): Carbon
     {
         // Simple cron parser - in production use a package like mtdowling/cron-expression
         // For now, default to daily
@@ -113,12 +114,12 @@ class BackupSchedule extends Model
      */
     public function getScheduleDescription(): string
     {
-        return match($this->frequency) {
+        return match ($this->frequency) {
             'daily' => "Daily at {$this->hour}:00",
-            'weekly' => "Weekly on " . $this->getDayName() . " at {$this->hour}:00",
+            'weekly' => 'Weekly on '.$this->getDayName()." at {$this->hour}:00",
             'monthly' => "Monthly on day {$this->day_of_month} at {$this->hour}:00",
             'custom' => "Custom: {$this->cron_expression}",
-            default => "Unknown frequency",
+            default => 'Unknown frequency',
         };
     }
 
@@ -128,6 +129,7 @@ class BackupSchedule extends Model
     protected function getDayName(): string
     {
         $days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
         return $days[$this->day_of_week ?? 0] ?? 'Unknown';
     }
 

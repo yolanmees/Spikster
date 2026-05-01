@@ -108,7 +108,7 @@ Thank you for considering contributing to the Spikster project
 
 ## Licence
 
-Spikster is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License. See the [LICENSE](./LICENSE) file for details.
+Spikster is open-sourced software licensed under the [MIT License](./LICENSE).
 
 ## Need support with Spikster?
 

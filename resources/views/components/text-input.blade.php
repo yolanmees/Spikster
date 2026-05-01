@@ -9,7 +9,7 @@
 <div {{ $attributes->only('class')->merge(['class' => 'w-full']) }}>
     @if ($label)
         <label {{ $attributes->only('for') }}
-            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+            class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
             {{ $label }}
         </label>
     @endif
@@ -33,12 +33,12 @@
             placeholder="{{ $placeholder }}"
             {{ $attributes->except(['class', 'for', 'label', 'model', 'debounce', 'type', 'placeholder'])->merge([
                 'class' => implode(' ', [
-                    'block w-full rounded-lg border border-gray-300 bg-white py-2 text-sm text-gray-900',
-                    'placeholder-gray-400 shadow-sm',
-                    'focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20',
+                    'block w-full rounded-lg border border-zinc-300 bg-white py-2 text-sm text-zinc-950',
+                    'placeholder-zinc-400 shadow-sm',
+                    'focus:border-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-700/20',
                     'disabled:opacity-60 disabled:cursor-not-allowed',
-                    'dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500',
-                    'dark:focus:border-blue-400 dark:focus:ring-blue-400/20',
+                    'dark:border-zinc-600 dark:bg-zinc-800 dark:text-white dark:placeholder-zinc-500',
+                    'dark:focus:border-purple-500 dark:focus:ring-purple-500/20',
                     isset($icon) ? 'pl-10 pr-3' : 'px-3',
                     isset($suffix) ? 'pr-10' : '',
                 ])

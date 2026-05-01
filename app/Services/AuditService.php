@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Models\AuditLog;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
@@ -20,17 +22,20 @@ class AuditService
         array $newValues = [],
         string $severity = 'info'
     ): AuditLog {
+        $request = Request::instance();
+
         return AuditLog::create([
             'user_id' => Auth::id(),
             'event_type' => $eventType,
             'auditable_type' => $auditable ? get_class($auditable) : null,
             'auditable_id' => $auditable?->id,
-            'ip_address' => Request::ip(),
-            'user_agent' => Request::userAgent(),
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
             'description' => $description,
             'old_values' => ! empty($oldValues) ? $oldValues : null,
             'new_values' => ! empty($newValues) ? $newValues : null,
             'severity' => $severity,
+            'request_id' => $request->attributes->get('request_id'),
         ]);
     }
 
@@ -39,7 +44,7 @@ class AuditService
      */
     public static function logLogin(?int $userId = null): AuditLog
     {
-        $user = $userId ? \App\Models\User::find($userId) : Auth::user();
+        $user = $userId ? User::find($userId) : Auth::user();
 
         return self::log(
             eventType: 'login',
@@ -187,7 +192,7 @@ class AuditService
     /**
      * Get recent audit logs for a user.
      */
-    public static function getRecentLogsForUser(int $userId, int $limit = 50): \Illuminate\Database\Eloquent\Collection
+    public static function getRecentLogsForUser(int $userId, int $limit = 50): Collection
     {
         return AuditLog::where('user_id', $userId)
             ->orderBy('created_at', 'desc')
@@ -198,7 +203,7 @@ class AuditService
     /**
      * Get recent audit logs for a model.
      */
-    public static function getRecentLogsForModel(Model $model, int $limit = 50): \Illuminate\Database\Eloquent\Collection
+    public static function getRecentLogsForModel(Model $model, int $limit = 50): Collection
     {
         return AuditLog::where('auditable_type', get_class($model))
             ->where('auditable_id', $model->id)
@@ -210,7 +215,7 @@ class AuditService
     /**
      * Get critical security events.
      */
-    public static function getCriticalEvents(int $limit = 100): \Illuminate\Database\Eloquent\Collection
+    public static function getCriticalEvents(int $limit = 100): Collection
     {
         return AuditLog::where('severity', 'critical')
             ->orderBy('created_at', 'desc')

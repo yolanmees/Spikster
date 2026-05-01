@@ -1,6 +1,6 @@
 <x-guest-layout>
     <h2 class="text-2xl font-bold text-white text-center mb-1">Verify your email</h2>
-    <p class="text-sm text-gray-400 text-center mb-8">
+    <p class="text-sm text-zinc-500 dark:text-zinc-400 text-center mb-8">
         Before continuing, please verify your email by clicking the link we sent you.
         Didn't receive it? We'll resend it.
     </p>
@@ -15,18 +15,18 @@
         <form method="POST" action="{{ route('verification.send') }}">
             @csrf
             <button type="submit"
-                class="w-full py-2.5 px-6 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-semibold rounded-lg shadow-lg shadow-blue-500/20 transition-all duration-200 text-sm">
+                class="w-full py-2.5 px-6 bg-gradient-to-r bg-zinc-950 hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-950 dark:hover:bg-zinc-200 text-white font-semibold rounded-lg shadow-lg  transition-all duration-200 text-sm">
                 Resend Verification Email
             </button>
         </form>
 
         <div class="flex items-center justify-between text-sm">
-            <a href="{{ route('profile.show') }}" class="text-blue-400 hover:text-blue-300 transition-colors">
+            <a href="{{ route('profile.show') }}" class="text-purple-700 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 transition-colors">
                 Edit Profile
             </a>
             <form method="POST" action="{{ route('logout') }}" class="inline">
                 @csrf
-                <button type="submit" class="text-gray-400 hover:text-gray-300 transition-colors">
+                <button type="submit" class="text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:text-zinc-300 transition-colors">
                     Log Out
                 </button>
             </form>

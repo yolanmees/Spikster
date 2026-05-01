@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Module;
 use App\Services\ModuleRegistry;
-use Illuminate\Http\Request;
 
 class ModuleController extends Controller
 {
@@ -40,6 +39,7 @@ class ModuleController extends Controller
      */
     public function enable(string $id)
     {
+        $this->authorize('server.configure');
         $module = Module::findOrFail($id);
 
         try {
@@ -60,6 +60,7 @@ class ModuleController extends Controller
      */
     public function disable(string $id)
     {
+        $this->authorize('server.configure');
         $module = Module::findOrFail($id);
 
         try {

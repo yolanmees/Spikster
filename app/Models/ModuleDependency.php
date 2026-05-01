@@ -46,11 +46,11 @@ class ModuleDependency extends Model
 
     protected function checkModuleDependency(): bool
     {
-        if (!$this->requiredModule) {
+        if (! $this->requiredModule) {
             return false;
         }
 
-        if (!$this->requiredModule->is_installed) {
+        if (! $this->requiredModule->is_installed) {
             return false;
         }
 
@@ -67,12 +67,12 @@ class ModuleDependency extends Model
 
     protected function checkPackageDependency(): bool
     {
-        if (!$this->required_package) {
+        if (! $this->required_package) {
             return false;
         }
 
         $composerLock = json_decode(file_get_contents(base_path('composer.lock')), true);
-        
+
         foreach ($composerLock['packages'] ?? [] as $package) {
             if ($package['name'] === $this->required_package) {
                 if ($this->required_version) {
@@ -82,6 +82,7 @@ class ModuleDependency extends Model
                         '>='
                     );
                 }
+
                 return true;
             }
         }
@@ -91,7 +92,7 @@ class ModuleDependency extends Model
 
     protected function checkPhpVersion(): bool
     {
-        if (!$this->required_version) {
+        if (! $this->required_version) {
             return true;
         }
 
@@ -100,7 +101,7 @@ class ModuleDependency extends Model
 
     protected function checkPhpExtension(): bool
     {
-        if (!$this->required_package) {
+        if (! $this->required_package) {
             return false;
         }
 

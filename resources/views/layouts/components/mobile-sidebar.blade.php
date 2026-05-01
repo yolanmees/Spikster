@@ -33,15 +33,15 @@
             </div>
 
             {{-- Sidebar content (same as desktop) --}}
-            <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-gradient-to-b from-gray-900 to-gray-950 px-6 pb-4 ring-1 ring-white/10">
-                <div class="flex h-16 shrink-0 items-center border-b border-white/10">
+            <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-white dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800 px-6 pb-4">
+                <div class="flex h-16 shrink-0 items-center border-b border-zinc-200 dark:border-zinc-800">
                     <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="w-8 h-8 rounded-lg bg-zinc-950 dark:bg-white flex items-center justify-center">
+                            <svg class="w-5 h-5 text-white dark:text-zinc-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                             </svg>
                         </div>
-                        <span class="font-bold text-white text-lg">{{ config('app.name') }}</span>
+                        <span class="font-bold text-zinc-950 dark:text-zinc-100 text-lg">{{ config('app.name') }}</span>
                     </div>
                 </div>
                 <nav class="flex flex-1 flex-col">

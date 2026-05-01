@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class LogManagerController extends Controller
 {
     //
 
-    public function index(): \Illuminate\Http\JsonResponse
+    public function index(): JsonResponse
     {
         $logs = [];
         $log_files = glob(storage_path('logs/*.log'));
@@ -44,7 +46,7 @@ class LogManagerController extends Controller
         ]);
     }
 
-    public function show($log): \Illuminate\Http\JsonResponse
+    public function show($log): JsonResponse
     {
         $originalLog = $log;
         // check if log contains a underscore and if so, replace it with a slash
@@ -75,7 +77,7 @@ class LogManagerController extends Controller
 
     }
 
-    public function download($log): \Symfony\Component\HttpFoundation\BinaryFileResponse|\Illuminate\Http\JsonResponse
+    public function download($log): BinaryFileResponse|JsonResponse
     {
         // check if log contains a underscore and if so, replace it with a slash
         if (strpos($log, '_') !== false) {
@@ -93,7 +95,7 @@ class LogManagerController extends Controller
         }
     }
 
-    public function delete($log): \Illuminate\Http\JsonResponse
+    public function delete($log): JsonResponse
     {
         // Only allow deleting application logs, not server logs for safety
         if (strpos($log, '_') !== false) {
@@ -106,6 +108,7 @@ class LogManagerController extends Controller
 
         if (file_exists($filePath)) {
             unlink($filePath);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Log file deleted successfully',

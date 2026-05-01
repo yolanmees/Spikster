@@ -16,6 +16,7 @@ class UnbanIpSSH implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $timeout = 60;
+
     public $tries = 3;
 
     public function __construct(
@@ -33,10 +34,10 @@ class UnbanIpSSH implements ShouldQueue
                 throw new \RuntimeException("Daemon returned failure for fail2ban.unban: {$this->ip}");
             }
 
-            $jailInfo = $this->jail ? "from jail {$this->jail}" : "from all jails";
+            $jailInfo = $this->jail ? "from jail {$this->jail}" : 'from all jails';
             Log::info("Fail2ban: Unbanned IP {$this->ip} {$jailInfo} on server {$this->server->name}");
         } catch (\Throwable $e) {
-            Log::error("Fail2ban: Failed to unban IP {$this->ip}: " . $e->getMessage());
+            Log::error("Fail2ban: Failed to unban IP {$this->ip}: ".$e->getMessage());
             throw $e;
         }
     }

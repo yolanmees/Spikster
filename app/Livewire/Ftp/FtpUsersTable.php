@@ -13,30 +13,49 @@ class FtpUsersTable extends Component
     use WithPagination;
 
     public Site $site;
+
     public $search = '';
+
     public $statusFilter = 'all'; // all, active, inactive, locked
+
     public $perPage = 10;
 
     // Modal states
     public $showCreateModal = false;
+
     public $showEditModal = false;
+
     public $showDeleteModal = false;
+
     public $showPasswordModal = false;
+
     public $showQuotaModal = false;
+
     public $showConnectionInfoModal = false;
 
     // Form data
     public $selectedUserId;
+
     public $username;
+
     public $password;
+
     public $password_confirmation;
+
     public $home_directory;
+
     public $quota_mb = 1024;
+
     public $max_connections = 5;
+
     public $bandwidth_limit_kbps;
+
     public $require_ssl = true;
+
     public $allowed_ip;
+
     public $notes;
+
     public $is_active = true;
 
     protected $queryString = [
@@ -65,10 +84,10 @@ class FtpUsersTable extends Component
 
         // Apply search filter
         if ($this->search) {
-            $ftpUsersQuery->where(function($query) {
-                $query->where('username', 'like', '%' . $this->search . '%')
-                      ->orWhere('notes', 'like', '%' . $this->search . '%')
-                      ->orWhere('home_directory', 'like', '%' . $this->search . '%');
+            $ftpUsersQuery->where(function ($query) {
+                $query->where('username', 'like', '%'.$this->search.'%')
+                    ->orWhere('notes', 'like', '%'.$this->search.'%')
+                    ->orWhere('home_directory', 'like', '%'.$this->search.'%');
             });
         }
 
@@ -199,7 +218,7 @@ class FtpUsersTable extends Component
             session()->flash('success', 'FTP user created successfully! The user will be provisioned on the server shortly.');
 
         } catch (\Exception $e) {
-            session()->flash('error', 'Failed to create FTP user: ' . $e->getMessage());
+            session()->flash('error', 'Failed to create FTP user: '.$e->getMessage());
         }
     }
 
@@ -237,7 +256,7 @@ class FtpUsersTable extends Component
             session()->flash('success', 'FTP user updated successfully!');
 
         } catch (\Exception $e) {
-            session()->flash('error', 'Failed to update FTP user: ' . $e->getMessage());
+            session()->flash('error', 'Failed to update FTP user: '.$e->getMessage());
         }
     }
 
@@ -254,7 +273,7 @@ class FtpUsersTable extends Component
             session()->flash('success', 'FTP user deleted successfully!');
 
         } catch (\Exception $e) {
-            session()->flash('error', 'Failed to delete FTP user: ' . $e->getMessage());
+            session()->flash('error', 'Failed to delete FTP user: '.$e->getMessage());
         }
     }
 
@@ -278,7 +297,7 @@ class FtpUsersTable extends Component
             session()->flash('success', 'Password reset successfully!');
 
         } catch (\Exception $e) {
-            session()->flash('error', 'Failed to reset password: ' . $e->getMessage());
+            session()->flash('error', 'Failed to reset password: '.$e->getMessage());
         }
     }
 
@@ -301,7 +320,7 @@ class FtpUsersTable extends Component
             session()->flash('success', 'Quota updated successfully!');
 
         } catch (\Exception $e) {
-            session()->flash('error', 'Failed to update quota: ' . $e->getMessage());
+            session()->flash('error', 'Failed to update quota: '.$e->getMessage());
         }
     }
 
@@ -319,7 +338,7 @@ class FtpUsersTable extends Component
             }
 
         } catch (\Exception $e) {
-            session()->flash('error', 'Failed to toggle user status: ' . $e->getMessage());
+            session()->flash('error', 'Failed to toggle user status: '.$e->getMessage());
         }
     }
 
@@ -332,7 +351,7 @@ class FtpUsersTable extends Component
             session()->flash('success', 'FTP user unlocked successfully!');
 
         } catch (\Exception $e) {
-            session()->flash('error', 'Failed to unlock user: ' . $e->getMessage());
+            session()->flash('error', 'Failed to unlock user: '.$e->getMessage());
         }
     }
 
@@ -345,7 +364,7 @@ class FtpUsersTable extends Component
             session()->flash('success', 'Disk usage update queued. This may take a few moments.');
 
         } catch (\Exception $e) {
-            session()->flash('error', 'Failed to update disk usage: ' . $e->getMessage());
+            session()->flash('error', 'Failed to update disk usage: '.$e->getMessage());
         }
     }
 

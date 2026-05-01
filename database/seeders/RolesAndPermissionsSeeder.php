@@ -3,8 +3,9 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class RolesAndPermissionsSeeder extends Seeder
 {
@@ -14,7 +15,7 @@ class RolesAndPermissionsSeeder extends Seeder
     public function run(): void
     {
         // Reset cached roles and permissions
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         // Create permissions with organized groups
         $permissions = [
@@ -90,6 +91,12 @@ class RolesAndPermissionsSeeder extends Seeder
             // Users (Reseller & User only)
             'user.view', 'user.create', 'user.edit', 'user.delete',
 
+            // Roles & permissions
+            'role.view', 'role.create', 'role.edit', 'permission.assign',
+
+            // Settings
+            'settings.view', 'settings.edit',
+
             // Email
             'email.view', 'email.create', 'email.edit', 'email.delete', 'email.configure',
 
@@ -149,9 +156,9 @@ class RolesAndPermissionsSeeder extends Seeder
             'api.access',
         ]);
 
-        // 4. User - End user, assigned sites only
-        $user = Role::firstOrCreate(['name' => 'User']);
-        $user->syncPermissions([
+        // 4. Customer - End user, assigned sites only
+        $customer = Role::firstOrCreate(['name' => 'Customer']);
+        $customer->syncPermissions([
             // Sites (assigned only)
             'site.view', 'site.edit',
 
@@ -177,16 +184,23 @@ class RolesAndPermissionsSeeder extends Seeder
             'api.access',
         ]);
 
+        // Backward-compatible legacy end-user role.
+        $legacyUserRole = Role::firstOrCreate(['name' => 'User']);
+        $legacyUserRole->syncPermissions($customer->permissions->pluck('name')->all());
+
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
+
         $this->command->info('✅ Roles and permissions seeded successfully!');
         $this->command->info('');
         $this->command->info('📊 Summary:');
-        $this->command->info('   Roles created: 4 (Super Admin, Admin, Reseller, User)');
-        $this->command->info('   Permissions created: ' . count($permissions));
+        $this->command->info('   Roles created: 5 (Super Admin, Admin, Reseller, Customer, User)');
+        $this->command->info('   Permissions created: '.count($permissions));
         $this->command->info('');
         $this->command->info('🔐 Role Permissions:');
-        $this->command->info('   Super Admin: ' . $superAdmin->permissions->count() . ' (ALL)');
-        $this->command->info('   Admin: ' . $admin->permissions->count());
-        $this->command->info('   Reseller: ' . $reseller->permissions->count());
-        $this->command->info('   User: ' . $user->permissions->count());
+        $this->command->info('   Super Admin: '.$superAdmin->permissions->count().' (ALL)');
+        $this->command->info('   Admin: '.$admin->permissions->count());
+        $this->command->info('   Reseller: '.$reseller->permissions->count());
+        $this->command->info('   Customer: '.$customer->permissions->count());
+        $this->command->info('   User: '.$legacyUserRole->permissions->count().' (legacy alias)');
     }
 }

@@ -8,39 +8,39 @@ use App\Models\User;
 class SitePolicy
 {
     /**
-     * All authenticated users can list sites.
+     * Users with site.view permission can list sites.
      */
     public function viewAny(User $user): bool
     {
-        return true;
+        return $user->can('site.view');
     }
 
     /**
-     * All authenticated users can view a site.
+     * Users with site.view permission or server ownership may view a site.
      */
     public function view(User $user, Site $site): bool
     {
-        return $user->is_admin || $site->server?->user_id === $user->id;
+        return $user->can('site.view') || $site->server?->user_id === $user->id;
     }
 
     /**
-     * Only verified users can create sites.
+     * Only users with site.create permission can create sites.
      */
     public function create(User $user): bool
     {
-        return $user->hasVerifiedEmail();
+        return $user->can('site.create');
     }
 
     /**
-     * Only the site owner (or admin) may update a site.
+     * Users with site.edit permission or server ownership may update a site.
      */
     public function update(User $user, Site $site): bool
     {
-        return $user->is_admin || $site->server?->user_id === $user->id;
+        return $user->can('site.edit') || $site->server?->user_id === $user->id;
     }
 
     /**
-     * The panel site cannot be deleted; all others require ownership.
+     * The panel site cannot be deleted; all others require site.delete or ownership.
      */
     public function delete(User $user, Site $site): bool
     {
@@ -48,15 +48,15 @@ class SitePolicy
             return false;
         }
 
-        return $user->is_admin || $site->server?->user_id === $user->id;
+        return $user->can('site.delete') || $site->server?->user_id === $user->id;
     }
 
     /**
-     * Only admins may restore soft-deleted sites.
+     * Only users with site.configure permission may restore soft-deleted sites.
      */
     public function restore(User $user, Site $site): bool
     {
-        return $user->is_admin ?? false;
+        return $user->can('site.configure');
     }
 
     /**
@@ -79,7 +79,7 @@ class SitePolicy
             return false;
         }
 
-        return $user->is_admin || $site->server?->user_id === $user->id;
+        return $user->can('ssl.create') || $site->server?->user_id === $user->id;
     }
 
     /**
@@ -91,7 +91,7 @@ class SitePolicy
             return false;
         }
 
-        return $user->is_admin || $site->server?->user_id === $user->id;
+        return $user->can('site.deploy') || $site->server?->user_id === $user->id;
     }
 
     /**
@@ -99,7 +99,7 @@ class SitePolicy
      */
     public function manageAliases(User $user, Site $site): bool
     {
-        return $user->is_admin || $site->server?->user_id === $user->id;
+        return $user->can('site.configure') || $site->server?->user_id === $user->id;
     }
 
     /**
@@ -107,7 +107,7 @@ class SitePolicy
      */
     public function manageFtp(User $user, Site $site): bool
     {
-        return $user->is_admin || $site->server?->user_id === $user->id;
+        return $user->can('ftp.create') || $site->server?->user_id === $user->id;
     }
 
     /**
@@ -115,7 +115,7 @@ class SitePolicy
      */
     public function manageDatabases(User $user, Site $site): bool
     {
-        return $user->is_admin || $site->server?->user_id === $user->id;
+        return $user->can('database.create') || $site->server?->user_id === $user->id;
     }
 
     /**
@@ -123,7 +123,7 @@ class SitePolicy
      */
     public function manageEmail(User $user, Site $site): bool
     {
-        return $user->is_admin || $site->server?->user_id === $user->id;
+        return $user->can('email.create') || $site->server?->user_id === $user->id;
     }
 
     /**
@@ -131,7 +131,7 @@ class SitePolicy
      */
     public function manageCron(User $user, Site $site): bool
     {
-        return $user->is_admin || $site->server?->user_id === $user->id;
+        return $user->can('site.configure') || $site->server?->user_id === $user->id;
     }
 
     /**
@@ -139,7 +139,7 @@ class SitePolicy
      */
     public function manageDns(User $user, Site $site): bool
     {
-        return $user->is_admin || $site->server?->user_id === $user->id;
+        return $user->can('dns.create') || $site->server?->user_id === $user->id;
     }
 
     /**
@@ -147,7 +147,7 @@ class SitePolicy
      */
     public function manageBackups(User $user, Site $site): bool
     {
-        return $user->is_admin || $site->server?->user_id === $user->id;
+        return $user->can('backup.view') || $site->server?->user_id === $user->id;
     }
 
     /**
@@ -155,7 +155,7 @@ class SitePolicy
      */
     public function manageFiles(User $user, Site $site): bool
     {
-        return $user->is_admin || $site->server?->user_id === $user->id;
+        return $user->can('site.configure') || $site->server?->user_id === $user->id;
     }
 
     /**
@@ -163,7 +163,7 @@ class SitePolicy
      */
     public function manageWordPress(User $user, Site $site): bool
     {
-        return $user->is_admin || $site->server?->user_id === $user->id;
+        return $user->can('site.configure') || $site->server?->user_id === $user->id;
     }
 
     /**
@@ -171,7 +171,7 @@ class SitePolicy
      */
     public function manageNodejs(User $user, Site $site): bool
     {
-        return $user->is_admin || $site->server?->user_id === $user->id;
+        return $user->can('site.configure') || $site->server?->user_id === $user->id;
     }
 
     /**
@@ -179,7 +179,7 @@ class SitePolicy
      */
     public function updateCredentials(User $user, Site $site): bool
     {
-        return $user->is_admin || $site->server?->user_id === $user->id;
+        return $user->can('site.configure') || $site->server?->user_id === $user->id;
     }
 
     /**
@@ -187,7 +187,7 @@ class SitePolicy
      */
     public function viewLogs(User $user, Site $site): bool
     {
-        return $user->is_admin || $site->server?->user_id === $user->id;
+        return $user->can('site.view') || $site->server?->user_id === $user->id;
     }
 
     /**
@@ -195,6 +195,6 @@ class SitePolicy
      */
     public function installRoundcube(User $user, Site $site): bool
     {
-        return $user->is_admin || $site->server?->user_id === $user->id;
+        return $user->can('site.configure') || $site->server?->user_id === $user->id;
     }
 }

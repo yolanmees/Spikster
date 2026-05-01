@@ -3,13 +3,13 @@
 <div class="space-y-6">
     <!-- Time Range Selector - Shared for all graphs -->
     <div
-        class="flex justify-between items-center bg-gradient-to-r from-blue-50 to-indigo-50 p-5 rounded-xl border border-blue-100 shadow-sm">
+        class="flex justify-between items-center bg-zinc-50 dark:bg-zinc-900 p-5 rounded-xl border border-zinc-200 dark:border-zinc-800">
         <div>
-            <h3 class="text-xl font-bold text-gray-800">Server Monitoring</h3>
-            <p class="text-sm text-gray-600 mt-1">Real-time resource usage</p>
+            <h3 class="text-xl font-bold text-zinc-950 dark:text-white">Server Monitoring</h3>
+            <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Real-time resource usage</p>
         </div>
         <select id="timeRangeSelector"
-            class="px-4 py-2 rounded-lg border-2 border-blue-200 shadow-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-200 text-sm font-medium text-gray-700 bg-white transition-all">
+            class="px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 focus:border-purple-700 focus:ring-2 focus:ring-purple-700/20 text-sm font-medium transition-all">
             <option value="1">Last Hour</option>
             <option value="6">Last 6 Hours</option>
             <option value="12">Last 12 Hours</option>
@@ -39,16 +39,16 @@
         </div>
 
         <!-- Memory Chart -->
-        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+        <div class="bg-white dark:bg-zinc-900 p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow">
             <div class="flex items-center gap-3 mb-4">
-                <div class="p-2 bg-emerald-100 rounded-lg">
-                    <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="p-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
+                    <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4">
                         </path>
                     </svg>
                 </div>
-                <h4 class="text-base font-semibold text-gray-800">Memory Usage</h4>
+                <h4 class="text-base font-semibold text-zinc-950 dark:text-white">Memory Usage</h4>
             </div>
             <div style="position: relative; height: 220px;">
                 <canvas id="memoryChart"></canvas>
@@ -56,15 +56,15 @@
         </div>
 
         <!-- Load Average Chart -->
-        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+        <div class="bg-white dark:bg-zinc-900 p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow">
             <div class="flex items-center gap-3 mb-4">
-                <div class="p-2 bg-amber-100 rounded-lg">
-                    <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                     </svg>
                 </div>
-                <h4 class="text-base font-semibold text-gray-800">Load Average</h4>
+                <h4 class="text-base font-semibold text-zinc-950 dark:text-white">Load Average</h4>
             </div>
             <div style="position: relative; height: 220px;">
                 <canvas id="loadChart"></canvas>
@@ -72,16 +72,16 @@
         </div>
 
         <!-- Disk Usage Chart -->
-        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+        <div class="bg-white dark:bg-zinc-900 p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow">
             <div class="flex items-center gap-3 mb-4">
-                <div class="p-2 bg-purple-100 rounded-lg">
-                    <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                    <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z">
                         </path>
                     </svg>
                 </div>
-                <h4 class="text-base font-semibold text-gray-800">Disk Usage</h4>
+                <h4 class="text-base font-semibold text-zinc-950 dark:text-white">Disk Usage</h4>
             </div>
             <div style="position: relative; height: 220px;">
                 <canvas id="diskChart"></canvas>
@@ -172,14 +172,14 @@
                             beginAtZero: true,
                             max: maxValue,
                             grid: {
-                                color: 'rgba(0, 0, 0, 0.04)',
+                                color: 'rgba(113, 113, 122, 0.08)',
                                 drawBorder: false
                             },
                             ticks: {
                                 font: {
                                     size: 11
                                 },
-                                color: '#6B7280',
+                                color: '#71717a',
                                 padding: 8,
                                 callback: function(value) {
                                     return value + (maxValue === 100 ? '%' : '');
@@ -196,7 +196,7 @@
                                 font: {
                                     size: 11
                                 },
-                                color: '#6B7280',
+                                color: '#71717a',
                                 padding: 8
                             }
                         }

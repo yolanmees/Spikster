@@ -3,6 +3,7 @@
 namespace App\Livewire\Server;
 
 use App\Services\ServerService;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 
@@ -89,7 +90,7 @@ class NewServer extends Component
             ]);
 
             $this->serverSshPort = 22;
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             // Re-throw validation exceptions
             throw $e;
         } catch (\Exception $e) {

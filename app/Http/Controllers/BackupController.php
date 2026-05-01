@@ -10,7 +10,6 @@ use App\Services\BackupService;
 use App\Services\SiteService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 /**
@@ -22,6 +21,7 @@ use Illuminate\Support\Facades\Validator;
 class BackupController extends Controller
 {
     protected BackupService $backupService;
+
     protected SiteService $siteService;
 
     public function __construct(BackupService $backupService, SiteService $siteService)
@@ -35,12 +35,15 @@ class BackupController extends Controller
      *     path="/api/sites/{site_id}/backups",
      *     tags={"Backups"},
      *     summary="List all backups for a site",
+     *
      *     @OA\Parameter(
      *         name="site_id",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="string", format="uuid")
      *     ),
+     *
      *     @OA\Response(response=200, description="List of backups"),
      *     @OA\Response(response=404, description="Site not found")
      * )
@@ -48,6 +51,7 @@ class BackupController extends Controller
     public function index(string $siteId): JsonResponse
     {
         $site = Site::where('site_id', $siteId)->firstOrFail();
+        $this->authorize('backup.view');
 
         $backups = Backup::where('site_id', $site->site_id)
             ->with(['backupSchedule', 'server'])
@@ -62,14 +66,19 @@ class BackupController extends Controller
      *     path="/api/sites/{site_id}/backups/full",
      *     tags={"Backups"},
      *     summary="Create a full backup",
+     *
      *     @OA\Parameter(
      *         name="site_id",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="string", format="uuid")
      *     ),
+     *
      *     @OA\RequestBody(
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="include_database", type="boolean", example=true),
      *             @OA\Property(property="include_files", type="boolean", example=true),
      *             @OA\Property(property="include_email", type="boolean", example=false),
@@ -77,6 +86,7 @@ class BackupController extends Controller
      *             @OA\Property(property="storage_location", type="string", example="local")
      *         )
      *     ),
+     *
      *     @OA\Response(response=202, description="Backup queued"),
      *     @OA\Response(response=404, description="Site not found")
      * )
@@ -84,6 +94,7 @@ class BackupController extends Controller
     public function createFullBackup(Request $request, string $siteId): JsonResponse
     {
         $site = Site::where('site_id', $siteId)->firstOrFail();
+        $this->authorize('backup.create');
 
         $validator = Validator::make($request->all(), [
             'include_database' => 'boolean',
@@ -110,12 +121,15 @@ class BackupController extends Controller
      *     path="/api/sites/{site_id}/backups/incremental",
      *     tags={"Backups"},
      *     summary="Create an incremental backup",
+     *
      *     @OA\Parameter(
      *         name="site_id",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="string", format="uuid")
      *     ),
+     *
      *     @OA\Response(response=202, description="Incremental backup queued"),
      *     @OA\Response(response=404, description="Site not found")
      * )
@@ -123,6 +137,7 @@ class BackupController extends Controller
     public function createIncrementalBackup(Request $request, string $siteId): JsonResponse
     {
         $site = Site::where('site_id', $siteId)->firstOrFail();
+        $this->authorize('backup.create');
 
         $backup = $this->backupService->createIncrementalBackup($site, $request->all());
 
@@ -137,18 +152,22 @@ class BackupController extends Controller
      *     path="/api/sites/{site_id}/backups/database",
      *     tags={"Backups"},
      *     summary="Create a database-only backup",
+     *
      *     @OA\Parameter(
      *         name="site_id",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="string", format="uuid")
      *     ),
+     *
      *     @OA\Response(response=202, description="Database backup queued")
      * )
      */
     public function createDatabaseBackup(Request $request, string $siteId): JsonResponse
     {
         $site = Site::where('site_id', $siteId)->firstOrFail();
+        $this->authorize('backup.create');
 
         $backup = $this->backupService->createDatabaseBackup($site, $request->all());
 
@@ -163,24 +182,30 @@ class BackupController extends Controller
      *     path="/api/sites/{site_id}/backups/{backup_id}",
      *     tags={"Backups"},
      *     summary="Get backup details",
+     *
      *     @OA\Parameter(
      *         name="site_id",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="string", format="uuid")
      *     ),
+     *
      *     @OA\Parameter(
      *         name="backup_id",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="string", format="uuid")
      *     ),
+     *
      *     @OA\Response(response=200, description="Backup details"),
      *     @OA\Response(response=404, description="Backup not found")
      * )
      */
     public function show(string $siteId, string $backupId): JsonResponse
     {
+        $this->authorize('backup.view');
         $backup = Backup::where('site_id', $siteId)
             ->with(['site', 'server', 'backupSchedule'])
             ->findOrFail($backupId);
@@ -193,25 +218,33 @@ class BackupController extends Controller
      *     path="/api/sites/{site_id}/backups/{backup_id}/restore",
      *     tags={"Backups"},
      *     summary="Restore a backup",
+     *
      *     @OA\Parameter(
      *         name="site_id",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="string", format="uuid")
      *     ),
+     *
      *     @OA\Parameter(
      *         name="backup_id",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="string", format="uuid")
      *     ),
+     *
      *     @OA\RequestBody(
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="restore_database", type="boolean", example=true),
      *             @OA\Property(property="restore_files", type="boolean", example=true),
      *             @OA\Property(property="restore_email", type="boolean", example=false)
      *         )
      *     ),
+     *
      *     @OA\Response(response=202, description="Restore queued"),
      *     @OA\Response(response=400, description="Backup cannot be restored"),
      *     @OA\Response(response=404, description="Backup not found")
@@ -219,6 +252,7 @@ class BackupController extends Controller
      */
     public function restore(Request $request, string $siteId, string $backupId): JsonResponse
     {
+        $this->authorize('backup.restore');
         $backup = Backup::where('site_id', $siteId)->findOrFail($backupId);
 
         $validator = Validator::make($request->all(), [
@@ -233,7 +267,7 @@ class BackupController extends Controller
 
         $success = $this->backupService->restoreBackup($backup, $request->all());
 
-        if (!$success) {
+        if (! $success) {
             return response()->json([
                 'message' => 'Backup cannot be restored',
             ], 400);
@@ -249,29 +283,35 @@ class BackupController extends Controller
      *     path="/api/sites/{site_id}/backups/{backup_id}/download",
      *     tags={"Backups"},
      *     summary="Download a backup",
+     *
      *     @OA\Parameter(
      *         name="site_id",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="string", format="uuid")
      *     ),
+     *
      *     @OA\Parameter(
      *         name="backup_id",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="string", format="uuid")
      *     ),
+     *
      *     @OA\Response(response=200, description="Backup file"),
      *     @OA\Response(response=404, description="Backup not found")
      * )
      */
     public function download(string $siteId, string $backupId): JsonResponse
     {
+        $this->authorize('backup.view');
         $backup = Backup::where('site_id', $siteId)->findOrFail($backupId);
 
         $filepath = $this->backupService->downloadBackup($backup);
 
-        if (!$filepath) {
+        if (! $filepath) {
             return response()->json([
                 'message' => 'Backup file not available for download',
             ], 404);
@@ -290,30 +330,38 @@ class BackupController extends Controller
      *     path="/api/sites/{site_id}/backups/{backup_id}",
      *     tags={"Backups"},
      *     summary="Delete a backup",
+     *
      *     @OA\Parameter(
      *         name="site_id",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="string", format="uuid")
      *     ),
+     *
      *     @OA\Parameter(
      *         name="backup_id",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="string", format="uuid")
      *     ),
+     *
      *     @OA\Parameter(
      *         name="delete_file",
      *         in="query",
      *         required=false,
+     *
      *         @OA\Schema(type="boolean", default=false)
      *     ),
+     *
      *     @OA\Response(response=200, description="Backup deleted"),
      *     @OA\Response(response=404, description="Backup not found")
      * )
      */
     public function destroy(Request $request, string $siteId, string $backupId): JsonResponse
     {
+        $this->authorize('backup.delete');
         $backup = Backup::where('site_id', $siteId)->findOrFail($backupId);
 
         $deleteFile = $request->boolean('delete_file', false);
@@ -329,18 +377,22 @@ class BackupController extends Controller
      *     path="/api/sites/{site_id}/backups/stats",
      *     tags={"Backups"},
      *     summary="Get backup statistics for a site",
+     *
      *     @OA\Parameter(
      *         name="site_id",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="string", format="uuid")
      *     ),
+     *
      *     @OA\Response(response=200, description="Backup statistics")
      * )
      */
     public function stats(string $siteId): JsonResponse
     {
         $site = Site::where('site_id', $siteId)->firstOrFail();
+        $this->authorize('backup.view');
 
         $stats = $this->backupService->getBackupStats($site);
 
@@ -356,18 +408,22 @@ class BackupController extends Controller
      *     path="/api/sites/{site_id}/backup-schedules",
      *     tags={"Backups"},
      *     summary="List backup schedules for a site",
+     *
      *     @OA\Parameter(
      *         name="site_id",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="string", format="uuid")
      *     ),
+     *
      *     @OA\Response(response=200, description="List of backup schedules")
      * )
      */
     public function listSchedules(string $siteId): JsonResponse
     {
         $site = Site::where('site_id', $siteId)->firstOrFail();
+        $this->authorize('backup.view');
 
         $schedules = BackupSchedule::where('site_id', $site->site_id)
             ->with('backups')
@@ -382,16 +438,21 @@ class BackupController extends Controller
      *     path="/api/sites/{site_id}/backup-schedules",
      *     tags={"Backups"},
      *     summary="Create a backup schedule",
+     *
      *     @OA\Parameter(
      *         name="site_id",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="string", format="uuid")
      *     ),
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"name", "type", "frequency"},
+     *
      *             @OA\Property(property="name", type="string", example="Daily Full Backup"),
      *             @OA\Property(property="type", type="string", enum={"full", "incremental", "database", "files"}),
      *             @OA\Property(property="frequency", type="string", enum={"daily", "weekly", "monthly", "custom"}),
@@ -406,6 +467,7 @@ class BackupController extends Controller
      *             @OA\Property(property="is_active", type="boolean", example=true)
      *         )
      *     ),
+     *
      *     @OA\Response(response=201, description="Backup schedule created"),
      *     @OA\Response(response=422, description="Validation error")
      * )
@@ -413,6 +475,7 @@ class BackupController extends Controller
     public function createSchedule(Request $request, string $siteId): JsonResponse
     {
         $site = Site::where('site_id', $siteId)->firstOrFail();
+        $this->authorize('backup.configure');
 
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
@@ -446,24 +509,30 @@ class BackupController extends Controller
      *     path="/api/sites/{site_id}/backup-schedules/{schedule_id}",
      *     tags={"Backups"},
      *     summary="Update a backup schedule",
+     *
      *     @OA\Parameter(
      *         name="site_id",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="string", format="uuid")
      *     ),
+     *
      *     @OA\Parameter(
      *         name="schedule_id",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="string", format="uuid")
      *     ),
+     *
      *     @OA\Response(response=200, description="Schedule updated"),
      *     @OA\Response(response=404, description="Schedule not found")
      * )
      */
     public function updateSchedule(Request $request, string $siteId, string $scheduleId): JsonResponse
     {
+        $this->authorize('backup.configure');
         $schedule = BackupSchedule::where('site_id', $siteId)->findOrFail($scheduleId);
 
         $validator = Validator::make($request->all(), [
@@ -490,24 +559,30 @@ class BackupController extends Controller
      *     path="/api/sites/{site_id}/backup-schedules/{schedule_id}",
      *     tags={"Backups"},
      *     summary="Delete a backup schedule",
+     *
      *     @OA\Parameter(
      *         name="site_id",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="string", format="uuid")
      *     ),
+     *
      *     @OA\Parameter(
      *         name="schedule_id",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="string", format="uuid")
      *     ),
+     *
      *     @OA\Response(response=200, description="Schedule deleted"),
      *     @OA\Response(response=404, description="Schedule not found")
      * )
      */
     public function deleteSchedule(Request $request, string $siteId, string $scheduleId): JsonResponse
     {
+        $this->authorize('backup.configure');
         $schedule = BackupSchedule::where('site_id', $siteId)->findOrFail($scheduleId);
 
         $deleteBackups = $request->boolean('delete_backups', false);
@@ -527,11 +602,13 @@ class BackupController extends Controller
      *     path="/api/backup-storage-locations",
      *     tags={"Backups"},
      *     summary="List all storage locations",
+     *
      *     @OA\Response(response=200, description="List of storage locations")
      * )
      */
     public function listStorageLocations(): JsonResponse
     {
+        $this->authorize('backup.view');
         $locations = BackupStorageLocation::active()->get();
 
         return response()->json($locations);
@@ -542,10 +619,13 @@ class BackupController extends Controller
      *     path="/api/backup-storage-locations",
      *     tags={"Backups"},
      *     summary="Create a storage location",
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"name", "type", "config"},
+     *
      *             @OA\Property(property="name", type="string", example="AWS S3"),
      *             @OA\Property(property="type", type="string", enum={"local", "s3", "ftp", "sftp"}),
      *             @OA\Property(property="config", type="object"),
@@ -553,12 +633,14 @@ class BackupController extends Controller
      *             @OA\Property(property="is_active", type="boolean", example=true)
      *         )
      *     ),
+     *
      *     @OA\Response(response=201, description="Storage location created"),
      *     @OA\Response(response=422, description="Validation error")
      * )
      */
     public function createStorageLocation(Request $request): JsonResponse
     {
+        $this->authorize('backup.configure');
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'type' => 'required|in:local,s3,ftp,sftp',
@@ -584,17 +666,21 @@ class BackupController extends Controller
      *     path="/api/backup-storage-locations/{location_id}/test",
      *     tags={"Backups"},
      *     summary="Test storage location connection",
+     *
      *     @OA\Parameter(
      *         name="location_id",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="string", format="uuid")
      *     ),
+     *
      *     @OA\Response(response=200, description="Connection test result")
      * )
      */
     public function testStorageConnection(string $locationId): JsonResponse
     {
+        $this->authorize('backup.configure');
         $location = BackupStorageLocation::findOrFail($locationId);
 
         $success = $this->backupService->testStorageConnection($location);
@@ -612,23 +698,27 @@ class BackupController extends Controller
      *     path="/api/backup-storage-locations/{location_id}",
      *     tags={"Backups"},
      *     summary="Delete a storage location",
+     *
      *     @OA\Parameter(
      *         name="location_id",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="string", format="uuid")
      *     ),
+     *
      *     @OA\Response(response=200, description="Storage location deleted"),
      *     @OA\Response(response=400, description="Cannot delete default location")
      * )
      */
     public function deleteStorageLocation(string $locationId): JsonResponse
     {
+        $this->authorize('backup.configure');
         $location = BackupStorageLocation::findOrFail($locationId);
 
         $success = $this->backupService->deleteStorageLocation($location);
 
-        if (!$success) {
+        if (! $success) {
             return response()->json([
                 'message' => 'Cannot delete default storage location',
             ], 400);

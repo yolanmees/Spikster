@@ -21,27 +21,27 @@ class WordPressInstallationService
         try {
             // Get site and server
             $site = Site::where('site_id', $data['site_id'])->first();
-            if (!$site) {
+            if (! $site) {
                 return ['success' => false, 'message' => 'Site not found'];
             }
 
             $server = $site->server;
-            if (!$server) {
+            if (! $server) {
                 return ['success' => false, 'message' => 'Server not found'];
             }
 
             // Create database and user
-            $dbName = 'wp_' . Str::random(8);
-            $dbUser = 'user_' . Str::random(8);
+            $dbName = 'wp_'.Str::random(8);
+            $dbUser = 'user_'.Str::random(8);
             $dbPassword = Str::random(16);
 
             $databaseResponse = $this->databaseService->createDatabase($dbName, $data['site_id']);
-            if (!$databaseResponse['success']) {
+            if (! $databaseResponse['success']) {
                 return $databaseResponse;
             }
 
             $userResponse = $this->databaseService->createUser($dbUser, $dbPassword, $data['site_id']);
-            if (!$userResponse['success']) {
+            if (! $userResponse['success']) {
                 return $userResponse;
             }
 
@@ -50,15 +50,15 @@ class WordPressInstallationService
                 $databaseResponse['database']->id,
                 $data['site_id']
             );
-            if (!$linkResponse['success']) {
+            if (! $linkResponse['success']) {
                 return $linkResponse;
             }
 
             // Install WordPress files
-            $path = $site->rootpath . '/' . trim($data['path'], '/');
+            $path = $site->rootpath.'/'.trim($data['path'], '/');
             $installResult = $this->installWordPressFiles($server, $path, $dbName, $dbUser, $dbPassword);
-            
-            if (!$installResult['success']) {
+
+            if (! $installResult['success']) {
                 return $installResult;
             }
 
@@ -66,7 +66,7 @@ class WordPressInstallationService
             $installation = WordPressInstallation::create([
                 'site_id' => $data['site_id'],
                 'path' => $data['path'],
-                'url' => $data['url'] ?? 'https://' . $site->domain . '/' . trim($data['path'], '/'),
+                'url' => $data['url'] ?? 'https://'.$site->domain.'/'.trim($data['path'], '/'),
                 'admin_username' => $data['username'],
                 'admin_password' => $data['password'],
                 'database_id' => $databaseResponse['database']->id,
@@ -95,7 +95,7 @@ class WordPressInstallationService
 
             return [
                 'success' => false,
-                'message' => 'WordPress installation failed: ' . $e->getMessage(),
+                'message' => 'WordPress installation failed: '.$e->getMessage(),
             ];
         }
     }
@@ -174,7 +174,7 @@ class WordPressInstallationService
 
             return [
                 'success' => false,
-                'message' => 'Failed to install WordPress files: ' . $e->getMessage(),
+                'message' => 'Failed to install WordPress files: '.$e->getMessage(),
             ];
         }
     }
@@ -210,7 +210,7 @@ class WordPressInstallationService
 
             return [
                 'success' => false,
-                'message' => 'Uninstallation failed: ' . $e->getMessage(),
+                'message' => 'Uninstallation failed: '.$e->getMessage(),
             ];
         }
     }

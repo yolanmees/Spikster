@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Domain;
-use App\Models\DnsRecord;
 use App\Models\Site;
 use App\Services\DnsService;
 use Illuminate\Http\Request;

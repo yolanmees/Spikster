@@ -29,7 +29,7 @@ class SendCronJobFailedNotification
 
         // Send notification to admin users
         $admins = User::role('admin')->get();
-        
+
         foreach ($admins as $admin) {
             $admin->notify(new CronJobFailedNotification($execution));
         }

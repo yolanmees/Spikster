@@ -68,7 +68,7 @@ class ModuleMenuItem extends Model
 
     public function getBadgeValue()
     {
-        if ($this->badge_type === 'none' || !$this->badge_source) {
+        if ($this->badge_type === 'none' || ! $this->badge_source) {
             return null;
         }
 
@@ -81,7 +81,7 @@ class ModuleMenuItem extends Model
             return null;
         }
 
-        if (!class_exists($class) || !method_exists($class, $method)) {
+        if (! class_exists($class) || ! method_exists($class, $method)) {
             return null;
         }
 
@@ -90,7 +90,7 @@ class ModuleMenuItem extends Model
 
     public function hasPermission(): bool
     {
-        if (!$this->permission) {
+        if (! $this->permission) {
             return true;
         }
 

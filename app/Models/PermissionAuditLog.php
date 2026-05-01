@@ -5,8 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class PermissionAuditLog extends Model
 {
@@ -14,10 +14,15 @@ class PermissionAuditLog extends Model
 
     // Action constants
     const ACTION_ROLE_ASSIGNED = 'role_assigned';
+
     const ACTION_ROLE_REVOKED = 'role_revoked';
+
     const ACTION_PERMISSION_GRANTED = 'permission_granted';
+
     const ACTION_PERMISSION_REVOKED = 'permission_revoked';
+
     const ACTION_SITE_ACCESS_GRANTED = 'site_access_granted';
+
     const ACTION_SITE_ACCESS_REVOKED = 'site_access_revoked';
 
     const UPDATED_AT = null; // Only created_at

@@ -6,20 +6,15 @@ use App\Models\Backup;
 use App\Models\BackupSchedule;
 use App\Models\BackupStorageLocation;
 use App\Models\Site;
-use App\Models\Server;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Carbon\Carbon;
 
 class BackupService
 {
     /**
      * Create a full backup of a site
-     *
-     * @param Site $site
-     * @param array $options
-     * @return Backup
      */
     public function createFullBackup(Site $site, array $options = []): Backup
     {
@@ -36,22 +31,22 @@ class BackupService
             'storage_location' => $options['storage_location'] ?? 'local',
         ]);
 
-        $daemon = app(\App\Services\DaemonService::class);
+        $daemon = app(DaemonService::class);
         $result = $daemon->send('backup.create', [
-            'site_id'   => $backup->site->site_id,
-            'username'  => $backup->site->username,
-            'db_name'   => $backup->site->username,
-            'db_pass'   => $backup->site->database,
-            'db_root'   => $backup->site->server->database,
-            'site_root' => '/home/' . $backup->site->username . '/web',
+            'site_id' => $backup->site->site_id,
+            'username' => $backup->site->username,
+            'db_name' => $backup->site->username,
+            'db_pass' => $backup->site->database,
+            'db_root' => $backup->site->server->database,
+            'site_root' => '/home/'.$backup->site->username.'/web',
         ]);
 
         $backup->update([
-            'status'   => $result['success'] ? 'completed' : 'failed',
+            'status' => $result['success'] ? 'completed' : 'failed',
             'filename' => $result['output'] ?? null,
         ]);
 
-        Log::info("Full backup for site {$site->domain}: " . ($result['success'] ? 'completed' : 'failed'), [
+        Log::info("Full backup for site {$site->domain}: ".($result['success'] ? 'completed' : 'failed'), [
             'backup_id' => $backup->id,
         ]);
 
@@ -60,10 +55,6 @@ class BackupService
 
     /**
      * Create an incremental backup of a site
-     *
-     * @param Site $site
-     * @param array $options
-     * @return Backup
      */
     public function createIncrementalBackup(Site $site, array $options = []): Backup
     {
@@ -74,9 +65,10 @@ class BackupService
             ->orderBy('created_at', 'desc')
             ->first();
 
-        if (!$lastBackup) {
+        if (! $lastBackup) {
             // No previous backup exists, create a full backup instead
             Log::info("No previous backup found for site {$site->domain}, creating full backup");
+
             return $this->createFullBackup($site, $options);
         }
 
@@ -98,12 +90,12 @@ class BackupService
         ]);
 
         // Dispatch SSH job to create the incremental backup
-        app(\App\Services\DaemonService::class)->send('backup.create', [
-            'site_id'   => $backup->site->site_id,
-            'username'  => $backup->site->username,
-            'db_name'   => $backup->site->username,
-            'db_root'   => $backup->site->server->database,
-            'site_root' => '/home/' . $backup->site->username . '/web',
+        app(DaemonService::class)->send('backup.create', [
+            'site_id' => $backup->site->site_id,
+            'username' => $backup->site->username,
+            'db_name' => $backup->site->username,
+            'db_root' => $backup->site->server->database,
+            'site_root' => '/home/'.$backup->site->username.'/web',
         ]);
 
         Log::info("Incremental backup queued for site {$site->domain}", [
@@ -116,10 +108,6 @@ class BackupService
 
     /**
      * Create a database-only backup
-     *
-     * @param Site $site
-     * @param array $options
-     * @return Backup
      */
     public function createDatabaseBackup(Site $site, array $options = []): Backup
     {
@@ -137,12 +125,12 @@ class BackupService
         ]);
 
         // For database-only backups, we use the full backup job but it will only backup DB
-        app(\App\Services\DaemonService::class)->send('backup.create', [
-            'site_id'   => $backup->site->site_id,
-            'username'  => $backup->site->username,
-            'db_name'   => $backup->site->username,
-            'db_root'   => $backup->site->server->database,
-            'site_root' => '/home/' . $backup->site->username . '/web',
+        app(DaemonService::class)->send('backup.create', [
+            'site_id' => $backup->site->site_id,
+            'username' => $backup->site->username,
+            'db_name' => $backup->site->username,
+            'db_root' => $backup->site->server->database,
+            'site_root' => '/home/'.$backup->site->username.'/web',
         ]);
 
         Log::info("Database backup queued for site {$site->domain}", [
@@ -154,10 +142,6 @@ class BackupService
 
     /**
      * Create a files-only backup
-     *
-     * @param Site $site
-     * @param array $options
-     * @return Backup
      */
     public function createFilesBackup(Site $site, array $options = []): Backup
     {
@@ -175,12 +159,12 @@ class BackupService
         ]);
 
         // For files-only backups, we use the full backup job but it will only backup files
-        app(\App\Services\DaemonService::class)->send('backup.create', [
-            'site_id'   => $backup->site->site_id,
-            'username'  => $backup->site->username,
-            'db_name'   => $backup->site->username,
-            'db_root'   => $backup->site->server->database,
-            'site_root' => '/home/' . $backup->site->username . '/web',
+        app(DaemonService::class)->send('backup.create', [
+            'site_id' => $backup->site->site_id,
+            'username' => $backup->site->username,
+            'db_name' => $backup->site->username,
+            'db_root' => $backup->site->server->database,
+            'site_root' => '/home/'.$backup->site->username.'/web',
         ]);
 
         Log::info("Files backup queued for site {$site->domain}", [
@@ -192,48 +176,47 @@ class BackupService
 
     /**
      * Restore a backup
-     *
-     * @param Backup $backup
-     * @param array $options
-     * @return bool
      */
     public function restoreBackup(Backup $backup, array $options = []): bool
     {
-        if (!$backup->isComplete()) {
-            Log::error("Cannot restore incomplete backup", [
+        if (! $backup->isComplete()) {
+            Log::error('Cannot restore incomplete backup', [
                 'backup_id' => $backup->id,
                 'status' => $backup->status,
             ]);
+
             return false;
         }
 
         // Check if backup exists
-        if (!$backup->exists()) {
-            Log::error("Backup file does not exist", [
+        if (! $backup->exists()) {
+            Log::error('Backup file does not exist', [
                 'backup_id' => $backup->id,
                 'filepath' => $backup->filepath,
             ]);
+
             return false;
         }
 
         // Verify backup integrity before restore
-        if (!$backup->verifyIntegrity()) {
-            Log::error("Backup integrity verification failed", [
+        if (! $backup->verifyIntegrity()) {
+            Log::error('Backup integrity verification failed', [
                 'backup_id' => $backup->id,
             ]);
+
             return false;
         }
 
         // Dispatch SSH job to restore the backup
-        app(\App\Services\DaemonService::class)->send('backup.restore', [
-            'archive'   => $backup->filepath,
-            'username'  => $backup->site->username,
-            'db_name'   => $backup->site->username,
-            'db_root'   => $backup->site->server->database,
-            'site_root' => '/home/' . $backup->site->username . '/web',
+        app(DaemonService::class)->send('backup.restore', [
+            'archive' => $backup->filepath,
+            'username' => $backup->site->username,
+            'db_name' => $backup->site->username,
+            'db_root' => $backup->site->server->database,
+            'site_root' => '/home/'.$backup->site->username.'/web',
         ]);
 
-        Log::info("Restore queued for backup", [
+        Log::info('Restore queued for backup', [
             'backup_id' => $backup->id,
             'site_id' => $backup->site_id,
             'restore_database' => $options['restore_database'] ?? true,
@@ -246,12 +229,11 @@ class BackupService
     /**
      * Download a backup
      *
-     * @param Backup $backup
      * @return string|null Path to the downloaded backup file
      */
     public function downloadBackup(Backup $backup): ?string
     {
-        if (!$backup->isComplete()) {
+        if (! $backup->isComplete()) {
             return null;
         }
 
@@ -261,16 +243,17 @@ class BackupService
                 ->where('is_active', true)
                 ->first();
 
-            if (!$storageLocation) {
-                Log::error("Storage location not found", [
+            if (! $storageLocation) {
+                Log::error('Storage location not found', [
                     'storage_location' => $backup->storage_location,
                 ]);
+
                 return null;
             }
 
             // Download from remote storage
             // This will be implemented with the SSH jobs
-            Log::info("Downloading backup from remote storage", [
+            Log::info('Downloading backup from remote storage', [
                 'backup_id' => $backup->id,
                 'storage_location' => $backup->storage_location,
             ]);
@@ -282,16 +265,14 @@ class BackupService
     /**
      * Delete a backup (soft delete)
      *
-     * @param Backup $backup
-     * @param bool $deleteFile Also delete the physical backup file
-     * @return bool
+     * @param  bool  $deleteFile  Also delete the physical backup file
      */
     public function deleteBackup(Backup $backup, bool $deleteFile = false): bool
     {
         if ($deleteFile && $backup->exists()) {
             // Delete physical backup file
             // This will be implemented with the SSH jobs
-            Log::info("Deleting backup file", [
+            Log::info('Deleting backup file', [
                 'backup_id' => $backup->id,
                 'filepath' => $backup->filepath,
             ]);
@@ -302,7 +283,7 @@ class BackupService
         $backup->save();
         $backup->delete();
 
-        Log::info("Backup deleted", [
+        Log::info('Backup deleted', [
             'backup_id' => $backup->id,
             'deleted_file' => $deleteFile,
         ]);
@@ -313,8 +294,6 @@ class BackupService
     /**
      * Rotate backups according to retention policy
      *
-     * @param Site $site
-     * @param BackupSchedule|null $schedule
      * @return int Number of backups deleted
      */
     public function rotateBackups(Site $site, ?BackupSchedule $schedule = null): int
@@ -359,14 +338,14 @@ class BackupService
                 ->get();
 
             foreach ($oldBackups as $backup) {
-                if (!$backup->trashed()) {
+                if (! $backup->trashed()) {
                     $this->deleteBackup($backup, true);
                     $deleted++;
                 }
             }
         }
 
-        Log::info("Backup rotation completed", [
+        Log::info('Backup rotation completed', [
             'site_id' => $site->site_id,
             'schedule_id' => $schedule?->id,
             'deleted_count' => $deleted,
@@ -377,10 +356,6 @@ class BackupService
 
     /**
      * Create a backup schedule
-     *
-     * @param Site $site
-     * @param array $data
-     * @return BackupSchedule
      */
     public function createSchedule(Site $site, array $data): BackupSchedule
     {
@@ -403,7 +378,7 @@ class BackupService
         // Calculate next run time
         $schedule->calculateNextRun();
 
-        Log::info("Backup schedule created", [
+        Log::info('Backup schedule created', [
             'schedule_id' => $schedule->id,
             'site_id' => $site->site_id,
             'frequency' => $schedule->frequency,
@@ -414,10 +389,6 @@ class BackupService
 
     /**
      * Update a backup schedule
-     *
-     * @param BackupSchedule $schedule
-     * @param array $data
-     * @return BackupSchedule
      */
     public function updateSchedule(BackupSchedule $schedule, array $data): BackupSchedule
     {
@@ -428,7 +399,7 @@ class BackupService
             $schedule->calculateNextRun();
         }
 
-        Log::info("Backup schedule updated", [
+        Log::info('Backup schedule updated', [
             'schedule_id' => $schedule->id,
         ]);
 
@@ -438,9 +409,7 @@ class BackupService
     /**
      * Delete a backup schedule
      *
-     * @param BackupSchedule $schedule
-     * @param bool $deleteBackups Also delete associated backups
-     * @return bool
+     * @param  bool  $deleteBackups  Also delete associated backups
      */
     public function deleteSchedule(BackupSchedule $schedule, bool $deleteBackups = false): bool
     {
@@ -453,7 +422,7 @@ class BackupService
 
         $schedule->delete();
 
-        Log::info("Backup schedule deleted", [
+        Log::info('Backup schedule deleted', [
             'schedule_id' => $schedule->id,
             'deleted_backups' => $deleteBackups,
         ]);
@@ -463,9 +432,6 @@ class BackupService
 
     /**
      * Test a storage location connection
-     *
-     * @param BackupStorageLocation $location
-     * @return bool
      */
     public function testStorageConnection(BackupStorageLocation $location): bool
     {
@@ -475,7 +441,7 @@ class BackupService
         $location->test_status = $result ? 'success' : 'failed';
         $location->save();
 
-        Log::info("Storage connection tested", [
+        Log::info('Storage connection tested', [
             'location_id' => $location->id,
             'type' => $location->type,
             'result' => $result,
@@ -486,9 +452,6 @@ class BackupService
 
     /**
      * Create a storage location
-     *
-     * @param array $data
-     * @return BackupStorageLocation
      */
     public function createStorageLocation(array $data): BackupStorageLocation
     {
@@ -507,7 +470,7 @@ class BackupService
                 ->update(['is_default' => false]);
         }
 
-        Log::info("Storage location created", [
+        Log::info('Storage location created', [
             'location_id' => $location->id,
             'type' => $location->type,
         ]);
@@ -517,10 +480,6 @@ class BackupService
 
     /**
      * Update a storage location
-     *
-     * @param BackupStorageLocation $location
-     * @param array $data
-     * @return BackupStorageLocation
      */
     public function updateStorageLocation(BackupStorageLocation $location, array $data): BackupStorageLocation
     {
@@ -532,7 +491,7 @@ class BackupService
                 ->update(['is_default' => false]);
         }
 
-        Log::info("Storage location updated", [
+        Log::info('Storage location updated', [
             'location_id' => $location->id,
         ]);
 
@@ -541,22 +500,20 @@ class BackupService
 
     /**
      * Delete a storage location
-     *
-     * @param BackupStorageLocation $location
-     * @return bool
      */
     public function deleteStorageLocation(BackupStorageLocation $location): bool
     {
         if ($location->is_default) {
-            Log::error("Cannot delete default storage location", [
+            Log::error('Cannot delete default storage location', [
                 'location_id' => $location->id,
             ]);
+
             return false;
         }
 
         $location->delete();
 
-        Log::info("Storage location deleted", [
+        Log::info('Storage location deleted', [
             'location_id' => $location->id,
         ]);
 
@@ -565,9 +522,6 @@ class BackupService
 
     /**
      * Get backup statistics for a site
-     *
-     * @param Site $site
-     * @return array
      */
     public function getBackupStats(Site $site): array
     {
@@ -588,7 +542,7 @@ class BackupService
                 ->sortBy('created_at')
                 ->first(),
             'storage_by_location' => $backups->groupBy('storage_location')
-                ->map(fn($group) => [
+                ->map(fn ($group) => [
                     'count' => $group->count(),
                     'size' => $group->sum('compressed_size'),
                 ]),
@@ -659,14 +613,14 @@ class BackupService
                 $created++;
 
             } catch (\Exception $e) {
-                Log::error("Failed to process scheduled backup", [
+                Log::error('Failed to process scheduled backup', [
                     'schedule_id' => $schedule->id,
                     'error' => $e->getMessage(),
                 ]);
             }
         }
 
-        Log::info("Scheduled backups processed", [
+        Log::info('Scheduled backups processed', [
             'created_count' => $created,
         ]);
 

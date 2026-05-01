@@ -79,7 +79,7 @@ class CreateEmailAccount extends Component
 
         try {
             $account = $emailService->createEmailAccount($this->site, [
-                'email' => $this->username . '@' . $this->site->domain,
+                'email' => $this->username.'@'.$this->site->domain,
                 'password' => $this->password,
                 'quota_mb' => $this->quota_mb,
                 'spam_filter' => $this->enable_spam_filter,

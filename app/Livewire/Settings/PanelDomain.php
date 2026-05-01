@@ -14,13 +14,8 @@ class PanelDomain extends Component
     public function mount()
     {
         $server = Server::where('default', 1)->first();
-        $site = Site::where('server_id', $server->id)->where('panel', 1)->first();
-        if (! $site) {
-            $domain = '';
-        } else {
-            $domain = $site->domain;
-        }
-        $this->panel_domain = $domain;
+        $site = $server ? Site::where('server_id', $server->id)->where('panel', 1)->first() : null;
+        $this->panel_domain = $site ? $site->domain : '';
     }
 
     public function render()

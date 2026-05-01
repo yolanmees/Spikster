@@ -44,12 +44,12 @@ class WordPressTheme extends Model
 
     public function hasUpdate(): bool
     {
-        return !is_null($this->update_available);
+        return ! is_null($this->update_available);
     }
 
     public function isChildTheme(): bool
     {
-        return !is_null($this->template);
+        return ! is_null($this->template);
     }
 
     public function scopeActive($query)

@@ -28,17 +28,17 @@ class ModuleWidgetManager
 
     public function renderWidget(ModuleWidget $widget): string
     {
-        if (!class_exists($widget->component_class)) {
+        if (! class_exists($widget->component_class)) {
             return "<div class='text-red-500'>Widget component not found: {$widget->component_class}</div>";
         }
 
         try {
             $component = app($widget->component_class);
-            
+
             if (method_exists($component, 'render')) {
                 return $component->render()->render();
             }
-            
+
             return (string) $component;
         } catch (\Exception $e) {
             return "<div class='text-red-500'>Error rendering widget: {$e->getMessage()}</div>";
@@ -70,7 +70,8 @@ class ModuleWidgetManager
 
     public function toggleWidget(ModuleWidget $widget): bool
     {
-        $widget->update(['is_active' => !$widget->is_active]);
+        $widget->update(['is_active' => ! $widget->is_active]);
+
         return $widget->is_active;
     }
 

@@ -121,6 +121,7 @@ class SecurityHelper
     public static function sanitizeShellValue(string $value): string
     {
         $dangerous = ['&', '|', ';', '`', '$', '(', ')', '<', '>', "\n", "\r", "\0", '"', "'"];
+
         return trim(str_replace($dangerous, '', $value));
     }
 

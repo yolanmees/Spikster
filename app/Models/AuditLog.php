@@ -24,6 +24,7 @@ class AuditLog extends Model
         'old_values',
         'new_values',
         'severity',
+        'request_id',
     ];
 
     /**

@@ -54,6 +54,7 @@ class ShellController extends Controller
     public function serversrootreset()
     {
         $script = Storage::get('spikster/rootreset.sh');
+
         return response($script)->withHeaders(['Content-Type' => 'application/x-sh']);
     }
 }

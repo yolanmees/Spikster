@@ -25,9 +25,11 @@ class UploadToFTPSSH implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $timeout = 3600;
+
     public $tries = 2;
 
     protected Backup $backup;
+
     protected ?BackupStorageLocation $storageLocation;
 
     public function __construct(Backup $backup)
@@ -47,26 +49,26 @@ class UploadToFTPSSH implements ShouldQueue
         }
 
         try {
-            Log::info("Starting FTP/SFTP upload via daemon", [
-                'backup_id'        => $this->backup->id,
+            Log::info('Starting FTP/SFTP upload via daemon', [
+                'backup_id' => $this->backup->id,
                 'storage_location' => $this->storageLocation->name,
             ]);
 
             $credentials = $this->storageLocation->getCredentials();
 
             $result = $daemon->send($this->backup->site->server, 'backup.upload-ftp', [
-                'backup_id'    => $this->backup->id,
-                'filepath'     => $this->backup->filepath,
-                'filename'     => $this->backup->filename,
-                'domain'       => $this->backup->site->domain,
-                'type'         => $this->storageLocation->type,
-                'host'         => $credentials['host'],
-                'port'         => $credentials['port'] ?? ($this->storageLocation->type === 'sftp' ? 22 : 21),
-                'username'     => $credentials['username'],
-                'password'     => $credentials['password'],
-                'remote_path'  => rtrim($credentials['path'] ?? '/backups', '/')
-                                  . '/' . $this->backup->site->domain,
-                'passive'      => $credentials['passive'] ?? true,
+                'backup_id' => $this->backup->id,
+                'filepath' => $this->backup->filepath,
+                'filename' => $this->backup->filename,
+                'domain' => $this->backup->site->domain,
+                'type' => $this->storageLocation->type,
+                'host' => $credentials['host'],
+                'port' => $credentials['port'] ?? ($this->storageLocation->type === 'sftp' ? 22 : 21),
+                'username' => $credentials['username'],
+                'password' => $credentials['password'],
+                'remote_path' => rtrim($credentials['path'] ?? '/backups', '/')
+                                  .'/'.$this->backup->site->domain,
+                'passive' => $credentials['passive'] ?? true,
                 'delete_local' => config('backup.delete_local_after_remote_upload', false),
             ]);
 
@@ -76,9 +78,9 @@ class UploadToFTPSSH implements ShouldQueue
 
             $metadata = $this->backup->metadata ?? [];
             $metadata['remote_upload'] = [
-                'type'        => $this->storageLocation->type,
-                'host'        => $credentials['host'],
-                'path'        => $result['remote_path'] ?? null,
+                'type' => $this->storageLocation->type,
+                'host' => $credentials['host'],
+                'path' => $result['remote_path'] ?? null,
                 'uploaded_at' => now()->toIso8601String(),
             ];
             $this->backup->metadata = $metadata;
@@ -89,9 +91,9 @@ class UploadToFTPSSH implements ShouldQueue
             ]);
 
         } catch (\Exception $e) {
-            Log::error("FTP/SFTP upload failed", [
+            Log::error('FTP/SFTP upload failed', [
                 'backup_id' => $this->backup->id,
-                'error'     => $e->getMessage(),
+                'error' => $e->getMessage(),
             ]);
             throw $e;
         }
@@ -99,10 +101,10 @@ class UploadToFTPSSH implements ShouldQueue
 
     public function failed(\Throwable $exception): void
     {
-        Log::error("UploadToFTPSSH job failed", [
-            'backup_id'        => $this->backup->id,
+        Log::error('UploadToFTPSSH job failed', [
+            'backup_id' => $this->backup->id,
             'storage_location' => $this->storageLocation?->name,
-            'error'            => $exception->getMessage(),
+            'error' => $exception->getMessage(),
         ]);
     }
 }

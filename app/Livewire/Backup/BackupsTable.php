@@ -13,14 +13,20 @@ class BackupsTable extends Component
     use WithPagination;
 
     public Site $site;
+
     public $selectedBackup = null;
+
     public $showRestoreModal = false;
+
     public $showDeleteModal = false;
+
     public $deleteFile = false;
 
     // Filters
     public $filterType = '';
+
     public $filterStatus = '';
+
     public $search = '';
 
     protected $queryString = [
@@ -46,8 +52,8 @@ class BackupsTable extends Component
             })
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
-                    $q->where('filename', 'like', '%' . $this->search . '%')
-                      ->orWhere('type', 'like', '%' . $this->search . '%');
+                    $q->where('filename', 'like', '%'.$this->search.'%')
+                        ->orWhere('type', 'like', '%'.$this->search.'%');
                 });
             })
             ->orderBy('created_at', 'desc')
@@ -64,6 +70,7 @@ class BackupsTable extends Component
     public function getBackupStats()
     {
         $backupService = app(BackupService::class);
+
         return $backupService->getBackupStats($this->site);
     }
 
@@ -117,7 +124,7 @@ class BackupsTable extends Component
 
     public function confirmRestore()
     {
-        if (!$this->selectedBackup) {
+        if (! $this->selectedBackup) {
             return;
         }
 
@@ -135,7 +142,7 @@ class BackupsTable extends Component
 
     public function confirmDelete()
     {
-        if (!$this->selectedBackup) {
+        if (! $this->selectedBackup) {
             return;
         }
 
@@ -151,8 +158,9 @@ class BackupsTable extends Component
     {
         $backup = Backup::where('site_id', $this->site->id)->find($backupId);
 
-        if (!$backup || !$backup->isComplete()) {
+        if (! $backup || ! $backup->isComplete()) {
             session()->flash('error', 'Backup file not available for download');
+
             return;
         }
 

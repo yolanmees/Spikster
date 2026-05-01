@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\NodejsSetupSSH;
-use App\Jobs\NodejsStopSSH;
 use App\Models\Server;
 use App\Models\Site;
-use Carbon\Carbon;
+use App\Services\DaemonService;
 use Illuminate\Http\Request;
 
 class NodejsController extends Controller
@@ -189,7 +187,7 @@ class NodejsController extends Controller
         $site->node_status = 1;
         $site->save();
 
-        app(\App\Services\DaemonService::class)->send('nodejs.setup', ['username' => $site->username, 'script' => $site->node_script ?? 'app.js']);
+        app(DaemonService::class)->send('nodejs.setup', ['username' => $site->username, 'script' => $site->node_script ?? 'app.js']);
 
         return response()->json([
             'site_id' => $site->site_id,
@@ -389,7 +387,7 @@ class NodejsController extends Controller
         $site->node_status = 0;
         $site->save();
 
-        app(\App\Services\DaemonService::class)->send('nodejs.stop', ['username' => $site->username]);
+        app(DaemonService::class)->send('nodejs.stop', ['username' => $site->username]);
 
         return response()->json([
             'site_id' => $site->site_id,

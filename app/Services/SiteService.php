@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\Alias;
 use App\Models\Server;
 use App\Models\Site;
-use App\Services\AuditService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
@@ -88,18 +87,18 @@ class SiteService
 
         // Call the daemon first — if it fails we never write to the DB
         $daemonParams = [
-            'id'       => $data['site_id'],
-            'domain'   => $data['domain'],
+            'id' => $data['site_id'],
+            'domain' => $data['domain'],
             'username' => $data['username'],
             'password' => $data['password'],
-            'db_name'  => $data['username'],
-            'db_pass'  => $data['database'],
-            'db_root'  => $server->database,
-            'php'      => $data['php'],
+            'db_name' => $data['username'],
+            'db_pass' => $data['database'],
+            'db_root' => $server->database,
+            'php' => $data['php'],
             'basepath' => $data['basepath'] ?? '',
         ];
 
-        $daemon  = app(\App\Services\DaemonService::class);
+        $daemon = app(DaemonService::class);
         $success = $daemon->createSite($daemonParams);
 
         if (! $success) {
@@ -114,14 +113,15 @@ class SiteService
             // Best-effort: remove what we just created on the server
             $daemon->deleteSite([
                 'username' => $data['username'],
-                'db_name'  => $data['username'],
-                'db_root'  => $server->database,
-                'php'      => $data['php'],
+                'db_name' => $data['username'],
+                'db_root' => $server->database,
+                'php' => $data['php'],
             ]);
             throw $e;
         }
 
         AuditService::logCreate($site, "Site created: {$site->domain}");
+
         return $site;
     }
 
@@ -152,17 +152,18 @@ class SiteService
         }
 
         // Tell the daemon to remove the site from the server first
-        app(\App\Services\DaemonService::class)->deleteSite([
+        app(DaemonService::class)->deleteSite([
             'username' => $site->username,
-            'php'      => $site->php,
-            'db_name'  => $site->username,
-            'db_root'  => $site->server->database,
+            'php' => $site->php,
+            'db_name' => $site->username,
+            'db_root' => $site->server->database,
         ]);
 
         // Delete all aliases then the site record
         $site->aliases()->delete();
 
         AuditService::logDelete($site, "Site deleted: {$site->domain}");
+
         return $site->delete();
     }
 

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
 /**
  * Server Model
@@ -23,8 +24,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property bool $default
  * @property int|null $build
  * @property int $status
- * @property \Illuminate\Support\Carbon $created_at
- * @property \Illuminate\Support\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class Server extends Model
 {
@@ -70,14 +71,14 @@ class Server extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'default'    => 'boolean',
-        'build'      => 'integer',
-        'status'     => 'integer',
+        'default' => 'boolean',
+        'build' => 'integer',
+        'status' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         // Sensitive fields — encrypted at rest using APP_KEY
-        'password'   => 'encrypted',
-        'database'   => 'encrypted',
+        'password' => 'encrypted',
+        'database' => 'encrypted',
     ];
 
     /**

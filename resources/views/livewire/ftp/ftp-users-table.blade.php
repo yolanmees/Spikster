@@ -100,7 +100,7 @@
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse ($ftpUsers as $user)
-                        <tr class="hover:bg-gray-50">
+                        <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center">
                                     <div>

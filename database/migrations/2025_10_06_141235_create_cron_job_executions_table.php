@@ -22,7 +22,7 @@ return new class extends Migration
             $table->text('output')->nullable();
             $table->text('error_output')->nullable();
             $table->timestamps();
-            
+
             $table->index(['cron_job_id', 'started_at']);
             $table->index(['status', 'started_at']);
         });

@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Carbon\Carbon;
 
 class EmailAutoresponder extends Model
 {
@@ -49,7 +49,7 @@ class EmailAutoresponder extends Model
      */
     public function isActive(): bool
     {
-        if (!$this->enabled) {
+        if (! $this->enabled) {
             return false;
         }
 
@@ -84,11 +84,11 @@ class EmailAutoresponder extends Model
         return $query->where('enabled', true)
             ->where(function ($q) use ($now) {
                 $q->whereNull('start_date')
-                  ->orWhere('start_date', '<=', $now);
+                    ->orWhere('start_date', '<=', $now);
             })
             ->where(function ($q) use ($now) {
                 $q->whereNull('end_date')
-                  ->orWhere('end_date', '>=', $now);
+                    ->orWhere('end_date', '>=', $now);
             });
     }
 }

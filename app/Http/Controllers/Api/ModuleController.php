@@ -127,12 +127,12 @@ class ModuleController extends Controller
             return response()->json([
                 'success' => true,
                 'discovered' => $discovered,
-                'message' => 'Found ' . count($discovered) . ' module(s)',
+                'message' => 'Found '.count($discovered).' module(s)',
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to discover modules: ' . $e->getMessage(),
+                'message' => 'Failed to discover modules: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -154,7 +154,7 @@ class ModuleController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to install module: ' . $e->getMessage(),
+                'message' => 'Failed to install module: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -172,7 +172,7 @@ class ModuleController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to enable module: ' . $e->getMessage(),
+                'message' => 'Failed to enable module: '.$e->getMessage(),
             ], 400);
         }
     }
@@ -190,7 +190,7 @@ class ModuleController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to disable module: ' . $e->getMessage(),
+                'message' => 'Failed to disable module: '.$e->getMessage(),
             ], 400);
         }
     }
@@ -208,7 +208,7 @@ class ModuleController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to check module health: ' . $e->getMessage(),
+                'message' => 'Failed to check module health: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -227,7 +227,7 @@ class ModuleController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to check dependencies: ' . $e->getMessage(),
+                'message' => 'Failed to check dependencies: '.$e->getMessage(),
             ], 500);
         }
     }

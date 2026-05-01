@@ -18,7 +18,7 @@ return new class extends Migration
             $table->boolean('is_required')->default(false);
             $table->text('description')->nullable();
             $table->timestamps();
-            
+
             $table->foreign('module_id')->references('id')->on('modules')->onDelete('cascade');
             $table->foreign('permission_id')->references('id')->on('permissions')->onDelete('cascade');
             $table->unique(['module_id', 'permission_id'], 'unique_module_permission');

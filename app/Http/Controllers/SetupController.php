@@ -17,7 +17,7 @@ class SetupController extends Controller
     {
         $setup = SetupToken::where('token', $token)->first();
 
-        if (!$setup || !$setup->isValid()) {
+        if (! $setup || ! $setup->isValid()) {
             abort(404);
         }
 
@@ -31,13 +31,13 @@ class SetupController extends Controller
     {
         $setup = SetupToken::where('token', $token)->first();
 
-        if (!$setup || !$setup->isValid()) {
+        if (! $setup || ! $setup->isValid()) {
             abort(404);
         }
 
         $request->validate([
-            'name'     => 'required|min:2|max:64',
-            'email'    => 'required|email',
+            'name' => 'required|min:2|max:64',
+            'email' => 'required|email',
             'password' => 'required|min:8|confirmed',
         ]);
 
@@ -45,8 +45,8 @@ class SetupController extends Controller
         $user = User::where('email', 'administrator@localhost')->first();
         if ($user) {
             $user->update([
-                'name'     => $request->name,
-                'email'    => $request->email,
+                'name' => $request->name,
+                'email' => $request->email,
                 'password' => Hash::make($request->password),
             ]);
         }
@@ -68,8 +68,8 @@ class SetupController extends Controller
         $token = Str::random(48);
 
         SetupToken::create([
-            'token'      => $token,
-            'used'       => false,
+            'token' => $token,
+            'used' => false,
             'expires_at' => now()->addHours(24),
         ]);
 

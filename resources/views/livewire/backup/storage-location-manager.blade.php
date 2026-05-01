@@ -76,7 +76,7 @@
 
                 <div class="mt-4 flex gap-2">
                     <button wire:click="testConnection({{ $location->id }})"
-                        class="flex-1 px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">
+                        class="flex-1 px-3 py-2 text-sm bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-700">
                         Test
                     </button>
                     @if (!$location->is_default)
@@ -185,7 +185,7 @@
                                 Create Location
                             </button>
                             <button type="button" wire:click="closeCreateModal"
-                                class="mt-3 sm:mt-0 w-full sm:w-auto px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50">
+                                class="mt-3 sm:mt-0 w-full sm:w-auto px-4 py-2 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border border-zinc-300 dark:border-zinc-700 rounded-md hover:bg-zinc-50 dark:hover:bg-zinc-800">
                                 Cancel
                             </button>
                         </div>
@@ -207,7 +207,7 @@
                     </p>
                     <div class="flex gap-2 justify-end">
                         <button wire:click="closeDeleteModal"
-                            class="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50">
+                            class="px-4 py-2 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border border-zinc-300 dark:border-zinc-700 rounded-md hover:bg-zinc-50 dark:hover:bg-zinc-800">
                             Cancel
                         </button>
                         <button wire:click="deleteLocation"

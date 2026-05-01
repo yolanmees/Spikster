@@ -25,15 +25,18 @@ class Fail2banService
                 'server_id' => $server->server_id,
             ]);
 
-            if (!$response->successful()) {
-                Log::error("Failed to get banned IPs", ['server' => $server->id, 'status' => $response->status()]);
+            if (! $response->successful()) {
+                Log::error('Failed to get banned IPs', ['server' => $server->id, 'status' => $response->status()]);
+
                 return [];
             }
 
             $data = $response->json();
+
             return $data['ips'] ?? [];
         } catch (\Exception $e) {
-            Log::error("Fail2ban getBannedIps error: " . $e->getMessage());
+            Log::error('Fail2ban getBannedIps error: '.$e->getMessage());
+
             return [];
         }
     }
@@ -49,15 +52,18 @@ class Fail2banService
                 'server_id' => $server->server_id,
             ]);
 
-            if (!$response->successful()) {
-                Log::error("Failed to get jails", ['server' => $server->id, 'status' => $response->status()]);
+            if (! $response->successful()) {
+                Log::error('Failed to get jails', ['server' => $server->id, 'status' => $response->status()]);
+
                 return [];
             }
 
             $data = $response->json();
+
             return $data['jails'] ?? [];
         } catch (\Exception $e) {
-            Log::error("Fail2ban getJails error: " . $e->getMessage());
+            Log::error('Fail2ban getJails error: '.$e->getMessage());
+
             return [];
         }
     }
@@ -74,14 +80,16 @@ class Fail2banService
                 'jail' => $jail,
             ]);
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 return [];
             }
 
             $data = $response->json();
+
             return $data['status'] ?? [];
         } catch (\Exception $e) {
-            Log::error("Fail2ban getJailStatus error: " . $e->getMessage());
+            Log::error('Fail2ban getJailStatus error: '.$e->getMessage());
+
             return [];
         }
     }
@@ -92,7 +100,7 @@ class Fail2banService
     public function banIp(Server $server, string $ip, string $jail = 'sshd'): bool
     {
         // Validate IP address
-        if (!filter_var($ip, FILTER_VALIDATE_IP)) {
+        if (! filter_var($ip, FILTER_VALIDATE_IP)) {
             throw new \Exception("Invalid IP address: {$ip}");
         }
 
@@ -104,15 +112,15 @@ class Fail2banService
                 'jail' => $jail,
             ]);
 
-            if (!$response->successful()) {
-                throw new \Exception("HTTP request failed with status: " . $response->status());
+            if (! $response->successful()) {
+                throw new \Exception('HTTP request failed with status: '.$response->status());
             }
 
             $data = $response->json();
 
             // Log the action
-            if (class_exists(\App\Services\AuditService::class)) {
-                \App\Services\AuditService::log(
+            if (class_exists(AuditService::class)) {
+                AuditService::log(
                     eventType: 'fail2ban_ban_ip',
                     description: "Banned IP {$ip} in jail {$jail}",
                     severity: 'warning'
@@ -121,7 +129,7 @@ class Fail2banService
 
             return $data['success'] ?? false;
         } catch (\Exception $e) {
-            Log::error("Fail2ban banIp error: " . $e->getMessage());
+            Log::error('Fail2ban banIp error: '.$e->getMessage());
             throw $e;
         }
     }
@@ -132,7 +140,7 @@ class Fail2banService
     public function unbanIp(Server $server, string $ip, ?string $jail = null): bool
     {
         // Validate IP address
-        if (!filter_var($ip, FILTER_VALIDATE_IP)) {
+        if (! filter_var($ip, FILTER_VALIDATE_IP)) {
             throw new \Exception("Invalid IP address: {$ip}");
         }
 
@@ -144,24 +152,24 @@ class Fail2banService
                 'jail' => $jail,
             ]);
 
-            if (!$response->successful()) {
-                throw new \Exception("HTTP request failed");
+            if (! $response->successful()) {
+                throw new \Exception('HTTP request failed');
             }
 
             $data = $response->json();
 
             // Log the action
-            if (class_exists(\App\Services\AuditService::class)) {
-                \App\Services\AuditService::log(
+            if (class_exists(AuditService::class)) {
+                AuditService::log(
                     eventType: 'fail2ban_unban_ip',
-                    description: "Unbanned IP {$ip}" . ($jail ? " from jail {$jail}" : " from all jails"),
+                    description: "Unbanned IP {$ip}".($jail ? " from jail {$jail}" : ' from all jails'),
                     severity: 'info'
                 );
             }
 
             return $data['success'] ?? false;
         } catch (\Exception $e) {
-            Log::error("Fail2ban unbanIp error: " . $e->getMessage());
+            Log::error('Fail2ban unbanIp error: '.$e->getMessage());
             throw $e;
         }
     }
@@ -194,11 +202,12 @@ class Fail2banService
                 'server_id' => $server->server_id,
             ]);
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 return ['running' => false, 'version' => ''];
             }
 
             $data = $response->json();
+
             return $data['status'] ?? ['running' => false, 'version' => ''];
         } catch (\Exception $e) {
             return ['running' => false, 'version' => ''];
@@ -218,7 +227,8 @@ class Fail2banService
 
             return $response->successful();
         } catch (\Exception $e) {
-            Log::error("Fail2ban restartService error: " . $e->getMessage());
+            Log::error('Fail2ban restartService error: '.$e->getMessage());
+
             return false;
         }
     }
@@ -235,14 +245,16 @@ class Fail2banService
                 'lines' => $lines,
             ]);
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 return [];
             }
 
             $data = $response->json();
+
             return $data['logs'] ?? [];
         } catch (\Exception $e) {
-            Log::error("Fail2ban getLogs error: " . $e->getMessage());
+            Log::error('Fail2ban getLogs error: '.$e->getMessage());
+
             return [];
         }
     }
@@ -280,7 +292,7 @@ class Fail2banService
     public function whitelistIp(Server $server, string $ip): bool
     {
         // Validate IP address
-        if (!filter_var($ip, FILTER_VALIDATE_IP)) {
+        if (! filter_var($ip, FILTER_VALIDATE_IP)) {
             throw new \Exception("Invalid IP address: {$ip}");
         }
 
@@ -291,15 +303,15 @@ class Fail2banService
                 'ip' => $ip,
             ]);
 
-            if (!$response->successful()) {
-                throw new \Exception("HTTP request failed");
+            if (! $response->successful()) {
+                throw new \Exception('HTTP request failed');
             }
 
             $data = $response->json();
 
             // Log the action
-            if (class_exists(\App\Services\AuditService::class)) {
-                \App\Services\AuditService::log(
+            if (class_exists(AuditService::class)) {
+                AuditService::log(
                     eventType: 'fail2ban_whitelist_ip',
                     description: "Whitelisted IP {$ip}",
                     severity: 'info'
@@ -308,7 +320,7 @@ class Fail2banService
 
             return $data['success'] ?? false;
         } catch (\Exception $e) {
-            Log::error("Fail2ban whitelistIp error: " . $e->getMessage());
+            Log::error('Fail2ban whitelistIp error: '.$e->getMessage());
             throw $e;
         }
     }
@@ -324,14 +336,16 @@ class Fail2banService
                 'server_id' => $server->server_id,
             ]);
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 return [];
             }
 
             $data = $response->json();
+
             return $data['whitelist'] ?? [];
         } catch (\Exception $e) {
-            Log::error("Fail2ban getWhitelistedIps error: " . $e->getMessage());
+            Log::error('Fail2ban getWhitelistedIps error: '.$e->getMessage());
+
             return [];
         }
     }
@@ -348,15 +362,15 @@ class Fail2banService
                 'jail_config' => $jailConfig,
             ]);
 
-            if (!$response->successful()) {
-                throw new \Exception("HTTP request failed");
+            if (! $response->successful()) {
+                throw new \Exception('HTTP request failed');
             }
 
             $data = $response->json();
 
             // Log the action
-            if (class_exists(\App\Services\AuditService::class)) {
-                \App\Services\AuditService::log(
+            if (class_exists(AuditService::class)) {
+                AuditService::log(
                     eventType: 'fail2ban_add_jail',
                     description: "Added jail: {$jailConfig['name']}",
                     severity: 'info'
@@ -365,7 +379,7 @@ class Fail2banService
 
             return $data['success'] ?? false;
         } catch (\Exception $e) {
-            Log::error("Fail2ban addJail error: " . $e->getMessage());
+            Log::error('Fail2ban addJail error: '.$e->getMessage());
             throw $e;
         }
     }

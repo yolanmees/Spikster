@@ -80,10 +80,10 @@ class FtpUser extends Model
     public function scopeActive($query)
     {
         return $query->where('is_active', true)
-                    ->where(function($q) {
-                        $q->whereNull('locked_until')
-                          ->orWhere('locked_until', '<', now());
-                    });
+            ->where(function ($q) {
+                $q->whereNull('locked_until')
+                    ->orWhere('locked_until', '<', now());
+            });
     }
 
     public function scopeForSite($query, $siteId)
@@ -99,7 +99,7 @@ class FtpUser extends Model
     public function scopeLocked($query)
     {
         return $query->whereNotNull('locked_until')
-                    ->where('locked_until', '>', now());
+            ->where('locked_until', '>', now());
     }
 
     /**
@@ -108,7 +108,7 @@ class FtpUser extends Model
     public function setPasswordAttribute($value)
     {
         // Only hash if it's not already hashed
-        if (!str_starts_with($value, '$2y$')) {
+        if (! str_starts_with($value, '$2y$')) {
             $this->attributes['password'] = Hash::make($value);
         } else {
             $this->attributes['password'] = $value;
@@ -130,12 +130,14 @@ class FtpUser extends Model
         }
 
         $quotaBytes = $this->quota_mb * 1024 * 1024;
+
         return min(100, round(($this->current_usage_bytes / $quotaBytes) * 100, 2));
     }
 
     public function getRemainingQuotaBytes(): int
     {
         $quotaBytes = $this->quota_mb * 1024 * 1024;
+
         return max(0, $quotaBytes - $this->current_usage_bytes);
     }
 
@@ -169,7 +171,7 @@ class FtpUser extends Model
         // Lock account after 5 failed attempts for 30 minutes
         if ($this->failed_login_count >= 5) {
             $this->update([
-                'locked_until' => now()->addMinutes(30)
+                'locked_until' => now()->addMinutes(30),
             ]);
         }
     }
@@ -210,27 +212,27 @@ class FtpUser extends Model
 
     public function canRead(): bool
     {
-        return $this->hasPermission('read') && $this->is_active && !$this->isLocked();
+        return $this->hasPermission('read') && $this->is_active && ! $this->isLocked();
     }
 
     public function canWrite(): bool
     {
-        return $this->hasPermission('write') && $this->is_active && !$this->isLocked();
+        return $this->hasPermission('write') && $this->is_active && ! $this->isLocked();
     }
 
     public function canDelete(): bool
     {
-        return $this->hasPermission('delete') && $this->is_active && !$this->isLocked();
+        return $this->hasPermission('delete') && $this->is_active && ! $this->isLocked();
     }
 
     public function canRename(): bool
     {
-        return $this->hasPermission('rename') && $this->is_active && !$this->isLocked();
+        return $this->hasPermission('rename') && $this->is_active && ! $this->isLocked();
     }
 
     public function canCreateDirectory(): bool
     {
-        return $this->hasPermission('create_directory') && $this->is_active && !$this->isLocked();
+        return $this->hasPermission('create_directory') && $this->is_active && ! $this->isLocked();
     }
 
     public function setPermissions(array $permissions): void
@@ -244,30 +246,33 @@ class FtpUser extends Model
     public function getFormattedQuota(): string
     {
         if ($this->quota_mb >= 1024) {
-            return round($this->quota_mb / 1024, 2) . ' GB';
+            return round($this->quota_mb / 1024, 2).' GB';
         }
-        return $this->quota_mb . ' MB';
+
+        return $this->quota_mb.' MB';
     }
 
     public function getFormattedUsage(): string
     {
         $mb = round($this->current_usage_bytes / (1024 * 1024), 2);
         if ($mb >= 1024) {
-            return round($mb / 1024, 2) . ' GB';
+            return round($mb / 1024, 2).' GB';
         }
-        return $mb . ' MB';
+
+        return $mb.' MB';
     }
 
     public function getFormattedBandwidth(): ?string
     {
-        if (!$this->bandwidth_limit_kbps) {
+        if (! $this->bandwidth_limit_kbps) {
             return 'Unlimited';
         }
 
         if ($this->bandwidth_limit_kbps >= 1024) {
-            return round($this->bandwidth_limit_kbps / 1024, 2) . ' MB/s';
+            return round($this->bandwidth_limit_kbps / 1024, 2).' MB/s';
         }
-        return $this->bandwidth_limit_kbps . ' KB/s';
+
+        return $this->bandwidth_limit_kbps.' KB/s';
     }
 
     /**
@@ -275,19 +280,37 @@ class FtpUser extends Model
      */
     public function getStatusBadgeColor(): string
     {
-        if (!$this->is_active) return 'gray';
-        if ($this->isLocked()) return 'red';
-        if ($this->isQuotaExceeded()) return 'orange';
-        if ($this->isNearQuotaLimit()) return 'yellow';
+        if (! $this->is_active) {
+            return 'gray';
+        }
+        if ($this->isLocked()) {
+            return 'red';
+        }
+        if ($this->isQuotaExceeded()) {
+            return 'orange';
+        }
+        if ($this->isNearQuotaLimit()) {
+            return 'yellow';
+        }
+
         return 'green';
     }
 
     public function getStatusText(): string
     {
-        if (!$this->is_active) return 'Inactive';
-        if ($this->isLocked()) return 'Locked';
-        if ($this->isQuotaExceeded()) return 'Quota Exceeded';
-        if ($this->isNearQuotaLimit()) return 'Near Quota Limit';
+        if (! $this->is_active) {
+            return 'Inactive';
+        }
+        if ($this->isLocked()) {
+            return 'Locked';
+        }
+        if ($this->isQuotaExceeded()) {
+            return 'Quota Exceeded';
+        }
+        if ($this->isNearQuotaLimit()) {
+            return 'Near Quota Limit';
+        }
+
         return 'Active';
     }
 
@@ -295,9 +318,16 @@ class FtpUser extends Model
     {
         $percentage = $this->getQuotaUsagePercentage();
 
-        if ($percentage >= 100) return 'red';
-        if ($percentage >= 80) return 'orange';
-        if ($percentage >= 60) return 'yellow';
+        if ($percentage >= 100) {
+            return 'red';
+        }
+        if ($percentage >= 80) {
+            return 'orange';
+        }
+        if ($percentage >= 60) {
+            return 'yellow';
+        }
+
         return 'green';
     }
 
@@ -358,7 +388,7 @@ class FtpUser extends Model
     public function isIpAllowed(string $ip): bool
     {
         // If no IP restriction, allow all
-        if (!$this->allowed_ip) {
+        if (! $this->allowed_ip) {
             return true;
         }
 
@@ -376,7 +406,7 @@ class FtpUser extends Model
      */
     public function getLastLoginHuman(): ?string
     {
-        if (!$this->last_login_at) {
+        if (! $this->last_login_at) {
             return null;
         }
 

@@ -9,31 +9,48 @@ use Livewire\Component;
 class StorageLocationManager extends Component
 {
     public $locations;
+
     public $showCreateModal = false;
+
     public $showDeleteModal = false;
+
     public $selectedLocation = null;
 
     // Form fields
     public $name = '';
+
     public $type = 'local';
+
     public $config = [];
+
     public $is_default = false;
+
     public $is_active = true;
 
     // S3 Config
     public $s3_bucket = '';
+
     public $s3_region = 'us-east-1';
+
     public $s3_access_key = '';
+
     public $s3_secret_key = '';
+
     public $s3_endpoint = '';
+
     public $s3_path = 'backups';
 
     // FTP/SFTP Config
     public $ftp_host = '';
+
     public $ftp_port = '';
+
     public $ftp_username = '';
+
     public $ftp_password = '';
+
     public $ftp_path = '/backups';
+
     public $ftp_passive = true;
 
     protected $rules = [
@@ -107,7 +124,7 @@ class StorageLocationManager extends Component
     {
         $location = BackupStorageLocation::find($locationId);
 
-        if (!$location) {
+        if (! $location) {
             return;
         }
 
@@ -125,14 +142,14 @@ class StorageLocationManager extends Component
 
     public function deleteLocation()
     {
-        if (!$this->selectedLocation) {
+        if (! $this->selectedLocation) {
             return;
         }
 
         $backupService = app(BackupService::class);
         $success = $backupService->deleteStorageLocation($this->selectedLocation);
 
-        if (!$success) {
+        if (! $success) {
             session()->flash('error', 'Cannot delete default storage location');
         } else {
             session()->flash('message', 'Storage location deleted successfully!');

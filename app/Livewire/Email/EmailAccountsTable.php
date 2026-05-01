@@ -175,6 +175,7 @@ class EmailAccountsTable extends Component
 
             if (! $account) {
                 session()->flash('error', 'Email account not found.');
+
                 return;
             }
 

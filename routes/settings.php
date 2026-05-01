@@ -6,20 +6,37 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])->group(function () {
 
     Route::get('/settings', function () {
-        return view('settings.settings');
+        abort_unless(auth()->user()?->can('settings.view'), 403);
+
+        return redirect()->route('settings.section', ['section' => 'general']);
     })->name('settings.general');
 
-    // User Management Routes
+    Route::get('/settings/{section}', function (string $section) {
+        $allowed = ['general', 'users', 'roles'];
+        abort_unless(in_array($section, $allowed), 404);
+
+        $requiredPermission = [
+            'general' => 'settings.view',
+            'users' => 'user.view',
+            'roles' => 'role.view',
+        ][$section];
+
+        abort_unless(auth()->user()?->can($requiredPermission), 403);
+
+        return view('settings.manage', compact('section'));
+    })->name('settings.section');
+
+    // Legacy named route aliases (kept for backward compatibility)
     Route::get('/settings/users', function () {
-        return view('settings.users-management');
+        return redirect()->route('settings.section', ['section' => 'users']);
     })->name('settings.users');
 
-    // Role Management Routes
     Route::get('/settings/roles', function () {
-        return view('settings.roles-management');
+        return redirect()->route('settings.section', ['section' => 'roles']);
     })->name('settings.roles');
 
-    // Legacy routes (kept for backward compatibility)
-    Route::delete('/settings/user/{userId}/delete', [SettingsController::class, 'users'])->name('settings.users.delete');
+    Route::delete('/settings/user/{userId}/delete', [SettingsController::class, 'users'])
+        ->middleware('can:user.delete')
+        ->name('settings.users.delete');
 
 });

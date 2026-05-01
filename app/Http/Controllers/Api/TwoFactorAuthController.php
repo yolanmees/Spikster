@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Services\TwoFactorAuthService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use PragmaRX\Google2FA\Google2FA;
 
 class TwoFactorAuthController extends Controller
 {
@@ -86,10 +87,10 @@ class TwoFactorAuthController extends Controller
             $user = $request->user();
 
             // Create a temporary Google2FA instance to verify the code
-            $google2fa = new \PragmaRX\Google2FA\Google2FA();
+            $google2fa = new Google2FA;
             $valid = $google2fa->verifyKey($request->secret, $request->code);
 
-            if (!$valid) {
+            if (! $valid) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Invalid verification code',
@@ -143,7 +144,7 @@ class TwoFactorAuthController extends Controller
             $user = $request->user();
 
             // Verify the code before disabling
-            if (!$this->twoFactorService->verify2FA($user, $request->code)) {
+            if (! $this->twoFactorService->verify2FA($user, $request->code)) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Invalid verification code',
@@ -186,7 +187,7 @@ class TwoFactorAuthController extends Controller
         try {
             $user = $request->user();
 
-            if (!$this->twoFactorService->verify2FA($user, $request->code)) {
+            if (! $this->twoFactorService->verify2FA($user, $request->code)) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Invalid verification code',
@@ -240,7 +241,7 @@ class TwoFactorAuthController extends Controller
             $user = $request->user();
 
             // Verify code before regenerating
-            if (!$this->twoFactorService->verify2FA($user, $request->code)) {
+            if (! $this->twoFactorService->verify2FA($user, $request->code)) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Invalid verification code',

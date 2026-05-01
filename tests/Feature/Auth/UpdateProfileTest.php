@@ -19,7 +19,7 @@ class UpdateProfileTest extends TestCase
         $user = Auth::create([
             'username' => 'oldusername',
             'password' => Hash::make('password123'),
-            'apikey' => 'test-api-key-' . now()->timestamp,
+            'apikey' => 'test-api-key-'.now()->timestamp,
         ]);
 
         $response = $this->patchJson('/auth', [
@@ -69,7 +69,7 @@ class UpdateProfileTest extends TestCase
         $user = Auth::create([
             'username' => 'testuser',
             'password' => Hash::make('oldpassword'),
-            'apikey' => 'test-api-key-' . now()->timestamp,
+            'apikey' => 'test-api-key-'.now()->timestamp,
         ]);
 
         $response = $this->patchJson('/auth', [
@@ -129,7 +129,7 @@ class UpdateProfileTest extends TestCase
         Auth::create([
             'username' => 'testuser',
             'password' => Hash::make('correctpassword'),
-            'apikey' => 'test-api-key-' . now()->timestamp,
+            'apikey' => 'test-api-key-'.now()->timestamp,
         ]);
 
         $response = $this->patchJson('/auth', [
@@ -147,7 +147,7 @@ class UpdateProfileTest extends TestCase
         $user = Auth::create([
             'username' => 'testuser',
             'password' => Hash::make('password123'),
-            'apikey' => 'test-api-key-' . now()->timestamp,
+            'apikey' => 'test-api-key-'.now()->timestamp,
         ]);
 
         $this->expectException(ValidationException::class);
@@ -168,7 +168,7 @@ class UpdateProfileTest extends TestCase
         $user = Auth::create([
             'username' => 'testuser',
             'password' => Hash::make('password123'),
-            'apikey' => 'test-api-key-' . now()->timestamp,
+            'apikey' => 'test-api-key-'.now()->timestamp,
         ]);
 
         $this->expectException(ValidationException::class);
@@ -189,7 +189,7 @@ class UpdateProfileTest extends TestCase
         $user = Auth::create([
             'username' => 'testuser',
             'password' => Hash::make('password123'),
-            'apikey' => 'test-api-key-' . now()->timestamp,
+            'apikey' => 'test-api-key-'.now()->timestamp,
         ]);
 
         $response = $this->patchJson('/auth', [

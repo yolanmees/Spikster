@@ -38,7 +38,7 @@ class TrustedDevicesTable extends Component
             $this->loadDevices();
             session()->flash('message', 'Device removed successfully.');
         } catch (\Exception $e) {
-            session()->flash('error', 'Failed to remove device: ' . $e->getMessage());
+            session()->flash('error', 'Failed to remove device: '.$e->getMessage());
         }
     }
 
@@ -49,7 +49,7 @@ class TrustedDevicesTable extends Component
             $this->loadDevices();
             session()->flash('message', "Removed $count expired device(s).");
         } catch (\Exception $e) {
-            session()->flash('error', 'Failed to cleanup devices: ' . $e->getMessage());
+            session()->flash('error', 'Failed to cleanup devices: '.$e->getMessage());
         }
     }
 

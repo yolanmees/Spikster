@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Domain;
 use App\Models\DnsRecord;
-use App\Services\DomainService;
+use App\Models\Domain;
+use App\Models\Server;
+use App\Models\Site;
 use App\Services\DnsService;
+use App\Services\DomainService;
 use Illuminate\Http\Request;
 
 class DomainController extends Controller
@@ -25,7 +27,53 @@ class DomainController extends Controller
      */
     public function index()
     {
-        return view('domain.list');
+        $stats = [
+            'total' => Domain::count(),
+            'primary' => Domain::where('is_primary', true)->count(),
+            'aliases' => Domain::where('is_primary', false)->count(),
+            'total_dns_records' => DnsRecord::count(),
+        ];
+
+        return view('domain.list', compact('stats'));
+    }
+
+    /**
+     * Show the form for creating a new domain.
+     */
+    public function create()
+    {
+        $servers = Server::all();
+        $sites = Site::all();
+
+        return view('domain.create', compact('servers', 'sites'));
+    }
+
+    /**
+     * Store a newly created domain.
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'domain' => 'required|string|max:255',
+            'server_id' => 'required|string|exists:servers,server_id',
+            'site_id' => 'nullable|string|exists:sites,site_id',
+            'is_primary' => 'nullable|boolean',
+        ]);
+
+        try {
+            $this->domainService->createDomain([
+                'domain' => $validated['domain'],
+                'server_id' => $validated['server_id'],
+                'site_id' => $validated['site_id'] ?? null,
+                'is_primary' => $validated['is_primary'] ?? false,
+            ]);
+
+            session()->flash('success', 'Domain successfully created.');
+        } catch (\Exception $e) {
+            session()->flash('error', 'Failed to create domain: '.$e->getMessage());
+        }
+
+        return redirect()->route('domain.list');
     }
 
     /**

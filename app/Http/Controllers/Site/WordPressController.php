@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Site;
 use App\Models\Wordpress;
 use App\Services\WordPressService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\View\View;
 
 class WordPressController extends Controller
 {
@@ -18,11 +20,11 @@ class WordPressController extends Controller
         $this->wordpressService = $wordpressService;
     }
 
-    public function index($site_id): \Illuminate\View\View
+    public function index($site_id): View
     {
         // Verify site exists
         $site = Site::where('site_id', $site_id)->first();
-        if (!$site) {
+        if (! $site) {
             abort(404, 'Site not found');
         }
 
@@ -31,7 +33,7 @@ class WordPressController extends Controller
         return view('site.wordpress.index', compact('site_id', 'site', 'wordpresses'));
     }
 
-    public function create(Request $request, $site_id): \Illuminate\Http\RedirectResponse
+    public function create(Request $request, $site_id): RedirectResponse
     {
         $request->validate([
             'path' => 'required|string',
@@ -40,11 +42,11 @@ class WordPressController extends Controller
         ]);
 
         $site = Site::where('site_id', $site_id)->first();
-        if (!$site) {
+        if (! $site) {
             return back()->withErrors(['error' => 'Site not found. Please check the site ID.']);
         }
 
-        $path = $site->rootpath . '/' . trim($request->input('path'), '/');
+        $path = $site->rootpath.'/'.trim($request->input('path'), '/');
 
         try {
             $response = $this->wordpressService->deployWordPress(
@@ -61,8 +63,9 @@ class WordPressController extends Controller
                 return back()->withErrors(['error' => $response['message']]);
             }
         } catch (\Exception $e) {
-            Log::error('WordPress deployment failed: ' . $e->getMessage());
-            return back()->withErrors(['error' => 'WordPress deployment failed: ' . $e->getMessage()]);
+            Log::error('WordPress deployment failed: '.$e->getMessage());
+
+            return back()->withErrors(['error' => 'WordPress deployment failed: '.$e->getMessage()]);
         }
     }
 }

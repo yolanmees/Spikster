@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Server;
 use App\Models\ServerMetric;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Carbon\Carbon;
 
 class ServerMetricsController extends Controller
 {
@@ -63,11 +63,11 @@ class ServerMetricsController extends Controller
             ]);
 
             return [
-                'labels' => $metrics->pluck('measured_at')->map(fn($t) => Carbon::parse($t)->format('H:i'))->values()->toArray(),
-                'cpu' => $metrics->pluck('cpu_percent')->map(fn($v) => round($v, 2))->values()->toArray(),
-                'memory' => $metrics->pluck('memory_percent')->map(fn($v) => round($v, 2))->values()->toArray(),
-                'disk' => $metrics->pluck('disk_percent')->map(fn($v) => round($v, 2))->values()->toArray(),
-                'load' => $metrics->pluck('load_1')->map(fn($v) => round($v, 2))->values()->toArray(),
+                'labels' => $metrics->pluck('measured_at')->map(fn ($t) => Carbon::parse($t)->format('H:i'))->values()->toArray(),
+                'cpu' => $metrics->pluck('cpu_percent')->map(fn ($v) => round($v, 2))->values()->toArray(),
+                'memory' => $metrics->pluck('memory_percent')->map(fn ($v) => round($v, 2))->values()->toArray(),
+                'disk' => $metrics->pluck('disk_percent')->map(fn ($v) => round($v, 2))->values()->toArray(),
+                'load' => $metrics->pluck('load_1')->map(fn ($v) => round($v, 2))->values()->toArray(),
             ];
 
         } elseif ($hours <= 6) {
@@ -86,11 +86,11 @@ class ServerMetricsController extends Controller
                 ->get();
 
             return [
-                'labels' => $metrics->pluck('time_bucket')->map(fn($t) => Carbon::parse($t)->format('H:i'))->values()->toArray(),
-                'cpu' => $metrics->pluck('avg_cpu')->map(fn($v) => round($v, 2))->values()->toArray(),
-                'memory' => $metrics->pluck('avg_memory')->map(fn($v) => round($v, 2))->values()->toArray(),
-                'disk' => $metrics->pluck('avg_disk')->map(fn($v) => round($v, 2))->values()->toArray(),
-                'load' => $metrics->pluck('avg_load')->map(fn($v) => round($v, 2))->values()->toArray(),
+                'labels' => $metrics->pluck('time_bucket')->map(fn ($t) => Carbon::parse($t)->format('H:i'))->values()->toArray(),
+                'cpu' => $metrics->pluck('avg_cpu')->map(fn ($v) => round($v, 2))->values()->toArray(),
+                'memory' => $metrics->pluck('avg_memory')->map(fn ($v) => round($v, 2))->values()->toArray(),
+                'disk' => $metrics->pluck('avg_disk')->map(fn ($v) => round($v, 2))->values()->toArray(),
+                'load' => $metrics->pluck('avg_load')->map(fn ($v) => round($v, 2))->values()->toArray(),
             ];
 
         } else {
@@ -111,11 +111,11 @@ class ServerMetricsController extends Controller
             $labelFormat = $hours > 48 ? 'M j H:i' : 'H:i';
 
             return [
-                'labels' => $metrics->pluck('hour')->map(fn($t) => Carbon::parse($t)->format($labelFormat))->values()->toArray(),
-                'cpu' => $metrics->pluck('avg_cpu')->map(fn($v) => round($v, 2))->values()->toArray(),
-                'memory' => $metrics->pluck('avg_memory')->map(fn($v) => round($v, 2))->values()->toArray(),
-                'disk' => $metrics->pluck('avg_disk')->map(fn($v) => round($v, 2))->values()->toArray(),
-                'load' => $metrics->pluck('avg_load')->map(fn($v) => round($v, 2))->values()->toArray(),
+                'labels' => $metrics->pluck('hour')->map(fn ($t) => Carbon::parse($t)->format($labelFormat))->values()->toArray(),
+                'cpu' => $metrics->pluck('avg_cpu')->map(fn ($v) => round($v, 2))->values()->toArray(),
+                'memory' => $metrics->pluck('avg_memory')->map(fn ($v) => round($v, 2))->values()->toArray(),
+                'disk' => $metrics->pluck('avg_disk')->map(fn ($v) => round($v, 2))->values()->toArray(),
+                'load' => $metrics->pluck('avg_load')->map(fn ($v) => round($v, 2))->values()->toArray(),
             ];
         }
     }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Site;
 
 use App\Http\Controllers\Controller;
 use App\Models\Site;
+use App\Services\DaemonService;
 use Barryvdh\DomPDF\Facade\Pdf as PDF;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
@@ -19,7 +20,7 @@ class CredentialController extends Controller
     {
         $site = Site::where('site_id', $site_id)->first();
 
-        if (!$site) {
+        if (! $site) {
             return response()->json([
                 'message' => __('spikster.site_not_found_message'),
                 'errors' => __('spikster.site_not_found'),
@@ -30,20 +31,20 @@ class CredentialController extends Controller
         $site->password = $newpassword;
         $site->save();
 
-        app(\App\Services\DaemonService::class)->send('site.user-password', [
+        app(DaemonService::class)->send('site.user-password', [
             'username' => $site->username,
             'password' => $newpassword,
         ]);
 
         $pdftoken = JWT::encode(
             ['iat' => time(), 'exp' => time() + 180],
-            config('cipi.jwt_secret') . '-Pdf',
+            config('cipi.jwt_secret').'-Pdf',
             'HS256'
         );
 
         return response()->json([
             'password' => $site->password,
-            'pdf' => URL::to('/pdf/' . $site->site_id . '/' . $pdftoken),
+            'pdf' => URL::to('/pdf/'.$site->site_id.'/'.$pdftoken),
         ]);
     }
 
@@ -54,7 +55,7 @@ class CredentialController extends Controller
     {
         $site = Site::where('site_id', $site_id)->first();
 
-        if (!$site) {
+        if (! $site) {
             return response()->json([
                 'message' => __('spikster.site_not_found_message'),
                 'errors' => __('spikster.site_not_found'),
@@ -65,7 +66,7 @@ class CredentialController extends Controller
         $site->database = Str::random(24);
         $site->save();
 
-        app(\App\Services\DaemonService::class)->send('site.db-password', [
+        app(DaemonService::class)->send('site.db-password', [
             'username' => $site->username,
             'old_pass' => $last_password,
             'new_pass' => $site->database,
@@ -73,13 +74,13 @@ class CredentialController extends Controller
 
         $pdftoken = JWT::encode(
             ['iat' => time(), 'exp' => time() + 180],
-            config('cipi.jwt_secret') . '-Pdf',
+            config('cipi.jwt_secret').'-Pdf',
             'HS256'
         );
 
         return response()->json([
             'password' => $site->database,
-            'pdf' => URL::to('/pdf/' . $site->site_id . '/' . $pdftoken),
+            'pdf' => URL::to('/pdf/'.$site->site_id.'/'.$pdftoken),
         ]);
     }
 
@@ -89,7 +90,7 @@ class CredentialController extends Controller
     public function pdf(string $site_id, string $pdftoken)
     {
         try {
-            JWT::decode($pdftoken, new Key(config('cipi.jwt_secret') . '-Pdf', 'HS256'));
+            JWT::decode($pdftoken, new Key(config('cipi.jwt_secret').'-Pdf', 'HS256'));
         } catch (\Throwable $th) {
             abort(403);
         }
@@ -108,7 +109,7 @@ class CredentialController extends Controller
 
         $pdf = PDF::loadView('pdf', $data);
 
-        return $pdf->download($site->username . '_' . date('YmdHi') . '_' . date('s') . '.pdf');
+        return $pdf->download($site->username.'_'.date('YmdHi').'_'.date('s').'.pdf');
     }
 
     /**
@@ -118,10 +119,10 @@ class CredentialController extends Controller
     {
         $site = Site::where('site_id', $site_id)->first();
 
-        if (!$site) {
+        if (! $site) {
             return back();
         }
 
-        return redirect()->to('mysecureadmin/index.php?username=' . $site->username . '&password=' . $site->database);
+        return redirect()->to('mysecureadmin/index.php?username='.$site->username.'&password='.$site->database);
     }
 }

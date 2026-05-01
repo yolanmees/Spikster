@@ -15,10 +15,16 @@ class DatabaseSeeder extends Seeder
         User::firstOrCreate(
             ['email' => 'administrator@localhost'],
             [
-                'name'     => 'admin',
+                'name' => 'admin',
                 'password' => Hash::make(bin2hex(random_bytes(32))), // random, unusable until wizard runs
             ]
         );
+
+        // Seed RBAC baseline and align existing users to expected roles.
+        $this->call([
+            RolesAndPermissionsSeeder::class,
+            AssignRolesToExistingUsersSeeder::class,
+        ]);
 
         // Panel server entry — reads from env vars set by go.sh
         $serverId = env('PANEL_SERVER_ID');
@@ -30,13 +36,13 @@ class DatabaseSeeder extends Seeder
             Server::firstOrCreate(
                 ['server_id' => $serverId],
                 [
-                    'name'     => 'This VPS!',
-                    'ip'       => $serverIp,
+                    'name' => 'This VPS!',
+                    'ip' => $serverIp,
                     'password' => $serverPass ?? '',
                     'database' => $serverDb ?? '',
-                    'default'  => true,
-                    'status'   => 1,
-                    'cron'     => ' ',
+                    'default' => true,
+                    'status' => 1,
+                    'cron' => ' ',
                 ]
             );
         }

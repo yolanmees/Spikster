@@ -31,7 +31,7 @@ return new class extends Migration
             $table->string('badge_color', 50)->default('blue');
             $table->enum('menu_location', ['main', 'admin', 'user', 'footer'])->default('main');
             $table->timestamps();
-            
+
             $table->foreign('module_id')->references('id')->on('modules')->onDelete('cascade');
             $table->foreign('parent_id')->references('id')->on('module_menu_items')->onDelete('cascade');
             $table->index(['module_id', 'menu_location']);

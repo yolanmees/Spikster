@@ -7,7 +7,6 @@ use App\Models\PermissionAuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
 
 class RoleController extends Controller
 {
@@ -16,6 +15,8 @@ class RoleController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('role.view');
+
         try {
             $roles = Role::with('permissions')
                 ->withCount('users')
@@ -39,6 +40,8 @@ class RoleController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('role.create');
+
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|unique:roles,name',
             'permissions' => 'nullable|array',
@@ -89,6 +92,8 @@ class RoleController extends Controller
      */
     public function show(Request $request, $id)
     {
+        $this->authorize('role.view');
+
         try {
             $role = Role::with('permissions')
                 ->withCount('users')
@@ -111,8 +116,10 @@ class RoleController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $this->authorize('role.edit');
+
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|unique:roles,name,' . $id,
+            'name' => 'required|string|unique:roles,name,'.$id,
             'permissions' => 'nullable|array',
             'permissions.*' => 'exists:permissions,name',
         ]);
@@ -145,7 +152,7 @@ class RoleController extends Controller
                 [
                     'old_name' => $oldName,
                     'new_name' => $role->name,
-                    'permissions_count' => $role->permissions->count()
+                    'permissions_count' => $role->permissions->count(),
                 ]
             );
 
@@ -168,6 +175,8 @@ class RoleController extends Controller
      */
     public function destroy(Request $request, $id)
     {
+        $this->authorize('role.delete');
+
         try {
             $role = Role::findOrFail($id);
 
@@ -210,6 +219,8 @@ class RoleController extends Controller
      */
     public function getPermissions($id)
     {
+        $this->authorize('role.view');
+
         try {
             $role = Role::with('permissions')->findOrFail($id);
 
@@ -230,6 +241,8 @@ class RoleController extends Controller
      */
     public function assignPermissions(Request $request, $id)
     {
+        $this->authorize('permission.assign');
+
         $validator = Validator::make($request->all(), [
             'permissions' => 'required|array',
             'permissions.*' => 'exists:permissions,name',
@@ -256,7 +269,7 @@ class RoleController extends Controller
                 null,
                 [
                     'role_name' => $role->name,
-                    'permissions_count' => count($request->permissions)
+                    'permissions_count' => count($request->permissions),
                 ]
             );
 

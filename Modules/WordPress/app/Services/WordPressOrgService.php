@@ -2,14 +2,16 @@
 
 namespace Modules\WordPress\Services;
 
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class WordPressOrgService
 {
     protected string $themeApiUrl = 'https://api.wordpress.org/themes/info/1.2/';
+
     protected string $pluginApiUrl = 'https://api.wordpress.org/plugins/info/1.2/';
+
     protected int $cacheDuration = 3600; // 1 hour
 
     /**
@@ -36,22 +38,22 @@ class WordPressOrgService
                 'fields[active_installs]' => true,
             ];
 
-            if (!empty($search)) {
+            if (! empty($search)) {
                 $queryArgs['search'] = $search;
             }
 
             // Add optional filters
-            if (!empty($filters['tag'])) {
+            if (! empty($filters['tag'])) {
                 $queryArgs['tag'] = $filters['tag'];
             }
 
-            if (!empty($filters['browse'])) {
+            if (! empty($filters['browse'])) {
                 $queryArgs['browse'] = $filters['browse'];
             } else {
                 $queryArgs['browse'] = 'popular';
             }
 
-            $url = $this->themeApiUrl . '?' . http_build_query($queryArgs);
+            $url = $this->themeApiUrl.'?'.http_build_query($queryArgs);
 
             Log::info('WordPress.org Themes API Request', [
                 'url' => $url,
@@ -68,6 +70,7 @@ class WordPressOrgService
 
             if ($response->successful()) {
                 $data = $response->json();
+
                 return [
                     'success' => true,
                     'themes' => $data['themes'] ?? [],
@@ -82,7 +85,7 @@ class WordPressOrgService
 
             return [
                 'success' => false,
-                'message' => 'Failed to fetch themes from WordPress.org (HTTP ' . $response->status() . ')',
+                'message' => 'Failed to fetch themes from WordPress.org (HTTP '.$response->status().')',
             ];
 
         } catch (\Exception $e) {
@@ -93,7 +96,7 @@ class WordPressOrgService
 
             return [
                 'success' => false,
-                'message' => 'Exception: ' . $e->getMessage(),
+                'message' => 'Exception: '.$e->getMessage(),
             ];
         }
     }
@@ -192,24 +195,24 @@ class WordPressOrgService
                 'fields[active_installs]' => true,
             ];
 
-            if (!empty($search)) {
+            if (! empty($search)) {
                 $queryArgs['search'] = $search;
             }
 
             // Add optional filters
-            if (!empty($filters['tag'])) {
+            if (! empty($filters['tag'])) {
                 $queryArgs['tag'] = $filters['tag'];
             }
-            if (!empty($filters['author'])) {
+            if (! empty($filters['author'])) {
                 $queryArgs['author'] = $filters['author'];
             }
-            if (!empty($filters['browse'])) {
+            if (! empty($filters['browse'])) {
                 $queryArgs['browse'] = $filters['browse'];
             } else {
                 $queryArgs['browse'] = 'popular';
             }
 
-            $url = $this->pluginApiUrl . '?' . http_build_query($queryArgs);
+            $url = $this->pluginApiUrl.'?'.http_build_query($queryArgs);
 
             Log::info('WordPress.org Plugin API Request', [
                 'url' => $url,
@@ -226,6 +229,7 @@ class WordPressOrgService
 
             if ($response->successful()) {
                 $data = $response->json();
+
                 return [
                     'success' => true,
                     'plugins' => $data['plugins'] ?? [],
@@ -239,7 +243,7 @@ class WordPressOrgService
 
             return [
                 'success' => false,
-                'message' => 'Failed to fetch plugins from WordPress.org (HTTP ' . $response->status() . ')',
+                'message' => 'Failed to fetch plugins from WordPress.org (HTTP '.$response->status().')',
             ];
 
         } catch (\Exception $e) {
@@ -250,7 +254,7 @@ class WordPressOrgService
 
             return [
                 'success' => false,
-                'message' => 'Exception: ' . $e->getMessage(),
+                'message' => 'Exception: '.$e->getMessage(),
             ];
         }
     }

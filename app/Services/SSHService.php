@@ -13,7 +13,10 @@ use App\Models\Server;
  */
 class SSHService
 {
-    public function connect(Server $server): static { return $this; }
+    public function connect(Server $server): static
+    {
+        return $this;
+    }
 
     public function executeCommand(Server $server, string $command): string
     {

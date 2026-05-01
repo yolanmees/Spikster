@@ -39,7 +39,7 @@ class ModuleWidget extends Model
 
     public function hasPermission(): bool
     {
-        if (!$this->permission) {
+        if (! $this->permission) {
             return true;
         }
 

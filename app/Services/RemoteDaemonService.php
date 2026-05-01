@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Server;
+use phpseclib3\Net\SSH2;
 
 /**
  * RemoteDaemonService
@@ -15,6 +16,7 @@ use App\Models\Server;
 class RemoteDaemonService
 {
     protected int $port = 18999;
+
     protected int $timeout = 30;
 
     /**
@@ -70,7 +72,7 @@ class RemoteDaemonService
 
         $cmd = sprintf(
             'ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 '
-            . '-fN -L %d:127.0.0.1:%d spikster@%s -i /etc/spikster/ssh_key 2>/dev/null',
+            .'-fN -L %d:127.0.0.1:%d spikster@%s -i /etc/spikster/ssh_key 2>/dev/null',
             $localPort, $this->port, $server->ip
         );
 
@@ -91,6 +93,7 @@ class RemoteDaemonService
         $name = stream_socket_get_name($socket, false);
         fclose($socket);
         [, $port] = explode(':', $name);
+
         return (int) $port;
     }
 
@@ -99,22 +102,23 @@ class RemoteDaemonService
      */
     public function createSite(Server $server, array $params): bool
     {
-        return ($this->send($server, 'site.create', $params))['success'] ?? false;
+        return $this->send($server, 'site.create', $params)['success'] ?? false;
     }
 
     public function deleteSite(Server $server, array $params): bool
     {
-        return ($this->send($server, 'site.delete', $params))['success'] ?? false;
+        return $this->send($server, 'site.delete', $params)['success'] ?? false;
     }
 
     public function restartService(Server $server, string $service): bool
     {
-        return ($this->send($server, 'restart', ['service' => $service]))['success'] ?? false;
+        return $this->send($server, 'restart', ['service' => $service])['success'] ?? false;
     }
 
     public function doctor(Server $server): array
     {
         $result = $this->send($server, 'server.package-list', []);
+
         return $result;
     }
 
@@ -126,7 +130,7 @@ class RemoteDaemonService
     {
         $script = 'curl -fsSL https://raw.githubusercontent.com/yolanmees/Spikster/v2-update/go.sh | bash';
 
-        $ssh = new \phpseclib3\Net\SSH2($server->ip, 22);
+        $ssh = new SSH2($server->ip, 22);
         if (! $ssh->login('root', $server->password)) {
             throw new \Exception("SSH authentication failed for {$server->ip}");
         }
@@ -168,31 +172,32 @@ class RemoteDaemonService
 
     public function createFtpUser(Server $server, array $params): bool
     {
-        return ($this->send($server, 'ftp.create', $params))['success'] ?? false;
+        return $this->send($server, 'ftp.create', $params)['success'] ?? false;
     }
 
     public function deleteFtpUser(Server $server, string $username): bool
     {
-        return ($this->send($server, 'ftp.delete', ['username' => $username]))['success'] ?? false;
+        return $this->send($server, 'ftp.delete', ['username' => $username])['success'] ?? false;
     }
 
     public function updateFtpUser(Server $server, array $params): bool
     {
-        return ($this->send($server, 'ftp.update-password', $params))['success'] ?? false;
+        return $this->send($server, 'ftp.update-password', $params)['success'] ?? false;
     }
 
     public function getFtpDiskUsage(Server $server, string $username, string $homeDirectory): int
     {
         $result = $this->send($server, 'ftp.disk-usage', [
-            'username'       => $username,
+            'username' => $username,
             'home_directory' => $homeDirectory,
         ]);
+
         return (int) ($result['usage_bytes'] ?? 0);
     }
 
     public function updateFtpQuota(Server $server, string $username, string $homeDirectory, int $quotaMb): bool
     {
-        return ($this->send($server, 'ftp.update-quota', compact('username', 'homeDirectory', 'quotaMb')))['success'] ?? false;
+        return $this->send($server, 'ftp.update-quota', compact('username', 'homeDirectory', 'quotaMb'))['success'] ?? false;
     }
 
     public function testFtpConnection(Server $server, string $username, string $password): array
@@ -200,52 +205,52 @@ class RemoteDaemonService
         return $this->send($server, 'ftp.test', [
             'username' => $username,
             'password' => $password,
-            'host'     => '127.0.0.1',
+            'host' => '127.0.0.1',
         ]);
     }
     // ─── Email management ─────────────────────────────────────────────────────
 
     public function createEmailAccount(Server $server, string $domain, string $username, string $email, string $passwordHash, int $quotaMb = 0): bool
     {
-        return ($this->send($server, 'email.create', compact('domain', 'username', 'email') + [
+        return $this->send($server, 'email.create', compact('domain', 'username', 'email') + [
             'password_hash' => $passwordHash,
             'quota_mb' => (string) $quotaMb,
-        ]))['success'] ?? false;
+        ])['success'] ?? false;
     }
 
     public function deleteEmailAccount(Server $server, string $domain, string $username, string $email): bool
     {
-        return ($this->send($server, 'email.delete', compact('domain', 'username', 'email')))['success'] ?? false;
+        return $this->send($server, 'email.delete', compact('domain', 'username', 'email'))['success'] ?? false;
     }
 
     public function updateEmailPassword(Server $server, string $email, string $passwordHash): bool
     {
-        return ($this->send($server, 'email.update-password', ['email' => $email, 'password_hash' => $passwordHash]))['success'] ?? false;
+        return $this->send($server, 'email.update-password', ['email' => $email, 'password_hash' => $passwordHash])['success'] ?? false;
     }
 
     public function updateEmailQuota(Server $server, string $email, int $quotaMb): bool
     {
-        return ($this->send($server, 'email.update-quota', ['email' => $email, 'quota_mb' => (string) $quotaMb]))['success'] ?? false;
+        return $this->send($server, 'email.update-quota', ['email' => $email, 'quota_mb' => (string) $quotaMb])['success'] ?? false;
     }
 
     public function createEmailForwarder(Server $server, string $source, string $destination): bool
     {
-        return ($this->send($server, 'email.forwarder-create', compact('source', 'destination')))['success'] ?? false;
+        return $this->send($server, 'email.forwarder-create', compact('source', 'destination'))['success'] ?? false;
     }
 
     public function deleteEmailForwarder(Server $server, string $source): bool
     {
-        return ($this->send($server, 'email.forwarder-delete', ['source' => $source]))['success'] ?? false;
+        return $this->send($server, 'email.forwarder-delete', ['source' => $source])['success'] ?? false;
     }
 
     public function createEmailAlias(Server $server, string $alias, string $target): bool
     {
-        return ($this->send($server, 'email.alias-create', compact('alias', 'target')))['success'] ?? false;
+        return $this->send($server, 'email.alias-create', compact('alias', 'target'))['success'] ?? false;
     }
 
     public function deleteEmailAlias(Server $server, string $alias): bool
     {
-        return ($this->send($server, 'email.alias-delete', ['alias' => $alias]))['success'] ?? false;
+        return $this->send($server, 'email.alias-delete', ['alias' => $alias])['success'] ?? false;
     }
 
     /**
@@ -258,6 +263,7 @@ class RemoteDaemonService
             return [];
         }
         $decoded = json_decode($result['output'] ?? '', true);
+
         return is_array($decoded) ? $decoded : [];
     }
 
@@ -266,40 +272,39 @@ class RemoteDaemonService
         string $subject = '', string $message = '',
         string $startDate = '', string $endDate = ''
     ): bool {
-        return ($this->send($server, 'email.autoresponder-update', [
+        return $this->send($server, 'email.autoresponder-update', [
             'domain' => $domain, 'username' => $username,
             'enabled' => $enabled ? 'true' : 'false',
             'subject' => $subject, 'message' => $message,
             'start_date' => $startDate, 'end_date' => $endDate,
-        ]))['success'] ?? false;
+        ])['success'] ?? false;
     }
 
     public function installRoundcube(
         Server $server, string $domain, string $siteRoot,
         string $dbName, string $dbUser, string $dbPass, string $php
     ): bool {
-        return ($this->send($server, 'email.roundcube-install', [
+        return $this->send($server, 'email.roundcube-install', [
             'domain' => $domain, 'site_root' => $siteRoot,
             'db_name' => $dbName, 'db_user' => $dbUser, 'db_pass' => $dbPass,
             'php' => $php,
-        ]))['success'] ?? false;
+        ])['success'] ?? false;
     }
 
     // ─── Fail2ban management ──────────────────────────────────────────────────
 
     public function fail2banBan(Server $server, string $ip, string $jail = 'sshd'): bool
     {
-        return ($this->send($server, 'fail2ban.ban', ['ip' => $ip, 'jail' => $jail]))['success'] ?? false;
+        return $this->send($server, 'fail2ban.ban', ['ip' => $ip, 'jail' => $jail])['success'] ?? false;
     }
 
     public function fail2banUnban(Server $server, string $ip, string $jail = ''): bool
     {
-        return ($this->send($server, 'fail2ban.unban', ['ip' => $ip, 'jail' => $jail]))['success'] ?? false;
+        return $this->send($server, 'fail2ban.unban', ['ip' => $ip, 'jail' => $jail])['success'] ?? false;
     }
 
     public function fail2banWhitelist(Server $server, string $ip): bool
     {
-        return ($this->send($server, 'fail2ban.whitelist', ['ip' => $ip]))['success'] ?? false;
+        return $this->send($server, 'fail2ban.whitelist', ['ip' => $ip])['success'] ?? false;
     }
-
 }

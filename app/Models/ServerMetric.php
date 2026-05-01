@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class ServerMetric extends Model
 {
@@ -205,11 +205,11 @@ class ServerMetric extends Model
                 ->get();
 
             return [
-                'labels' => $metrics->pluck('measured_at')->map(fn($t) => Carbon::parse($t)->format('H:i'))->toArray(),
-                'cpu' => $metrics->pluck('cpu_percent')->map(fn($v) => round($v, 2))->toArray(),
-                'memory' => $metrics->pluck('memory_percent')->map(fn($v) => round($v, 2))->toArray(),
-                'disk' => $metrics->pluck('disk_percent')->map(fn($v) => round($v, 2))->toArray(),
-                'load' => $metrics->pluck('load_1')->map(fn($v) => round($v, 2))->toArray(),
+                'labels' => $metrics->pluck('measured_at')->map(fn ($t) => Carbon::parse($t)->format('H:i'))->toArray(),
+                'cpu' => $metrics->pluck('cpu_percent')->map(fn ($v) => round($v, 2))->toArray(),
+                'memory' => $metrics->pluck('memory_percent')->map(fn ($v) => round($v, 2))->toArray(),
+                'disk' => $metrics->pluck('disk_percent')->map(fn ($v) => round($v, 2))->toArray(),
+                'load' => $metrics->pluck('load_1')->map(fn ($v) => round($v, 2))->toArray(),
             ];
 
         } elseif ($hours <= 6) {
@@ -228,11 +228,11 @@ class ServerMetric extends Model
                 ->get();
 
             return [
-                'labels' => $metrics->pluck('time_bucket')->map(fn($h) => Carbon::parse($h)->format('H:i'))->toArray(),
-                'cpu' => $metrics->pluck('avg_cpu')->map(fn($v) => round($v, 2))->toArray(),
-                'memory' => $metrics->pluck('avg_memory')->map(fn($v) => round($v, 2))->toArray(),
-                'disk' => $metrics->pluck('avg_disk')->map(fn($v) => round($v, 2))->toArray(),
-                'load' => $metrics->pluck('avg_load')->map(fn($v) => round($v, 2))->toArray(),
+                'labels' => $metrics->pluck('time_bucket')->map(fn ($h) => Carbon::parse($h)->format('H:i'))->toArray(),
+                'cpu' => $metrics->pluck('avg_cpu')->map(fn ($v) => round($v, 2))->toArray(),
+                'memory' => $metrics->pluck('avg_memory')->map(fn ($v) => round($v, 2))->toArray(),
+                'disk' => $metrics->pluck('avg_disk')->map(fn ($v) => round($v, 2))->toArray(),
+                'load' => $metrics->pluck('avg_load')->map(fn ($v) => round($v, 2))->toArray(),
             ];
 
         } else {
@@ -254,11 +254,11 @@ class ServerMetric extends Model
             $labelFormat = $hours > 48 ? 'M j H:i' : 'H:i';
 
             return [
-                'labels' => $metrics->pluck('hour')->map(fn($h) => Carbon::parse($h)->format($labelFormat))->toArray(),
-                'cpu' => $metrics->pluck('avg_cpu')->map(fn($v) => round($v, 2))->toArray(),
-                'memory' => $metrics->pluck('avg_memory')->map(fn($v) => round($v, 2))->toArray(),
-                'disk' => $metrics->pluck('avg_disk')->map(fn($v) => round($v, 2))->toArray(),
-                'load' => $metrics->pluck('avg_load')->map(fn($v) => round($v, 2))->toArray(),
+                'labels' => $metrics->pluck('hour')->map(fn ($h) => Carbon::parse($h)->format($labelFormat))->toArray(),
+                'cpu' => $metrics->pluck('avg_cpu')->map(fn ($v) => round($v, 2))->toArray(),
+                'memory' => $metrics->pluck('avg_memory')->map(fn ($v) => round($v, 2))->toArray(),
+                'disk' => $metrics->pluck('avg_disk')->map(fn ($v) => round($v, 2))->toArray(),
+                'load' => $metrics->pluck('avg_load')->map(fn ($v) => round($v, 2))->toArray(),
             ];
         }
     }
@@ -274,7 +274,7 @@ class ServerMetric extends Model
             $bytes /= 1024;
         }
 
-        return round($bytes, $precision) . ' ' . $units[$i];
+        return round($bytes, $precision).' '.$units[$i];
     }
 
     /**
@@ -287,7 +287,7 @@ class ServerMetric extends Model
             'used' => $this->formatBytes($this->memory_used),
             'free' => $this->formatBytes($this->memory_free),
             'available' => $this->memory_available ? $this->formatBytes($this->memory_available) : null,
-            'percent' => $this->memory_percent . '%',
+            'percent' => $this->memory_percent.'%',
         ];
     }
 
@@ -300,7 +300,7 @@ class ServerMetric extends Model
             'total' => $this->formatBytes($this->disk_total),
             'used' => $this->formatBytes($this->disk_used),
             'free' => $this->formatBytes($this->disk_free),
-            'percent' => $this->disk_percent . '%',
+            'percent' => $this->disk_percent.'%',
         ];
     }
 
@@ -315,9 +315,15 @@ class ServerMetric extends Model
         $minutes = floor(($seconds % 3600) / 60);
 
         $parts = [];
-        if ($days > 0) $parts[] = "{$days}d";
-        if ($hours > 0) $parts[] = "{$hours}h";
-        if ($minutes > 0 || empty($parts)) $parts[] = "{$minutes}m";
+        if ($days > 0) {
+            $parts[] = "{$days}d";
+        }
+        if ($hours > 0) {
+            $parts[] = "{$hours}h";
+        }
+        if ($minutes > 0 || empty($parts)) {
+            $parts[] = "{$minutes}m";
+        }
 
         return implode(' ', $parts);
     }

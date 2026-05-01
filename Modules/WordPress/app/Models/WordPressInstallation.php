@@ -100,12 +100,12 @@ class WordPressInstallation extends Model
 
     public function getFullPath(): string
     {
-        return $this->site->rootpath . '/' . ltrim($this->path, '/');
+        return $this->site->rootpath.'/'.ltrim($this->path, '/');
     }
 
     public function getAdminUrl(): string
     {
-        return rtrim($this->url ?? $this->site->domain, '/') . '/wp-admin';
+        return rtrim($this->url ?? $this->site->domain, '/').'/wp-admin';
     }
 
     public function scopeActive($query)

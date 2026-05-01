@@ -27,7 +27,7 @@ return new class extends Migration
             $table->string('permission')->nullable();
             $table->json('config')->nullable();
             $table->timestamps();
-            
+
             $table->foreign('module_id')->references('id')->on('modules')->onDelete('cascade');
             $table->unique(['module_id', 'widget_key'], 'unique_widget');
             $table->index(['is_active', 'order_index']);

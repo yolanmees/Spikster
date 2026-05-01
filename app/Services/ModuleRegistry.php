@@ -16,7 +16,7 @@ class ModuleRegistry
 
         foreach ($modules as $module) {
             $moduleJson = $this->getModuleJson($module->getPath());
-            
+
             if ($moduleJson) {
                 $discovered[] = $moduleJson;
             }
@@ -28,14 +28,14 @@ class ModuleRegistry
     public function register(string $alias): Module
     {
         $nwidartModule = ModuleFacade::find($alias);
-        
-        if (!$nwidartModule) {
+
+        if (! $nwidartModule) {
             throw new \Exception("Module {$alias} not found in filesystem");
         }
 
         $moduleJson = $this->getModuleJson($nwidartModule->getPath());
 
-        if (!$moduleJson) {
+        if (! $moduleJson) {
             throw new \Exception("Module {$alias} has no valid module.json");
         }
 
@@ -92,10 +92,10 @@ class ModuleRegistry
 
         // Check dependencies
         $unsatisfied = $this->checkDependencies($module);
-        
-        if (!empty($unsatisfied)) {
+
+        if (! empty($unsatisfied)) {
             throw new \Exception(
-                'Cannot enable module. Unsatisfied dependencies: ' . 
+                'Cannot enable module. Unsatisfied dependencies: '.
                 implode(', ', $unsatisfied)
             );
         }
@@ -113,7 +113,7 @@ class ModuleRegistry
 
     public function disable(Module $module): bool
     {
-        if (!$module->canBeDisabled()) {
+        if (! $module->canBeDisabled()) {
             throw new \Exception('Cannot disable this module. Other modules depend on it or it is a core module.');
         }
 
@@ -133,7 +133,7 @@ class ModuleRegistry
             $isSatisfied = $dependency->checkSatisfied();
             $dependency->update(['is_satisfied' => $isSatisfied]);
 
-            if (!$isSatisfied) {
+            if (! $isSatisfied) {
                 $unsatisfied[] = match ($dependency->dependency_type) {
                     'module' => "Module: {$dependency->requiredModule?->name}",
                     'package' => "Package: {$dependency->required_package}",
@@ -156,21 +156,21 @@ class ModuleRegistry
 
         // Check if module files exist
         $nwidartModule = ModuleFacade::find($module->alias);
-        if (!$nwidartModule) {
+        if (! $nwidartModule) {
             $health['status'] = 'error';
             $health['checks'][] = 'Module files not found';
         }
 
         // Check dependencies
         $unsatisfied = $this->checkDependencies($module);
-        if (!empty($unsatisfied)) {
+        if (! empty($unsatisfied)) {
             $health['status'] = 'warning';
-            $health['checks'][] = 'Unsatisfied dependencies: ' . implode(', ', $unsatisfied);
+            $health['checks'][] = 'Unsatisfied dependencies: '.implode(', ', $unsatisfied);
         }
 
         // Check if service provider exists
-        $providerPath = $nwidartModule?->getPath() . '/Providers/' . studly_case($module->alias) . 'ServiceProvider.php';
-        if ($nwidartModule && !File::exists($providerPath)) {
+        $providerPath = $nwidartModule?->getPath().'/Providers/'.studly_case($module->alias).'ServiceProvider.php';
+        if ($nwidartModule && ! File::exists($providerPath)) {
             $health['status'] = 'warning';
             $health['checks'][] = 'Service provider not found';
         }
@@ -186,9 +186,9 @@ class ModuleRegistry
 
     protected function getModuleJson(string $modulePath): ?array
     {
-        $jsonPath = $modulePath . '/module.json';
+        $jsonPath = $modulePath.'/module.json';
 
-        if (!File::exists($jsonPath)) {
+        if (! File::exists($jsonPath)) {
             return null;
         }
 

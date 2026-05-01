@@ -2,13 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Models\EmailAccount;
-use App\Models\FtpUser;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Carbon;
 
 /**
  * Site Model
@@ -28,10 +27,10 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property string|null $nginx
  * @property string|null $deploy
  * @property bool $panel
- * @property \Illuminate\Support\Carbon $created_at
- * @property \Illuminate\Support\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  * @property-read Server $server
- * @property-read \Illuminate\Database\Eloquent\Collection<int, Alias> $aliases
+ * @property-read Collection<int, Alias> $aliases
  */
 class Site extends Model
 {

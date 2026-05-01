@@ -168,7 +168,7 @@ class Backup extends Model
      */
     public function getDuration(): ?int
     {
-        if (!$this->started_at || !$this->completed_at) {
+        if (! $this->started_at || ! $this->completed_at) {
             return null;
         }
 
@@ -244,7 +244,7 @@ class Backup extends Model
      */
     public function verifyIntegrity(): bool
     {
-        if (!$this->checksum || !file_exists($this->filepath)) {
+        if (! $this->checksum || ! file_exists($this->filepath)) {
             return false;
         }
 
@@ -271,7 +271,7 @@ class Backup extends Model
      */
     public function getTypeBadgeColor(): string
     {
-        return match($this->type) {
+        return match ($this->type) {
             'full' => 'blue',
             'incremental' => 'green',
             'database' => 'purple',
@@ -285,7 +285,7 @@ class Backup extends Model
      */
     public function getStatusBadgeColor(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             'completed' => 'green',
             'in_progress' => 'blue',
             'failed' => 'red',
@@ -306,6 +306,6 @@ class Backup extends Model
             $bytes /= 1024;
         }
 
-        return round($bytes, $precision) . ' ' . $units[$i];
+        return round($bytes, $precision).' '.$units[$i];
     }
 }

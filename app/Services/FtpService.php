@@ -15,17 +15,17 @@ class FtpService
     public function createUser(Site $site, array $data): FtpUser
     {
         // Generate username if not provided
-        if (!isset($data['username'])) {
+        if (! isset($data['username'])) {
             $data['username'] = $this->generateUsername($site);
         }
 
         // Validate username format
-        if (!str_contains($data['username'], '@')) {
-            $data['username'] .= '@' . $site->domain;
+        if (! str_contains($data['username'], '@')) {
+            $data['username'] .= '@'.$site->domain;
         }
 
         // Set home directory if not provided
-        if (!isset($data['home_directory'])) {
+        if (! isset($data['home_directory'])) {
             $data['home_directory'] = "/var/www/vhosts/{$site->domain}/httpdocs";
         }
 
@@ -34,7 +34,7 @@ class FtpService
         $data['site_id'] = $site->site_id;
 
         // Set default permissions if not provided
-        if (!isset($data['permissions'])) {
+        if (! isset($data['permissions'])) {
             $data['permissions'] = [
                 'read' => true,
                 'write' => true,
@@ -48,7 +48,7 @@ class FtpService
         $ftpUser = FtpUser::create($data);
 
         // Dispatch SSH job to configure vsftpd
-        app(\App\Services\DaemonService::class)->send('ftp.create', ['username' => $ftpUser->username, 'password' => $ftpUser->password, 'home_dir' => $ftpUser->home_dir ?? '/home/'.$ftpUser->username]);
+        app(DaemonService::class)->send('ftp.create', ['username' => $ftpUser->username, 'password' => $ftpUser->password, 'home_dir' => $ftpUser->home_dir ?? '/home/'.$ftpUser->username]);
 
         return $ftpUser->fresh();
     }
@@ -64,7 +64,7 @@ class FtpService
 
         // If password or critical settings changed, update server config
         if ($needsServerUpdate) {
-            app(\App\Services\DaemonService::class)->send('ftp.update-password', ['username' => $ftpUser->username, 'password' => $ftpUser->password]);
+            app(DaemonService::class)->send('ftp.update-password', ['username' => $ftpUser->username, 'password' => $ftpUser->password]);
         }
 
         return $ftpUser->fresh();
@@ -76,7 +76,7 @@ class FtpService
     public function deleteUser(FtpUser $ftpUser): bool
     {
         // Dispatch SSH job to remove from vsftpd before deleting
-        app(\App\Services\DaemonService::class)->send('ftp.delete', ['username' => $ftpUser->username]);
+        app(DaemonService::class)->send('ftp.delete', ['username' => $ftpUser->username]);
 
         return $ftpUser->delete();
     }
@@ -89,7 +89,7 @@ class FtpService
         $ftpUser->update(['password' => $newPassword]);
 
         // Update vsftpd configuration with new password
-        app(\App\Services\DaemonService::class)->send('ftp.update-password', ['username' => $ftpUser->username, 'password' => $ftpUser->password]);
+        app(DaemonService::class)->send('ftp.update-password', ['username' => $ftpUser->username, 'password' => $ftpUser->password]);
 
         return $ftpUser->fresh();
     }
@@ -207,7 +207,7 @@ class FtpService
     {
         $ftpUser->update(['is_active' => true]);
 
-        app(\App\Services\DaemonService::class)->send('ftp.update-password', ['username' => $ftpUser->username, 'password' => $ftpUser->password]);
+        app(DaemonService::class)->send('ftp.update-password', ['username' => $ftpUser->username, 'password' => $ftpUser->password]);
 
         return $ftpUser->fresh();
     }
@@ -219,7 +219,7 @@ class FtpService
     {
         $ftpUser->update(['is_active' => false]);
 
-        app(\App\Services\DaemonService::class)->send('ftp.update-password', ['username' => $ftpUser->username, 'password' => $ftpUser->password]);
+        app(DaemonService::class)->send('ftp.update-password', ['username' => $ftpUser->username, 'password' => $ftpUser->password]);
 
         return $ftpUser->fresh();
     }
@@ -241,7 +241,7 @@ class FtpService
     {
         $ftpUser->setPermissions($permissions);
 
-        app(\App\Services\DaemonService::class)->send('ftp.update-password', ['username' => $ftpUser->username, 'password' => $ftpUser->password]);
+        app(DaemonService::class)->send('ftp.update-password', ['username' => $ftpUser->username, 'password' => $ftpUser->password]);
 
         return $ftpUser->fresh();
     }
@@ -253,10 +253,10 @@ class FtpService
     {
         $permissions = [
             'read' => true,
-            'write' => !$readOnly,
-            'delete' => !$readOnly,
-            'rename' => !$readOnly,
-            'create_directory' => !$readOnly,
+            'write' => ! $readOnly,
+            'delete' => ! $readOnly,
+            'rename' => ! $readOnly,
+            'create_directory' => ! $readOnly,
         ];
 
         return $this->updatePermissions($ftpUser, $permissions);
@@ -356,12 +356,12 @@ class FtpService
     public function validateUsername(string $username): bool
     {
         // Must contain @
-        if (!str_contains($username, '@')) {
+        if (! str_contains($username, '@')) {
             return false;
         }
 
         // Must not contain special characters except @ . - _
-        if (!preg_match('/^[a-zA-Z0-9@.\-_]+$/', $username)) {
+        if (! preg_match('/^[a-zA-Z0-9@.\-_]+$/', $username)) {
             return false;
         }
 
@@ -374,12 +374,12 @@ class FtpService
     public function validateHomeDirectory(string $path): bool
     {
         // Must start with /
-        if (!str_starts_with($path, '/')) {
+        if (! str_starts_with($path, '/')) {
             return false;
         }
 
         // Must be within /var/www/vhosts/
-        if (!str_starts_with($path, '/var/www/vhosts/')) {
+        if (! str_starts_with($path, '/var/www/vhosts/')) {
             return false;
         }
 

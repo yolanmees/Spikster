@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('group_name', 100)->nullable();
             $table->integer('order_index')->default(0);
             $table->timestamps();
-            
+
             $table->foreign('module_id')->references('id')->on('modules')->onDelete('cascade');
             $table->unique(['module_id', 'setting_key'], 'unique_module_setting');
             $table->index(['module_id', 'group_name']);

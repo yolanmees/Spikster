@@ -8,8 +8,8 @@
 
 @php
     $titleClass = $size === 'section'
-        ? 'text-lg font-semibold text-gray-900 dark:text-white'
-        : 'text-2xl font-bold text-gray-900 dark:text-white';
+        ? 'text-lg font-semibold text-zinc-900 dark:text-white'
+        : 'text-2xl font-bold text-zinc-900 dark:text-white';
     $tag = $size === 'section' ? 'h3' : 'h1';
 @endphp
 
@@ -17,7 +17,7 @@
     <div class="flex items-center gap-3">
         @if($back)
             <a href="{{ $back }}"
-               class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+               class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                 </svg>
@@ -27,7 +27,7 @@
         <div>
             <{{ $tag }} class="{{ $titleClass }}">{{ $title }}</{{ $tag }}>
             @if($subtitle)
-                <p class="mt-0.5 text-sm text-gray-500 dark:text-gray-400">{{ $subtitle }}</p>
+                <p class="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">{{ $subtitle }}</p>
             @endif
         </div>
     </div>

@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Server;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class LogManagerController extends Controller
 {
-    public function index($server_id): \Illuminate\View\View
+    public function index($server_id): View
     {
         $server = Server::where(['server_id' => $server_id])->first();
         $server_url = 'http://'.$server->ip.'/api/logs';
@@ -15,7 +17,7 @@ class LogManagerController extends Controller
         return view('server.logs.index', compact('server', 'logs'));
     }
 
-    public function show($server_id, $log): \Illuminate\View\View
+    public function show($server_id, $log): View
     {
         $server = Server::where(['server_id' => $server_id])->first();
         $server_url = 'http://'.$server->ip.'/api/logs/'.$log;
@@ -38,7 +40,7 @@ class LogManagerController extends Controller
             ->header('Content-Disposition', 'attachment; filename="'.$filename.'"');
     }
 
-    public function delete($server_id, $log): \Illuminate\Http\RedirectResponse
+    public function delete($server_id, $log): RedirectResponse
     {
         $server = Server::where(['server_id' => $server_id])->first();
         $server_url = 'http://'.$server->ip.'/api/logs/'.$log;
@@ -48,7 +50,7 @@ class LogManagerController extends Controller
             'http' => [
                 'method' => 'DELETE',
                 'header' => 'Content-Type: application/json',
-            ]
+            ],
         ]);
 
         $result = file_get_contents($server_url, false, $context);

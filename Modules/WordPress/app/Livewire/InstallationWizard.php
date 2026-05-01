@@ -2,31 +2,38 @@
 
 namespace Modules\WordPress\Livewire;
 
-use Livewire\Component;
 use App\Models\Site;
+use Livewire\Component;
 use Modules\WordPress\Services\WordPressInstallationService;
 
 class InstallationWizard extends Component
 {
     public $currentStep = 1;
+
     public $totalSteps = 3;
 
     // Step 1: Site Selection
     public $site_id = '';
+
     public $path = '/';
+
     public $url = '';
 
     // Step 2: Admin Credentials
     public $username = 'admin';
+
     public $password = '';
 
     // Step 3: Configuration
     public $locale = 'en_US';
+
     public $auto_update = false;
 
     // Installation
     public $isInstalling = false;
+
     public $installationComplete = false;
+
     public $installation = null;
 
     protected $rules = [
@@ -46,7 +53,7 @@ class InstallationWizard extends Component
     public function nextStep()
     {
         $this->validateCurrentStep();
-        
+
         if ($this->currentStep < $this->totalSteps) {
             $this->currentStep++;
         }
@@ -86,7 +93,7 @@ class InstallationWizard extends Component
 
         try {
             $service = app(WordPressInstallationService::class);
-            
+
             $this->installation = $service->install([
                 'site_id' => $this->site_id,
                 'path' => $this->path,
@@ -100,7 +107,7 @@ class InstallationWizard extends Component
             $this->installationComplete = true;
             session()->flash('success', 'WordPress installed successfully!');
         } catch (\Exception $e) {
-            session()->flash('error', 'Installation failed: ' . $e->getMessage());
+            session()->flash('error', 'Installation failed: '.$e->getMessage());
             $this->isInstalling = false;
         }
     }
@@ -112,9 +119,10 @@ class InstallationWizard extends Component
 
     public function getSelectedSiteProperty()
     {
-        if (!$this->site_id) {
+        if (! $this->site_id) {
             return null;
         }
+
         return Site::where('site_id', $this->site_id)->first();
     }
 

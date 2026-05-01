@@ -19,19 +19,19 @@ class Require2FA
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
 
         // If user is not authenticated, let other middleware handle it
-        if (!$user) {
+        if (! $user) {
             return $next($request);
         }
 
         // Check if user has 2FA enabled
-        if (!$this->twoFactorService->has2FAEnabled($user)) {
+        if (! $this->twoFactorService->has2FAEnabled($user)) {
             return $next($request);
         }
 
@@ -45,6 +45,7 @@ class Require2FA
         if ($deviceToken && $this->twoFactorService->isDeviceTrusted($user, $deviceToken)) {
             // Mark session as verified
             $request->session()->put('2fa_verified', true);
+
             return $next($request);
         }
 

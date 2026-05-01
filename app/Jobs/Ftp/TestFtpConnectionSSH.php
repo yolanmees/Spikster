@@ -23,6 +23,7 @@ class TestFtpConnectionSSH implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $timeout = 60;
+
     public $tries = 1;
 
     public function __construct(
@@ -33,19 +34,19 @@ class TestFtpConnectionSSH implements ShouldQueue
     public function handle(RemoteDaemonService $daemon): array
     {
         try {
-            Log::info("Testing FTP connection via daemon", ['username' => $this->ftpUser->username]);
+            Log::info('Testing FTP connection via daemon', ['username' => $this->ftpUser->username]);
 
             $result = $daemon->send($this->ftpUser->server, 'ftp.test', [
                 'username' => $this->ftpUser->username,
                 'password' => $this->password,
-                'host'     => '127.0.0.1',
+                'host' => '127.0.0.1',
             ]);
 
             $success = $result['success'] ?? false;
 
-            Log::info("FTP connection test completed via daemon", [
+            Log::info('FTP connection test completed via daemon', [
                 'username' => $this->ftpUser->username,
-                'success'  => $success,
+                'success' => $success,
             ]);
 
             return [
@@ -54,14 +55,14 @@ class TestFtpConnectionSSH implements ShouldQueue
             ];
 
         } catch (\Exception $e) {
-            Log::error("FTP connection test failed", [
+            Log::error('FTP connection test failed', [
                 'username' => $this->ftpUser->username,
-                'error'    => $e->getMessage(),
+                'error' => $e->getMessage(),
             ]);
 
             return [
                 'success' => false,
-                'message' => 'Connection test failed: ' . $e->getMessage(),
+                'message' => 'Connection test failed: '.$e->getMessage(),
             ];
         }
     }

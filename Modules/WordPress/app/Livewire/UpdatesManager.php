@@ -9,10 +9,15 @@ use Modules\WordPress\Services\WPCLIService;
 class UpdatesManager extends Component
 {
     public WordPressInstallation $installation;
+
     public $coreUpdate = null;
+
     public $themeUpdates = [];
+
     public $pluginUpdates = [];
+
     public $isChecking = false;
+
     public $isUpdating = false;
 
     public function mount(WordPressInstallation $installation)
@@ -63,7 +68,7 @@ class UpdatesManager extends Component
 
             session()->flash('success', 'Updates checked successfully');
         } catch (\Exception $e) {
-            session()->flash('error', 'Check failed: ' . $e->getMessage());
+            session()->flash('error', 'Check failed: '.$e->getMessage());
         } finally {
             $this->isChecking = false;
         }
@@ -80,7 +85,7 @@ class UpdatesManager extends Component
             $this->coreUpdate = null;
             session()->flash('success', 'WordPress core updated successfully');
         } catch (\Exception $e) {
-            session()->flash('error', 'Core update failed: ' . $e->getMessage());
+            session()->flash('error', 'Core update failed: '.$e->getMessage());
         } finally {
             $this->isUpdating = false;
         }
@@ -95,7 +100,7 @@ class UpdatesManager extends Component
             $this->loadUpdates();
             session()->flash('success', "Theme '{$slug}' updated successfully");
         } catch (\Exception $e) {
-            session()->flash('error', 'Theme update failed: ' . $e->getMessage());
+            session()->flash('error', 'Theme update failed: '.$e->getMessage());
         }
     }
 
@@ -108,7 +113,7 @@ class UpdatesManager extends Component
             $this->loadUpdates();
             session()->flash('success', "Plugin '{$slug}' updated successfully");
         } catch (\Exception $e) {
-            session()->flash('error', 'Plugin update failed: ' . $e->getMessage());
+            session()->flash('error', 'Plugin update failed: '.$e->getMessage());
         }
     }
 
@@ -156,7 +161,7 @@ class UpdatesManager extends Component
             $count = count($updated);
             session()->flash('success', "Updated {$count} item(s) successfully");
         } catch (\Exception $e) {
-            session()->flash('error', 'Update all failed: ' . $e->getMessage());
+            session()->flash('error', 'Update all failed: '.$e->getMessage());
         } finally {
             $this->isUpdating = false;
         }

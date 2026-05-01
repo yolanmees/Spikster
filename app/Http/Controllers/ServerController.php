@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreServerRequest;
 use App\Models\Server;
+use App\Models\ServerMetric;
 use App\Models\Site;
 use App\Models\Userdatabase;
+use App\Services\DaemonService;
 use App\Services\ServerService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -113,6 +115,8 @@ class ServerController extends Controller
      */
     public function index()
     {
+        $this->authorize('viewAny', Server::class);
+
         $servers = $this->serverService->getAllServers();
         $response = [];
 
@@ -249,6 +253,8 @@ class ServerController extends Controller
      */
     public function create(StoreServerRequest $request)
     {
+        $this->authorize('create', Server::class);
+
         // Check if IP conflicts with current server
         if ($request->ip == $request->server('SERVER_ADDR')) {
             return response()->json([
@@ -336,6 +342,15 @@ class ServerController extends Controller
         $server = $this->serverService->getServerById($server_id);
 
         if (! $server) {
+            return response()->json([
+                'message' => __('spikster.server_not_found_message_default'),
+                'errors' => __('spikster.server_not_found'),
+            ], 404);
+        }
+
+        $this->authorize('delete', $server);
+
+        if ($server->default) {
             return response()->json([
                 'message' => __('spikster.server_not_found_message_default'),
                 'errors' => __('spikster.server_not_found'),
@@ -480,6 +495,8 @@ class ServerController extends Controller
             ], 404);
         }
 
+        $this->authorize('view', $server);
+
         $stats = $this->serverService->getServerStats($server);
 
         return response()->json([
@@ -603,6 +620,8 @@ class ServerController extends Controller
             ], 404);
         }
 
+        $this->authorize('managePanel', $server);
+
         $site = Site::where('server_id', $server->id)->where('panel', 1)->first();
 
         if (! $site) {
@@ -689,10 +708,12 @@ class ServerController extends Controller
             ], 404);
         }
 
+        $this->authorize('managePanel', $server);
+
         $site = Site::where('server_id', $server->id)->where('panel', true)->first();
         if ($site) {
             $site->delete();
-            app(\App\Services\DaemonService::class)->send('panel.domain-remove', []);
+            app(DaemonService::class)->send('panel.domain-remove', []);
         }
 
         if ($request->domain && $request->domain != '') {
@@ -714,7 +735,7 @@ class ServerController extends Controller
             $newsite->database = 'Secret_123';
             $newsite->panel = true;
             $newsite->save();
-            app(\App\Services\DaemonService::class)->send('panel.domain-add', ['domain' => $server->domain]);
+            app(DaemonService::class)->send('panel.domain-add', ['domain' => $server->domain]);
         }
 
         return response()->json([]);
@@ -767,10 +788,12 @@ class ServerController extends Controller
             ], 404);
         }
 
+        $this->authorize('managePanel', $server);
+
         $site = Site::where('server_id', $server->id)->where('panel', true)->first();
 
         if ($site) {
-            app(\App\Services\DaemonService::class)->send('panel.domain-ssl', ['domain' => $site->domain]);
+            app(DaemonService::class)->send('panel.domain-ssl', ['domain' => $site->domain]);
         } else {
             return response()->json([
                 'message' => __('spikster.ssl_request_error_message'),
@@ -950,6 +973,8 @@ class ServerController extends Controller
             ], 404);
         }
 
+        $this->authorize('update', $server);
+
         if ($request->ip) {
             $validator = Validator::make($request->all(), [
                 'ip' => 'required|ip',
@@ -1003,7 +1028,7 @@ class ServerController extends Controller
         if ($request->cron) {
             $server->cron = $request->cron;
             $server->save();
-            app(\App\Services\DaemonService::class)->writeCron($server->cron);
+            app(DaemonService::class)->writeCron($server->cron);
         }
 
         if ($request->php) {
@@ -1013,7 +1038,7 @@ class ServerController extends Controller
                     'errors' => 'Invalid PHP version.',
                 ], 400);
             }
-            app(\App\Services\DaemonService::class)->send('server.php-cli', ['version' => $request->php]);
+            app(DaemonService::class)->send('server.php-cli', ['version' => $request->php]);
             $server->php = $request->php;
         }
 
@@ -1101,7 +1126,7 @@ class ServerController extends Controller
                 return response()->json([
                     'message' => 'Server is online',
                     'status' => 'online',
-                    'response_time' => $responseTime . 'ms',
+                    'response_time' => $responseTime.'ms',
                 ], 200);
             } else {
                 return response()->json([
@@ -1118,7 +1143,6 @@ class ServerController extends Controller
             ], 503);
         }
     }
-
 
     /**
      * Server root password reset
@@ -1182,12 +1206,14 @@ class ServerController extends Controller
             ], 404);
         }
 
+        $this->authorize('resetPassword', $server);
+
         $last_password = $server->password;
         $new_password = Str::random(24);
         $server->password = $new_password;
         $server->save();
 
-        app(\App\Services\DaemonService::class)->send('server.root-reset', ['new_pass' => $new_password]);
+        app(DaemonService::class)->send('server.root-reset', ['new_pass' => $new_password]);
 
         return response()->json([
             'password' => $server->password,
@@ -1254,32 +1280,34 @@ class ServerController extends Controller
      */
     public function servicerestart(string $server_id, string $service)
     {
-        if (!in_array($service, config('spikster.services'))) {
+        if (! in_array($service, config('spikster.services'))) {
             return response()->json([
                 'message' => __('spikster.invalid_service_error_message'),
-                'errors' => __('spikster.bad_request')
+                'errors' => __('spikster.bad_request'),
             ], 400);
         }
 
         $server = Server::where('server_id', $server_id)->where('status', 1)->first();
-        if (!$server) {
+        if (! $server) {
             return response()->json([
                 'message' => __('spikster.server_not_found_message'),
-                'errors' => __('spikster.server_not_found')
+                'errors' => __('spikster.server_not_found'),
             ], 404);
         }
 
+        $this->authorize('manageServices', $server);
+
         // Service name mapping
         $serviceMap = [
-            'nginx'      => 'nginx',
-            'php'        => ['php8.4-fpm', 'php8.3-fpm', 'php8.2-fpm'],
-            'mysql'      => 'mysql',
-            'redis'      => 'redis-server',
+            'nginx' => 'nginx',
+            'php' => ['php8.4-fpm', 'php8.3-fpm', 'php8.2-fpm'],
+            'mysql' => 'mysql',
+            'redis' => 'redis-server',
             'supervisor' => 'supervisor',
         ];
 
         try {
-            $daemon = app(\App\Services\DaemonService::class);
+            $daemon = app(DaemonService::class);
             $services = (array) ($serviceMap[$service] ?? $service);
 
             foreach ($services as $svc) {
@@ -1290,7 +1318,7 @@ class ServerController extends Controller
         } catch (\Throwable $th) {
             return response()->json([
                 'message' => __('spikster.something_error_message'),
-                'errors' => __('spikster.error')
+                'errors' => __('spikster.error'),
             ], 500);
         }
     }
@@ -1391,6 +1419,8 @@ class ServerController extends Controller
             ], 404);
         }
 
+        $this->authorize('viewSites', $server);
+
         $sites = Site::where('panel', false)->where('server_id', $server->id)->get();
         $response = [];
 
@@ -1460,6 +1490,8 @@ class ServerController extends Controller
             ], 404);
         }
 
+        $this->authorize('viewDomains', $server);
+
         $response = [];
 
         foreach ($server->allsites as $site) {
@@ -1499,17 +1531,18 @@ class ServerController extends Controller
             return response()->json(['cpu' => 0, 'ram' => 0, 'hdd' => 0, 'status' => 'unknown']);
         }
         try {
-            $latest = \App\Models\ServerMetric::where('server_id', $server->id)
+            $latest = ServerMetric::where('server_id', $server->id)
                 ->orderByDesc('measured_at')
                 ->first();
             if ($latest) {
                 return response()->json([
-                    'cpu'    => (int) $latest->cpu,
-                    'ram'    => (int) $latest->memory,
-                    'hdd'    => (int) $latest->disk,
+                    'cpu' => (int) $latest->cpu,
+                    'ram' => (int) $latest->memory,
+                    'hdd' => (int) $latest->disk,
                     'status' => 'online',
                 ]);
             }
+
             return response()->json(['cpu' => 0, 'ram' => 0, 'hdd' => 0, 'status' => 'online']);
         } catch (\Throwable $th) {
             return response()->json(['cpu' => 0, 'ram' => 0, 'hdd' => 0, 'status' => 'unknown']);

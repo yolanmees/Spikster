@@ -1,7 +1,13 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}"
-    x-data="{ sidebarOpen: false, darkMode: localStorage.getItem('darkMode') === 'true' }"
-    x-init="$watch('darkMode', v => localStorage.setItem('darkMode', v))"
+    x-data="{ sidebarOpen: false, darkMode: (localStorage.getItem('theme') ?? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')) === 'dark' }"
+    x-init="
+        $watch('darkMode', v => {
+            localStorage.setItem('theme', v ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', v ? 'dark' : 'light');
+        });
+        document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+    "
     :class="{ 'dark': darkMode }">
 
 <head>
@@ -14,7 +20,29 @@
     <title>{{ config('cipi.name', config('app.name')) }} · @yield('title')</title>
     <link rel="icon" type="image/png" href="/favicon.png">
 
+    <script>
+        (function () {
+            try {
+                var savedTheme = localStorage.getItem('theme');
+                var isDark = savedTheme
+                    ? savedTheme === 'dark'
+                    : window.matchMedia('(prefers-color-scheme: dark)').matches;
+                document.documentElement.classList.toggle('dark', isDark);
+                document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+            } catch (e) {
+                // Ignore theme bootstrap failures and continue rendering.
+            }
+        })();
+    </script>
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) { lucide.createIcons(); }
+        });
+    </script>
 
     <style>[x-cloak]{display:none!important}</style>
     @yield('css')
@@ -22,7 +50,7 @@
 
 </head>
 
-<body class="bg-gray-100 dark:bg-gray-950 antialiased">
+<body class="bg-zinc-50 text-zinc-950 antialiased dark:bg-zinc-950 dark:text-zinc-100">
 
     {{-- Mobile sidebar overlay --}}
     @include('layouts.components.mobile-sidebar')
@@ -34,10 +62,10 @@
     <div class="xl:pl-72 flex flex-col min-h-screen">
 
         {{-- Topbar --}}
-        <header class="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-white/10 bg-gray-900 dark:bg-gray-900 px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+        <header class="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-zinc-200 bg-white/88 backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-950/88 px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
             {{-- Mobile hamburger --}}
             <button x-on:click="sidebarOpen = true" type="button"
-                class="-m-2.5 p-2.5 text-white xl:hidden hover:text-gray-300 transition-colors"
+                class="-m-2.5 p-2.5 text-zinc-500 xl:hidden hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 transition-colors"
                 aria-label="Open sidebar">
                 <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10zm0 5.25a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75a.75.75 0 01-.75-.75z" clip-rule="evenodd"/>
@@ -46,31 +74,64 @@
 
             <div class="flex flex-1 items-center justify-end gap-x-3">
                 {{-- Page title (injected by pages) --}}
-                <div class="mr-auto hidden sm:block text-sm text-gray-400 font-medium">
+                <div class="mr-auto hidden sm:block text-sm text-zinc-500 dark:text-zinc-400 font-medium">
                     @yield('topbar-title')
                 </div>
 
+                {{-- Search button --}}
+                <button type="button"
+                    class="hidden h-9 min-w-56 items-center gap-2 rounded-lg border border-zinc-200 bg-white px-3 text-left text-sm text-zinc-500 shadow-sm hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 md:flex transition-colors">
+                    <i data-lucide="search" class="w-4 h-4 shrink-0"></i>
+                    <span class="truncate">Zoeken...</span>
+                </button>
+                <button type="button"
+                    class="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-zinc-200 bg-white text-zinc-600 shadow-sm hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 transition-colors md:hidden"
+                    aria-label="Zoeken">
+                    <i data-lucide="search" class="w-4 h-4"></i>
+                </button>
+
                 {{-- Dark mode toggle --}}
                 <button @click="darkMode = !darkMode" type="button"
-                    class="inline-flex items-center justify-center w-9 h-9 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-all duration-200"
+                    class="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-zinc-200 bg-white text-zinc-600 shadow-sm hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 transition-colors"
                     :aria-label="darkMode ? 'Switch to light mode' : 'Switch to dark mode'">
-                    <svg x-show="!darkMode" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
-                    </svg>
-                    <svg x-show="darkMode" x-cloak class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
-                    </svg>
+                    <i x-show="!darkMode" data-lucide="moon" class="w-4 h-4"></i>
+                    <i x-show="darkMode" x-cloak data-lucide="sun" class="w-4 h-4"></i>
                 </button>
+
+                {{-- Notifications --}}
+                <div x-data="{ open: false }" class="relative">
+                    <button @click="open = !open" @click.away="open = false" type="button"
+                        class="relative inline-flex items-center justify-center w-9 h-9 rounded-lg border border-zinc-200 bg-white text-zinc-600 shadow-sm hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 transition-colors"
+                        aria-label="Notificaties">
+                        <i data-lucide="bell" class="w-4 h-4"></i>
+                    </button>
+                    <div x-show="open" x-cloak
+                        x-transition:enter="transition ease-out duration-100"
+                        x-transition:enter-start="transform opacity-0 scale-95"
+                        x-transition:enter-end="transform opacity-100 scale-100"
+                        x-transition:leave="transition ease-in duration-75"
+                        x-transition:leave-start="transform opacity-100 scale-100"
+                        x-transition:leave-end="transform opacity-0 scale-95"
+                        class="absolute right-0 mt-2 w-80 rounded-xl border border-zinc-200 bg-white shadow-xl dark:border-zinc-800 dark:bg-zinc-900 z-50">
+                        <div class="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
+                            <p class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Notifications</p>
+                        </div>
+                        <div class="px-4 py-8 text-center">
+                            <i data-lucide="bell-off" class="w-8 h-8 mx-auto text-zinc-300 dark:text-zinc-600 mb-2"></i>
+                            <p class="text-sm text-zinc-500 dark:text-zinc-400">No notifications</p>
+                        </div>
+                    </div>
+                </div>
 
                 {{-- User avatar dropdown --}}
                 <div x-data="{ open: false }" class="relative">
                     <button @click="open = !open" @click.away="open = false" type="button"
-                        class="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-white/10 transition-all duration-200">
-                        <div class="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs shrink-0">
+                        class="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all duration-200">
+                        <div class="h-8 w-8 rounded-full bg-zinc-900 dark:bg-white flex items-center justify-center text-white dark:text-zinc-950 font-bold text-xs shrink-0">
                             {{ strtoupper(substr(Auth::user()->name ?? 'U', 0, 2)) }}
                         </div>
-                        <span class="hidden sm:block text-sm font-medium text-white">{{ Auth::user()->name ?? '' }}</span>
-                        <svg class="w-4 h-4 text-gray-400 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <span class="hidden sm:block text-sm font-medium text-zinc-900 dark:text-zinc-100">{{ Auth::user()->name ?? '' }}</span>
+                        <svg class="w-4 h-4 text-zinc-400 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </button>
@@ -82,15 +143,15 @@
                         x-transition:leave="transition ease-in duration-75"
                         x-transition:leave-start="transform opacity-100 scale-100"
                         x-transition:leave-end="transform opacity-0 scale-95"
-                        class="absolute right-0 mt-2 w-48 origin-top-right rounded-xl bg-white dark:bg-gray-800 shadow-xl ring-1 ring-black/10 dark:ring-white/10 py-1 z-50">
+                        class="absolute right-0 mt-2 w-48 origin-top-right rounded-xl bg-white dark:bg-zinc-900 shadow-xl ring-1 ring-zinc-200 dark:ring-zinc-700 py-1 z-50">
                         <a href="{{ route('profile.show') }}"
-                            class="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            class="flex items-center gap-2 px-4 py-2.5 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
+                            <svg class="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                             </svg>
                             Profile
                         </a>
-                        <div class="my-1 border-t border-gray-100 dark:border-gray-700"></div>
+                        <div class="my-1 border-t border-zinc-100 dark:border-zinc-700"></div>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <button type="submit"
@@ -132,10 +193,16 @@
     <script>
         @php
             use Firebase\JWT\JWT;
-            $jwtSecret = config('cipi.jwt_secret');
-            $jwtToken = JWT::encode(['iat' => time(), 'exp' => time() + 900], $jwtSecret . '-Acs', 'HS256');
+            try {
+                $jwtSecret = config('cipi.jwt_secret');
+                $jwtToken = JWT::encode(['iat' => time(), 'exp' => time() + 900], $jwtSecret . '-Acs', 'HS256');
+            } catch (\Throwable $e) {
+                $jwtToken = '';
+            }
         @endphp
+        @if($jwtToken)
         localStorage.setItem('access_token', '{{ $jwtToken }}');
+        @endif
     </script>
     @stack('scripts')
     @yield('js')

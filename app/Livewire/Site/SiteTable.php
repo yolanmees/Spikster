@@ -11,8 +11,6 @@ class SiteTable extends Component
 {
     use WithPagination;
 
-    private const CREATE_WAIT_TIMEOUT_SECONDS = 90;
-
     public $search = '';
 
     public $sortField = 'created_at';
@@ -26,12 +24,6 @@ class SiteTable extends Component
     public $confirmingDeletion = false;
 
     public $siteToDelete = null;
-
-    public bool $waitingForCreatedSite = false;
-
-    public int $siteCountBeforeCreate = 0;
-
-    public ?int $createWaitStartedAt = null;
 
     /**
      * Render the component.
@@ -154,36 +146,27 @@ class SiteTable extends Component
     }
 
     /**
-     * Refresh the component when a site is created.
+     * Triggered when the NewSite form is submitted (before the job finishes).
+     * Resets pagination so the user ends up on page 1 while waiting.
      */
     #[On('site-created')]
-    public function refreshTable(): void
+    public function onSiteSubmitted(): void
     {
-        // New sites are sorted by creation date; reset to page 1 for visibility.
         $this->resetPage();
-
-        // Start temporary polling while async create job is processing.
-        $this->waitingForCreatedSite = true;
-        $this->siteCountBeforeCreate = app(SiteService::class)->getAllSitesQuery()->count();
-        $this->createWaitStartedAt = time();
     }
 
     /**
-     * Poll only while waiting for a queued site creation to complete.
+     * Triggered by Laravel Echo when the queue job has actually finished
+     * creating the site. The event is broadcast on channel sites.{userId}.
      */
-    public function checkForCreatedSite(SiteService $siteService): void
+    #[On('echo:sites.{userId},site.created')]
+    public function onSiteCreatedByJob(): void
     {
-        if (! $this->waitingForCreatedSite) {
-            return;
-        }
+        $this->resetPage();
+    }
 
-        $currentCount = $siteService->getAllSitesQuery()->count();
-        $isTimedOut = $this->createWaitStartedAt !== null
-            && (time() - $this->createWaitStartedAt) >= self::CREATE_WAIT_TIMEOUT_SECONDS;
-
-        if ($currentCount > $this->siteCountBeforeCreate || $isTimedOut) {
-            $this->waitingForCreatedSite = false;
-            $this->createWaitStartedAt = null;
-        }
+    public function getUserIdProperty(): int
+    {
+        return auth()->id() ?? 0;
     }
 }

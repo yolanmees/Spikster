@@ -8,43 +8,43 @@ use App\Models\User;
 class ServerPolicy
 {
     /**
-     * All authenticated users can list servers.
+     * All authenticated users with server.view permission can list servers.
      */
     public function viewAny(User $user): bool
     {
-        return true;
+        return $user->can('server.view');
     }
 
     /**
-     * All authenticated users can view a server's details.
+     * Users with server.view permission or ownership may view a server's details.
      */
     public function view(User $user, Server $server): bool
     {
-        return true;
+        return $user->can('server.view') || $server->user_id === $user->id;
     }
 
     /**
-     * Only verified users can provision new servers.
+     * Only users with server.create permission can provision new servers.
      */
     public function create(User $user): bool
     {
-        return $user->hasVerifiedEmail();
+        return $user->can('server.create');
     }
 
     /**
-     * Only the server owner (or admin) may update it.
+     * Users with server.edit permission or ownership may update a server.
      */
     public function update(User $user, Server $server): bool
     {
-        return $user->is_admin || $server->user_id === $user->id;
+        return $user->can('server.edit') || $server->user_id === $user->id;
     }
 
     /**
-     * Only the server owner (or admin) may delete — and only when no active sites exist.
+     * Users with server.delete permission or ownership may delete — only when no active sites exist.
      */
     public function delete(User $user, Server $server): bool
     {
-        if (! ($user->is_admin || $server->user_id === $user->id)) {
+        if (! ($user->can('server.delete') || $server->user_id === $user->id)) {
             return false;
         }
 
@@ -57,11 +57,11 @@ class ServerPolicy
     }
 
     /**
-     * Only admins may restore soft-deleted servers.
+     * Only users with server.configure permission may restore soft-deleted servers.
      */
     public function restore(User $user, Server $server): bool
     {
-        return $user->is_admin ?? false;
+        return $user->can('server.configure');
     }
 
     /**
@@ -79,7 +79,7 @@ class ServerPolicy
      */
     public function manageServices(User $user, Server $server): bool
     {
-        return $user->is_admin || $server->user_id === $user->id;
+        return $user->can('server.configure') || $server->user_id === $user->id;
     }
 
     /**
@@ -87,7 +87,7 @@ class ServerPolicy
      */
     public function resetPassword(User $user, Server $server): bool
     {
-        return $user->is_admin || $server->user_id === $user->id;
+        return $user->can('server.configure') || $server->user_id === $user->id;
     }
 
     /**
@@ -95,7 +95,7 @@ class ServerPolicy
      */
     public function managePanel(User $user, Server $server): bool
     {
-        return $user->is_admin ?? false;
+        return $user->can('server.configure');
     }
 
     /**
@@ -103,7 +103,7 @@ class ServerPolicy
      */
     public function managePackages(User $user, Server $server): bool
     {
-        return $user->is_admin || $server->user_id === $user->id;
+        return $user->can('server.configure') || $server->user_id === $user->id;
     }
 
     /**
@@ -111,7 +111,7 @@ class ServerPolicy
      */
     public function viewMetrics(User $user, Server $server): bool
     {
-        return $user->is_admin || $server->user_id === $user->id;
+        return $user->can('monitoring.view') || $server->user_id === $user->id;
     }
 
     /**
@@ -119,7 +119,7 @@ class ServerPolicy
      */
     public function manageFail2ban(User $user, Server $server): bool
     {
-        return $user->is_admin || $server->user_id === $user->id;
+        return $user->can('server.configure') || $server->user_id === $user->id;
     }
 
     /**
@@ -127,7 +127,7 @@ class ServerPolicy
      */
     public function shell(User $user, Server $server): bool
     {
-        return $user->is_admin || $server->user_id === $user->id;
+        return $user->can('server.configure') || $server->user_id === $user->id;
     }
 
     /**
@@ -135,7 +135,7 @@ class ServerPolicy
      */
     public function viewSites(User $user, Server $server): bool
     {
-        return $user->is_admin || $server->user_id === $user->id;
+        return $user->can('site.view') || $server->user_id === $user->id;
     }
 
     /**
@@ -143,7 +143,7 @@ class ServerPolicy
      */
     public function viewDomains(User $user, Server $server): bool
     {
-        return $user->is_admin || $server->user_id === $user->id;
+        return $user->can('site.view') || $server->user_id === $user->id;
     }
 
     /**
@@ -151,7 +151,7 @@ class ServerPolicy
      */
     public function createDatabase(User $user, Server $server): bool
     {
-        return $user->is_admin || $server->user_id === $user->id;
+        return $user->can('database.create') || $server->user_id === $user->id;
     }
 
     /**
@@ -159,6 +159,6 @@ class ServerPolicy
      */
     public function ping(User $user, Server $server): bool
     {
-        return $user->is_admin || $server->user_id === $user->id;
+        return $user->can('server.view') || $server->user_id === $user->id;
     }
 }

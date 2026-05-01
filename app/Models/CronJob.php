@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
 /**
  * CronJob Model
@@ -18,8 +19,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property bool $enabled
  * @property string|null $output_file
  * @property bool $notify_on_error
- * @property \Illuminate\Support\Carbon $created_at
- * @property \Illuminate\Support\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class CronJob extends Model
 {
@@ -99,11 +100,11 @@ class CronJob extends Model
     {
         $output = $this->output_file ?? '/dev/null';
         $line = "{$this->schedule} {$this->command} >> {$output} 2>&1";
-        
-        if (!$this->enabled) {
+
+        if (! $this->enabled) {
             $line = "# {$line}";
         }
-        
+
         return $line;
     }
 
@@ -114,11 +115,11 @@ class CronJob extends Model
     {
         // Cron format: minute hour day month weekday
         $parts = explode(' ', $schedule);
-        
+
         if (count($parts) !== 5) {
             return false;
         }
-        
+
         return true;
     }
 
@@ -128,7 +129,7 @@ class CronJob extends Model
     public function getScheduleDescriptionAttribute(): string
     {
         $schedule = $this->schedule;
-        
+
         // Common patterns
         $patterns = [
             '* * * * *' => 'Every minute',
@@ -143,7 +144,7 @@ class CronJob extends Model
             '0 0 * * 0' => 'Weekly on Sunday',
             '0 0 1 * *' => 'Monthly on the 1st',
         ];
-        
+
         return $patterns[$schedule] ?? $schedule;
     }
 

@@ -5,134 +5,135 @@
 @section('content')
     <div class="space-y-6">
 
-        <x-page-header :title="$module->name" subtitle="Module Details">
-            <x-slot name="actions">
-                <x-back-button :href="route('modules.index')" label="Back to Modules" />
-            </x-slot>
-        </x-page-header>
-
-        {{-- Module Header Card --}}
-        <x-card>
-            <div class="flex items-start justify-between gap-4">
-                <div class="flex items-start gap-4">
-                    <div class="shrink-0 w-16 h-16 rounded-xl flex items-center justify-center {{ $module->is_active ? 'bg-green-50 dark:bg-green-900/20' : 'bg-gray-100 dark:bg-gray-700' }}">
-                        @if ($module->is_active)
-                            <svg class="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        @else
-                            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                            </svg>
-                        @endif
-                    </div>
-                    <div>
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">{{ $module->name }}</h3>
-                        <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">{{ $module->description }}</p>
-                        <div class="flex items-center gap-3 mt-3">
-                            <x-badge :color="$module->is_active ? 'green' : 'gray'" :text="$module->is_active ? 'Active' : 'Inactive'" />
-                            @if ($module->version)
-                                <span class="text-sm text-gray-500 dark:text-gray-400">v{{ $module->version }}</span>
-                            @endif
-                        </div>
-                    </div>
+        {{-- Page Header --}}
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <div class="flex items-center gap-1 text-xs text-zinc-500 dark:text-zinc-400">
+                    <a href="{{ route('modules.index') }}" class="hover:text-zinc-900 dark:hover:text-white">Modules</a>
+                    <i data-lucide="chevron-right" class="h-3.5 w-3.5"></i>
+                    <span>{{ $module->name }}</span>
                 </div>
-                <form method="POST" action="{{ route('modules.toggle', $module->id) }}" class="shrink-0">
-                    @csrf
-                    @if ($module->is_active)
-                        <x-danger-button type="submit">Disable Module</x-danger-button>
-                    @else
-                        <x-primary-button type="submit">Enable Module</x-primary-button>
-                    @endif
-                </form>
+                <h1 class="mt-1 text-lg font-semibold sm:text-xl">{{ $module->name }}</h1>
             </div>
-        </x-card>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {{-- Menu Items --}}
-            <x-card>
-                <x-slot name="header">
-                    <div class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
-                        Menu Items
-                    </div>
-                </x-slot>
-                @if ($module->menuItems->isEmpty())
-                    <p class="text-sm text-gray-500 dark:text-gray-400">No menu items registered</p>
+            <form method="POST" action="{{ route('modules.toggle', $module->id) }}" class="shrink-0">
+                @csrf
+                @if ($module->is_active)
+                    <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium shadow-sm hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:bg-zinc-800">
+                        <i data-lucide="circle-off" class="h-4 w-4"></i>
+                        Disable Module
+                    </button>
                 @else
-                    <div class="space-y-2">
-                        @foreach ($module->menuItems as $item)
-                            <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                                <div class="flex items-center gap-2">
-                                    @if ($item->icon)
-                                        <div class="text-gray-500 dark:text-gray-300">{!! $item->icon !!}</div>
-                                    @endif
-                                    <span class="text-sm font-medium text-gray-900 dark:text-white">{{ $item->title }}</span>
-                                </div>
-                                <x-badge color="blue" :text="$item->menu_location" />
-                            </div>
-                        @endforeach
-                    </div>
+                    <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-lg bg-purple-700 px-3 py-2 text-sm font-medium text-white hover:bg-purple-800">
+                        <i data-lucide="check-circle" class="h-4 w-4"></i>
+                        Enable Module
+                    </button>
                 @endif
-            </x-card>
-
-            {{-- Permissions --}}
-            <x-card>
-                <x-slot name="header">
-                    <div class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                        </svg>
-                        Permissions
-                    </div>
-                </x-slot>
-                @if ($module->permissions->isEmpty())
-                    <p class="text-sm text-gray-500 dark:text-gray-400">No permissions registered</p>
-                @else
-                    <div class="space-y-2">
-                        @foreach ($module->permissions as $permission)
-                            <div class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                                <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $permission->name }}</div>
-                                @if ($permission->description)
-                                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ $permission->description }}</div>
-                                @endif
-                            </div>
-                        @endforeach
-                    </div>
-                @endif
-            </x-card>
+            </form>
         </div>
 
-        {{-- Module Metadata --}}
-        <x-card>
-            <x-slot name="header">Module Information</x-slot>
-            <dl class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4">
-                <div>
-                    <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Slug</dt>
-                    <dd class="mt-1 text-sm font-mono text-gray-900 dark:text-white">{{ $module->slug }}</dd>
+        {{-- Module Header Card --}}
+        <section class="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+            <div class="flex items-start gap-4">
+                <span class="flex h-12 w-12 items-center justify-center rounded-lg text-white"
+                      style="background-color: {{ $module->color ?? '#7c3aed' }}">
+                    @if ($module->icon)
+                        <i class="{{ $module->icon }} h-5 w-5"></i>
+                    @else
+                        <span class="text-lg font-bold">{{ substr($module->name, 0, 1) }}</span>
+                    @endif
+                </span>
+                <div class="min-w-0">
+                    <h3 class="text-base font-semibold">{{ $module->name }}</h3>
+                    <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{{ $module->description }}</p>
+                    <div class="mt-3 flex items-center gap-3">
+                        <span class="rounded-full px-2.5 py-1 text-xs font-medium {{ $module->is_active ? 'bg-purple-100 text-purple-700 dark:bg-purple-700/15 dark:text-purple-300' : 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400' }}">
+                            {{ $module->is_active ? 'Active' : 'Inactive' }}
+                        </span>
+                        @if ($module->version)
+                            <span class="text-sm text-zinc-500 dark:text-zinc-400">v{{ $module->version }}</span>
+                        @endif
+                    </div>
                 </div>
-                @if ($module->version)
-                    <div>
-                        <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Version</dt>
-                        <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ $module->version }}</dd>
+            </div>
+        </section>
+
+        <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+            {{-- Menu Items --}}
+            <section class="rounded-lg border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+                <div class="border-b border-zinc-200 p-5 dark:border-zinc-800">
+                    <h2 class="text-base font-semibold">Menu Items</h2>
+                    <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Navigation entries registered by this module.</p>
+                </div>
+                @if ($module->menuItems->isEmpty())
+                    <div class="p-5">
+                        <p class="text-sm text-zinc-500 dark:text-zinc-400">No menu items registered</p>
+                    </div>
+                @else
+                    <div class="divide-y divide-zinc-200 dark:divide-zinc-800">
+                        @foreach ($module->menuItems as $item)
+                            <div class="flex items-center justify-between p-5">
+                                <div class="flex items-center gap-3">
+                                    @if ($item->icon)
+                                        <span class="text-zinc-400">{!! $item->icon !!}</span>
+                                    @endif
+                                    <span class="text-sm font-medium">{{ $item->title }}</span>
+                                </div>
+                                <span class="rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+                                    {{ $item->menu_location }}
+                                </span>
+                            </div>
+                        @endforeach
                     </div>
                 @endif
-                <div>
-                    <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Status</dt>
-                    <dd class="mt-1"><x-badge :color="$module->is_active ? 'green' : 'gray'" :text="$module->is_active ? 'Active' : 'Inactive'" /></dd>
-                </div>
-                <div>
-                    <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Registered At</dt>
-                    <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ $module->created_at->format('M d, Y H:i') }}</dd>
-                </div>
-                <div>
-                    <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Last Updated</dt>
-                    <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ $module->updated_at->format('M d, Y H:i') }}</dd>
-                </div>
-            </dl>
-        </x-card>
+            </section>
+
+            {{-- Metadata Sidebar --}}
+            <aside class="space-y-6">
+                {{-- Module Information --}}
+                <section class="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+                    <h2 class="text-base font-semibold">Module Information</h2>
+                    <div class="mt-5 space-y-4">
+                        <div class="rounded-lg border border-zinc-200 p-3 dark:border-zinc-800">
+                            <p class="text-xs text-zinc-500 dark:text-zinc-400">Slug</p>
+                            <p class="mt-1 font-mono text-sm font-semibold">{{ $module->slug }}</p>
+                        </div>
+                        @if ($module->version)
+                            <div class="rounded-lg border border-zinc-200 p-3 dark:border-zinc-800">
+                                <p class="text-xs text-zinc-500 dark:text-zinc-400">Version</p>
+                                <p class="mt-1 text-sm font-semibold">{{ $module->version }}</p>
+                            </div>
+                        @endif
+                        <div class="rounded-lg border border-zinc-200 p-3 dark:border-zinc-800">
+                            <p class="text-xs text-zinc-500 dark:text-zinc-400">Registered At</p>
+                            <p class="mt-1 text-sm font-semibold">{{ $module->created_at->format('M d, Y H:i') }}</p>
+                        </div>
+                        <div class="rounded-lg border border-zinc-200 p-3 dark:border-zinc-800">
+                            <p class="text-xs text-zinc-500 dark:text-zinc-400">Last Updated</p>
+                            <p class="mt-1 text-sm font-semibold">{{ $module->updated_at->format('M d, Y H:i') }}</p>
+                        </div>
+                    </div>
+                </section>
+
+                {{-- Permissions --}}
+                <section class="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+                    <h2 class="text-base font-semibold">Permissions</h2>
+                    @if ($module->permissions->isEmpty())
+                        <p class="mt-4 text-sm text-zinc-500 dark:text-zinc-400">No permissions registered</p>
+                    @else
+                        <div class="mt-4 space-y-3">
+                            @foreach ($module->permissions as $permission)
+                                <div class="rounded-lg border border-zinc-200 p-3 dark:border-zinc-800">
+                                    <p class="text-sm font-medium">{{ $permission->name }}</p>
+                                    @if ($permission->description)
+                                        <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-400">{{ $permission->description }}</p>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                </section>
+            </aside>
+        </div>
 
     </div>
 @endsection

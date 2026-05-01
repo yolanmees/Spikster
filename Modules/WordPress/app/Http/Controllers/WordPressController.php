@@ -80,7 +80,7 @@ class WordPressController extends Controller
     public function destroy($id)
     {
         $installation = WordPressInstallation::findOrFail($id);
-        
+
         $result = $this->installationService->uninstall($installation);
 
         if ($result['success']) {
@@ -95,7 +95,7 @@ class WordPressController extends Controller
     public function syncThemes($id)
     {
         $installation = WordPressInstallation::findOrFail($id);
-        
+
         $result = $this->wpCLIService->syncThemes($installation);
 
         if ($result['success']) {
@@ -108,7 +108,7 @@ class WordPressController extends Controller
     public function syncPlugins($id)
     {
         $installation = WordPressInstallation::findOrFail($id);
-        
+
         $result = $this->wpCLIService->syncPlugins($installation);
 
         if ($result['success']) {
@@ -121,11 +121,11 @@ class WordPressController extends Controller
     public function checkUpdates($id)
     {
         $installation = WordPressInstallation::findOrFail($id);
-        
+
         // Sync themes and plugins to get latest update info
         $this->wpCLIService->syncThemes($installation);
         $this->wpCLIService->syncPlugins($installation);
-        
+
         // Check core updates
         $coreResult = $this->wpCLIService->checkCoreUpdate($installation);
 

@@ -5,6 +5,7 @@ namespace App\Livewire\Site;
 use App\Jobs\CreateSiteJob;
 use App\Services\ServerService;
 use App\Services\SiteService;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 
@@ -71,14 +72,17 @@ class NewSite extends Component
             $validated = $this->validate();
 
             // Dispatch site creation as background job (avoids 502 from php-fpm reload)
-            CreateSiteJob::dispatch([
-                'server_id' => (int) $validated['serverId'],
-                'domain' => strtolower($validated['domain']),
-                'php' => $validated['php'],
-                'basepath' => $validated['basepath'] ?? '/public',
-                'repository' => ! empty($validated['repository']) ? $validated['repository'] : null,
-                'branch' => ! empty($validated['branch']) ? $validated['branch'] : null,
-            ]);
+            CreateSiteJob::dispatch(
+                [
+                    'server_id' => (int) $validated['serverId'],
+                    'domain' => strtolower($validated['domain']),
+                    'php' => $validated['php'],
+                    'basepath' => $validated['basepath'] ?? '/public',
+                    'repository' => ! empty($validated['repository']) ? $validated['repository'] : null,
+                    'branch' => ! empty($validated['branch']) ? $validated['branch'] : null,
+                ],
+                auth()->id() ?? 0,
+            );
 
             // Flash success message
             session()->flash('success', 'Site is being created. It will appear shortly.');
@@ -91,7 +95,7 @@ class NewSite extends Component
 
             // Reset form
             $this->resetForm($serverService);
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             // Re-throw validation exceptions
             throw $e;
         } catch (\Exception $e) {

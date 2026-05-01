@@ -2,11 +2,23 @@
 
 namespace Modules\WordPress\Providers;
 
+use App\Models\Module;
+use App\Services\ModuleMenuManager;
+use App\Services\ModuleRegistry;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
+use Livewire\Livewire;
+use Modules\WordPress\Livewire\PluginManager;
+use Modules\WordPress\Livewire\ThemeManager;
+use Modules\WordPress\Livewire\UpdatesManager;
+use Modules\WordPress\Services\WordPressBadgeService;
+use Modules\WordPress\Services\WordPressInstallationService;
+use Modules\WordPress\Services\WordPressOrgService;
+use Modules\WordPress\Services\WPCLIService;
 use Nwidart\Modules\Traits\PathNamespace;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use Spatie\Permission\Models\Permission;
 
 class WordPressServiceProvider extends ServiceProvider
 {
@@ -42,13 +54,13 @@ class WordPressServiceProvider extends ServiceProvider
      */
     protected function registerLivewireComponents(): void
     {
-        if (!class_exists(\Livewire\Livewire::class)) {
+        if (! class_exists(Livewire::class)) {
             return;
         }
 
-        \Livewire\Livewire::component('wordpress::theme-manager', \Modules\WordPress\Livewire\ThemeManager::class);
-        \Livewire\Livewire::component('wordpress::plugin-manager', \Modules\WordPress\Livewire\PluginManager::class);
-        \Livewire\Livewire::component('wordpress::updates-manager', \Modules\WordPress\Livewire\UpdatesManager::class);
+        Livewire::component('wordpress::theme-manager', ThemeManager::class);
+        Livewire::component('wordpress::plugin-manager', PluginManager::class);
+        Livewire::component('wordpress::updates-manager', UpdatesManager::class);
     }
 
     /**
@@ -60,9 +72,9 @@ class WordPressServiceProvider extends ServiceProvider
         $this->app->register(RouteServiceProvider::class);
 
         // Register services
-        $this->app->singleton(\Modules\WordPress\Services\WordPressInstallationService::class);
-        $this->app->singleton(\Modules\WordPress\Services\WPCLIService::class);
-        $this->app->singleton(\Modules\WordPress\Services\WordPressOrgService::class);
+        $this->app->singleton(WordPressInstallationService::class);
+        $this->app->singleton(WPCLIService::class);
+        $this->app->singleton(WordPressOrgService::class);
     }
 
     /**
@@ -70,15 +82,15 @@ class WordPressServiceProvider extends ServiceProvider
      */
     protected function registerModule(): void
     {
-        if (!app()->bound(\App\Services\ModuleRegistry::class)) {
+        if (! app()->bound(ModuleRegistry::class)) {
             return;
         }
 
         try {
-            $registry = app(\App\Services\ModuleRegistry::class);
+            $registry = app(ModuleRegistry::class);
             $registry->register('wordpress');
         } catch (\Exception $e) {
-            \Log::warning('Failed to register WordPress module: ' . $e->getMessage());
+            \Log::warning('Failed to register WordPress module: '.$e->getMessage());
         }
     }
 
@@ -87,15 +99,15 @@ class WordPressServiceProvider extends ServiceProvider
      */
     protected function registerMenuItems(): void
     {
-        if (!app()->bound(\App\Services\ModuleMenuManager::class)) {
+        if (! app()->bound(ModuleMenuManager::class)) {
             return;
         }
 
         try {
-            $menuManager = app(\App\Services\ModuleMenuManager::class);
-            $module = \App\Models\Module::where('alias', 'wordpress')->first();
+            $menuManager = app(ModuleMenuManager::class);
+            $module = Module::where('alias', 'wordpress')->first();
 
-            if (!$module) {
+            if (! $module) {
                 return;
             }
 
@@ -109,12 +121,12 @@ class WordPressServiceProvider extends ServiceProvider
                 'order_index' => 10,
                 'menu_location' => 'main',
                 'badge_type' => 'count',
-                'badge_source' => \Modules\WordPress\Services\WordPressBadgeService::class . '@getPendingUpdatesCount',
+                'badge_source' => WordPressBadgeService::class.'@getPendingUpdatesCount',
                 'badge_color' => 'blue',
             ]);
 
         } catch (\Exception $e) {
-            \Log::warning('Failed to register WordPress menu items: ' . $e->getMessage());
+            \Log::warning('Failed to register WordPress menu items: '.$e->getMessage());
         }
     }
 
@@ -123,7 +135,7 @@ class WordPressServiceProvider extends ServiceProvider
      */
     protected function registerPermissions(): void
     {
-        if (!class_exists(\Spatie\Permission\Models\Permission::class)) {
+        if (! class_exists(Permission::class)) {
             return;
         }
 
@@ -139,13 +151,13 @@ class WordPressServiceProvider extends ServiceProvider
             ];
 
             foreach ($permissions as $name => $description) {
-                \Spatie\Permission\Models\Permission::firstOrCreate(
+                Permission::firstOrCreate(
                     ['name' => $name],
                     ['guard_name' => 'web']
                 );
             }
         } catch (\Exception $e) {
-            \Log::warning('Failed to register WordPress permissions: ' . $e->getMessage());
+            \Log::warning('Failed to register WordPress permissions: '.$e->getMessage());
         }
     }
 
@@ -240,7 +252,7 @@ class WordPressServiceProvider extends ServiceProvider
 
         $this->loadViewsFrom(array_merge($this->getPublishableViewPaths(), [$sourcePath]), $this->nameLower);
 
-        Blade::componentNamespace(config('modules.namespace').'\\' . $this->name . '\\View\\Components', $this->nameLower);
+        Blade::componentNamespace(config('modules.namespace').'\\'.$this->name.'\\View\\Components', $this->nameLower);
     }
 
     /**

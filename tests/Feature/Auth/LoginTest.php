@@ -19,7 +19,7 @@ class LoginTest extends TestCase
         $user = Auth::create([
             'username' => 'testuser',
             'password' => Hash::make('password123'),
-            'apikey' => 'test-api-key-' . now()->timestamp,
+            'apikey' => 'test-api-key-'.now()->timestamp,
         ]);
 
         $response = $this->postJson('/auth', [
@@ -44,7 +44,7 @@ class LoginTest extends TestCase
         Auth::create([
             'username' => 'testuser',
             'password' => Hash::make('password123'),
-            'apikey' => 'test-api-key-' . now()->timestamp,
+            'apikey' => 'test-api-key-'.now()->timestamp,
         ]);
 
         $response = $this->postJson('/auth', [
@@ -101,7 +101,7 @@ class LoginTest extends TestCase
         Auth::create([
             'username' => 'testuser',
             'password' => Hash::make('password123'),
-            'apikey' => 'test-api-key-' . now()->timestamp,
+            'apikey' => 'test-api-key-'.now()->timestamp,
         ]);
 
         $response = $this->postJson('/auth', [
@@ -128,7 +128,7 @@ class LoginTest extends TestCase
         $user = Auth::create([
             'username' => 'testuser',
             'password' => Hash::make('password123'),
-            'apikey' => 'test-api-key-' . now()->timestamp,
+            'apikey' => 'test-api-key-'.now()->timestamp,
             'jwt' => null,
         ]);
 

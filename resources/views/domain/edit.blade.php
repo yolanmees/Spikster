@@ -16,85 +16,141 @@
 
         <x-flash-messages />
 
-        {{-- Domain Info --}}
-        <x-card>
-            <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
-                <div>
-                    <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Type</dt>
-                    <dd class="mt-1">
-                        <x-badge :color="$domain->is_primary ? 'green' : 'gray'" :text="$domain->is_primary ? 'Primary Domain' : 'Alias'" />
-                    </dd>
-                </div>
-                <div>
-                    <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Site</dt>
-                    <dd class="mt-1 text-sm text-gray-900 dark:text-white">
-                        @if ($domain->site)
-                            <a href="{{ route('site.edit', $domain->site_id) }}" class="text-blue-600 hover:text-blue-800 dark:text-blue-400">
-                                {{ $domain->site->domain }}
-                            </a>
-                        @else
-                            <span class="text-gray-400">—</span>
-                        @endif
-                    </dd>
-                </div>
-                <div>
-                    <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Server</dt>
-                    <dd class="mt-1 text-sm text-gray-900 dark:text-white">
-                        @if ($domain->server)
-                            {{ $domain->server->name }} <span class="text-gray-400 font-mono text-xs">({{ $domain->server->ip }})</span>
-                        @else
-                            <span class="text-gray-400">—</span>
-                        @endif
-                    </dd>
+        {{-- Stats --}}
+        <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div class="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-zinc-500 dark:text-zinc-400">DNS Records</p>
+                        <p class="mt-2 text-2xl font-semibold">{{ $stats['dns_records_count'] }}</p>
+                    </div>
+                    <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 text-purple-700 dark:bg-purple-700/15 dark:text-purple-300">
+                        <i data-lucide="network" class="h-5 w-5"></i>
+                    </span>
                 </div>
             </div>
-        </x-card>
+            <div class="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-zinc-500 dark:text-zinc-400">Type</p>
+                        <p class="mt-2 text-2xl font-semibold">
+                            @if ($domain->is_primary)
+                                <span class="inline-flex items-center rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-medium text-purple-700 dark:bg-purple-700/15 dark:text-purple-300">Primary</span>
+                            @else
+                                <span class="inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">Alias</span>
+                            @endif
+                        </p>
+                    </div>
+                    <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 text-purple-700 dark:bg-purple-700/15 dark:text-purple-300">
+                        <i data-lucide="tag" class="h-5 w-5"></i>
+                    </span>
+                </div>
+            </div>
+            <div class="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-zinc-500 dark:text-zinc-400">Site</p>
+                        <p class="mt-2 text-lg font-semibold truncate">
+                            @if ($domain->site)
+                                <a href="{{ route('site.edit', $domain->site_id) }}" class="text-purple-700 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300">
+                                    {{ $domain->site->domain }}
+                                </a>
+                            @else
+                                <span class="text-zinc-400">&mdash;</span>
+                            @endif
+                        </p>
+                    </div>
+                    <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 text-purple-700 dark:bg-purple-700/15 dark:text-purple-300">
+                        <i data-lucide="app-window" class="h-5 w-5"></i>
+                    </span>
+                </div>
+            </div>
+            <div class="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-zinc-500 dark:text-zinc-400">Server</p>
+                        <p class="mt-2 text-lg font-semibold truncate">
+                            @if ($domain->server)
+                                {{ $domain->server->name }}
+                            @else
+                                <span class="text-zinc-400">&mdash;</span>
+                            @endif
+                        </p>
+                    </div>
+                    <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 text-purple-700 dark:bg-purple-700/15 dark:text-purple-300">
+                        <i data-lucide="server" class="h-5 w-5"></i>
+                    </span>
+                </div>
+            </div>
+        </div>
 
         {{-- DNS Records Table --}}
-        <x-card>
-            <x-slot name="header">DNS Records</x-slot>
+        <div class="rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+            <div class="flex flex-col gap-4 border-b border-zinc-200 p-5 dark:border-zinc-800 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h2 class="text-base font-semibold text-zinc-900 dark:text-white">DNS Records</h2>
+                    <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Manage DNS records for {{ $domain->domain }}</p>
+                </div>
+                <a href="{{ route('domain.dns.new', $domain->domain_id) }}"
+                   class="inline-flex items-center justify-center gap-2 rounded-lg bg-zinc-950 px-3 py-2 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200 transition-colors">
+                    <i data-lucide="plus" class="h-4 w-4"></i>
+                    Add DNS Record
+                </a>
+            </div>
 
             @if ($dnsRecords->count() > 0)
-                <div class="-mx-6 overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-gray-50 dark:bg-gray-800/50">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-zinc-200 dark:divide-zinc-800">
+                        <thead class="bg-zinc-50 dark:bg-zinc-900">
                             <tr>
-                                @foreach (['Host', 'Type', 'Value', 'TTL', 'Priority', ''] as $col)
-                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider {{ $loop->last ? 'text-right' : '' }}">
-                                        {{ $col }}
-                                    </th>
-                                @endforeach
+                                <th class="px-5 py-3 text-left text-xs font-semibold uppercase text-zinc-500 dark:text-zinc-400">Host</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold uppercase text-zinc-500 dark:text-zinc-400">Type</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold uppercase text-zinc-500 dark:text-zinc-400">Value</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold uppercase text-zinc-500 dark:text-zinc-400">TTL</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold uppercase text-zinc-500 dark:text-zinc-400">Priority</th>
+                                <th class="px-5 py-3 text-right text-xs font-semibold uppercase text-zinc-500 dark:text-zinc-400">Actions</th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                        <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
                             @foreach ($dnsRecords as $record)
-                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                                    <td class="px-4 py-3.5 text-sm font-mono text-gray-900 dark:text-white">{{ $record->zone }}</td>
-                                    <td class="px-4 py-3.5 text-sm">
-                                        <x-badge :color="match ($record->type) {
-                                            'A'     => 'blue',
-                                            'AAAA'  => 'indigo',
-                                            'CNAME' => 'purple',
-                                            'MX'    => 'red',
-                                            'TXT'   => 'green',
-                                            'NS'    => 'yellow',
-                                            'SRV'   => 'gray',
-                                            default => 'gray',
-                                        }" :text="$record->type" />
+                                <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
+                                    <td class="whitespace-nowrap px-5 py-3.5 font-mono text-sm text-zinc-900 dark:text-white">{{ $record->zone }}</td>
+                                    <td class="whitespace-nowrap px-5 py-3.5">
+                                        @php
+                                            $typeColors = [
+                                                'A'     => 'bg-purple-100 text-purple-700 dark:bg-purple-700/15 dark:text-purple-300',
+                                                'AAAA'  => 'bg-indigo-100 text-indigo-700 dark:bg-indigo-700/15 dark:text-indigo-300',
+                                                'CNAME' => 'bg-blue-100 text-blue-700 dark:bg-blue-700/15 dark:text-blue-300',
+                                                'MX'    => 'bg-amber-100 text-amber-700 dark:bg-amber-700/15 dark:text-amber-300',
+                                                'TXT'   => 'bg-emerald-100 text-emerald-700 dark:bg-emerald-700/15 dark:text-emerald-300',
+                                                'NS'    => 'bg-rose-100 text-rose-700 dark:bg-rose-700/15 dark:text-rose-300',
+                                                'SRV'   => 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300',
+                                            ];
+                                            $class = $typeColors[$record->type] ?? 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300';
+                                        @endphp
+                                        <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {{ $class }}">
+                                            {{ $record->type }}
+                                        </span>
                                     </td>
-                                    <td class="px-4 py-3.5 text-sm font-mono text-gray-500 dark:text-gray-300 max-w-xs truncate">{{ Str::limit($record->value, 50) }}</td>
-                                    <td class="px-4 py-3.5 text-sm text-gray-500 dark:text-gray-400">{{ $record->ttl }}</td>
-                                    <td class="px-4 py-3.5 text-sm text-gray-500 dark:text-gray-400">{{ $record->priority ?? '—' }}</td>
-                                    <td class="px-4 py-3.5 text-right text-sm">
+                                    <td class="max-w-xs truncate px-5 py-3.5 font-mono text-sm text-zinc-500 dark:text-zinc-300">{{ Str::limit($record->value, 50) }}</td>
+                                    <td class="whitespace-nowrap px-5 py-3.5 text-sm text-zinc-500 dark:text-zinc-400">{{ $record->ttl }}s</td>
+                                    <td class="whitespace-nowrap px-5 py-3.5 text-sm text-zinc-500 dark:text-zinc-400">{{ $record->priority ?? '—' }}</td>
+                                    <td class="whitespace-nowrap px-5 py-3.5 text-right">
                                         <div class="flex items-center justify-end gap-2">
-                                            <x-action-button :href="route('domain.dns.edit', [$domain->domain_id, $record->id])">
+                                            <a href="{{ route('domain.dns.edit', [$domain->domain_id, $record->id]) }}"
+                                               class="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800 transition-colors">
+                                                <i data-lucide="pencil" class="h-3.5 w-3.5"></i>
                                                 Edit
-                                            </x-action-button>
+                                            </a>
                                             <form method="POST" action="{{ route('domain.dns.delete', [$domain->domain_id, $record->id]) }}"
                                                   onsubmit="return confirm('Delete this DNS record?')" class="inline">
                                                 @csrf
                                                 @method('DELETE')
-                                                <x-danger-button type="submit" size="sm">Delete</x-danger-button>
+                                                <button type="submit"
+                                                   class="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-700/10 transition-colors">
+                                                    <i data-lucide="trash-2" class="h-3.5 w-3.5"></i>
+                                                    Delete
+                                                </button>
                                             </form>
                                         </div>
                                     </td>
@@ -113,6 +169,14 @@
                     </x-slot>
                 </x-empty-state>
             @endif
-        </x-card>
+        </div>
     </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.lucide) lucide.createIcons();
+    });
+</script>
+@endpush

@@ -4,18 +4,18 @@ namespace App\Jobs;
 
 use App\Models\Server;
 use App\Models\ServerMetric;
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
-use Carbon\Carbon;
 
-class FetchServerMetricsJob implements ShouldQueue, ShouldBeUnique
+class FetchServerMetricsJob implements ShouldBeUnique, ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -45,7 +45,7 @@ class FetchServerMetricsJob implements ShouldQueue, ShouldBeUnique
      */
     public function uniqueId(): string
     {
-        return 'fetch-metrics-' . $this->server->id;
+        return 'fetch-metrics-'.$this->server->id;
     }
 
     /**
@@ -68,8 +68,9 @@ class FetchServerMetricsJob implements ShouldQueue, ShouldBeUnique
     public function handle(): void
     {
         // Skip if server is not active
-        if (!$this->isServerActive()) {
+        if (! $this->isServerActive()) {
             Log::info("Skipping metrics for inactive server: {$this->server->id}");
+
             return;
         }
 
@@ -77,6 +78,7 @@ class FetchServerMetricsJob implements ShouldQueue, ShouldBeUnique
         $cacheKey = "last_metrics_fetch_{$this->server->id}";
         if (Cache::has($cacheKey)) {
             Log::debug("Skipping duplicate metrics fetch for server {$this->server->id} - already fetched recently");
+
             return;
         }
 
@@ -84,8 +86,9 @@ class FetchServerMetricsJob implements ShouldQueue, ShouldBeUnique
             // Fetch metrics from the agent
             $metrics = $this->fetchMetricsFromAgent();
 
-            if (!$metrics) {
+            if (! $metrics) {
                 Log::warning("No metrics received from server: {$this->server->id}");
+
                 return;
             }
 
@@ -134,21 +137,23 @@ class FetchServerMetricsJob implements ShouldQueue, ShouldBeUnique
                 ->retry(2, 1000)
                 ->get($agentUrl);
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 Log::warning("Agent returned non-200 status: {$response->status()}", [
                     'server' => $this->server->id,
                     'url' => $agentUrl,
                 ]);
+
                 return null;
             }
 
             $data = $response->json();
 
-            if (!$this->validateMetricsData($data)) {
-                Log::error("Invalid metrics data received from agent", [
+            if (! $this->validateMetricsData($data)) {
+                Log::error('Invalid metrics data received from agent', [
                     'server' => $this->server->id,
                     'data' => $data,
                 ]);
+
                 return null;
             }
 
@@ -159,6 +164,7 @@ class FetchServerMetricsJob implements ShouldQueue, ShouldBeUnique
                 'server' => $this->server->id,
                 'url' => $agentUrl,
             ]);
+
             return null;
         }
     }
@@ -185,8 +191,9 @@ class FetchServerMetricsJob implements ShouldQueue, ShouldBeUnique
         $required = ['cpu_percent', 'memory', 'disk', 'load', 'network', 'uptime_seconds', 'timestamp'];
 
         foreach ($required as $field) {
-            if (!isset($data[$field])) {
+            if (! isset($data[$field])) {
                 Log::error("Missing required field in metrics: {$field}");
+
                 return false;
             }
         }

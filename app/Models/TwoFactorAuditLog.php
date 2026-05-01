@@ -12,11 +12,17 @@ class TwoFactorAuditLog extends Model
 
     // Action types
     const ACTION_ENABLED = 'enabled';
+
     const ACTION_DISABLED = 'disabled';
+
     const ACTION_VERIFIED = 'verified';
+
     const ACTION_FAILED = 'failed';
+
     const ACTION_BACKUP_CODE_USED = 'backup_code_used';
+
     const ACTION_DEVICE_TRUSTED = 'device_trusted';
+
     const ACTION_DEVICE_REMOVED = 'device_removed';
 
     protected $fillable = [

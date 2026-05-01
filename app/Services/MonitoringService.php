@@ -4,9 +4,9 @@ namespace App\Services;
 
 use App\Models\Server;
 use App\Models\ServerMetric;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
 
 class MonitoringService
 {
@@ -36,6 +36,7 @@ class MonitoringService
             $cached = Cache::get($cacheKey);
             if ($cached) {
                 Log::info("Using cached metrics for server {$server->id}");
+
                 return array_merge($cached, ['cached' => true]);
             }
         }
@@ -52,7 +53,7 @@ class MonitoringService
             ->lastHours($hours)
             ->orderBy('measured_at', 'asc')
             ->get()
-            ->map(fn($m) => $this->formatMetricForDisplay($m))
+            ->map(fn ($m) => $this->formatMetricForDisplay($m))
             ->toArray();
     }
 
@@ -79,7 +80,7 @@ class MonitoringService
     {
         $metric = ServerMetric::getLatestForServer($server->id);
 
-        if (!$metric) {
+        if (! $metric) {
             return [
                 'status' => 'unknown',
                 'message' => 'No metrics available',
@@ -120,11 +121,11 @@ class MonitoringService
         }
 
         // Determine overall status
-        $hasCritical = collect($issues)->contains(fn($i) => str_contains($i, 'critical'));
+        $hasCritical = collect($issues)->contains(fn ($i) => str_contains($i, 'critical'));
 
         return [
             'status' => $hasCritical ? 'critical' : 'warning',
-            'message' => count($issues) . ' issue(s) detected',
+            'message' => count($issues).' issue(s) detected',
             'issues' => $issues,
         ];
     }
@@ -143,6 +144,7 @@ class MonitoringService
 
             if ($response->successful()) {
                 $data = $response->json();
+
                 return [
                     'success' => true,
                     'message' => 'Agent is running',
@@ -244,7 +246,7 @@ class MonitoringService
      */
     public function getStatusColor(string $status): string
     {
-        return match($status) {
+        return match ($status) {
             'critical' => 'red',
             'warning' => 'yellow',
             'healthy', 'normal' => 'green',

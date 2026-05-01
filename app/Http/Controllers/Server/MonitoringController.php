@@ -76,8 +76,9 @@ class MonitoringController extends Controller
         $process = new Process(['sudo', '/var/www/html/bin/spikster', 'list-services', '--format', $format]);
         $process->run();
 
-        if (!$process->isSuccessful()) {
-            Log::error('Error executing spikster: ' . $process->getErrorOutput());
+        if (! $process->isSuccessful()) {
+            Log::error('Error executing spikster: '.$process->getErrorOutput());
+
             return response()->json([
                 'result' => 'error',
                 'message' => 'Failed to list services',
@@ -99,27 +100,28 @@ class MonitoringController extends Controller
         $service = $request->get('service');
         $format = $request->get('format', 'json');
 
-        if (!$action || !$service) {
+        if (! $action || ! $service) {
             return response()->json(['result' => 'error', 'message' => 'Invalid request parameters'], 400);
         }
 
-        if (!in_array($action, $allowedActions)) {
+        if (! in_array($action, $allowedActions)) {
             return response()->json(['result' => 'error', 'message' => 'Invalid action'], 400);
         }
 
-        if (!in_array($format, $allowedFormats)) {
+        if (! in_array($format, $allowedFormats)) {
             return response()->json(['result' => 'error', 'message' => 'Invalid format'], 400);
         }
 
-        if (!preg_match('/^[a-zA-Z0-9\-\.@]+$/', $service)) {
+        if (! preg_match('/^[a-zA-Z0-9\-\.@]+$/', $service)) {
             return response()->json(['result' => 'error', 'message' => 'Invalid service name'], 400);
         }
 
         $process = new Process(['bin/spikster', 'manage-services', '--format', $format, $action, $service]);
         $process->run();
 
-        if (!$process->isSuccessful()) {
-            Log::error('Error executing spikster: ' . $process->getErrorOutput());
+        if (! $process->isSuccessful()) {
+            Log::error('Error executing spikster: '.$process->getErrorOutput());
+
             return response()->json(['result' => 'error', 'message' => 'Failed to manage service'], 500);
         }
 

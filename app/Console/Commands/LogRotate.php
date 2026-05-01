@@ -9,6 +9,7 @@ use Illuminate\Console\Command;
 class LogRotate extends Command
 {
     protected $signature = 'spikster:logrotate';
+
     protected $description = 'Rotate site access/error logs on all servers';
 
     public function handle(SSHService $sshService): int
@@ -26,7 +27,7 @@ class LogRotate extends Command
                     $ssh->exec("sudo unlink /home/{$u}/log/error_bk_{$day}.log 2>/dev/null; true");
                     $ssh->exec("sudo mv /home/{$u}/log/error.log /home/{$u}/log/error_bk_{$day}.log 2>/dev/null; true");
                 } catch (\Exception $e) {
-                    $this->warn("Log rotate failed for {$site->domain}: " . $e->getMessage());
+                    $this->warn("Log rotate failed for {$site->domain}: ".$e->getMessage());
                 }
             }
         }

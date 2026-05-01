@@ -10,24 +10,40 @@ use Livewire\Component;
 class BackupScheduleManager extends Component
 {
     public Site $site;
+
     public $schedules;
+
     public $showCreateModal = false;
+
     public $showEditModal = false;
+
     public $showDeleteModal = false;
+
     public $selectedSchedule = null;
 
     // Form fields
     public $name = '';
+
     public $type = 'full';
+
     public $frequency = 'daily';
+
     public $time = '02:00';
+
     public $day_of_week = null;
+
     public $day_of_month = null;
+
     public $cron_expression = '';
+
     public $storage_locations = ['local'];
+
     public $is_encrypted = false;
+
     public $retention_count = 10;
+
     public $retention_days = 30;
+
     public $is_active = true;
 
     protected $rules = [
@@ -146,7 +162,7 @@ class BackupScheduleManager extends Component
     {
         $this->validate();
 
-        if (!$this->selectedSchedule) {
+        if (! $this->selectedSchedule) {
             return;
         }
 
@@ -173,7 +189,7 @@ class BackupScheduleManager extends Component
 
     public function deleteSchedule()
     {
-        if (!$this->selectedSchedule) {
+        if (! $this->selectedSchedule) {
             return;
         }
 
@@ -190,7 +206,7 @@ class BackupScheduleManager extends Component
         $schedule = BackupSchedule::where('site_id', $this->site->id)->find($scheduleId);
 
         if ($schedule) {
-            $schedule->is_active = !$schedule->is_active;
+            $schedule->is_active = ! $schedule->is_active;
             $schedule->save();
 
             if ($schedule->is_active) {
@@ -198,7 +214,7 @@ class BackupScheduleManager extends Component
             }
 
             $this->loadSchedules();
-            session()->flash('message', 'Schedule ' . ($schedule->is_active ? 'enabled' : 'disabled'));
+            session()->flash('message', 'Schedule '.($schedule->is_active ? 'enabled' : 'disabled'));
         }
     }
 

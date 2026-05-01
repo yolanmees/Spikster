@@ -5,27 +5,35 @@ namespace Modules\WordPress\Livewire;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Modules\WordPress\Models\WordPressInstallation;
-use Modules\WordPress\Services\WPCLIService;
 use Modules\WordPress\Services\WordPressOrgService;
+use Modules\WordPress\Services\WPCLIService;
 
 class PluginManager extends Component
 {
     use WithPagination;
 
     public WordPressInstallation $installation;
+
     public $plugins = [];
+
     public $selectedPlugin = null;
 
     // Browse WordPress.org
     public $showBrowseModal = false;
+
     public $wpOrgPlugins = [];
+
     public $searchTerm = '';
+
     public $selectedWpOrgPlugin = null;
+
     public $showPluginDetails = false;
 
     // Manual install
     public $showInstallModal = false;
+
     public $newPluginSlug = '';
+
     public $activateAfterInstall = false;
 
     public function mount(WordPressInstallation $installation)
@@ -48,7 +56,7 @@ class PluginManager extends Component
 
             session()->flash('success', 'Plugins synced successfully');
         } catch (\Exception $e) {
-            session()->flash('error', 'Sync failed: ' . $e->getMessage());
+            session()->flash('error', 'Sync failed: '.$e->getMessage());
         }
     }
 
@@ -61,7 +69,7 @@ class PluginManager extends Component
 
             session()->flash('success', "Plugin '{$slug}' activated successfully");
         } catch (\Exception $e) {
-            session()->flash('error', 'Activation failed: ' . $e->getMessage());
+            session()->flash('error', 'Activation failed: '.$e->getMessage());
         }
     }
 
@@ -74,7 +82,7 @@ class PluginManager extends Component
 
             session()->flash('success', "Plugin '{$slug}' deactivated successfully");
         } catch (\Exception $e) {
-            session()->flash('error', 'Deactivation failed: ' . $e->getMessage());
+            session()->flash('error', 'Deactivation failed: '.$e->getMessage());
         }
     }
 
@@ -87,7 +95,7 @@ class PluginManager extends Component
 
             session()->flash('success', "Plugin '{$slug}' updated successfully");
         } catch (\Exception $e) {
-            session()->flash('error', 'Update failed: ' . $e->getMessage());
+            session()->flash('error', 'Update failed: '.$e->getMessage());
         }
     }
 
@@ -117,7 +125,7 @@ class PluginManager extends Component
             $this->closeInstallModal();
             session()->flash('success', "Plugin '{$this->newPluginSlug}' installed successfully");
         } catch (\Exception $e) {
-            session()->flash('error', 'Installation failed: ' . $e->getMessage());
+            session()->flash('error', 'Installation failed: '.$e->getMessage());
         }
     }
 
@@ -126,6 +134,7 @@ class PluginManager extends Component
         if (! preg_match('/^[a-zA-Z0-9\-_\.]+$/', $slug)) {
             throw new \InvalidArgumentException("Invalid plugin/theme slug: {$slug}");
         }
+
         return $slug;
     }
 
@@ -141,10 +150,10 @@ class PluginManager extends Component
                 $this->loadPlugins();
                 session()->flash('success', "Plugin '{$slug}' deleted successfully");
             } else {
-                session()->flash('error', 'Delete failed: ' . $result['output']);
+                session()->flash('error', 'Delete failed: '.$result['output']);
             }
         } catch (\Exception $e) {
-            session()->flash('error', 'Delete failed: ' . $e->getMessage());
+            session()->flash('error', 'Delete failed: '.$e->getMessage());
         }
     }
 
@@ -179,7 +188,7 @@ class PluginManager extends Component
             }
         } catch (\Exception $e) {
             $this->wpOrgPlugins = [];
-            session()->flash('error', 'Search failed: ' . $e->getMessage());
+            session()->flash('error', 'Search failed: '.$e->getMessage());
         }
     }
 
@@ -196,7 +205,7 @@ class PluginManager extends Component
                 session()->flash('error', 'Failed to load plugin details');
             }
         } catch (\Exception $e) {
-            session()->flash('error', 'Failed to load details: ' . $e->getMessage());
+            session()->flash('error', 'Failed to load details: '.$e->getMessage());
         }
     }
 
@@ -223,10 +232,10 @@ class PluginManager extends Component
 
                 session()->flash('success', $message);
             } else {
-                session()->flash('error', 'Installation failed: ' . $result['output']);
+                session()->flash('error', 'Installation failed: '.$result['output']);
             }
         } catch (\Exception $e) {
-            session()->flash('error', 'Installation failed: ' . $e->getMessage());
+            session()->flash('error', 'Installation failed: '.$e->getMessage());
         }
     }
 

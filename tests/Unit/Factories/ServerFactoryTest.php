@@ -3,7 +3,7 @@
 namespace Tests\Unit\Factories;
 
 use App\Models\Server;
-use App\Models\User;
+use App\Models\Site;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\Unit\UnitTestCase;
 
@@ -56,11 +56,11 @@ class ServerFactoryTest extends UnitTestCase
     public function it_creates_server_with_sites_relationship(): void
     {
         $server = Server::factory()
-            ->has(\App\Models\Site::factory()->count(3))
+            ->has(Site::factory()->count(3))
             ->create();
 
         $this->assertCount(3, $server->sites);
-        $this->assertInstanceOf(\App\Models\Site::class, $server->sites->first());
+        $this->assertInstanceOf(Site::class, $server->sites->first());
     }
 
     #[Test]

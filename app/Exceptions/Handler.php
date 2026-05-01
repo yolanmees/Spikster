@@ -2,7 +2,13 @@
 
 namespace App\Exceptions;
 
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -36,6 +42,52 @@ class Handler extends ExceptionHandler
     {
         $this->reportable(function (Throwable $e) {
             //
+        });
+
+        $this->renderable(function (Throwable $e, Request $request) {
+            if (! $request->expectsJson() && ! $request->is('api/*')) {
+                return null;
+            }
+
+            if ($e instanceof ValidationException) {
+                return response()->json([
+                    'message' => 'The given data was invalid.',
+                    'errors' => $e->errors(),
+                ], 422);
+            }
+
+            if ($e instanceof ModelNotFoundException) {
+                return response()->json([
+                    'message' => 'Resource not found.',
+                    'errors' => 'not_found',
+                ], 404);
+            }
+
+            if ($e instanceof AuthenticationException) {
+                return response()->json([
+                    'message' => 'Unauthenticated.',
+                    'errors' => 'unauthenticated',
+                ], 401);
+            }
+
+            if ($e instanceof AuthorizationException) {
+                return response()->json([
+                    'message' => 'This action is unauthorized.',
+                    'errors' => 'unauthorized',
+                ], 403);
+            }
+
+            if ($e instanceof HttpException) {
+                return response()->json([
+                    'message' => $e->getMessage() ?: 'HTTP error.',
+                    'errors' => 'http_error',
+                ], $e->getStatusCode());
+            }
+
+            return response()->json([
+                'message' => 'An unexpected error occurred.',
+                'errors' => 'server_error',
+            ], 500);
         });
     }
 }

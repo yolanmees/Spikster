@@ -2,10 +2,11 @@
 
 namespace App\Console\Commands;
 
+use App\Models\User;
 use Illuminate\Console\Command;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
-use App\Models\User;
+use Spatie\Permission\PermissionRegistrar;
 
 class SyncWordPressPermissions extends Command
 {
@@ -70,7 +71,7 @@ class SyncWordPressPermissions extends Command
         // Assign to admin role if requested or if it exists
         if ($this->option('assign-to-admin')) {
             $adminRole = Role::where('name', 'admin')->orWhere('name', 'Admin')->first();
-            
+
             if ($adminRole) {
                 $this->info('Assigning permissions to admin role...');
                 $adminRole->syncPermissions(array_keys($permissions));
@@ -87,14 +88,14 @@ class SyncWordPressPermissions extends Command
         // Assign to specific user if requested
         if ($userIdOrEmail = $this->option('assign-to-user')) {
             // Try to find user by ID first, then by email
-            $user = is_numeric($userIdOrEmail) 
-                ? User::find($userIdOrEmail) 
+            $user = is_numeric($userIdOrEmail)
+                ? User::find($userIdOrEmail)
                 : User::where('email', $userIdOrEmail)->first();
-            
+
             if ($user) {
                 $this->info("Assigning permissions to user: {$user->email}");
                 foreach (array_keys($permissions) as $permission) {
-                    if (!$user->hasPermissionTo($permission)) {
+                    if (! $user->hasPermissionTo($permission)) {
                         $user->givePermissionTo($permission);
                         $this->line("  ✓ Granted: {$permission}");
                     } else {
@@ -109,13 +110,13 @@ class SyncWordPressPermissions extends Command
         }
 
         // Clear permission cache
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
         $this->info('✓ Permission cache cleared');
 
         $this->newLine();
-        
+
         // Show usage examples
-        if (!$this->option('assign-to-admin') && !$this->option('assign-to-user')) {
+        if (! $this->option('assign-to-admin') && ! $this->option('assign-to-user')) {
             $this->info('💡 To assign permissions, use one of these options:');
             $this->line('');
             $this->line('  Assign to admin role:');

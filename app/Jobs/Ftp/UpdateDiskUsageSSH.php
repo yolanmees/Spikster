@@ -16,6 +16,7 @@ class UpdateDiskUsageSSH implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $timeout = 120;
+
     public $tries = 2;
 
     public function __construct(
@@ -26,7 +27,7 @@ class UpdateDiskUsageSSH implements ShouldQueue
     {
         try {
             $result = $daemon->send($this->ftpUser->server, 'ftp.disk-usage', [
-                'username'       => $this->ftpUser->username,
+                'username' => $this->ftpUser->username,
                 'home_directory' => $this->ftpUser->home_directory,
             ]);
 
@@ -37,16 +38,16 @@ class UpdateDiskUsageSSH implements ShouldQueue
             $usageBytes = (int) ($result['usage_bytes'] ?? 0);
             $this->ftpUser->updateDiskUsage($usageBytes);
 
-            Log::info("Updated FTP user disk usage via daemon", [
-                'username'    => $this->ftpUser->username,
+            Log::info('Updated FTP user disk usage via daemon', [
+                'username' => $this->ftpUser->username,
                 'usage_bytes' => $usageBytes,
-                'usage_mb'    => round($usageBytes / (1024 * 1024), 2),
+                'usage_mb' => round($usageBytes / (1024 * 1024), 2),
             ]);
 
         } catch (\Exception $e) {
-            Log::error("Failed to update FTP user disk usage", [
+            Log::error('Failed to update FTP user disk usage', [
                 'username' => $this->ftpUser->username,
-                'error'    => $e->getMessage(),
+                'error' => $e->getMessage(),
             ]);
             // Non-critical: don't rethrow
         }

@@ -9,7 +9,7 @@
         <div class="flex items-center justify-between">
             <span>{{ $title }}</span>
             <select wire:model.live="timeRange"
-                class="text-sm rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-3 py-1.5 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors">
+                class="text-sm rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 px-3 py-1.5 shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-700 focus:border-transparent transition-colors">
                 @foreach ($timeRangeOptions as $value => $label)
                     <option value="{{ $value }}">{{ $label }}</option>
                 @endforeach

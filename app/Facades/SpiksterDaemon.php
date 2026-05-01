@@ -2,6 +2,7 @@
 
 namespace App\Facades;
 
+use App\Services\DaemonService;
 use Illuminate\Support\Facades\Facade;
 
 /**
@@ -11,12 +12,12 @@ use Illuminate\Support\Facades\Facade;
  * @method static string status(string $service)
  * @method static bool isAvailable()
  *
- * @see \App\Services\DaemonService
+ * @see DaemonService
  */
 class SpiksterDaemon extends Facade
 {
     protected static function getFacadeAccessor(): string
     {
-        return \App\Services\DaemonService::class;
+        return DaemonService::class;
     }
 }

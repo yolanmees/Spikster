@@ -26,7 +26,7 @@ return new class extends Migration
             $table->timestamp('last_update_check')->nullable();
             $table->timestamp('installed_at')->nullable();
             $table->timestamps();
-            
+
             $table->index(['site_id', 'status']);
             $table->index('status');
         });

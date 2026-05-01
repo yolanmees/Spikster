@@ -7,8 +7,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Modules\WordPress\Models\WordPressInstallation;
 use Modules\WordPress\Services\WordPressInstallationService;
-use Modules\WordPress\Services\WPCLIService;
 use Modules\WordPress\Services\WordPressOrgService;
+use Modules\WordPress\Services\WPCLIService;
 
 class WordPressApiController extends Controller
 {
@@ -88,7 +88,7 @@ class WordPressApiController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Installation failed: ' . $e->getMessage(),
+                'message' => 'Installation failed: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -110,7 +110,7 @@ class WordPressApiController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Uninstall failed: ' . $e->getMessage(),
+                'message' => 'Uninstall failed: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -132,7 +132,7 @@ class WordPressApiController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to get WordPress info: ' . $e->getMessage(),
+                'message' => 'Failed to get WordPress info: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -168,7 +168,7 @@ class WordPressApiController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Sync failed: ' . $e->getMessage(),
+                'message' => 'Sync failed: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -190,7 +190,7 @@ class WordPressApiController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Activation failed: ' . $e->getMessage(),
+                'message' => 'Activation failed: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -213,7 +213,7 @@ class WordPressApiController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Installation failed: ' . $e->getMessage(),
+                'message' => 'Installation failed: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -235,7 +235,7 @@ class WordPressApiController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Update failed: ' . $e->getMessage(),
+                'message' => 'Update failed: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -259,12 +259,12 @@ class WordPressApiController extends Controller
                 'success' => $result['success'],
                 'message' => $result['success']
                     ? "Theme '{$slug}' deleted successfully"
-                    : 'Delete failed: ' . $result['output'],
+                    : 'Delete failed: '.$result['output'],
             ], $result['success'] ? 200 : 500);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Delete failed: ' . $e->getMessage(),
+                'message' => 'Delete failed: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -300,7 +300,7 @@ class WordPressApiController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Sync failed: ' . $e->getMessage(),
+                'message' => 'Sync failed: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -322,7 +322,7 @@ class WordPressApiController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Activation failed: ' . $e->getMessage(),
+                'message' => 'Activation failed: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -344,7 +344,7 @@ class WordPressApiController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Deactivation failed: ' . $e->getMessage(),
+                'message' => 'Deactivation failed: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -367,7 +367,7 @@ class WordPressApiController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Installation failed: ' . $e->getMessage(),
+                'message' => 'Installation failed: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -389,7 +389,7 @@ class WordPressApiController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Update failed: ' . $e->getMessage(),
+                'message' => 'Update failed: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -413,12 +413,12 @@ class WordPressApiController extends Controller
                 'success' => $result['success'],
                 'message' => $result['success']
                     ? "Plugin '{$slug}' deleted successfully"
-                    : 'Delete failed: ' . $result['output'],
+                    : 'Delete failed: '.$result['output'],
             ], $result['success'] ? 200 : 500);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Delete failed: ' . $e->getMessage(),
+                'message' => 'Delete failed: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -452,7 +452,7 @@ class WordPressApiController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to check updates: ' . $e->getMessage(),
+                'message' => 'Failed to check updates: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -474,7 +474,7 @@ class WordPressApiController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Update failed: ' . $e->getMessage(),
+                'message' => 'Update failed: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -530,7 +530,7 @@ class WordPressApiController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Update failed: ' . $e->getMessage(),
+                'message' => 'Update failed: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -555,7 +555,7 @@ class WordPressApiController extends Controller
                 ['tag' => $validated['tag'] ?? null]
             );
 
-            if (!$result['success']) {
+            if (! $result['success']) {
                 return response()->json([
                     'success' => false,
                     'message' => $result['message'] ?? 'Failed to fetch themes',
@@ -570,7 +570,7 @@ class WordPressApiController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to browse themes: ' . $e->getMessage(),
+                'message' => 'Failed to browse themes: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -583,7 +583,7 @@ class WordPressApiController extends Controller
         try {
             $result = $this->wpOrgService->getThemeDetails($slug);
 
-            if (!$result['success']) {
+            if (! $result['success']) {
                 return response()->json([
                     'success' => false,
                     'message' => $result['message'] ?? 'Theme not found',
@@ -597,7 +597,7 @@ class WordPressApiController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to fetch theme: ' . $e->getMessage(),
+                'message' => 'Failed to fetch theme: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -626,7 +626,7 @@ class WordPressApiController extends Controller
                 ]
             );
 
-            if (!$result['success']) {
+            if (! $result['success']) {
                 return response()->json([
                     'success' => false,
                     'message' => $result['message'] ?? 'Failed to fetch plugins',
@@ -641,7 +641,7 @@ class WordPressApiController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to browse plugins: ' . $e->getMessage(),
+                'message' => 'Failed to browse plugins: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -654,7 +654,7 @@ class WordPressApiController extends Controller
         try {
             $result = $this->wpOrgService->getPluginDetails($slug);
 
-            if (!$result['success']) {
+            if (! $result['success']) {
                 return response()->json([
                     'success' => false,
                     'message' => $result['message'] ?? 'Plugin not found',
@@ -668,7 +668,7 @@ class WordPressApiController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to fetch plugin: ' . $e->getMessage(),
+                'message' => 'Failed to fetch plugin: '.$e->getMessage(),
             ], 500);
         }
     }

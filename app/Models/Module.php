@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Module extends Model
 {
@@ -82,7 +83,7 @@ class Module extends Model
         return $this->hasMany(ModulePermission::class);
     }
 
-    public function marketplace(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function marketplace(): HasOne
     {
         return $this->hasOne(ModuleMarketplace::class, 'package_name', 'alias');
     }
@@ -109,7 +110,7 @@ class Module extends Model
         }
 
         // Check if other active modules depend on this one
-        return !$this->dependents()->whereHas('module', function ($query) {
+        return ! $this->dependents()->whereHas('module', function ($query) {
             $query->where('is_active', true);
         })->exists();
     }
@@ -117,8 +118,8 @@ class Module extends Model
     public function getSetting(string $key, $default = null)
     {
         $setting = $this->settings()->where('setting_key', $key)->first();
-        
-        if (!$setting) {
+
+        if (! $setting) {
             return $default;
         }
 
