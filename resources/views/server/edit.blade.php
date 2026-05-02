@@ -117,7 +117,7 @@
                 $html('serveriptop', data.ip);
                 $html('serversites', data.sites);
                 $html('maintitle', '- ' + data.name);
-                $html('serverbuild', data.build || '{{ __('spikster.unknown') }}');
+                $html('serverbuild', data.php || '{{ __('spikster.unknown') }}');
                 ['8.3','8.2','8.1','8.0','7.4'].forEach(v => {
                     const el = $id('php' + v.replace('.', ''));
                     if (el && data.php === v) el.setAttribute('selected', 'selected');
