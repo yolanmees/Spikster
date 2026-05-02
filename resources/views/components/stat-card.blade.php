@@ -1,10 +1,15 @@
 @props([
-    'title',
+    'title' => null,
+    'label' => null,
     'value',
     'icon' => null,
     'color' => 'blue',
     'suffix' => null,
 ])
+
+@php
+    $title ??= $label;
+@endphp
 
 @php
     $colorMap = [

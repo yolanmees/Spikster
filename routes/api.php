@@ -7,7 +7,6 @@ use App\Http\Controllers\Api\ModuleController;
 use App\Http\Controllers\Api\SiteHealthController;
 use App\Http\Controllers\Api\TwoFactorAuthController;
 use App\Http\Controllers\Api\WebhookController;
-use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BackupController;
 use App\Http\Controllers\CronExecutionController;
 use App\Http\Controllers\DatabaseController;
@@ -153,9 +152,6 @@ Route::middleware(['api.unified-auth'])->group(function () {
     Route::get('/sites/{site_id}/email/logs', [MailQueueController::class, 'logs']);
 
 }); // end auth:sanctum
-
-// Get API Key From API login
-Route::post('/login', [AuthController::class, 'appLogin'])->middleware('throttle:10,3');
 
 Route::middleware(['api.unified-auth'])->group(function () {
     // database

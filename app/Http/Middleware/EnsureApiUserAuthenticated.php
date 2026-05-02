@@ -11,19 +11,12 @@ use Symfony\Component\HttpFoundation\Response;
 class EnsureApiUserAuthenticated
 {
     /**
-     * Prefer User/Sanctum auth for API requests.
-     * Optionally falls back to legacy CipiAuth while dual-stack migration is enabled.
+     * Authenticate API requests via Sanctum (personal access tokens or SPA cookies).
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (config('security.api.prefer_user_sanctum_auth', true) && $this->authenticateWithSanctumUser($request)) {
+        if ($this->authenticateWithSanctumUser($request)) {
             return $next($request);
-        }
-
-        if (config('security.api.allow_legacy_cipi_auth', true)) {
-            $request->attributes->set('auth_source', 'legacy_cipi');
-
-            return app(CipiAuth::class)->handle($request, $next);
         }
 
         return response()->json([

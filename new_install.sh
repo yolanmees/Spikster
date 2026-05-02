@@ -765,20 +765,11 @@ EOF
     sed -i "s|APP_URL=http://localhost|APP_URL=http://$IP|g" /var/www/html/.env
     sed -i "s/APP_ENV=local/APP_ENV=production/g" /var/www/html/.env
 
-    # Auth — generate a dedicated JWT secret
-    JWT_SECRET_VAL=$(openssl rand -hex 32)
-    sed -i "s|^JWT_SECRET=.*|JWT_SECRET=$JWT_SECRET_VAL|" /var/www/html/.env || echo "JWT_SECRET=$JWT_SECRET_VAL" >> /var/www/html/.env
-
-    # API Auth — enable legacy Cipi JWT auth so the dashboard AJAX works out of the box
-    sed -i "s|^API_ALLOW_LEGACY_CIPI_AUTH=.*|API_ALLOW_LEGACY_CIPI_AUTH=true|" /var/www/html/.env || echo "API_ALLOW_LEGACY_CIPI_AUTH=true" >> /var/www/html/.env
-    sed -i "s|^API_PREFER_USER_AUTH=.*|API_PREFER_USER_AUTH=true|" /var/www/html/.env || echo "API_PREFER_USER_AUTH=true" >> /var/www/html/.env
-
     # Sanctum — set stateful domains to include the server IP for SPA cookie auth
     sed -i "s|^SANCTUM_STATEFUL_DOMAINS=.*|SANCTUM_STATEFUL_DOMAINS=$IP,localhost,127.0.0.1|" /var/www/html/.env || echo "SANCTUM_STATEFUL_DOMAINS=$IP,localhost,127.0.0.1" >> /var/www/html/.env
 
     # RBAC — enable panel admin bypass for initial setup
     sed -i "s|^RBAC_PANEL_ADMIN_BYPASS=.*|RBAC_PANEL_ADMIN_BYPASS=true|" /var/www/html/.env || echo "RBAC_PANEL_ADMIN_BYPASS=true" >> /var/www/html/.env
-    sed -i "s|^CIPI_USERNAME=.*|CIPI_USERNAME=administrator@localhost|" /var/www/html/.env || echo "CIPI_USERNAME=administrator@localhost" >> /var/www/html/.env
 
     # Write panel server vars to .env — read by DatabaseSeeder
     grep -q "PANEL_SERVER_ID" /var/www/html/.env || echo "" >> /var/www/html/.env

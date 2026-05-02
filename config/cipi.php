@@ -1,34 +1,19 @@
 <?php
 
 /**
- * @deprecated Use config/spikster.php instead.
- *             Legacy Cipi configuration — kept for backward compatibility.
- *             All new settings should go in config/spikster.php.
- *             Will be removed in a future release.
+ * Legacy branding configuration.
+ *
+ * All system settings (PHP versions, services, daemon tokens, etc.)
+ * have been migrated to config/spikster.php and config/security.php.
+ * This file now only holds branding strings for backward compatibility
+ * with existing Blade templates.
  */
 
 return [
 
-    // Panel Credential
-    'username' => env('CIPI_USERNAME', 'admin@localhost'),
-    'password' => env('CIPI_PASSWORD', 'password'),
-
-    // JWT Settings
-    'jwt_secret' => env('JWT_SECRET', env('APP_KEY')),
-    'jwt_access' => env('JWT_ACCESS', 900),
-    'jwt_refresh' => env('JWT_REFRESH', 7200),
-
-    // Custom Vars
     'name' => env('CIPI_NAME', 'Spikster Control Panel'),
     'website' => env('CIPI_WEBSITE', 'https://github.com/yolanmees/Spikster'),
-    'activesetupcount' => env('CIPI_ACTIVESETUPCOUNT', '/#'),
     'documentation' => env('CIPI_DOCUMENTATION', 'https://spikster.com/'),
     'app' => env('CIPI_APP', '/#'),
-
-    // Global Settings
-    'users_prefix' => env('CIPI_USERS_PREFIX', 'cp'),
-    'phpvers' => ['8.3', '8.2', '8.1', '8.0', '7.4'],
-    'services' => ['nginx', 'php', 'mysql', 'redis', 'supervisor'],
-    'default_php' => '8.3',
 
 ];

@@ -36,7 +36,6 @@
     </script>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
     <script>
@@ -191,30 +190,33 @@
         @endif
     </div>
 
+    @auth
     <script>
         @php
-            use Firebase\JWT\JWT;
             try {
-                $jwtSecret = config('cipi.jwt_secret');
-                $jwtToken = JWT::encode(['iat' => time(), 'exp' => time() + (int) config('cipi.jwt_access', 900)], $jwtSecret, 'HS256');
+                // Revoke any existing 'dashboard' token for this user, then create a fresh one.
+                // The plain-text token is only visible once — it is stored in localStorage for API calls.
+                Auth::user()->tokens()->where('name', 'dashboard')->delete();
+                $sanctumToken = Auth::user()->createToken('dashboard', ['*'])->plainTextToken;
             } catch (\Throwable $e) {
-                $jwtToken = '';
+                $sanctumToken = '';
             }
         @endphp
-        @if($jwtToken)
-        localStorage.setItem('access_token', '{{ $jwtToken }}');
+        @if($sanctumToken)
+        localStorage.setItem('sanctum_token', '{{ $sanctumToken }}');
         @endif
     </script>
+    @endauth
     <script>
-        // Global API helper — wraps fetch() with automatic auth header.
+        // Global API helper — wraps fetch() with automatic Sanctum auth header.
         // Usage: api('/api/servers') → GET with JSON
         //        api('/api/sites/1', 'POST', { domain: 'example.com' }) → POST with JSON body
-        //        api('/api/sites/1', 'PATCH', { php: '8.3' }) → PATCH with JSON body
         async function api(url, method = 'GET', data = null) {
+            const token = localStorage.getItem('sanctum_token') || '';
             const opts = {
                 method,
                 headers: {
-                    'Authorization': 'Bearer ' + localStorage.getItem('access_token') || '',
+                    'Authorization': token ? ('Bearer ' + token) : '',
                     'Accept': 'application/json',
                 },
             };
@@ -224,7 +226,7 @@
             }
             const res = await fetch(url, opts);
             if (res.status === 401) {
-                localStorage.clear();
+                localStorage.removeItem('sanctum_token');
                 window.location.replace('/login');
                 throw new Error('Unauthorized — redirecting to login');
             }
@@ -233,30 +235,6 @@
                 throw new Error(text || res.statusText);
             }
             return res.json();
-        }
-
-        // jQuery — global AJAX setup for pages that still use $.ajax
-        if (typeof $ !== 'undefined') {
-            $.ajaxSetup({
-                cache: false,
-                headers: {
-                    'Authorization': 'Bearer ' + localStorage.getItem('access_token') || '',
-                    'Accept': 'application/json',
-                },
-                error: function(xhr) {
-                    if (xhr.status === 401) {
-                        localStorage.clear();
-                        window.location.reload();
-                    }
-                },
-            });
-
-            // Legacy helpers (used by server/edit pages)
-            window.getDataNoDT = function(url) {
-                $.ajax({ type: 'GET', url, success: function(data) {
-                    try { localStorage.otherdata = JSON.stringify(data); } catch(e) {}
-                }});
-            };
         }
     </script>
     @stack('scripts')

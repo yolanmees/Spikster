@@ -26,7 +26,7 @@ class AssignRolesToExistingUsersSeeder extends Seeder
             return;
         }
 
-        $configuredAdminEmail = (string) config('cipi.username');
+        $configuredAdminEmail = (string) config('security.rbac.panel_admin_identifier', 'administrator@localhost');
         $adminCandidates = array_values(array_filter([
             $configuredAdminEmail,
             'administrator@localhost',

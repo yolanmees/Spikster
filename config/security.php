@@ -28,17 +28,13 @@ return [
 
     // API security
     'api' => [
-        'jwt_access_lifetime' => env('JWT_ACCESS_LIFETIME', 3600), // seconds (1 hour)
-        'jwt_refresh_lifetime' => env('JWT_REFRESH_LIFETIME', 604800), // seconds (7 days)
         'rate_limit_per_minute' => env('API_RATE_LIMIT', 60),
-        'prefer_user_sanctum_auth' => env('API_PREFER_USER_AUTH', true),
-        'allow_legacy_cipi_auth' => env('API_ALLOW_LEGACY_CIPI_AUTH', true),
     ],
 
     // Role-based access control
     'rbac' => [
         'panel_admin_bypass' => env('RBAC_PANEL_ADMIN_BYPASS', true),
-        'panel_admin_identifier' => env('RBAC_PANEL_ADMIN_IDENTIFIER', env('CIPI_USERNAME', 'admin@localhost')),
+        'panel_admin_identifier' => env('RBAC_PANEL_ADMIN_IDENTIFIER', 'admin@localhost'),
     ],
 
     // SSH security

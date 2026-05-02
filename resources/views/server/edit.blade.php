@@ -109,74 +109,78 @@
 
 @section('js')
     <script>
+        const $id = id => document.getElementById(id);
+        const $html = (id, v) => { const e = $id(id); if (e) e.innerHTML = v; };
+
         function serverInit() {
-            getDataNoDT('/api/servers', false);
-            $.ajax({
-                url: '/api/servers/{{ $server_id }}',
-                type: 'GET',
-                success: function(data) {
-                    $('#serveriptop').html(data.ip);
-                    $('#serversites').html(data.sites);
-                    $('#maintitle').html('- ' + data.name);
-                    $('#serverbuild').html(data.build || '{{ __('spikster.unknown') }}');
-                    switch (data.php) {
-                        case '8.3': $('#php83').attr("selected","selected"); break;
-                        case '8.2': $('#php82').attr("selected","selected"); break;
-                        case '8.1': $('#php81').attr("selected","selected"); break;
-                        case '8.0': $('#php80').attr("selected","selected"); break;
-                        case '7.4': $('#php74').attr("selected","selected"); break;
-                        case '7.3': $('#phpver').append('<option value="7.3" selected>7.3</option>'); break;
-                    }
-                },
+            api('/api/servers/{{ $server_id }}').then(data => {
+                $html('serveriptop', data.ip);
+                $html('serversites', data.sites);
+                $html('maintitle', '- ' + data.name);
+                $html('serverbuild', data.build || '{{ __('spikster.unknown') }}');
+                ['8.3','8.2','8.1','8.0','7.4'].forEach(v => {
+                    const el = $id('php' + v.replace('.', ''));
+                    if (el && data.php === v) el.setAttribute('selected', 'selected');
+                });
+                if (data.php === '7.3') {
+                    const phpver = $id('phpver');
+                    if (phpver) phpver.insertAdjacentHTML('beforeend', '<option value="7.3" selected>7.3</option>');
+                }
+            });
+            api('/api/servers').then(data => {
+                try { localStorage.otherdata = JSON.stringify(data); } catch(e) {}
             });
         }
         serverInit();
 
         function getPing() {
-            $.ajax({
-                url: '/api/servers/{{ $server_id }}/ping',
-                type: 'GET',
-                timeout: 10000,
-                beforeSend: function() {
-                    $('#serverping').html('<svg class="animate-spin h-4 w-4 inline-block text-zinc-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>');
-                },
-                success: function(data) {
-                    var icon = data.status === 'online'
-                        ? '<svg class="w-4 h-4 inline-block text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>'
-                        : '<svg class="w-4 h-4 inline-block text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>';
-                    $('#serverping').html(icon);
-                },
-                error: function() {
-                    $('#serverping').html('<svg class="w-4 h-4 inline-block text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>');
-                }
-            });
+            const spinner = '<svg class="animate-spin h-4 w-4 inline-block text-zinc-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
+            const okIcon = '<svg class="w-4 h-4 inline-block text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
+            const errIcon = '<svg class="w-4 h-4 inline-block text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>';
+
+            const pingEl = $id('serverping');
+            if (pingEl) pingEl.innerHTML = spinner;
+
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), 10000);
+
+            fetch('/api/servers/{{ $server_id }}/ping', {
+                headers: { 'Authorization': 'Bearer ' + (localStorage.getItem('sanctum_token') || ''), 'Accept': 'application/json' },
+                signal: controller.signal,
+            }).then(r => r.json()).then(data => {
+                if (pingEl) pingEl.innerHTML = data.status === 'online' ? okIcon : errIcon;
+            }).catch(() => {
+                if (pingEl) pingEl.innerHTML = errIcon;
+            }).finally(() => clearTimeout(timer));
         }
         setInterval(getPing, 10000);
         getPing();
 
         // Change PHP CLI
-        $('#changephp').click(function() {
-            $.ajax({
-                url: '/api/servers/{{ $server_id }}', type: 'PATCH',
-                contentType: 'application/json', dataType: 'json',
-                data: JSON.stringify({ 'php': $('#phpver').val() }),
-                success: function() { serverInit(); },
+        const changePhpBtn = document.getElementById('changephp');
+        if (changePhpBtn) {
+            changePhpBtn.addEventListener('click', () => {
+                const phpver = document.getElementById('phpver');
+                api('/api/servers/{{ $server_id }}', 'PATCH', { php: phpver ? phpver.value : '' })
+                    .then(() => serverInit());
             });
-        });
+        }
 
         // Root Reset
-        $('#rootreset').click(function() {
-            window.dispatchEvent(new CustomEvent('open-modal', { detail: 'root-reset-modal' }));
-        });
-        $('#rootresetsubmit').click(function() {
-            $.ajax({
-                url: '/api/servers/{{ $server_id }}/rootreset', type: 'POST',
-                success: function(data) {
-                    success('{{ __('spikster.new_password_success') }}:<br><b>' + data.password + '</b>');
-                    $(window).scrollTop(0);
-                    window.dispatchEvent(new CustomEvent('close-modal'));
-                }
+        const rootResetBtn = document.getElementById('rootreset');
+        if (rootResetBtn) {
+            rootResetBtn.addEventListener('click', () => {
+                window.dispatchEvent(new CustomEvent('open-modal', { detail: 'root-reset-modal' }));
             });
-        });
+        }
+        const rootResetSubmit = document.getElementById('rootresetsubmit');
+        if (rootResetSubmit) {
+            rootResetSubmit.addEventListener('click', () => {
+                api('/api/servers/{{ $server_id }}/rootreset', 'POST').then(data => {
+                    window.scrollTo(0, 0);
+                    window.dispatchEvent(new CustomEvent('close-modal'));
+                });
+            });
+        }
     </script>
 @endsection

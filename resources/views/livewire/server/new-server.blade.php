@@ -2,7 +2,8 @@
     @script
         <script>
             $wire.on('close-modal', () => {
-                $('#newServerModal').modal('hide');
+                const modal = document.getElementById('newServerModal');
+                if (modal) modal.classList.add('hidden');
             });
         </script>
     @endscript

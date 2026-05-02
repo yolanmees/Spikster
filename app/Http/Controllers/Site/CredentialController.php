@@ -38,7 +38,7 @@ class CredentialController extends Controller
 
         $pdftoken = JWT::encode(
             ['iat' => time(), 'exp' => time() + 180],
-            config('cipi.jwt_secret').'-Pdf',
+            config('app.key').'-Pdf',
             'HS256'
         );
 
@@ -74,7 +74,7 @@ class CredentialController extends Controller
 
         $pdftoken = JWT::encode(
             ['iat' => time(), 'exp' => time() + 180],
-            config('cipi.jwt_secret').'-Pdf',
+            config('app.key').'-Pdf',
             'HS256'
         );
 
@@ -90,7 +90,7 @@ class CredentialController extends Controller
     public function pdf(string $site_id, string $pdftoken)
     {
         try {
-            JWT::decode($pdftoken, new Key(config('cipi.jwt_secret').'-Pdf', 'HS256'));
+            JWT::decode($pdftoken, new Key(config('app.key').'-Pdf', 'HS256'));
         } catch (\Throwable $th) {
             abort(403);
         }

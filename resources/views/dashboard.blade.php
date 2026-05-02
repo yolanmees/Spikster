@@ -204,7 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadMetrics(serverId) {
         try {
             const res = await fetch(`/api/servers/${serverId}/healthy`, {
-                headers: { 'Authorization': 'Bearer ' + localStorage.access_token, 'Accept': 'application/json' }
+                headers: { 'Authorization': 'Bearer ' + localStorage.sanctum_token, 'Accept': 'application/json' }
             });
             if (!res.ok) return;
             const data = await res.json();
@@ -219,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     fetch('/api/servers', {
-        headers: { 'Authorization': 'Bearer ' + localStorage.access_token, 'Accept': 'application/json' }
+        headers: { 'Authorization': 'Bearer ' + localStorage.sanctum_token, 'Accept': 'application/json' }
     })
     .then(r => r.json())
     .then(servers => {

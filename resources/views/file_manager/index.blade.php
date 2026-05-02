@@ -341,16 +341,25 @@
 @endsection
 
 @push('scripts')
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js"></script>
 <script>
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-    });
-
     function fileManager() {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+        async function postJson(url, data) {
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                },
+                body: JSON.stringify(data),
+            });
+            if (!res.ok) throw new Error(res.statusText);
+            const text = await res.text();
+            try { return JSON.parse(text); } catch { return text; }
+        }
         return {
             contextMenu: false,
             folderContextMenu: false,
@@ -429,64 +438,44 @@
             viewFile() {
                 this.contextMenu = false;
                 if (!this.selectedContent) return;
-                $.ajax({
-                    url: '{{ route('files.show') }}',
-                    type: 'POST',
-                    data: JSON.stringify(this.selectedContent),
-                    success: (data) => {
-                        if (typeof data === 'object' && data.nonmedia) {
-                            this.viewContent = data.nonmedia;
-                            this.modals.view = true;
-                        } else {
-                            window.open(data, '_blank');
-                        }
+                postJson('{{ route('files.show') }}', this.selectedContent).then(data => {
+                    if (typeof data === 'object' && data.nonmedia) {
+                        this.viewContent = data.nonmedia;
+                        this.modals.view = true;
+                    } else {
+                        window.open(data, '_blank');
                     }
                 });
             },
             editFile() {
                 this.contextMenu = false;
                 if (!this.selectedContent) return;
-                $.ajax({
-                    url: '{{ route('files.edit') }}',
-                    type: 'POST',
-                    data: JSON.stringify(this.selectedContent),
-                    success: (data) => {
-                        this.modals.edit = true;
-                        this.$nextTick(() => {
-                            if (this.editor) {
-                                this.editor.setValue(data || '', -1);
-                            }
-                            const form = document.getElementById('edit-form');
-                            const contentInput = document.getElementById('edit-content-input');
-                            const dataInput = document.getElementById('edit-data-input');
-                            form.onsubmit = () => {
-                                contentInput.value = JSON.stringify(this.selectedContent);
-                                dataInput.value = this.editor ? this.editor.getValue() : '';
-                            };
-                        });
-                    }
+                postJson('{{ route('files.edit') }}', this.selectedContent).then(data => {
+                    this.modals.edit = true;
+                    this.$nextTick(() => {
+                        if (this.editor) {
+                            this.editor.setValue(data || '', -1);
+                        }
+                        const form = document.getElementById('edit-form');
+                        const contentInput = document.getElementById('edit-content-input');
+                        const dataInput = document.getElementById('edit-data-input');
+                        form.onsubmit = () => {
+                            contentInput.value = JSON.stringify(this.selectedContent);
+                            dataInput.value = this.editor ? this.editor.getValue() : '';
+                        };
+                    });
                 });
             },
             downloadFile() {
                 this.contextMenu = false;
                 if (!this.selectedContent) return;
-                $.ajax({
-                    url: '{{ route('files.download') }}',
-                    type: 'POST',
-                    data: JSON.stringify(this.selectedContent),
-                    success: (data) => window.open(data, '_blank')
-                });
+                postJson('{{ route('files.download') }}', this.selectedContent).then(data => window.open(data, '_blank'));
             },
             deleteFile() {
                 this.contextMenu = false;
                 if (!this.selectedContent) return;
                 if (!confirm('Delete this file?')) return;
-                $.ajax({
-                    url: '{{ route('files.delete') }}',
-                    type: 'POST',
-                    data: JSON.stringify(this.selectedContent),
-                    success: () => window.location.reload()
-                });
+                postJson('{{ route('files.delete') }}', this.selectedContent).then(() => window.location.reload());
             }
         }
     }

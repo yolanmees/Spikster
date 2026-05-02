@@ -2,8 +2,6 @@
 
 namespace App\Console;
 
-use App\Console\Commands\ActiveSetupCount;
-use App\Console\Commands\CipiUpdate;
 use App\Console\Commands\LogRotate;
 use App\Console\Commands\MonitoringCheckCommand;
 use App\Console\Commands\ServerSetupCheck;
@@ -25,11 +23,9 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        ActiveSetupCount::class,
         LogRotate::class,
         MonitoringCheckCommand::class,
         ServerSetupCheck::class,
-        CipiUpdate::class,
     ];
 
     /**
@@ -40,9 +36,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->command('servers:setupcheck')->everyMinute();
-        $schedule->command('cipi:update')->dailyAt('12:05');
-        $schedule->command('cipi:logrotate')->dailyAt('00:00');
-        $schedule->command('cipi:activesetupcount')->dailyAt('03:03');
+        $schedule->command('spikster:logrotate')->dailyAt('00:00');
 
         // New monitoring system - fetch metrics from spikster-agent
         $schedule->call(function () {

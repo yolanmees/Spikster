@@ -4,7 +4,6 @@ namespace App\Http;
 
 use App\Http\Middleware\AssignRequestId;
 use App\Http\Middleware\Authenticate;
-use App\Http\Middleware\CipiAuth;
 use App\Http\Middleware\EncryptCookies;
 use App\Http\Middleware\EnforceProductionSafety;
 use App\Http\Middleware\EnsureApiUserAuthenticated;
@@ -122,7 +121,6 @@ class Kernel extends HttpKernel
         'throttle' => ThrottleRequests::class,
         'verified' => EnsureEmailIsVerified::class,
         'api.unified-auth' => EnsureApiUserAuthenticated::class,
-        'cipi.auth' => CipiAuth::class,
         'idempotency' => IdempotencyKey::class,
     ];
 }

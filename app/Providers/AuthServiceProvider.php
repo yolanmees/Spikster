@@ -33,7 +33,7 @@ class AuthServiceProvider extends ServiceProvider
         Gate::before(function ($user, string $ability) {
             // Emergency bypass for the configured panel admin account.
             if (config('security.rbac.panel_admin_bypass', true)) {
-                $panelAdminIdentifier = config('security.rbac.panel_admin_identifier', config('cipi.username'));
+                $panelAdminIdentifier = config('security.rbac.panel_admin_identifier');
 
                 if (is_string($panelAdminIdentifier)
                     && $panelAdminIdentifier !== ''

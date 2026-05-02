@@ -163,7 +163,7 @@
 @section('js')
     <script>
         const SITE_ID = '{{ $site_id }}';
-        const TOKEN = localStorage.getItem('access_token') || '';
+        const TOKEN = localStorage.getItem('sanctum_token') || '';
 
         function api(url, method = 'GET', body = null) {
             const opts = {
