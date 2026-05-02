@@ -11,15 +11,21 @@ import (
 )
 
 type Site struct {
-	ID       string
-	Domain   string
-	Username string
-	Password string
-	DBName   string
-	DBPass   string
-	DBRoot   string
-	PHP      string
-	Basepath string
+	ID                string
+	Domain            string
+	Username          string
+	Password          string
+	DBName            string
+	DBPass            string
+	DBRoot            string
+	PHP               string
+	Basepath          string
+	NginxConfig       string
+	PHPMemoryLimit    string
+	PHPUploadMaxSize  string
+	PHPMaxExecTime    string
+	PHPMaxInputVars   string
+	PHPPostMaxSize    string
 }
 
 func (s Site) WebRoot() string {
@@ -42,7 +48,7 @@ func Create(s Site) error {
 		{"create dirs", func() error { return createDirs(s) }},
 		{"write welcome page", func() error { return writeWelcome(s) }},
 		{"write nginx config", func() error { return writeNginxConfig(s) }},
-		{"write php-fpm pool", func() error { return writePHPPool(s) }},
+		{"write php-fpm pool", func() error { return WritePHPPool(s) }},
 		{"reload nginx", func() error { return reloadService("nginx") }},
 		{"reload php-fpm", func() error { return reloadService(fmt.Sprintf("php%s-fpm", s.PHP)) }},
 		{"create database", func() error { return createDatabase(s) }},
@@ -137,6 +143,19 @@ pm.max_children = 50
 pm.max_requests = 500
 pm.process_idle_timeout = 10s
 request_terminate_timeout = 300
+{{- if .PHPMemoryLimit}}
+php_admin_value[memory_limit] = {{.PHPMemoryLimit}}
+{{- end}}
+{{- if .PHPUploadMaxSize}}
+php_admin_value[upload_max_filesize] = {{.PHPUploadMaxSize}}
+php_admin_value[post_max_size] = {{if .PHPPostMaxSize}}{{.PHPPostMaxSize}}{{else}}{{.PHPUploadMaxSize}}{{end}}
+{{- end}}
+{{- if .PHPMaxExecTime}}
+php_admin_value[max_execution_time] = {{.PHPMaxExecTime}}
+{{- end}}
+{{- if .PHPMaxInputVars}}
+php_admin_value[max_input_vars] = {{.PHPMaxInputVars}}
+{{- end}}
 `
 
 func writeNginxConfig(s Site) error {
@@ -150,12 +169,30 @@ func writeNginxConfig(s Site) error {
 	if err := os.Symlink(available, enabled); err != nil {
 		return err
 	}
-	custom := fmt.Sprintf("/etc/nginx/spikster/%s.conf", s.Username)
-	return os.WriteFile(custom, []byte("# Custom nginx rules — edit freely\n"), 0644)
+	return WriteCustomNginxConfig(s)
 }
 
-func writePHPPool(s Site) error {
+func WriteCustomNginxConfig(s Site) error {
+	custom := fmt.Sprintf("/etc/nginx/spikster/%s.conf", s.Username)
+	content := "# Custom nginx rules — edit freely\n"
+	if s.NginxConfig != "" {
+		content = s.NginxConfig
+	}
+	if err := os.WriteFile(custom, []byte(content), 0644); err != nil {
+		return fmt.Errorf("write custom nginx: %w", err)
+	}
+	if err := run("nginx", "-t"); err != nil {
+		return fmt.Errorf("nginx config test failed: %w", err)
+	}
+	return reloadService("nginx")
+}
+
+func WritePHPPool(s Site) error {
 	return writeTpl(fmt.Sprintf("/etc/php/%s/fpm/pool.d/%s.conf", s.PHP, s.Username), phpPoolTpl, s)
+}
+
+func ReloadPHP(s Site) error {
+	return reloadService(fmt.Sprintf("php%s-fpm", s.PHP))
 }
 
 func createDatabase(s Site) error {
@@ -274,6 +311,12 @@ func UpdateDomain(username, oldDomain, newDomain string) error {
 func UpdateBasepath(username, newBasepath string) error {
 	nginxConf := fmt.Sprintf("/etc/nginx/sites-available/%s.conf", username)
 
+	// Validate — block path traversal
+	cleanBasepath := strings.TrimPrefix(newBasepath, "/")
+	if strings.Contains(cleanBasepath, "..") {
+		return fmt.Errorf("path traversal detected in basepath: %q", newBasepath)
+	}
+
 	// Read current config
 	data, err := os.ReadFile(nginxConf)
 	if err != nil {
@@ -286,7 +329,11 @@ func UpdateBasepath(username, newBasepath string) error {
 		if strings.HasPrefix(strings.TrimSpace(line), "root ") {
 			newRoot := "/home/" + username + "/web"
 			if newBasepath != "" {
-				newRoot += "/" + strings.TrimPrefix(newBasepath, "/")
+				newRoot += "/" + cleanBasepath
+			}
+			// Validate final path is under /home/
+			if !strings.HasPrefix(newRoot, "/home/") {
+				return fmt.Errorf("invalid root path: %q", newRoot)
 			}
 			lines[i] = "    root " + newRoot + ";"
 			break
@@ -470,6 +517,32 @@ func UpdateSupervisor(username, script string) error {
 	return run("systemctl", "restart", "supervisor")
 }
 
+func SupervisorCtl(action, process string) (string, error) {
+	var args []string
+	switch action {
+	case "status":
+		args = []string{"supervisorctl", "status"}
+		if process != "" {
+			args = append(args, process)
+		}
+	case "start":
+		args = []string{"supervisorctl", "start", process}
+	case "stop":
+		args = []string{"supervisorctl", "stop", process}
+	case "restart":
+		args = []string{"supervisorctl", "restart", process}
+	case "tail":
+		args = []string{"supervisorctl", "tail", "-f", process}
+	default:
+		return "", fmt.Errorf("unknown supervisorctl action: %s", action)
+	}
+	out, err := exec.Command(args[0], args[1:]...).CombinedOutput()
+	if err != nil {
+		return "", fmt.Errorf("supervisorctl %s: %s", action, strings.TrimSpace(string(out)))
+	}
+	return strings.TrimSpace(string(out)), nil
+}
+
 // ─── PHP CLI ──────────────────────────────────────────────────────────────────
 
 func SetPHPCLI(version string) error {
@@ -562,11 +635,18 @@ func EnablePanelSSL(domain string) error {
 // ─── Node.js ──────────────────────────────────────────────────────────────────
 
 func SetupNodejs(username string, port int, script string) error {
+	// Validate script name to prevent command injection
+	if script == "" || strings.ContainsAny(script, ";&|`$(){}[]!<>#~") {
+		return fmt.Errorf("invalid script name: %q", script)
+	}
+	if strings.Contains(script, "..") || strings.HasPrefix(script, "/") {
+		return fmt.Errorf("script name must be a filename, not a path: %q", script)
+	}
 	// Install PM2 if needed
 	run("npm", "install", "-g", "pm2")
-	// Start app
+	// Start app using exec.Command with separate args (no shell)
 	return run("su", "-", username, "-c",
-		fmt.Sprintf("cd ~/web && pm2 start %s --name %s --watch", script, username))
+		fmt.Sprintf("cd ~/web && pm2 start '%s' --name '%s' --watch", script, username))
 }
 
 func StopNodejs(username string) error {

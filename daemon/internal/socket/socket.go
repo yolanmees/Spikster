@@ -9,6 +9,8 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"bufio"
+	"strings"
 
 	"github.com/yolanmees/spikster/daemon/internal/backup"
 	"github.com/yolanmees/spikster/daemon/internal/email"
@@ -53,8 +55,31 @@ func Start() {
 
 func handle(conn net.Conn) {
 	defer conn.Close()
+
+	// Require token authentication (same as TCP handler)
+	token, err := readDaemonToken()
+	if err != nil {
+		log.Printf("Unix socket auth: cannot read daemon token: %v", err)
+		respond(conn, false, "", "authentication error")
+		return
+	}
+
+	reader := bufio.NewReader(conn)
+	line, err := reader.ReadString('\n')
+	if err != nil {
+		respond(conn, false, "", "authentication required")
+		return
+	}
+
+	line = strings.TrimSpace(line)
+	parts := strings.SplitN(line, " ", 2)
+	if len(parts) != 2 || parts[0] != "TOKEN" || parts[1] != token {
+		respond(conn, false, "", "unauthorized")
+		return
+	}
+
 	var req Request
-	if err := json.NewDecoder(conn).Decode(&req); err != nil {
+	if err := json.NewDecoder(reader).Decode(&req); err != nil {
 		respond(conn, false, "", "invalid request")
 		return
 	}
@@ -185,6 +210,11 @@ func dispatch(req Request) (string, error) {
 		if err != nil { return "", err }
 		return "supervisor updated", nil
 
+	case "server.supervisorctl":
+		out, err := site.SupervisorCtl(req.Params["action"], req.Params["process"])
+		if err != nil { return "", err }
+		return out, nil
+
 	// ── PHP CLI ───────────────────────────────────────────────────────────────
 	case "server.php-cli":
 		err := site.SetPHPCLI(req.Params["version"])
@@ -192,10 +222,27 @@ func dispatch(req Request) (string, error) {
 		return "php cli updated", nil
 
 	// ── Deploy script ─────────────────────────────────────────────────────────
+	case "site.php-settings":
+		s := siteFromParams(req.Params)
+		if err := site.WritePHPPool(s); err != nil {
+			return "", err
+		}
+		if err := site.ReloadPHP(s); err != nil {
+			return "", err
+		}
+		return "php settings updated", nil
+
 	case "site.deploy-script":
 		err := site.WriteDeployScript(req.Params["username"], req.Params["content"])
 		if err != nil { return "", err }
 		return "deploy script updated", nil
+
+	case "site.nginx-config":
+		s := siteFromParams(req.Params)
+		if err := site.WriteCustomNginxConfig(s); err != nil {
+			return "", err
+		}
+		return "nginx config updated", nil
 
 	// ── Spikster password reset ───────────────────────────────────────────────
 	case "server.root-reset":
@@ -254,6 +301,39 @@ func dispatch(req Request) (string, error) {
 		}
 		if err := backup.Restore(r); err != nil { return "", err }
 		return "restored", nil
+
+	case "backup.upload-s3":
+		p := req.Params
+		params := backup.UploadS3Params{
+			FilePath:     p["filepath"],
+			Bucket:       p["bucket"],
+			Region:       p["region"],
+			AccessKey:    p["access_key"],
+			SecretKey:    p["secret_key"],
+			S3Key:        p["s3_key"],
+			Endpoint:     p["endpoint"],
+			StorageClass: p["storage_class"],
+		}
+		if err := backup.UploadToS3(params); err != nil { return "", err }
+		return "uploaded to s3", nil
+
+	case "backup.upload-ftp":
+		p := req.Params
+		params := backup.UploadFTPParams{
+			FilePath:   p["filepath"],
+			FileName:   p["filename"],
+			Host:       p["host"],
+			Port:       p["port"],
+			Username:   p["username"],
+			Password:   p["password"],
+			RemotePath: p["remote_path"],
+			Passive:    true,
+		}
+		if f := p["passive"]; f == "false" || f == "0" {
+			params.Passive = false
+		}
+		if err := backup.UploadToFTP(params); err != nil { return "", err }
+		return "uploaded to ftp", nil
 
 	// ── FTP ───────────────────────────────────────────────────────────────────
 	case "ftp.create":
@@ -411,7 +491,12 @@ func siteFromParams(p map[string]string) site.Site {
 		DBName:   p["db_name"],
 		DBPass:   p["db_pass"],
 		DBRoot:   p["db_root"],
-		PHP:      p["php"],
-		Basepath: p["basepath"],
+		PHP:               p["php"],
+		Basepath:          p["basepath"],
+		NginxConfig:       p["nginx_config"],
+		PHPMemoryLimit:    p["php_memory_limit"],
+		PHPMaxExecTime:    p["php_max_execution_time"],
+		PHPMaxInputVars:   p["php_max_input_vars"],
+		PHPPostMaxSize:    p["php_post_max_size"],
 	}
 }

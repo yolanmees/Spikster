@@ -1,6 +1,6 @@
 module github.com/spikster/agent
 
-go 1.21
+go 1.23.0
 
 require (
 	github.com/shirou/gopsutil/v3 v3.23.12

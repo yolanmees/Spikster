@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/yolanmees/spikster/daemon/internal/installer"
 	"github.com/yolanmees/spikster/daemon/internal/socket"
@@ -80,24 +81,63 @@ func main() {
 func selfUpdate() {
 	fmt.Println("🔄 Checking for updates...")
 
-	tmpBin := "/tmp/spikster-new"
 	currentBin := "/usr/local/bin/spikster"
+	versionURL := "https://github.com/yolanmees/Spikster/releases/latest/download/spikster-linux-amd64"
 
-	steps := []struct {
-		name string
-		args []string
-	}{
-		{"download", []string{"curl", "-fsSL",
-			"https://github.com/yolanmees/Spikster/releases/latest/download/spikster-linux-amd64",
-			"-o", tmpBin}},
-		{"chmod", []string{"chmod", "+x", tmpBin}},
-		{"install", []string{"mv", tmpBin, currentBin}},
+	// Create temp file in a protected location under /etc/spikster
+	if err := os.MkdirAll("/etc/spikster", 0755); err != nil {
+		fmt.Printf("❌ Cannot create /etc/spikster: %v\n", err)
+		os.Exit(1)
 	}
 
-	for _, step := range steps {
-		out, err := exec.Command(step.args[0], step.args[1:]...).CombinedOutput()
-		if err != nil {
-			fmt.Printf("❌ Failed at [%s]: %s\n", step.name, string(out))
+	tmpBin, err := os.CreateTemp("/etc/spikster", "spikster-update-*")
+	if err != nil {
+		fmt.Printf("❌ Cannot create temp file: %v\n", err)
+		os.Exit(1)
+	}
+	tmpPath := tmpBin.Name()
+	tmpBin.Close()
+	defer os.Remove(tmpPath)
+
+	// Download binary
+	out, err := exec.Command("curl", "-fsSL", versionURL, "-o", tmpPath).CombinedOutput()
+	if err != nil {
+		fmt.Printf("❌ Download failed: %s\n", string(out))
+		os.Exit(1)
+	}
+
+	// Download SHA256 checksum
+	checksumURL := versionURL + ".sha256"
+	checksumOut, err := exec.Command("curl", "-fsSL", checksumURL).CombinedOutput()
+	if err == nil {
+		// Verify checksum if available
+		expected := strings.TrimSpace(string(checksumOut))
+		parts := strings.SplitN(expected, " ", 2)
+		if len(parts) >= 1 {
+			expectedHash := parts[0]
+			hashOut, err := exec.Command("sha256sum", tmpPath).CombinedOutput()
+			if err == nil {
+				actualParts := strings.SplitN(strings.TrimSpace(string(hashOut)), " ", 2)
+				if len(actualParts) >= 1 && actualParts[0] != expectedHash {
+					fmt.Printf("❌ Checksum mismatch: expected %s, got %s\n", expectedHash, actualParts[0])
+					os.Exit(1)
+				}
+				fmt.Println("  ✅ Checksum verified")
+			}
+		}
+	}
+
+	// Make it executable
+	if err := os.Chmod(tmpPath, 0755); err != nil {
+		fmt.Printf("❌ Cannot chmod temp binary: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Replace binary atomically
+	if err := os.Rename(tmpPath, currentBin); err != nil {
+		// Fall back to mv if rename across filesystems fails
+		if out, err := exec.Command("mv", tmpPath, currentBin).CombinedOutput(); err != nil {
+			fmt.Printf("❌ Cannot install binary: %s\n", string(out))
 			os.Exit(1)
 		}
 	}

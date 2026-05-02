@@ -9,10 +9,17 @@
         <div class="space-y-4">
             <div>
                 <p class="mb-3 text-sm text-zinc-600 dark:text-zinc-400">Generate or renew SSL certificates and reset service passwords.</p>
-                <button type="button" id="sitessl"
-                    class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-zinc-950 hover:bg-zinc-800 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-100 text-white font-semibold rounded-lg transform hover:scale-105 active:scale-95 transition-all">
-                    Generate SSL
-                </button>
+                <div class="flex items-center gap-2 mb-3">
+                    <button type="button" id="sitessl"
+                        class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-zinc-950 hover:bg-zinc-800 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-100 text-white font-semibold rounded-lg transform hover:scale-105 active:scale-95 transition-all">
+                        Generate SSL
+                    </button>
+                    <button type="button" id="sitecertstatus"
+                        class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 font-semibold rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors">
+                        Check Status
+                    </button>
+                </div>
+                <div id="sslstatus" class="hidden p-3 rounded-lg text-sm border"></div>
             </div>
             <div class="pt-4 border-t border-zinc-200 dark:border-zinc-700">
                 <p class="mb-3 text-sm font-medium text-zinc-700 dark:text-zinc-300">Reset credentials:</p>
@@ -49,4 +56,21 @@
             </button>
         </x-slot>
     </x-site-management-card>
+
+    <x-card size="md" dark="false" class="xl:col-span-2">
+        <x-slot name="header">
+            <div class="flex items-center gap-2">
+                <x-icon icon="check" class="h-5 w-5 text-green-600 dark:text-green-400" />
+                Runtime Health Check
+            </div>
+        </x-slot>
+        <div class="space-y-4">
+            <p class="text-sm text-zinc-600 dark:text-zinc-400">Check if the site's services are running and responding correctly.</p>
+            <button type="button" id="sitehealthcheck"
+                class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-zinc-950 hover:bg-zinc-800 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-100 text-white font-semibold rounded-lg transform hover:scale-105 active:scale-95 transition-all">
+                Run Health Check
+            </button>
+            <div id="healthresults" class="hidden space-y-2"></div>
+        </div>
+    </x-card>
 </div>

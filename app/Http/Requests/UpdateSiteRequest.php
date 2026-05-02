@@ -25,6 +25,11 @@ class UpdateSiteRequest extends FormRequest
         return [
             'domain' => 'sometimes|string|regex:/^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/i',
             'php' => 'sometimes|string|in:7.4,8.0,8.1,8.2,8.3',
+            'php_memory_limit' => 'sometimes|nullable|string|regex:/^\d+[KMG]?$/i',
+            'php_upload_max_filesize' => 'sometimes|nullable|string|regex:/^\d+[KMG]?$/i',
+            'php_max_execution_time' => 'sometimes|nullable|integer|min:10|max:86400',
+            'php_max_input_vars' => 'sometimes|nullable|integer|min:100|max:100000',
+            'php_post_max_size' => 'sometimes|nullable|string|regex:/^\d+[KMG]?$/i',
             'basepath' => 'sometimes|string|max:255',
             'repository' => 'sometimes|nullable|string|url',
             'branch' => 'sometimes|nullable|string|max:100',

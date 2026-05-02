@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Traits\ApiQueryHelper;
 use App\Models\Server;
 use App\Models\Site;
 use App\Services\DaemonService;
@@ -12,6 +13,8 @@ use Illuminate\Support\Facades\Validator;
 
 class SiteController extends Controller
 {
+    use ApiQueryHelper;
+
     public function __construct(
         protected SiteService $siteService,
         protected ServerService $serverService
@@ -19,125 +22,41 @@ class SiteController extends Controller
 
     /**
      * List all sites
-     *
-     * @OA\Get(
-     *      path="/api/sites",
-     *      summary="List all sites",
-     *      tags={"Sites"},
-     *      description="List all sites managed by panel.",
-     *
-     *      @OA\Parameter(
-     *          name="Authorization",
-     *          description="Use Apikey prefix (e.g. Authorization: Apikey XYZ)",
-     *          required=true,
-     *          in="header",
-     *
-     *          @OA\Schema(type="string")
-     *     ),
-     *
-     *     @OA\Response(
-     *          response=200,
-     *          description="Successful request",
-     *
-     *          @OA\JsonContent(
-     *              type="array",
-     *
-     *              @OA\Items(
-     *
-     *                @OA\Property(
-     *                    property="site_id",
-     *                    description="Site unique ID",
-     *                    type="string",
-     *                    example="abc-123-def-456"
-     *                ),
-     *                @OA\Property(
-     *                    property="domain",
-     *                    description="Main site domain",
-     *                    type="string",
-     *                    example="domain.ltd"
-     *                ),
-     *                @OA\Property(
-     *                    property="username",
-     *                    description="Site username",
-     *                    type="string",
-     *                    example="cp123456"
-     *                ),
-     *                @OA\Property(
-     *                    property="server_id",
-     *                    description="Related server unique ID",
-     *                    type="string",
-     *                    example="abc-123-def-456"
-     *                ),
-     *                @OA\Property(
-     *                    property="server_name",
-     *                    description="Related server name",
-     *                    type="string",
-     *                    example="Staging Server",
-     *                ),
-     *                @OA\Property(
-     *                    property="server_ip",
-     *                    description="Related server IP",
-     *                    type="string",
-     *                    example="123.123.123.123",
-     *                ),
-     *                @OA\Property(
-     *                    property="php",
-     *                    description="Site PHP version",
-     *                    type="string",
-     *                    example="7.4"
-     *                ),
-     *                @OA\Property(
-     *                    property="basepath",
-     *                    description="Site basepath",
-     *                    type="string",
-     *                    example="public"
-     *                ),
-     *                @OA\Property(
-     *                    property="aliases",
-     *                    description="The number of aliases of this site",
-     *                    type="integer",
-     *                    example="8"
-     *                ),
-     *              )
-     *          )
-     *      ),
-     *
-     *      @OA\Response(
-     *          response=401,
-     *          description="Unauthorized access error"
-     *      )
-     * )
      */
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('viewAny', Site::class);
 
-        $sites = $this->siteService->getAllSites();
-        $response = [];
+        $query = Site::query()->with('server')->where('panel', false);
 
-        foreach ($sites as $site) {
-            if ($site->isPanel()) {
-                continue; // Skip panel sites
-            }
+        $query = $this->applySorting($query, $request, [
+            'id', 'domain', 'username', 'php', 'created_at', 'updated_at',
+        ]);
 
-            $stats = $this->siteService->getSiteStats($site);
+        $query = $this->applyFilters($query, $request, [
+            'domain' => 'domain.like',
+            'php' => 'php',
+            'server_id' => 'server_id',
+        ]);
 
-            $data = [
-                'site_id' => $site->site_id,
-                'domain' => $site->domain,
-                'username' => $site->username,
-                'server_id' => $site->server->server_id ?? null,
-                'server_name' => $site->server->name,
-                'server_ip' => $stats['server']['ip'] ?? null,
-                'php' => $site->php,
-                'basepath' => $site->basepath,
-                'rootpath' => $site->rootpath,
-                'aliases' => $stats['aliases_count'],
-            ];
-            array_push($response, $data);
-        }
+        return response()->json(
+            $this->paginatedResponse($query, $request, function ($site) {
+                $stats = $this->siteService->getSiteStats($site);
 
-        return response()->json($response);
+                return [
+                    'site_id' => $site->site_id,
+                    'domain' => $site->domain,
+                    'username' => $site->username,
+                    'server_id' => $site->server?->server_id,
+                    'server_name' => $site->server?->name,
+                    'server_ip' => $stats['server']['ip'] ?? null,
+                    'php' => $site->php,
+                    'basepath' => $site->basepath,
+                    'rootpath' => $site->rootpath,
+                    'aliases' => $stats['aliases_count'],
+                ];
+            })
+        );
     }
 
     /**
@@ -641,21 +560,60 @@ class SiteController extends Controller
         }
 
         if ($request->has('basepath')) {
-            if ($site->basepath != strtolower($request->basepath)) {
+            $basepath = strtolower($request->basepath);
+            if ($basepath !== '' && ! str_starts_with($basepath, '/')) {
+                return response()->json([
+                    'message' => 'Invalid basepath.',
+                    'errors' => 'basepath_must_start_with_slash',
+                ], 422);
+            }
+            if (str_contains($basepath, '..')) {
+                return response()->json([
+                    'message' => 'Invalid basepath.',
+                    'errors' => 'basepath_path_traversal',
+                ], 422);
+            }
+            if ($site->basepath != $basepath) {
                 $last_basepath = $site->basepath;
-                $site->basepath = strtolower($request->basepath);
+                $site->basepath = $basepath;
                 $site->save();
                 app(DaemonService::class)->updateSiteBasepath($site->username, $site->basepath);
             }
         }
 
         if ($request->php) {
+            $allowedPhpVersions = config('spikster.phpvers', ['8.4', '8.3', '8.2', '8.1', '8.0', '7.4']);
+            if (! in_array($request->php, $allowedPhpVersions, true)) {
+                return response()->json([
+                    'message' => 'Invalid PHP version.',
+                    'errors' => 'php_version_not_allowed',
+                ], 422);
+            }
             if ($site->php != $request->php) {
                 $last_php = $site->php;
                 $site->php = $request->php;
                 $site->save();
                 app(DaemonService::class)->updateSitePHP($site->username, $last_php, $site->php);
             }
+        }
+
+        $phpSettings = ['php_memory_limit', 'php_upload_max_filesize', 'php_max_execution_time', 'php_max_input_vars', 'php_post_max_size'];
+        $phpChanged = false;
+        foreach ($phpSettings as $key) {
+            if ($request->has($key) && $site->{$key} !== $request->{$key}) {
+                if (! is_string($request->{$key})) {
+                    return response()->json([
+                        'message' => "Invalid value for {$key}.",
+                        'errors' => 'invalid_php_setting',
+                    ], 422);
+                }
+                $site->{$key} = $request->{$key};
+                $phpChanged = true;
+            }
+        }
+        if ($phpChanged) {
+            $site->save();
+            app(DaemonService::class)->updateSitePHPSettings($site->fresh());
         }
 
         if ($request->has('supervisor')) {
@@ -689,6 +647,14 @@ class SiteController extends Controller
                 $site->branch = $request->branch;
                 $site->save();
                 $deploy_patch = true;
+            }
+        }
+
+        if ($request->has('nginx')) {
+            if ($site->nginx != $request->nginx) {
+                $site->nginx = $request->nginx;
+                $site->save();
+                app(DaemonService::class)->updateSiteNginxConfig($site->fresh());
             }
         }
 
@@ -892,6 +858,11 @@ class SiteController extends Controller
             'server_name' => $site->server->name,
             'server_ip' => $site->server->ip,
             'php' => $site->php,
+            'php_memory_limit' => $site->php_memory_limit ?? '256M',
+            'php_upload_max_filesize' => $site->php_upload_max_filesize ?? '256M',
+            'php_max_execution_time' => $site->php_max_execution_time ?? '300',
+            'php_max_input_vars' => $site->php_max_input_vars ?? '3000',
+            'php_post_max_size' => $site->php_post_max_size ?? '256M',
             'node_script' => $site->node_script,
             'node_status' => $site->node_status,
             'basepath' => $site->basepath,
@@ -899,6 +870,7 @@ class SiteController extends Controller
             'branch' => $site->branch,
             'deploy' => $site->deploy,
             'deploy_key' => $site->server->github_key,
+            'nginx' => $site->nginx,
             'supervisor' => $site->supervisor,
             'rootpath' => $site->rootpath,
             'aliases' => count($site->aliases),

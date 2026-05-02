@@ -5,6 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @deprecated Use App\Models\Database instead.
+ *             Legacy model kept for backward compatibility.
+ *             Will be removed in a future release.
+ */
 class Userdatabase extends Model
 {
     use HasFactory;

@@ -108,7 +108,7 @@ class Server extends Model
      */
     public function metrics(): HasMany
     {
-        return $this->hasMany(ServerMetric::class, 'server_id', 'id');
+        return $this->hasMany(ServerMetric::class, 'server_id', 'server_id');
     }
 
     /**

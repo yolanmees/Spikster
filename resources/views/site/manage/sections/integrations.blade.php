@@ -46,3 +46,9 @@
         </x-slot>
     </x-site-management-card>
 </div>
+
+<div class="xl:col-span-2">
+    <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6">
+        @livewire('site.supervisor-manager', ['siteId' => $site_id], key('supervisor-' . $site_id))
+    </div>
+</div>

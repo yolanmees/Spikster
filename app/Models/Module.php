@@ -173,4 +173,35 @@ class Module extends Model
     {
         return $query->orderBy('priority')->orderBy('name');
     }
+
+    /**
+     * Check if this module version is compatible with a given panel version.
+     * Uses semver constraints stored in metadata.panel_version_constraint.
+     */
+    public function isCompatibleWith(string $panelVersion): bool
+    {
+        $constraint = $this->metadata['panel_version_constraint'] ?? '^'.$this->version;
+
+        return version_compare($panelVersion, ltrim($constraint, '^'), '>=');
+    }
+
+    /**
+     * Get the compatible panel version range for this module.
+     */
+    public function getCompatibilityRangeAttribute(): string
+    {
+        return $this->metadata['panel_version_constraint'] ?? "^{$this->version}";
+    }
+
+    /**
+     * Scope to modules compatible with a given panel version.
+     */
+    public function scopeCompatibleWith($query, string $panelVersion)
+    {
+        return $query->where(function ($q) use ($panelVersion) {
+            // Modules without a constraint are assumed compatible
+            $q->whereNull('metadata->panel_version_constraint')
+              ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.panel_version_constraint')) IS NULL");
+        });
+    }
 }

@@ -11,6 +11,7 @@ use App\Jobs\Email\DeleteForwarderSSH;
 use App\Jobs\Email\InstallRoundcubeSSH;
 use App\Jobs\Email\SetupDKIMSSH;
 use App\Jobs\Email\UpdateAutoResponderSSH;
+use App\Jobs\Email\UpdateEmailFiltersSSH;
 use App\Jobs\Email\UpdateEmailPasswordSSH;
 use App\Jobs\Email\UpdateEmailQuotaSSH;
 use App\Models\EmailAccount;
@@ -103,9 +104,19 @@ class EmailService
             UpdateEmailQuotaSSH::dispatch($account->site->server, $account);
         }
 
+        // Propagate antispam/antivirus changes to the server
+        $filterFields = ['spam_filter', 'spam_score', 'antivirus'];
+        $filterChanged = collect($filterFields)->contains(
+            fn ($field) => isset($data[$field]) && $data[$field] != $account->$field
+        );
+
         // Update other settings
         $account->fill($data);
         $account->save();
+
+        if ($filterChanged) {
+            UpdateEmailFiltersSSH::dispatch($account->site->server, $account);
+        }
 
         return $account;
     }
@@ -254,7 +265,7 @@ class EmailService
      */
     public function generateSPFRecord(Site $site, array $config = []): string
     {
-        $ipAddresses = $config['ip_addresses'] ?? [$site->server->ip];
+        $ipAddresses = $config['ip_addresses'] ?? array_filter([$site->server?->ip]);
         $includeDomains = $config['include_domains'] ?? [];
         $policy = $config['policy'] ?? '~all';
 

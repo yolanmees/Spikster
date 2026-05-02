@@ -1,6 +1,7 @@
 package socket
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"net"
@@ -49,10 +50,32 @@ func handleTCP(conn net.Conn) {
 		conn.Close()
 		return
 	}
-	handle(conn)
+	handleWithReader(conn)
+}
+
+// handleWithReader processes a JSON command using a buffered reader
+// that preserves any data already read during authentication.
+func handleWithReader(conn net.Conn) {
+	defer conn.Close()
+
+	var req Request
+	if err := json.NewDecoder(conn).Decode(&req); err != nil {
+		respond(conn, false, "", "invalid request")
+		return
+	}
+	output, err := dispatch(req)
+	if err != nil {
+		auditLog(req.Action, false, err.Error())
+		respond(conn, false, output, err.Error())
+		return
+	}
+	auditLog(req.Action, true, "")
+	respond(conn, true, output, "")
 }
 
 // authenticateTCP reads and validates the daemon token from the connection.
+// Uses bufio.Reader to avoid consuming pipelined JSON data (fix for protocol bug
+// where raw conn.Read could read token + part of the JSON body in one call).
 // The client must send "TOKEN <value>\n" as the very first line.
 func authenticateTCP(conn net.Conn) bool {
 	token, err := readDaemonToken()
@@ -61,13 +84,13 @@ func authenticateTCP(conn net.Conn) bool {
 		return false
 	}
 
-	buf := make([]byte, 256)
-	n, err := conn.Read(buf)
-	if err != nil || n == 0 {
+	reader := bufio.NewReader(conn)
+	line, err := reader.ReadString('\n')
+	if err != nil {
 		return false
 	}
 
-	line := strings.TrimSpace(string(buf[:n]))
+	line = strings.TrimSpace(line)
 	parts := strings.SplitN(line, " ", 2)
 	if len(parts) != 2 || parts[0] != "TOKEN" {
 		return false

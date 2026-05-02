@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\Api\DatabaseMetricsController;
 use App\Http\Controllers\Api\DeployController;
 use App\Http\Controllers\Api\LogManagerController;
 use App\Http\Controllers\Api\ModuleController;
+use App\Http\Controllers\Api\SiteHealthController;
 use App\Http\Controllers\Api\TwoFactorAuthController;
 use App\Http\Controllers\Api\WebhookController;
 use App\Http\Controllers\AuthController;
@@ -18,6 +20,8 @@ use App\Http\Controllers\ServerController;
 use App\Http\Controllers\ServerMetricsController;
 use App\Http\Controllers\Site\AliasController;
 use App\Http\Controllers\Site\CredentialController;
+use App\Http\Controllers\Site\MailQueueController;
+use App\Http\Controllers\Site\MailStatusController;
 use App\Http\Controllers\Site\SshKeyController;
 use App\Http\Controllers\SiteController;
 use Illuminate\Support\Facades\Route;
@@ -109,6 +113,9 @@ Route::middleware(['api.unified-auth'])->group(function () {
     Route::post('/sites/{site_id}/aliases', [AliasController::class, 'store']);
     Route::delete('/sites/{site_id}/aliases/{alias_id}', [AliasController::class, 'destroy']);
 
+    // Site Health
+    Route::get('/sites/{site_id}/health', [SiteHealthController::class, 'check']);
+
     // Deployments
     Route::post('/sites/{site_id}/deploy', [DeployController::class, 'deploy'])->middleware('idempotency');
     Route::get('/sites/{site_id}/deployments', [DeployController::class, 'history']);
@@ -139,6 +146,11 @@ Route::middleware(['api.unified-auth'])->group(function () {
 
     Route::post('/sites/{site_id}/email/webmail/install', [EmailController::class, 'installWebmail']);
     Route::post('/sites/{site_id}/email/accounts/{account_id}/webmail', [EmailController::class, 'getWebmailUrl']);
+    Route::get('/sites/{site_id}/email/status', [MailStatusController::class, 'status']);
+    Route::get('/sites/{site_id}/email/queue', [MailQueueController::class, 'index']);
+    Route::post('/sites/{site_id}/email/queue/{queue_id}/retry', [MailQueueController::class, 'retry']);
+    Route::delete('/sites/{site_id}/email/queue/{queue_id}', [MailQueueController::class, 'destroy']);
+    Route::get('/sites/{site_id}/email/logs', [MailQueueController::class, 'logs']);
 
 }); // end auth:sanctum
 
@@ -151,6 +163,7 @@ Route::middleware(['api.unified-auth'])->group(function () {
     Route::post('/createdatab', [DatabaseController::class, 'createDatabase'])->name('createdatab');
     Route::post('/createuser', [DatabaseController::class, 'createUser'])->name('createUser');
     Route::post('/linkdatabuser', [DatabaseController::class, 'linkDatabaseUser'])->name('linkdatabuser');
+    Route::get('/sites/{site_id}/databases/metrics', [DatabaseMetricsController::class, 'metrics']);
 });
 
 // File manager routes are defined in web.php (behind auth:sanctum)

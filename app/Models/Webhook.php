@@ -13,9 +13,14 @@ class Webhook extends Model
         'is_active', 'last_sent_at', 'last_response_code', 'failure_count',
     ];
 
+    protected $hidden = [
+        'secret',
+    ];
+
     protected $casts = [
         'events' => 'array',
         'is_active' => 'boolean',
+        'secret' => 'encrypted',
         'last_sent_at' => 'datetime',
     ];
 

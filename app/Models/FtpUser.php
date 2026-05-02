@@ -66,12 +66,12 @@ class FtpUser extends Model
      */
     public function site(): BelongsTo
     {
-        return $this->belongsTo(Site::class, 'site_id');
+        return $this->belongsTo(Site::class, 'site_id', 'site_id');
     }
 
     public function server(): BelongsTo
     {
-        return $this->belongsTo(Server::class, 'server_id');
+        return $this->belongsTo(Server::class, 'server_id', 'server_id');
     }
 
     /**

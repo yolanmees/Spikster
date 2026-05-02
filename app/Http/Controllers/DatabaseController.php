@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Database;
 use App\Models\DatabaseUser;
+use App\Models\Site;
 use App\Services\DatabaseService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,6 +21,8 @@ class DatabaseController extends Controller
 
     public function index($siteId): View
     {
+        $site = Site::where('site_id', $siteId)->firstOrFail();
+        $this->authorize('manageDatabases', $site);
         $databases = Database::with('users')->where('site_id', $siteId)->get();
         $databaseUsers = DatabaseUser::where('site_id', $siteId)->get();
 
@@ -28,6 +31,8 @@ class DatabaseController extends Controller
 
     public function createDatabase(Request $request, $siteId): RedirectResponse
     {
+        $site = Site::where('site_id', $siteId)->firstOrFail();
+        $this->authorize('manageDatabases', $site);
         $request->validate([
             'database_name' => ['required', 'string', 'max:64', 'regex:/^[a-zA-Z][a-zA-Z0-9_]{1,63}$/'],
         ]);
@@ -41,6 +46,8 @@ class DatabaseController extends Controller
 
     public function createUser(Request $request, $siteId): RedirectResponse
     {
+        $site = Site::where('site_id', $siteId)->firstOrFail();
+        $this->authorize('manageDatabases', $site);
         $request->validate([
             'username' => ['required', 'string', 'max:64', 'regex:/^[a-zA-Z][a-zA-Z0-9_]{1,63}$/'],
             'password' => ['required', 'string', 'min:8'],
@@ -59,6 +66,8 @@ class DatabaseController extends Controller
 
     public function linkDatabaseUser(Request $request, $siteId): RedirectResponse
     {
+        $site = Site::where('site_id', $siteId)->firstOrFail();
+        $this->authorize('manageDatabases', $site);
         $request->validate([
             'username' => ['required', 'integer'],
             'database' => ['required', 'integer'],
@@ -77,6 +86,8 @@ class DatabaseController extends Controller
 
     public function deleteDatabase(Request $request, $siteId): RedirectResponse
     {
+        $site = Site::where('site_id', $siteId)->firstOrFail();
+        $this->authorize('manageDatabases', $site);
         $request->validate(['database_id' => ['required', 'integer']]);
 
         $response = $this->databaseService->deleteDatabase($request->input('database_id'), $siteId);
@@ -88,6 +99,8 @@ class DatabaseController extends Controller
 
     public function deleteUser(Request $request, $siteId): RedirectResponse
     {
+        $site = Site::where('site_id', $siteId)->firstOrFail();
+        $this->authorize('manageDatabases', $site);
         $request->validate(['user_id' => ['required', 'integer']]);
 
         $response = $this->databaseService->deleteUser($request->input('user_id'), $siteId);
@@ -99,6 +112,8 @@ class DatabaseController extends Controller
 
     public function deleteLink(Request $request, $siteId): RedirectResponse
     {
+        $site = Site::where('site_id', $siteId)->firstOrFail();
+        $this->authorize('manageDatabases', $site);
         $request->validate(['link_id' => ['required', 'integer']]);
 
         $response = $this->databaseService->unlinkDatabaseUser($request->input('link_id'), $siteId);

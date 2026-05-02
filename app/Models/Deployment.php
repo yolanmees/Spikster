@@ -39,7 +39,7 @@ class Deployment extends Model
 
     public function server(): BelongsTo
     {
-        return $this->belongsTo(Server::class, 'server_id', 'server_id');
+        return $this->belongsTo(Server::class);
     }
 
     public function user(): BelongsTo

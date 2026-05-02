@@ -51,7 +51,7 @@ class BackupController extends Controller
     public function index(string $siteId): JsonResponse
     {
         $site = Site::where('site_id', $siteId)->firstOrFail();
-        $this->authorize('backup.view');
+        $this->authorize('manageBackups', $site);
 
         $backups = Backup::where('site_id', $site->site_id)
             ->with(['backupSchedule', 'server'])
@@ -94,7 +94,7 @@ class BackupController extends Controller
     public function createFullBackup(Request $request, string $siteId): JsonResponse
     {
         $site = Site::where('site_id', $siteId)->firstOrFail();
-        $this->authorize('backup.create');
+        $this->authorize('manageBackups', $site);
 
         $validator = Validator::make($request->all(), [
             'include_database' => 'boolean',
@@ -137,7 +137,7 @@ class BackupController extends Controller
     public function createIncrementalBackup(Request $request, string $siteId): JsonResponse
     {
         $site = Site::where('site_id', $siteId)->firstOrFail();
-        $this->authorize('backup.create');
+        $this->authorize('manageBackups', $site);
 
         $backup = $this->backupService->createIncrementalBackup($site, $request->all());
 
@@ -167,7 +167,7 @@ class BackupController extends Controller
     public function createDatabaseBackup(Request $request, string $siteId): JsonResponse
     {
         $site = Site::where('site_id', $siteId)->firstOrFail();
-        $this->authorize('backup.create');
+        $this->authorize('manageBackups', $site);
 
         $backup = $this->backupService->createDatabaseBackup($site, $request->all());
 
@@ -205,7 +205,8 @@ class BackupController extends Controller
      */
     public function show(string $siteId, string $backupId): JsonResponse
     {
-        $this->authorize('backup.view');
+        $site = Site::where('site_id', $siteId)->firstOrFail();
+        $this->authorize('manageBackups', $site);
         $backup = Backup::where('site_id', $siteId)
             ->with(['site', 'server', 'backupSchedule'])
             ->findOrFail($backupId);
@@ -252,7 +253,8 @@ class BackupController extends Controller
      */
     public function restore(Request $request, string $siteId, string $backupId): JsonResponse
     {
-        $this->authorize('backup.restore');
+        $site = Site::where('site_id', $siteId)->firstOrFail();
+        $this->authorize('manageBackups', $site);
         $backup = Backup::where('site_id', $siteId)->findOrFail($backupId);
 
         $validator = Validator::make($request->all(), [
@@ -306,7 +308,8 @@ class BackupController extends Controller
      */
     public function download(string $siteId, string $backupId): JsonResponse
     {
-        $this->authorize('backup.view');
+        $site = Site::where('site_id', $siteId)->firstOrFail();
+        $this->authorize('manageBackups', $site);
         $backup = Backup::where('site_id', $siteId)->findOrFail($backupId);
 
         $filepath = $this->backupService->downloadBackup($backup);
@@ -361,7 +364,8 @@ class BackupController extends Controller
      */
     public function destroy(Request $request, string $siteId, string $backupId): JsonResponse
     {
-        $this->authorize('backup.delete');
+        $site = Site::where('site_id', $siteId)->firstOrFail();
+        $this->authorize('manageBackups', $site);
         $backup = Backup::where('site_id', $siteId)->findOrFail($backupId);
 
         $deleteFile = $request->boolean('delete_file', false);
@@ -392,7 +396,7 @@ class BackupController extends Controller
     public function stats(string $siteId): JsonResponse
     {
         $site = Site::where('site_id', $siteId)->firstOrFail();
-        $this->authorize('backup.view');
+        $this->authorize('manageBackups', $site);
 
         $stats = $this->backupService->getBackupStats($site);
 
@@ -423,7 +427,7 @@ class BackupController extends Controller
     public function listSchedules(string $siteId): JsonResponse
     {
         $site = Site::where('site_id', $siteId)->firstOrFail();
-        $this->authorize('backup.view');
+        $this->authorize('manageBackups', $site);
 
         $schedules = BackupSchedule::where('site_id', $site->site_id)
             ->with('backups')
@@ -475,7 +479,7 @@ class BackupController extends Controller
     public function createSchedule(Request $request, string $siteId): JsonResponse
     {
         $site = Site::where('site_id', $siteId)->firstOrFail();
-        $this->authorize('backup.configure');
+        $this->authorize('manageBackups', $site);
 
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
@@ -532,7 +536,8 @@ class BackupController extends Controller
      */
     public function updateSchedule(Request $request, string $siteId, string $scheduleId): JsonResponse
     {
-        $this->authorize('backup.configure');
+        $site = Site::where('site_id', $siteId)->firstOrFail();
+        $this->authorize('manageBackups', $site);
         $schedule = BackupSchedule::where('site_id', $siteId)->findOrFail($scheduleId);
 
         $validator = Validator::make($request->all(), [
@@ -582,7 +587,8 @@ class BackupController extends Controller
      */
     public function deleteSchedule(Request $request, string $siteId, string $scheduleId): JsonResponse
     {
-        $this->authorize('backup.configure');
+        $site = Site::where('site_id', $siteId)->firstOrFail();
+        $this->authorize('manageBackups', $site);
         $schedule = BackupSchedule::where('site_id', $siteId)->findOrFail($scheduleId);
 
         $deleteBackups = $request->boolean('delete_backups', false);
@@ -609,7 +615,7 @@ class BackupController extends Controller
     public function listStorageLocations(): JsonResponse
     {
         $this->authorize('backup.view');
-        $locations = BackupStorageLocation::active()->get();
+        $locations = BackupStorageLocation::active()->where('user_id', auth()->id())->get();
 
         return response()->json($locations);
     }
@@ -641,6 +647,7 @@ class BackupController extends Controller
     public function createStorageLocation(Request $request): JsonResponse
     {
         $this->authorize('backup.configure');
+        $request->merge(['user_id' => auth()->id()]);
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'type' => 'required|in:local,s3,ftp,sftp',
@@ -681,7 +688,7 @@ class BackupController extends Controller
     public function testStorageConnection(string $locationId): JsonResponse
     {
         $this->authorize('backup.configure');
-        $location = BackupStorageLocation::findOrFail($locationId);
+        $location = BackupStorageLocation::where('user_id', auth()->id())->findOrFail($locationId);
 
         $success = $this->backupService->testStorageConnection($location);
 
@@ -714,7 +721,7 @@ class BackupController extends Controller
     public function deleteStorageLocation(string $locationId): JsonResponse
     {
         $this->authorize('backup.configure');
-        $location = BackupStorageLocation::findOrFail($locationId);
+        $location = BackupStorageLocation::where('user_id', auth()->id())->findOrFail($locationId);
 
         $success = $this->backupService->deleteStorageLocation($location);
 

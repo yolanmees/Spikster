@@ -5,10 +5,73 @@ namespace App\Services;
 use App\Models\Module;
 use App\Models\ModuleDependency;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Nwidart\Modules\Facades\Module as ModuleFacade;
 
 class ModuleRegistry
 {
+    /**
+     * Verify a module's cryptographic signature.
+     *
+     * Modules can be signed with a private key. The signature is stored in the
+     * module.json file as a "signature" field. This method verifies it against
+     * the configured public key.
+     *
+     * If no public key is configured, unsigned modules are allowed with a warning.
+     * If a public key is configured, unsigned modules are rejected.
+     */
+    public function verifySignature(string $modulePath): bool
+    {
+        $publicKey = config('modules.signing_public_key');
+
+        if (empty($publicKey)) {
+            // No signing key configured — allow unsigned modules but log a warning
+            Log::warning('Module signing is not configured. All modules are allowed without signature verification.');
+
+            return true;
+        }
+
+        $jsonPath = $modulePath.'/module.json';
+
+        if (! File::exists($jsonPath)) {
+            return false;
+        }
+
+        $moduleJson = json_decode(File::get($jsonPath), true);
+
+        if (! isset($moduleJson['signature'])) {
+            Log::warning('Unsigned module detected at: '.$modulePath);
+
+            return false;
+        }
+
+        $signature = base64_decode($moduleJson['signature']);
+        $payload = $this->getSignablePayload($moduleJson);
+
+        $result = openssl_verify($payload, $signature, $publicKey, OPENSSL_ALGO_SHA256);
+
+        if (! $result) {
+            Log::error('Module signature verification failed at: '.$modulePath);
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Get the payload to sign from module.json.
+     * Excludes the signature field itself and any metadata.
+     */
+    protected function getSignablePayload(array $moduleJson): string
+    {
+        $fields = array_diff_key($moduleJson, array_flip(['signature', 'metadata']));
+        ksort($fields);
+
+        return json_encode($fields, JSON_UNESCAPED_SLASHES);
+    }
+
+    public function discover(): array
     public function discover(): array
     {
         $discovered = [];
@@ -33,10 +96,16 @@ class ModuleRegistry
             throw new \Exception("Module {$alias} not found in filesystem");
         }
 
-        $moduleJson = $this->getModuleJson($nwidartModule->getPath());
+        $modulePath = $nwidartModule->getPath();
+        $moduleJson = $this->getModuleJson($modulePath);
 
         if (! $moduleJson) {
             throw new \Exception("Module {$alias} has no valid module.json");
+        }
+
+        // Verify module signature if signing is enabled
+        if (! $this->verifySignature($modulePath)) {
+            throw new \Exception("Module {$alias} failed signature verification. The module may be tampered with or unsigned.");
         }
 
         $module = Module::updateOrCreate(

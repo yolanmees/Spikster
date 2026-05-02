@@ -62,4 +62,7 @@ EXPOSE 80
 
 HEALTHCHECK CMD curl -f http://localhost/up || exit 1
 
+# Switch to non-root user after setup (nginx binds to port 80 as root then drops privileges)
+USER www-data
+
 CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]

@@ -75,7 +75,18 @@ func Restore(r RestoreRequest) error {
 		return err
 	}
 
-	// Extract outer archive
+	// Extract outer archive with path sanitization
+	// List archive contents first to check for path traversal
+	listOut, listErr := exec.Command("tar", "-tzf", r.ArchivePath).CombinedOutput()
+	if listErr != nil {
+		return fmt.Errorf("list archive: %w", listErr)
+	}
+	for _, entry := range strings.Split(strings.TrimSpace(string(listOut)), "\n") {
+		if strings.Contains(entry, "..") || strings.HasPrefix(entry, "/") {
+			return fmt.Errorf("archive contains unsafe path: %q", entry)
+		}
+	}
+
 	if err := run("tar", "-xzf", r.ArchivePath, "-C", restoreDir); err != nil {
 		return fmt.Errorf("extract archive: %w", err)
 	}
@@ -205,6 +216,60 @@ func run(args ...string) error {
 	out, err := exec.Command(args[0], args[1:]...).CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("%s: %s", args[0], strings.TrimSpace(string(out)))
+	}
+	return nil
+}
+
+// ─── Upload helpers ─────────────────────────────────────────────────────────
+
+type UploadS3Params struct {
+	FilePath     string
+	Bucket       string
+	Region       string
+	AccessKey    string
+	SecretKey    string
+	S3Key        string
+	Endpoint     string
+	StorageClass string
+}
+
+func UploadToS3(p UploadS3Params) error {
+	// Set AWS credentials via env (never CLI args)
+	cmd := exec.Command("aws", "s3", "cp", p.FilePath, "s3://"+p.Bucket+"/"+p.S3Key)
+	cmd.Env = append(os.Environ(),
+		"AWS_ACCESS_KEY_ID="+p.AccessKey,
+		"AWS_SECRET_ACCESS_KEY="+p.SecretKey,
+		"AWS_DEFAULT_REGION="+p.Region,
+	)
+	if p.Endpoint != "" {
+		cmd.Env = append(cmd.Env, "AWS_ENDPOINT_URL="+p.Endpoint)
+	}
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("s3 upload: %w", err)
+	}
+	return nil
+}
+
+type UploadFTPParams struct {
+	FilePath   string
+	FileName   string
+	Host       string
+	Port       string
+	Username   string
+	Password   string
+	RemotePath string
+	Passive    bool
+}
+
+func UploadToFTP(p UploadFTPParams) error {
+	passiveFlag := ""
+	if p.Passive {
+		passiveFlag = "--ssl"
+	}
+	url := fmt.Sprintf("ftp://%s:%s@%s:%s%s/%s", p.Username, p.Password, p.Host, p.Port, p.RemotePath, p.FileName)
+	cmd := exec.Command("curl", "-s", "-S", "-T", p.FilePath, passiveFlag, url)
+	if out, err := cmd.CombinedOutput(); err != nil {
+		return fmt.Errorf("ftp upload: %s: %w", strings.TrimSpace(string(out)), err)
 	}
 	return nil
 }

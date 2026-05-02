@@ -202,6 +202,11 @@
                 val('currentdomain', data.domain);
                 val('server_id', data.server_id);
                 val('sitesupervisor', data.supervisor);
+                val('phpmemorylimit', data.php_memory_limit || '');
+                val('phpuploadmaxsize', data.php_upload_max_filesize || '');
+                val('phpmaxexectime', data.php_max_execution_time || '');
+                val('phpmaxinputvars', data.php_max_input_vars || '');
+                val('phppostmaxsize', data.php_post_max_size || '');
                 html('deploykey', data.deploy_key);
                 html('repodeployinfouser1', data.username);
                 html('repodeployinfouser2', data.username);
@@ -209,6 +214,7 @@
                 val('repositoryproject', data.repository);
                 val('repositorybranch', data.branch);
                 if (typeof deploy !== 'undefined') deploy.session.setValue(data.deploy || '');
+                if (typeof nginxEditor !== 'undefined') nginxEditor.session.setValue(data.nginx || '');
                 if (data.server_id) api('/api/servers/' + data.server_id + '/domains');
                 const phpSel = el('sitephpver');
                 if (phpSel) {
@@ -259,6 +265,34 @@
             api('/api/sites/' + SITE_ID + '/ssl', 'POST').then(() => hide('sitesslloading'));
         });
 
+        on('sitecertstatus', 'click', () => {
+            const statusDiv = el('sslstatus');
+            statusDiv.classList.remove('hidden');
+            statusDiv.className = 'p-3 rounded-lg text-sm border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900';
+            statusDiv.innerHTML = 'Checking certificate...';
+            api('/api/sites/' + SITE_ID + '/health').then(data => {
+                if (data.checks) {
+                    const httpCheck = data.checks.find(c => c.check === 'HTTP Endpoint');
+                    if (httpCheck) {
+                        const isHttps = httpCheck.detail.includes('responded');
+                        const hasSsl = httpCheck.detail.includes('200') || httpCheck.detail.includes('301');
+                        if (hasSsl) {
+                            statusDiv.className = 'p-3 rounded-lg text-sm border border-green-200 dark:border-green-700/50 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300';
+                            statusDiv.innerHTML = '<strong>✓ Certificate active</strong><br>' + httpCheck.detail;
+                        } else {
+                            statusDiv.className = 'p-3 rounded-lg text-sm border border-amber-200 dark:border-amber-700/50 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300';
+                            statusDiv.innerHTML = '<strong>⚠ No SSL detected</strong><br>' + httpCheck.detail;
+                        }
+                    } else {
+                        statusDiv.innerHTML = 'No health data available.';
+                    }
+                }
+            }).catch(() => {
+                statusDiv.className = 'p-3 rounded-lg text-sm border border-red-200 dark:border-red-700/50 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300';
+                statusDiv.innerHTML = '<strong>✗ Could not check certificate</strong><br>Site may not be reachable.';
+            });
+        });
+
         // Repository
         on('sitesetrepo', 'click', () => window.dispatchEvent(new CustomEvent('open-modal', { detail: 'repository-modal' })));
         on('repositorysubmit', 'click', () => {
@@ -273,18 +307,29 @@
             });
         });
 
+        // Nginx config
+        on('sitenginxsubmit', 'click', () => {
+            api('/api/sites/' + SITE_ID, 'PATCH', {
+                nginx: typeof nginxEditor !== 'undefined' ? nginxEditor.getSession().getValue() : '',
+            }).then(() => { siteInit(); });
+        });
+
         // Copy deploy key
         on('copykey', 'click', () => {
             const key = el('deploykey');
             if (key) navigator.clipboard?.writeText(key.innerText) || (key.select?.(), document.execCommand('copy'));
         });
 
-        // Deploy editor (ace)
-        let deploy;
+        // Config editors (ace)
+        let deploy, nginxEditor;
         if (typeof ace !== 'undefined') {
             deploy = ace.edit('deploy');
             deploy.setTheme('ace/theme/monokai');
             deploy.session.setMode('ace/mode/sh');
+
+            nginxEditor = ace.edit('nginxeditor');
+            nginxEditor.setTheme('ace/theme/monokai');
+            nginxEditor.session.setMode('ace/mode/nginx');
         }
 
         on('editdeploy', 'click', () => window.dispatchEvent(new CustomEvent('open-modal', { detail: 'deploy-modal' })));
@@ -358,6 +403,45 @@
                 hide('sitesupervisorupdateloading');
                 siteInit();
             });
+        });
+
+        // Health Check
+        on('sitehealthcheck', 'click', () => {
+            const btn = el('sitehealthcheck');
+            const results = el('healthresults');
+            btn.disabled = true;
+            btn.textContent = 'Checking...';
+            results.classList.add('hidden');
+            api('/api/sites/' + SITE_ID + '/health').then(data => {
+                btn.disabled = false;
+                btn.textContent = 'Run Health Check';
+                if (data.checks) {
+                    results.innerHTML = data.checks.map(c =>
+                        '<div class="flex items-center gap-3 p-3 rounded-lg ' +
+                        (c.status === 'pass' ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700/50' :
+                        c.status === 'warn' ? 'bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50' :
+                        'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700/50') + '">' +
+                        '<span class="text-lg">' + (c.status === 'pass' ? '✓' : c.status === 'warn' ? '⚠' : '✗') + '</span>' +
+                        '<div><p class="text-sm font-medium text-zinc-900 dark:text-white">' + c.check + '</p>' +
+                        '<p class="text-xs text-zinc-500 dark:text-zinc-400">' + c.detail + '</p></div></div>'
+                    ).join('');
+                    results.classList.remove('hidden');
+                }
+            }).catch(() => {
+                btn.disabled = false;
+                btn.textContent = 'Run Health Check';
+            });
+        });
+
+        // PHP Settings
+        on('sitephpsettings', 'click', () => {
+            api('/api/sites/' + SITE_ID, 'PATCH', {
+                php_memory_limit: el('phpmemorylimit')?.value || null,
+                php_upload_max_filesize: el('phpuploadmaxsize')?.value || null,
+                php_max_execution_time: el('phpmaxexectime')?.value || null,
+                php_max_input_vars: el('phpmaxinputvars')?.value || null,
+                php_post_max_size: el('phppostmaxsize')?.value || null,
+            }).then(() => { siteInit(); });
         });
 
         // Basic info

@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Services\DaemonService;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
@@ -18,6 +19,8 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        Paginator::useTailwind();
+
         Livewire::setScriptRoute(function ($handle) {
             return Route::get('/vendor/livewire/livewire.js', $handle);
         });

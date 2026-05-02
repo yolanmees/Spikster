@@ -14,6 +14,14 @@ class DatabaseUser extends Model
         'password',
     ];
 
+    protected $hidden = [
+        'password',
+    ];
+
+    protected $casts = [
+        'password' => 'encrypted',
+    ];
+
     public function databases()
     {
         return $this->belongsToMany(Database::class, 'database_user_links', 'database_user_id', 'database_id');

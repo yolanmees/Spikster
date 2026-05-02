@@ -51,7 +51,7 @@
                             <h4 class="font-semibold text-gray-900 dark:text-white">Incoming Mail Server (IMAP)</h4>
                             <dl class="space-y-1 text-sm divide-y divide-gray-100 dark:divide-gray-700">
                                 @foreach ([
-                                    ['Server',   $site->server->ip],
+                                    ['Server',   $site->server?->ip ?? 'N/A'],
                                     ['Port',     '993 (SSL/TLS)'],
                                     ['Security', 'SSL/TLS'],
                                 ] as [$label, $value])
@@ -67,7 +67,7 @@
                             <h4 class="font-semibold text-gray-900 dark:text-white">Outgoing Mail Server (SMTP)</h4>
                             <dl class="space-y-1 text-sm divide-y divide-gray-100 dark:divide-gray-700">
                                 @foreach ([
-                                    ['Server',         $site->server->ip],
+                                    ['Server',         $site->server?->ip ?? 'N/A'],
                                     ['Port',           '587 (STARTTLS) / 465 (SSL/TLS)'],
                                     ['Security',       'STARTTLS or SSL/TLS'],
                                     ['Authentication', 'Required'],

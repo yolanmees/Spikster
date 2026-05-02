@@ -55,9 +55,9 @@ class SiteService
      */
     public function createSite(array $data): Site
     {
-        // Get server instance - use server_id from data
+        // Get server instance - lookup by UUID string server_id
         $serverId = $data['server_id'];
-        $server = Server::findOrFail($serverId);
+        $server = Server::where('server_id', $serverId)->firstOrFail();
 
         // Ensure server_id is set correctly as the internal database ID
         $data['server_id'] = $server->id;

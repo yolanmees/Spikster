@@ -52,6 +52,11 @@ class Site extends Model
         'repository',
         'branch',
         'php',
+        'php_memory_limit',
+        'php_upload_max_filesize',
+        'php_max_execution_time',
+        'php_max_input_vars',
+        'php_post_max_size',
         'supervisor',
         'nginx',
         'deploy',
@@ -79,6 +84,8 @@ class Site extends Model
     protected $casts = [
         'panel' => 'boolean',
         'server_id' => 'integer',
+        'password' => 'encrypted',
+        'database' => 'encrypted',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -88,6 +95,14 @@ class Site extends Model
      *
      * @return BelongsTo<Server, Site>
      */
+    /**
+     * Use site_id (UUID) as the route model binding key.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'site_id';
+    }
+
     public function server(): BelongsTo
     {
         return $this->belongsTo(Server::class);
@@ -139,6 +154,16 @@ class Site extends Model
     public function emailAccounts(): HasMany
     {
         return $this->hasMany(EmailAccount::class);
+    }
+
+    public function emailForwarders(): HasMany
+    {
+        return $this->hasMany(EmailForwarder::class);
+    }
+
+    public function emailDkimKeys(): HasMany
+    {
+        return $this->hasMany(EmailDkimKey::class);
     }
 
     /**

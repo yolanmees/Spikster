@@ -93,25 +93,15 @@ class SecurityHelper
     }
 
     /**
-     * Sanitize a user-supplied VALUE for safe inclusion in an SSH command.
+     * Sanitize a user-supplied VALUE for safe inclusion in a shell command.
      *
-     * Use this only for user-controlled string fragments (e.g. usernames, domains)
-     * that get embedded inside a command string. Do NOT run entire command strings
-     * through this — it will break pipes, redirections, awk $N references, etc.
-     *
-     * For user input that should be treated as a literal shell argument, prefer
-     * wrapping with escapeshellarg() instead.
+     * @deprecated Use escapeshellarg() for individual arguments or PHP's proc_open()
+     *             with an argument array for full commands. This method provides
+     *             no real security — callers must use proper shell escaping instead.
      */
     public static function sanitizeSshCommand(string $command): string
     {
-        // Strip characters that are dangerous in an unquoted shell context.
-        // Note: '|', '&', ';', '$', '(', ')', '<', '>' are intentionally preserved
-        // here because callers pass full command strings that legitimately use them.
-        // Only strip null bytes and literal backtick-style command substitution.
-        $dangerous = ['`', "\0"];
-        $command = str_replace($dangerous, '', $command);
-
-        return trim($command);
+        return escapeshellcmd($command);
     }
 
     /**

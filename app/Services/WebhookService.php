@@ -19,6 +19,7 @@ class WebhookService
         'backup.completed',
         'backup.failed',
         'user.registered',
+        'monitoring.alert',
     ];
 
     public function dispatch(string $event, array $payload = []): void

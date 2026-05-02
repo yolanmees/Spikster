@@ -2,20 +2,24 @@ name: Laravel
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, develop, laravel-12 ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, develop ]
 
 jobs:
   laravel-tests:
 
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-version: ['8.2', '8.3', '8.4']
 
     steps:
+    - uses: actions/checkout@v4
     - uses: shivammathur/setup-php@15c43e89cdef867065b0213be354c2841860869e
       with:
-        php-version: '8.0'
-    - uses: actions/checkout@v2
+        php-version: ${{ matrix.php-version }}
+        tools: composer:v2
     - name: Copy .env
       run: php -r "file_exists('.env') || copy('.env.example', '.env');"
     - name: Install Dependencies
@@ -28,6 +32,10 @@ jobs:
       run: |
         mkdir -p database
         touch database/database.sqlite
+    - name: Security audit (Composer)
+      run: composer audit
+    - name: Code style (Pint)
+      run: vendor/bin/pint --test
     - name: Static analysis (PHPStan)
       run: vendor/bin/phpstan analyse --no-progress
 

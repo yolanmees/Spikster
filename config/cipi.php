@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * @deprecated Use config/spikster.php instead.
+ *             Legacy Cipi configuration — kept for backward compatibility.
+ *             All new settings should go in config/spikster.php.
+ *             Will be removed in a future release.
+ */
+
 return [
 
     // Panel Credential

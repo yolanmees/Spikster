@@ -44,14 +44,14 @@ class DeploymentService
         return $url;
     }
 
-    public function deploySite(Site $site): array
+    public function deploySite(Site $site, bool $dryRun = false): array
     {
         if (! $site->hasRepository()) {
             throw new \Exception('Site does not have a repository configured');
         }
 
         $server = $site->server;
-        $sitePath = "/home/{$site->username}/{$site->domain}";
+        $sitePath = escapeshellarg("/home/{$site->username}/{$site->domain}");
 
         $steps = [
             'pull_code' => false,
@@ -60,6 +60,28 @@ class DeploymentService
             'clear_cache' => false,
             'restart_services' => false,
         ];
+
+        if ($dryRun) {
+            $commands = [];
+            $commands[] = "cd {$sitePath} && git pull origin ".$this->validateBranch($site->branch);
+            $commands[] = "test -f {$sitePath}/composer.json";
+            $commands[] = "cd {$sitePath} && composer install --no-dev --optimize-autoloader";
+            $commands[] = "test -f {$sitePath}/artisan";
+            $commands[] = "cd {$sitePath} && php artisan migrate --force";
+            $commands[] = "cd {$sitePath} && php artisan cache:clear";
+            $commands[] = "test -f {$sitePath}/package.json";
+            $commands[] = "cd {$sitePath} && npm install && npm run build";
+            $commands[] = "Restart php{$site->php}-fpm";
+            $commands[] = "chown {$site->username}:{$site->username} {$sitePath}";
+
+            return [
+                'success' => true,
+                'dry_run' => true,
+                'steps' => $steps,
+                'message' => 'Dry run completed',
+                'commands' => $commands,
+            ];
+        }
 
         try {
             // Pull latest code
@@ -148,7 +170,7 @@ class DeploymentService
         }
 
         $server = $site->server;
-        $sitePath = "/home/{$site->username}/{$site->domain}";
+        $sitePath = escapeshellarg("/home/{$site->username}/{$site->domain}");
 
         // Remove existing directory
         $this->sshService->deleteDirectory($server, $sitePath);
@@ -179,11 +201,14 @@ class DeploymentService
     public function runCustomScript(Site $site, string $script): string
     {
         $server = $site->server;
-        $sitePath = "/home/{$site->username}/{$site->domain}";
+        $sitePath = escapeshellarg("/home/{$site->username}/{$site->domain}");
 
         // Write script via SFTP to avoid shell injection through echo-quoting
         $localTmp = tempnam(sys_get_temp_dir(), 'deploy_');
-        file_put_contents($localTmp, $script);
+        // Use LOCK_EX to prevent concurrent write races
+        if (file_put_contents($localTmp, $script, LOCK_EX) === false) {
+            throw new \RuntimeException("Failed to write temporary deploy script to {$localTmp}");
+        }
 
         $scriptPath = "/tmp/deploy_{$site->site_id}.sh";
 
@@ -213,7 +238,7 @@ class DeploymentService
     public function getDeploymentHistory(Site $site): array
     {
         $server = $site->server;
-        $sitePath = "/home/{$site->username}/{$site->domain}";
+        $sitePath = escapeshellarg("/home/{$site->username}/{$site->domain}");
 
         // Get last 10 git commits
         $output = $this->sshService->executeCommand(
@@ -250,7 +275,7 @@ class DeploymentService
         }
 
         $server = $site->server;
-        $sitePath = "/home/{$site->username}/{$site->domain}";
+        $sitePath = escapeshellarg("/home/{$site->username}/{$site->domain}");
 
         $this->sshService->executeCommand(
             $server,

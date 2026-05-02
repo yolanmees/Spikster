@@ -6,6 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Hash;
 
+/**
+ * @deprecated Use App\Models\User with Sanctum authentication instead.
+ *             This model exists only for legacy Cipi API compatibility.
+ *             Will be removed in a future release.
+ */
 class Auth extends Model
 {
     use HasFactory;

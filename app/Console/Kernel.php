@@ -5,6 +5,7 @@ namespace App\Console;
 use App\Console\Commands\ActiveSetupCount;
 use App\Console\Commands\CipiUpdate;
 use App\Console\Commands\LogRotate;
+use App\Console\Commands\MonitoringCheckCommand;
 use App\Console\Commands\ServerSetupCheck;
 use App\Jobs\FetchServerMetricsJob;
 use App\Models\Backup;
@@ -26,6 +27,7 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         ActiveSetupCount::class,
         LogRotate::class,
+        MonitoringCheckCommand::class,
         ServerSetupCheck::class,
         CipiUpdate::class,
     ];
@@ -49,6 +51,11 @@ class Kernel extends ConsoleKernel
                 FetchServerMetricsJob::dispatch($server);
             }
         })->everyMinute()->name('fetch-server-metrics');
+
+        // Run monitoring health check every 5 minutes with alerting
+        $schedule->command('spikster:monitor-check --alert')
+            ->everyFiveMinutes()
+            ->name('monitor-health-check');
 
         // Cleanup old metrics daily
         $schedule->call(function () {

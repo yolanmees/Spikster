@@ -88,14 +88,14 @@ class AuthController extends Controller
 
         RateLimiter::clear($lockoutKey);
 
-        $user->jwt = JWT::encode(['iat' => time(), 'exp' => time() + config('cipi.jwt_refresh')], config('cipi.jwt_secret').'-Rfs', 'HS256');
+        $user->jwt = JWT::encode(['iat' => time(), 'exp' => time() + config('cipi.jwt_refresh')], config('cipi.jwt_secret'), 'HS256');
         $user->save();
 
         // Log successful login
         AuditService::logLogin($user->id);
 
         return response()->json([
-            'access_token' => JWT::encode(['iat' => time(), 'exp' => time() + config('cipi.jwt_access')], config('cipi.jwt_secret').'-Acs', 'HS256'),
+            'access_token' => JWT::encode(['iat' => time(), 'exp' => time() + config('cipi.jwt_access')], config('cipi.jwt_secret'), 'HS256'),
             'refresh_token' => $user->jwt,
             'username' => $user->username,
         ]);
@@ -126,11 +126,11 @@ class AuthController extends Controller
 
         if ($user) {
             RateLimiter::clear($lockoutKey);
-            $user->jwt = JWT::encode(['iat' => time(), 'exp' => time() + config('cipi.jwt_refresh')], config('cipi.jwt_secret').'-Rfs', 'HS256');
-            $user->save();
+        $user->jwt = JWT::encode(['iat' => time(), 'exp' => time() + config('cipi.jwt_refresh')], config('cipi.jwt_secret'), 'HS256');
+        $user->save();
 
-            return response()->json([
-                'access_token' => JWT::encode(['iat' => time(), 'exp' => time() + config('cipi.jwt_access')], config('cipi.jwt_secret').'-Acs', 'HS256'),
+        return response()->json([
+            'access_token' => JWT::encode(['iat' => time(), 'exp' => time() + config('cipi.jwt_access')], config('cipi.jwt_secret'), 'HS256'),
                 'refresh_token' => $user->jwt,
                 'username' => $user->username,
             ]);
@@ -209,7 +209,7 @@ class AuthController extends Controller
         $user->save();
 
         return response()->json([
-            'access_token' => JWT::encode(['iat' => time(), 'exp' => time() + config('cipi.jwt_access')], config('cipi.jwt_secret').'-Acs', 'HS256'),
+            'access_token' => JWT::encode(['iat' => time(), 'exp' => time() + config('cipi.jwt_access')], config('cipi.jwt_secret'), 'HS256'),
             'refresh_token' => $user->jwt,
             'username' => $user->username,
             'apikey' => $user->apikey,

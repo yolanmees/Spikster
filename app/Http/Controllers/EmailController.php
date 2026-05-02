@@ -32,8 +32,8 @@ class EmailController extends Controller
      */
     public function indexAccounts(string $site_id): JsonResponse
     {
-        $this->authorize('email.view');
         $site = Site::where('site_id', $site_id)->firstOrFail();
+        $this->authorize('manageEmail', $site);
         $accounts = $this->emailService->getAccountsBySite($site);
 
         return response()->json([
@@ -69,8 +69,8 @@ class EmailController extends Controller
      */
     public function createAccount(Request $request, string $site_id): JsonResponse
     {
-        $this->authorize('email.create');
         $site = Site::where('site_id', $site_id)->firstOrFail();
+        $this->authorize('manageEmail', $site);
 
         try {
             $account = $this->emailService->createEmailAccount($site, $request->all());
@@ -116,7 +116,8 @@ class EmailController extends Controller
      */
     public function updateAccount(Request $request, string $site_id, int $account_id): JsonResponse
     {
-        $this->authorize('email.edit');
+        $site = Site::where('site_id', $site_id)->firstOrFail();
+        $this->authorize('manageEmail', $site);
         $account = EmailAccount::where('id', $account_id)
             ->whereHas('site', fn ($q) => $q->where('site_id', $site_id))
             ->firstOrFail();
@@ -150,7 +151,8 @@ class EmailController extends Controller
      */
     public function deleteAccount(string $site_id, int $account_id): JsonResponse
     {
-        $this->authorize('email.delete');
+        $site = Site::where('site_id', $site_id)->firstOrFail();
+        $this->authorize('manageEmail', $site);
         $account = EmailAccount::where('id', $account_id)
             ->whereHas('site', fn ($q) => $q->where('site_id', $site_id))
             ->firstOrFail();
@@ -175,7 +177,8 @@ class EmailController extends Controller
      */
     public function getQuota(string $site_id, int $account_id): JsonResponse
     {
-        $this->authorize('email.view');
+        $site = Site::where('site_id', $site_id)->firstOrFail();
+        $this->authorize('manageEmail', $site);
         $account = EmailAccount::where('id', $account_id)
             ->whereHas('site', fn ($q) => $q->where('site_id', $site_id))
             ->firstOrFail();
@@ -196,8 +199,8 @@ class EmailController extends Controller
      */
     public function indexForwarders(string $site_id): JsonResponse
     {
-        $this->authorize('email.view');
         $site = Site::where('site_id', $site_id)->firstOrFail();
+        $this->authorize('manageEmail', $site);
         $forwarders = $this->emailService->getForwardersBySite($site);
 
         return response()->json(['forwarders' => $forwarders]);
@@ -216,8 +219,8 @@ class EmailController extends Controller
      */
     public function createForwarder(Request $request, string $site_id): JsonResponse
     {
-        $this->authorize('email.create');
         $site = Site::where('site_id', $site_id)->firstOrFail();
+        $this->authorize('manageEmail', $site);
 
         try {
             $forwarder = $this->emailService->createForwarder($site, $request->all());
@@ -248,7 +251,8 @@ class EmailController extends Controller
      */
     public function deleteForwarder(string $site_id, int $forwarder_id): JsonResponse
     {
-        $this->authorize('email.delete');
+        $site = Site::where('site_id', $site_id)->firstOrFail();
+        $this->authorize('manageEmail', $site);
         $forwarder = EmailForwarder::where('id', $forwarder_id)
             ->whereHas('site', fn ($q) => $q->where('site_id', $site_id))
             ->firstOrFail();
@@ -273,7 +277,8 @@ class EmailController extends Controller
      */
     public function indexAliases(string $site_id, int $account_id): JsonResponse
     {
-        $this->authorize('email.view');
+        $site = Site::where('site_id', $site_id)->firstOrFail();
+        $this->authorize('manageEmail', $site);
         $account = EmailAccount::where('id', $account_id)
             ->whereHas('site', fn ($q) => $q->where('site_id', $site_id))
             ->with('aliases')
@@ -295,7 +300,8 @@ class EmailController extends Controller
      */
     public function createAlias(Request $request, string $site_id, int $account_id): JsonResponse
     {
-        $this->authorize('email.create');
+        $site = Site::where('site_id', $site_id)->firstOrFail();
+        $this->authorize('manageEmail', $site);
         $account = EmailAccount::where('id', $account_id)
             ->whereHas('site', fn ($q) => $q->where('site_id', $site_id))
             ->firstOrFail();
@@ -329,7 +335,8 @@ class EmailController extends Controller
      */
     public function deleteAlias(string $site_id, int $alias_id): JsonResponse
     {
-        $this->authorize('email.delete');
+        $site = Site::where('site_id', $site_id)->firstOrFail();
+        $this->authorize('manageEmail', $site);
         $alias = EmailAlias::where('id', $alias_id)
             ->whereHas('emailAccount.site', fn ($q) => $q->where('site_id', $site_id))
             ->firstOrFail();
@@ -354,8 +361,8 @@ class EmailController extends Controller
      */
     public function setupDKIM(Request $request, string $site_id): JsonResponse
     {
-        $this->authorize('email.configure');
         $site = Site::where('site_id', $site_id)->firstOrFail();
+        $this->authorize('manageEmail', $site);
         $selector = $request->input('selector', 'default');
 
         $dkimKey = $this->emailService->setupDKIM($site, $selector);
@@ -383,8 +390,8 @@ class EmailController extends Controller
      */
     public function generateSPF(Request $request, string $site_id): JsonResponse
     {
-        $this->authorize('email.configure');
         $site = Site::where('site_id', $site_id)->firstOrFail();
+        $this->authorize('manageEmail', $site);
         $spf = $this->emailService->generateSPFRecord($site, $request->all());
 
         return response()->json([
@@ -409,8 +416,8 @@ class EmailController extends Controller
      */
     public function generateDMARC(Request $request, string $site_id): JsonResponse
     {
-        $this->authorize('email.configure');
         $site = Site::where('site_id', $site_id)->firstOrFail();
+        $this->authorize('manageEmail', $site);
         $dmarc = $this->emailService->generateDMARCRecord($site, $request->all());
 
         return response()->json([
@@ -435,7 +442,8 @@ class EmailController extends Controller
      */
     public function setAutoresponder(Request $request, string $site_id, int $account_id): JsonResponse
     {
-        $this->authorize('email.configure');
+        $site = Site::where('site_id', $site_id)->firstOrFail();
+        $this->authorize('manageEmail', $site);
         $account = EmailAccount::where('id', $account_id)
             ->whereHas('site', fn ($q) => $q->where('site_id', $site_id))
             ->firstOrFail();

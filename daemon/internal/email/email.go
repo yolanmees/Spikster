@@ -79,12 +79,15 @@ func removeLinesContaining(path, needle string) error {
 }
 
 func appendLine(path, line string) error {
+	// Strip newlines to prevent config file corruption
+	clean := strings.ReplaceAll(line, "\n", "")
+	clean = strings.ReplaceAll(clean, "\r", "")
 	f, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0640)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-	_, err = fmt.Fprintln(f, line)
+	_, err = fmt.Fprintln(f, clean)
 	return err
 }
 
@@ -419,8 +422,20 @@ func InstallRoundcube(p RoundcubeParams) error {
 		return fmt.Errorf("roundcube install script not found: %s", scriptPath)
 	}
 
-	if err := run("bash", scriptPath,
-		p.Domain, p.SiteRoot, p.DBName, p.DBUser, p.DBPass); err != nil {
+	// Write DB credentials to a temp env file to avoid exposing them in ps aux
+	envFile, err := os.CreateTemp("", "roundcube-env-*.sh")
+	if err != nil {
+		return fmt.Errorf("create env file: %w", err)
+	}
+	envPath := envFile.Name()
+	fmt.Fprintf(envFile, "RC_DOMAIN=%s\nRC_SITEROOT=%s\nRC_DBNAME=%s\nRC_DBUSER=%s\nRC_DBPASS=%s\n",
+		p.Domain, p.SiteRoot, p.DBName, p.DBUser, p.DBPass)
+	envFile.Close()
+	defer os.Remove(envPath)
+
+	if err := run("bash", "-c",
+		fmt.Sprintf("source %s && bash %s \"$RC_DOMAIN\" \"$RC_SITEROOT\" \"$RC_DBNAME\" \"$RC_DBUSER\" \"$RC_DBPASS\"",
+			envPath, scriptPath)); err != nil {
 		return err
 	}
 

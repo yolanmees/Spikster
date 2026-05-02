@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DiagnosticsController;
 use App\Http\Controllers\FileManagerController;
 use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\NodejsController;
@@ -80,6 +81,9 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     Route::get('/sites/{site}/ftp', function (Site $site) {
         return view('ftp.index', ['site' => $site]);
     })->name('ftp.index');
+
+    // Diagnostics
+    Route::get('/diagnostics', [DiagnosticsController::class, 'index'])->name('diagnostics');
 
     // Module Management
     Route::prefix('modules')->name('modules.')->group(function () {

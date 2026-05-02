@@ -3,214 +3,169 @@
 namespace App\Livewire\Backup;
 
 use App\Models\BackupStorageLocation;
-use App\Services\BackupService;
 use Livewire\Component;
 
 class StorageLocationManager extends Component
 {
-    public $locations;
+    public bool $showForm = false;
 
-    public $showCreateModal = false;
+    public ?string $editingId = null;
 
-    public $showDeleteModal = false;
+    public string $name = '';
 
-    public $selectedLocation = null;
+    public string $type = 'local';
 
-    // Form fields
-    public $name = '';
+    public string $configPath = '/backups';
 
-    public $type = 'local';
+    public string $configAccessKey = '';
 
-    public $config = [];
+    public string $configSecretKey = '';
 
-    public $is_default = false;
+    public string $configRegion = 'us-east-1';
 
-    public $is_active = true;
+    public string $configBucket = '';
 
-    // S3 Config
-    public $s3_bucket = '';
+    public string $configEndpoint = '';
 
-    public $s3_region = 'us-east-1';
+    public string $configHost = '';
 
-    public $s3_access_key = '';
+    public string $configPort = '';
 
-    public $s3_secret_key = '';
+    public string $configUsername = '';
 
-    public $s3_endpoint = '';
+    public string $configPassword = '';
 
-    public $s3_path = 'backups';
-
-    // FTP/SFTP Config
-    public $ftp_host = '';
-
-    public $ftp_port = '';
-
-    public $ftp_username = '';
-
-    public $ftp_password = '';
-
-    public $ftp_path = '/backups';
-
-    public $ftp_passive = true;
-
-    protected $rules = [
-        'name' => 'required|string|max:255',
-        'type' => 'required|in:local,s3,ftp,sftp',
-        'is_default' => 'boolean',
-        'is_active' => 'boolean',
-    ];
-
-    public function mount()
-    {
-        $this->loadLocations();
-    }
+    public bool $isDefault = false;
 
     public function render()
     {
-        return view('livewire.backup.storage-location-manager');
+        $locations = BackupStorageLocation::where('user_id', auth()->id())
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('livewire.backup.storage-location-manager', [
+            'locations' => $locations,
+        ]);
     }
 
-    public function loadLocations()
-    {
-        $this->locations = BackupStorageLocation::orderBy('created_at', 'desc')->get();
-    }
-
-    public function openCreateModal()
+    public function create(): void
     {
         $this->resetForm();
-        $this->showCreateModal = true;
+        $this->showForm = true;
+        $this->editingId = null;
     }
 
-    public function closeCreateModal()
+    public function edit(string $id): void
     {
-        $this->showCreateModal = false;
-        $this->resetForm();
+        $location = BackupStorageLocation::where('user_id', auth()->id())->findOrFail($id);
+        $this->editingId = $id;
+        $this->name = $location->name;
+        $this->type = $location->type;
+        $this->isDefault = $location->is_default;
+        $this->configPath = $location->config['path'] ?? '';
+        $this->configAccessKey = $location->config['access_key'] ?? '';
+        $this->configSecretKey = $location->config['secret_key'] ?? '';
+        $this->configRegion = $location->config['region'] ?? 'us-east-1';
+        $this->configBucket = $location->config['bucket'] ?? '';
+        $this->configEndpoint = $location->config['endpoint'] ?? '';
+        $this->configHost = $location->config['host'] ?? '';
+        $this->configPort = (string) ($location->config['port'] ?? '');
+        $this->configUsername = $location->config['username'] ?? '';
+        $this->configPassword = '';
+        $this->showForm = true;
     }
 
-    public function openDeleteModal($locationId)
+    public function save(): void
     {
-        $this->selectedLocation = BackupStorageLocation::find($locationId);
-        $this->showDeleteModal = true;
-    }
+        $this->validate([
+            'name' => 'required|max:255',
+            'type' => 'required|in:local,s3,ftp,sftp',
+            'configPath' => 'required_if:type,local|max:255',
+            'configHost' => 'required_if:type,ftp,sftp|max:255',
+            'configBucket' => 'required_if:type,s3|max:255',
+        ]);
 
-    public function closeDeleteModal()
-    {
-        $this->showDeleteModal = false;
-        $this->selectedLocation = null;
-    }
+        $config = match ($this->type) {
+            'local' => ['path' => $this->configPath],
+            's3' => [
+                'access_key' => $this->configAccessKey,
+                'secret_key' => $this->configSecretKey,
+                'region' => $this->configRegion,
+                'bucket' => $this->configBucket,
+                'endpoint' => $this->configEndpoint ?: null,
+            ],
+            'ftp', 'sftp' => [
+                'host' => $this->configHost,
+                'port' => (int) $this->configPort ?: ($this->type === 'sftp' ? 22 : 21),
+                'username' => $this->configUsername,
+                'password' => $this->configPassword,
+                'path' => $this->configPath,
+            ],
+        };
 
-    public function createLocation()
-    {
-        $this->validate();
-
-        // Build config based on type
-        $config = $this->buildConfig();
-
-        $backupService = app(BackupService::class);
-        $backupService->createStorageLocation([
+        $data = [
+            'user_id' => auth()->id(),
             'name' => $this->name,
             'type' => $this->type,
             'config' => $config,
-            'is_default' => $this->is_default,
-            'is_active' => $this->is_active,
-        ]);
+            'is_default' => $this->isDefault,
+            'is_active' => true,
+        ];
 
-        $this->closeCreateModal();
-        $this->loadLocations();
-        session()->flash('message', 'Storage location created successfully!');
-    }
-
-    public function testConnection($locationId)
-    {
-        $location = BackupStorageLocation::find($locationId);
-
-        if (! $location) {
-            return;
-        }
-
-        $backupService = app(BackupService::class);
-        $success = $backupService->testStorageConnection($location);
-
-        $this->loadLocations();
-
-        if ($success) {
-            session()->flash('message', 'Connection test successful!');
+        if ($this->editingId) {
+            $location = BackupStorageLocation::where('user_id', auth()->id())->findOrFail($this->editingId);
+            $location->update($data);
+            $this->dispatch('notify', message: 'Storage location updated', type: 'success');
         } else {
-            session()->flash('error', 'Connection test failed!');
+            BackupStorageLocation::create($data);
+            $this->dispatch('notify', message: 'Storage location created', type: 'success');
         }
+
+        $this->showForm = false;
+        $this->resetForm();
     }
 
-    public function deleteLocation()
+    public function test(string $id): void
     {
-        if (! $this->selectedLocation) {
-            return;
-        }
+        $location = BackupStorageLocation::where('user_id', auth()->id())->findOrFail($id);
+        $result = $location->testConnection();
 
-        $backupService = app(BackupService::class);
-        $success = $backupService->deleteStorageLocation($this->selectedLocation);
-
-        if (! $success) {
-            session()->flash('error', 'Cannot delete default storage location');
+        if ($result) {
+            $this->dispatch('notify', message: 'Connection test successful', type: 'success');
         } else {
-            session()->flash('message', 'Storage location deleted successfully!');
+            $error = $location->fresh()->last_test_error;
+            $this->dispatch('notify', message: 'Connection failed: '.($error ?? 'Unknown error'), type: 'error');
         }
-
-        $this->closeDeleteModal();
-        $this->loadLocations();
     }
 
-    protected function buildConfig(): array
+    public function delete(string $id): void
     {
-        switch ($this->type) {
-            case 's3':
-                return [
-                    'bucket' => $this->s3_bucket,
-                    'region' => $this->s3_region,
-                    'access_key' => $this->s3_access_key,
-                    'secret_key' => $this->s3_secret_key,
-                    'endpoint' => $this->s3_endpoint ?: null,
-                    'path' => $this->s3_path,
-                ];
-
-            case 'ftp':
-            case 'sftp':
-                return [
-                    'host' => $this->ftp_host,
-                    'port' => $this->ftp_port ?: ($this->type === 'sftp' ? 22 : 21),
-                    'username' => $this->ftp_username,
-                    'password' => $this->ftp_password,
-                    'path' => $this->ftp_path,
-                    'passive' => $this->ftp_passive,
-                ];
-
-            default:
-                return [];
-        }
+        $location = BackupStorageLocation::where('user_id', auth()->id())->findOrFail($id);
+        $location->delete();
+        $this->dispatch('notify', message: 'Storage location deleted', type: 'success');
     }
 
-    protected function resetForm()
+    public function cancel(): void
+    {
+        $this->showForm = false;
+        $this->resetForm();
+    }
+
+    private function resetForm(): void
     {
         $this->name = '';
         $this->type = 'local';
-        $this->is_default = false;
-        $this->is_active = true;
-
-        // S3
-        $this->s3_bucket = '';
-        $this->s3_region = 'us-east-1';
-        $this->s3_access_key = '';
-        $this->s3_secret_key = '';
-        $this->s3_endpoint = '';
-        $this->s3_path = 'backups';
-
-        // FTP/SFTP
-        $this->ftp_host = '';
-        $this->ftp_port = '';
-        $this->ftp_username = '';
-        $this->ftp_password = '';
-        $this->ftp_path = '/backups';
-        $this->ftp_passive = true;
-
-        $this->resetValidation();
+        $this->configPath = '/backups';
+        $this->configAccessKey = '';
+        $this->configSecretKey = '';
+        $this->configRegion = 'us-east-1';
+        $this->configBucket = '';
+        $this->configEndpoint = '';
+        $this->configHost = '';
+        $this->configPort = '';
+        $this->configUsername = '';
+        $this->configPassword = '';
+        $this->isDefault = false;
+        $this->editingId = null;
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Server;
+use Illuminate\Support\Facades\Log;
 use phpseclib3\Net\SSH2;
 
 /**
@@ -69,14 +70,46 @@ class RemoteDaemonService
     protected function openTunnel(Server $server): int
     {
         $localPort = $this->getFreePort();
+        $sshKey = '/etc/spikster/ssh_key';
+        $knownHosts = '/etc/spikster/known_hosts';
+
+        // Create known_hosts file if it doesn't exist
+        if (! is_file($knownHosts)) {
+            touch($knownHosts);
+            chmod($knownHosts, 0600);
+        }
+
+        $descriptors = [
+            0 => ['pipe', 'r'],
+            1 => ['pipe', 'w'],
+            2 => ['pipe', 'w'],
+        ];
 
         $cmd = sprintf(
-            'ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 '
-            .'-fN -L %d:127.0.0.1:%d spikster@%s -i /etc/spikster/ssh_key 2>/dev/null',
-            $localPort, $this->port, $server->ip
+            'ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=%s '
+            .'-o ConnectTimeout=10 -o ExitOnForwardFailure=yes '
+            .'-fN -L %d:127.0.0.1:%d spikster@%s -i %s',
+            escapeshellarg($knownHosts),
+            $localPort, $this->port,
+            escapeshellarg($server->ip),
+            escapeshellarg($sshKey)
         );
 
-        exec($cmd);
+        $process = proc_open($cmd, $descriptors, $pipes);
+        if (! is_resource($process)) {
+            throw new \Exception("Failed to open SSH tunnel to {$server->ip}");
+        }
+
+        fclose($pipes[0]);
+        $stderr = stream_get_contents($pipes[2]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        $exitCode = proc_close($process);
+
+        if ($exitCode !== 0) {
+            throw new \Exception("SSH tunnel failed for {$server->ip}: {$stderr}");
+        }
+
         usleep(500000); // 0.5s for tunnel to establish
 
         return $localPort;
@@ -84,7 +117,16 @@ class RemoteDaemonService
 
     protected function closeTunnel(int $localPort): void
     {
-        exec("pkill -f 'ssh.*{$localPort}:127.0.0.1:{$this->port}'");
+        $descriptors = [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']];
+        $cmd = sprintf('ssh -O stop -L %d:127.0.0.1:%d 127.0.0.1 2>/dev/null', $localPort, $this->port);
+
+        $process = proc_open($cmd, $descriptors, $pipes);
+        if (is_resource($process)) {
+            fclose($pipes[0]);
+            fclose($pipes[1]);
+            fclose($pipes[2]);
+            proc_close($process);
+        }
     }
 
     protected function getFreePort(): int
@@ -233,6 +275,24 @@ class RemoteDaemonService
         return $this->send($server, 'email.update-quota', ['email' => $email, 'quota_mb' => (string) $quotaMb])['success'] ?? false;
     }
 
+    /**
+     * Configure SpamAssassin and ClamAV filters for a mailbox.
+     */
+    public function setEmailFilters(
+        Server $server,
+        string $email,
+        bool $spamFilter,
+        float $spamScore,
+        bool $antivirus
+    ): bool {
+        return $this->send($server, 'email.set-filters', [
+            'email' => $email,
+            'spam_filter' => $spamFilter ? 'true' : 'false',
+            'spam_score' => (string) $spamScore,
+            'antivirus' => $antivirus ? 'true' : 'false',
+        ])['success'] ?? false;
+    }
+
     public function createEmailForwarder(Server $server, string $source, string $destination): bool
     {
         return $this->send($server, 'email.forwarder-create', compact('source', 'destination'))['success'] ?? false;
@@ -306,5 +366,47 @@ class RemoteDaemonService
     public function fail2banWhitelist(Server $server, string $ip): bool
     {
         return $this->send($server, 'fail2ban.whitelist', ['ip' => $ip])['success'] ?? false;
+    }
+
+    // ─── Mail queue & log management ─────────────────────────────────────────
+
+    /**
+     * List messages in the Postfix mail queue, optionally filtered by domain.
+     *
+     * @return array{queue: list<array{id: string, sender: string, recipient: string, size: int, arrival: string, reason: string}>}
+     */
+    public function mailQueueList(Server $server, string $domain = ''): array
+    {
+        return $this->send($server, 'email.queue-list', ['domain' => $domain]);
+    }
+
+    /**
+     * Flush (retry) a specific message in the mail queue.
+     */
+    public function mailQueueRetry(Server $server, string $queueId): bool
+    {
+        return $this->send($server, 'email.queue-retry', ['queue_id' => $queueId])['success'] ?? false;
+    }
+
+    /**
+     * Delete a specific message from the mail queue.
+     */
+    public function mailQueueDelete(Server $server, string $queueId): bool
+    {
+        return $this->send($server, 'email.queue-delete', ['queue_id' => $queueId])['success'] ?? false;
+    }
+
+    /**
+     * Tail the mail log, optionally filtered by domain and substring.
+     *
+     * @return array{lines: list<string>}
+     */
+    public function mailLogTail(Server $server, string $domain = '', int $lines = 100, string $filter = ''): array
+    {
+        return $this->send($server, 'email.log-tail', [
+            'domain' => $domain,
+            'lines' => $lines,
+            'filter' => $filter,
+        ]);
     }
 }

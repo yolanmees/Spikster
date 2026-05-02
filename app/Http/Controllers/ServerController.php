@@ -729,10 +729,10 @@ class ServerController extends Controller
             $newsite = new Site;
             $newsite->server_id = $server->id;
             $newsite->domain = $request->domain;
-            $newsite->site_id = sha1(microtime());
-            $newsite->username = md5(microtime());
-            $newsite->password = 'Secret_123';
-            $newsite->database = 'Secret_123';
+            $newsite->site_id = 'ste_'.Str::random(16);
+            $newsite->username = 'panel_'.Str::random(8);
+            $newsite->password = Str::random(24);
+            $newsite->database = Str::random(24);
             $newsite->panel = true;
             $newsite->save();
             app(DaemonService::class)->send('panel.domain-add', ['domain' => $server->domain]);
@@ -1216,7 +1216,7 @@ class ServerController extends Controller
         app(DaemonService::class)->send('server.root-reset', ['new_pass' => $new_password]);
 
         return response()->json([
-            'password' => $server->password,
+            'message' => 'Root password reset successfully.',
         ]);
     }
 

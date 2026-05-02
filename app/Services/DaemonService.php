@@ -36,6 +36,10 @@ class DaemonService
         // Allow up to 60s for long-running operations (site create, ssl, backup)
         stream_set_timeout($socket, 60);
 
+        // Authenticate with daemon token before sending the payload
+        $token = config('spikster.daemon_token');
+        fwrite($socket, "TOKEN {$token}\n");
+
         $payload = json_encode(['action' => $action, 'params' => $params]);
         fwrite($socket, $payload);
 
@@ -133,6 +137,42 @@ class DaemonService
     public function updateSitePHP(string $username, string $oldPHP, string $newPHP): bool
     {
         return $this->send('site.update-php', compact('username', 'oldPHP', 'newPHP'))['success'] ?? false;
+    }
+
+    public function updateSitePHPSettings($site): bool
+    {
+        return $this->send('site.php-settings', [
+            'id' => $site->site_id,
+            'domain' => $site->domain,
+            'username' => $site->username,
+            'password' => $site->password,
+            'db_name' => $site->username,
+            'db_pass' => $site->database,
+            'db_root' => $site->server->database ?? '',
+            'php' => $site->php,
+            'basepath' => $site->basepath ?? '',
+            'php_memory_limit' => $site->php_memory_limit ?? '',
+            'php_upload_max_filesize' => $site->php_upload_max_filesize ?? '',
+            'php_max_execution_time' => $site->php_max_execution_time ?? '',
+            'php_max_input_vars' => $site->php_max_input_vars ?? '',
+            'php_post_max_size' => $site->php_post_max_size ?? '',
+        ])['success'] ?? false;
+    }
+
+    public function updateSiteNginxConfig($site): bool
+    {
+        return $this->send('site.nginx-config', [
+            'id' => $site->site_id,
+            'domain' => $site->domain,
+            'username' => $site->username,
+            'password' => $site->password,
+            'db_name' => $site->username,
+            'db_pass' => $site->database,
+            'db_root' => $site->server->database ?? '',
+            'php' => $site->php,
+            'basepath' => $site->basepath ?? '',
+            'nginx_config' => $site->nginx ?? '',
+        ])['success'] ?? false;
     }
 
     public function updateSiteDomain(string $username, string $oldDomain, string $newDomain): bool
@@ -277,5 +317,10 @@ class DaemonService
     public function fail2banWhitelist(string $ip): bool
     {
         return $this->send('fail2ban.whitelist', ['ip' => $ip])['success'] ?? false;
+    }
+
+    public function supervisorCtl(string $action, string $process = ''): array
+    {
+        return $this->send('server.supervisorctl', compact('action', 'process'));
     }
 }

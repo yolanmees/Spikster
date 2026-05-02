@@ -49,7 +49,7 @@ class FtpController extends Controller
     public function index(Request $request, string $siteId)
     {
         $site = Site::where('site_id', $siteId)->firstOrFail();
-        $this->authorize('ftp.view');
+        $this->authorize('manageFtp', $site);
         $ftpUsers = $this->ftpService->getUsersForSite($site);
 
         return response()->json([
@@ -78,7 +78,7 @@ class FtpController extends Controller
     public function show(string $siteId, string $userId)
     {
         $site = Site::where('site_id', $siteId)->firstOrFail();
-        $this->authorize('ftp.view');
+        $this->authorize('manageFtp', $site);
         $ftpUser = FtpUser::where('site_id', $siteId)
             ->findOrFail($userId);
 
@@ -118,7 +118,7 @@ class FtpController extends Controller
     public function store(Request $request, string $siteId)
     {
         $site = Site::where('site_id', $siteId)->firstOrFail();
-        $this->authorize('ftp.create');
+        $this->authorize('manageFtp', $site);
 
         $validator = Validator::make($request->all(), [
             'username' => 'nullable|string|unique:ftp_users|max:255',
@@ -173,7 +173,8 @@ class FtpController extends Controller
      */
     public function update(Request $request, string $siteId, string $userId)
     {
-        $this->authorize('ftp.edit');
+        $site = Site::where('site_id', $siteId)->firstOrFail();
+        $this->authorize('manageFtp', $site);
         $ftpUser = FtpUser::where('site_id', $siteId)->findOrFail($userId);
 
         $validator = Validator::make($request->all(), [
@@ -216,7 +217,8 @@ class FtpController extends Controller
      */
     public function destroy(string $siteId, string $userId)
     {
-        $this->authorize('ftp.delete');
+        $site = Site::where('site_id', $siteId)->firstOrFail();
+        $this->authorize('manageFtp', $site);
         $ftpUser = FtpUser::where('site_id', $siteId)->findOrFail($userId);
 
         $this->ftpService->deleteUser($ftpUser);
@@ -250,7 +252,8 @@ class FtpController extends Controller
      */
     public function resetPassword(Request $request, string $siteId, string $userId)
     {
-        $this->authorize('ftp.edit');
+        $site = Site::where('site_id', $siteId)->firstOrFail();
+        $this->authorize('manageFtp', $site);
         $ftpUser = FtpUser::where('site_id', $siteId)->findOrFail($userId);
 
         $validator = Validator::make($request->all(), [
@@ -295,7 +298,8 @@ class FtpController extends Controller
      */
     public function updateQuota(Request $request, string $siteId, string $userId)
     {
-        $this->authorize('ftp.edit');
+        $site = Site::where('site_id', $siteId)->firstOrFail();
+        $this->authorize('manageFtp', $site);
         $ftpUser = FtpUser::where('site_id', $siteId)->findOrFail($userId);
 
         $validator = Validator::make($request->all(), [

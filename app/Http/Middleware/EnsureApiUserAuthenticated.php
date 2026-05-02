@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\AuditService;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -43,6 +44,20 @@ class EnsureApiUserAuthenticated
         Auth::setUser($user);
         $request->setUserResolver(fn () => $user);
         $request->attributes->set('auth_source', 'sanctum_user');
+
+        // Log API key usage for auditing (skip read-only GET/HEAD to reduce noise)
+        if (! in_array($request->method(), ['GET', 'HEAD'], true)) {
+            AuditService::log(
+                eventType: 'api_request',
+                description: $request->method().' '.$request->path(),
+                severity: 'info',
+                newValues: [
+                    'method' => $request->method(),
+                    'path' => $request->path(),
+                    'token_name' => $request->user()?->currentAccessToken()?->name ?? 'unknown',
+                ],
+            );
+        }
 
         return true;
     }

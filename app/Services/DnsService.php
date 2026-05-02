@@ -111,6 +111,10 @@ class DnsService
         return json_encode(['code' => 0, 'message' => "Zone $zone deleted successfully."]);
     }
 
+    public const ALLOWED_RECORD_TYPES = [
+        'A', 'AAAA', 'CNAME', 'MX', 'TXT', 'NS', 'SOA', 'SRV', 'CAA', 'PTR', 'CERT', 'SSHFP', 'TLSA',
+    ];
+
     public function addRecord(
         string $zone,
         string $record,
@@ -120,6 +124,10 @@ class DnsService
     ): string {
         if (! $zone || ! $record || ! $type || ! $value) {
             throw new \Exception('Missing required parameter: zone, record, type or value');
+        }
+        $type = strtoupper($type);
+        if (! in_array($type, self::ALLOWED_RECORD_TYPES, true)) {
+            throw new \Exception("Unsupported DNS record type: {$type}");
         }
         $zone = htmlspecialchars($zone, ENT_QUOTES, 'utf-8');
         $record = htmlspecialchars($record, ENT_QUOTES, 'utf-8');
@@ -156,6 +164,10 @@ class DnsService
         if (! $zone || ! $record || ! $type || ! $value) {
             throw new \Exception('Missing required parameter: zone, record, type or value');
         }
+        $type = strtoupper($type);
+        if (! in_array($type, self::ALLOWED_RECORD_TYPES, true)) {
+            throw new \Exception("Unsupported DNS record type: {$type}");
+        }
         $zone = htmlspecialchars($zone, ENT_QUOTES, 'utf-8');
         $record = htmlspecialchars($record, ENT_QUOTES, 'utf-8');
         $type = htmlspecialchars($type, ENT_QUOTES, 'utf-8');
@@ -182,6 +194,124 @@ class DnsService
         exec('rndc reload');
 
         return json_encode(['code' => 0, 'message' => "Record $record for $zone deleted successfully."]);
+    }
+
+    /**
+     * Enable DNSSEC for a zone by generating and signing with dnssec-keygen.
+     */
+    public function enableDnssec(string $zone): string
+    {
+        if (! preg_match('/^[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)*$/', $zone)) {
+            throw new \Exception('Invalid zone name.');
+        }
+
+        $keyDir = '/etc/bind/keys';
+        if (! is_dir($keyDir)) {
+            mkdir($keyDir, 0755, true);
+        }
+
+        // Generate ZSK (Zone Signing Key)
+        $zskCmd = sprintf('dnssec-keygen -a NSEC3RSASHA1 -b 2048 -n ZONE %s', escapeshellarg($zone));
+        exec("cd {$keyDir} && {$zskCmd} 2>&1", $zskOut, $zskCode);
+
+        if ($zskCode !== 0) {
+            throw new \Exception('ZSK generation failed: '.implode("\n", $zskOut));
+        }
+
+        // Generate KSK (Key Signing Key)
+        $kskCmd = sprintf('dnssec-keygen -f KSK -a NSEC3RSASHA1 -b 4096 -n ZONE %s', escapeshellarg($zone));
+        exec("cd {$keyDir} && {$kskCmd} 2>&1", $kskOut, $kskCode);
+
+        if ($kskCode !== 0) {
+            throw new \Exception('KSK generation failed: '.implode("\n", $kskOut));
+        }
+
+        // Sign the zone
+        $zoneFile = '/etc/bind/zones/'.$zone;
+        $signedFile = $zoneFile.'.signed';
+        $signCmd = sprintf('dnssec-signzone -A -o %s -t %s -k %s/K*.key %s',
+            escapeshellarg($zone), escapeshellarg($keyDir), escapeshellarg($keyDir), escapeshellarg($zoneFile));
+        exec("cd {$keyDir} && {$signCmd} 2>&1", $signOut, $signCode);
+
+        if ($signCode !== 0) {
+            throw new \Exception('Zone signing failed: '.implode("\n", $signOut));
+        }
+
+        // Update named.conf to use signed zone
+        $conf = file_get_contents('/etc/bind/named.conf.local');
+        $conf = str_replace(
+            "file \"/etc/bind/zones/{$zone}\";",
+            "file \"/etc/bind/zones/{$zone}.signed\";\n\tdnssec-enable yes;\n\tdnssec-validation yes;",
+            $conf
+        );
+        file_put_contents('/etc/bind/named.conf.local', $conf);
+
+        exec('rndc reload 2>&1', $reloadOut, $reloadCode);
+
+        return json_encode(['code' => 0, 'message' => "DNSSEC enabled for zone {$zone}. DS records must be added to the parent zone."]);
+    }
+
+    /**
+     * Get DNSSEC DS records for a zone.
+     */
+    public function getDsRecords(string $zone): array
+    {
+        $keyDir = '/etc/bind/keys';
+        $files = glob("{$keyDir}/K{$zone}*.key");
+
+        if (empty($files)) {
+            return [];
+        }
+
+        $dsRecords = [];
+        foreach ($files as $keyFile) {
+            $output = [];
+            exec("dnssec-dsfromkey {$keyFile} 2>/dev/null", $output);
+            foreach ($output as $line) {
+                $parts = preg_split('/\s+/', $line);
+                if (count($parts) >= 4) {
+                    $dsRecords[] = [
+                        'key_tag' => $parts[1] ?? '',
+                        'algorithm' => $parts[2] ?? '',
+                        'digest_type' => $parts[3] ?? '',
+                        'digest' => $parts[4] ?? '',
+                        'record' => $line,
+                    ];
+                }
+            }
+        }
+
+        return $dsRecords;
+    }
+
+    /**
+     * Check DNS propagation by querying multiple public resolvers.
+     * Returns the records found and which resolvers returned them.
+     */
+    public function checkPropagation(string $domain, string $type = 'A'): array
+    {
+        $resolvers = ['8.8.8.8', '1.1.1.1', '9.9.9.9'];
+        $results = [];
+
+        foreach ($resolvers as $resolver) {
+            $output = [];
+            $returnVar = 0;
+            exec("dig @{$resolver} {$domain} {$type} +short 2>/dev/null", $output, $returnVar);
+            $results[$resolver] = [
+                'resolver' => $resolver,
+                'records' => $returnVar === 0 ? array_filter($output) : [],
+                'reachable' => $returnVar === 0,
+            ];
+        }
+
+        return [
+            'domain' => $domain,
+            'type' => $type,
+            'resolvers' => $results,
+            'propagated' => count(array_unique(
+                array_map(fn ($r) => implode(',', $r['records']), $results)
+            )) === 1 && ! empty($results[array_key_first($results)]['records']),
+        ];
     }
 
     /**

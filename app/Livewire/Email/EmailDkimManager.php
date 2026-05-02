@@ -38,10 +38,10 @@ class EmailDkimManager extends Component
         $this->dkimKey = $this->site->emailDkimKeys()->first();
 
         // Generate SPF record
-        $this->spfRecord = $emailService->generateSPFRecord($this->site->id);
+        $this->spfRecord = $emailService->generateSPFRecord($this->site);
 
         // Generate DMARC record
-        $this->dmarcRecord = $emailService->generateDMARCRecord($this->site->id, 'quarantine', 'admin@'.$this->site->domain);
+        $this->dmarcRecord = $emailService->generateDMARCRecord($this->site);
     }
 
     /**

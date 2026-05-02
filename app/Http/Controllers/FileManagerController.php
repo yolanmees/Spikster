@@ -150,7 +150,13 @@ class FileManagerController extends Controller
             'pathName' => 'required|string',
         ]);
 
-        $pathName = $validated['pathName'];
+        $pathName = realpath($validated['pathName']);
+
+        // Restrict reads to site home directories only
+        if (! $pathName || ! str_starts_with($pathName, '/home/')) {
+            abort(403, 'Access denied: path outside allowed directory.');
+        }
+
         $ext = Str::afterLast($pathName, '.');
 
         if (! in_array($ext, [
@@ -212,7 +218,13 @@ class FileManagerController extends Controller
             'pathName' => 'required|string',
         ]);
 
-        $pathName = $validated['pathName'];
+        $pathName = realpath($validated['pathName']);
+
+        // Restrict edits to site home directories only
+        if (! $pathName || ! str_starts_with($pathName, '/home/')) {
+            abort(403, 'Access denied: path outside allowed directory.');
+        }
+
         $ext = Str::afterLast($pathName, '.');
 
         if (! in_array($ext, [

@@ -86,4 +86,48 @@ return [
         'table' => 'failed_jobs',
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Queue Tuning & Backpressure
+    |--------------------------------------------------------------------------
+    |
+    | Job-specific tuning for critical operations. These override the default
+    | retry_after, max attempts, and backoff for specific job classes.
+    |
+    */
+
+    'job_tuning' => [
+        \App\Jobs\FetchServerMetricsJob::class => [
+            'retry_after' => 30,
+            'max_attempts' => 3,
+            'backoff' => [5, 15, 30],
+            'unique_for' => 60,
+        ],
+        \App\Jobs\DeploySite::class => [
+            'retry_after' => 600,
+            'max_attempts' => 1,
+            'backoff' => [],
+        ],
+        \App\Jobs\CreateSiteJob::class => [
+            'retry_after' => 300,
+            'max_attempts' => 2,
+            'backoff' => [30, 120],
+        ],
+        \App\Jobs\Backup\CreateFullBackupSSH::class => [
+            'retry_after' => 1200,
+            'max_attempts' => 2,
+            'backoff' => [60, 300],
+        ],
+        \App\Jobs\Backup\UploadToS3SSH::class => [
+            'retry_after' => 1800,
+            'max_attempts' => 3,
+            'backoff' => [60, 300, 600],
+        ],
+        \App\Jobs\Backup\EncryptBackup::class => [
+            'retry_after' => 600,
+            'max_attempts' => 2,
+            'backoff' => [30, 120],
+        ],
+    ],
+
 ];

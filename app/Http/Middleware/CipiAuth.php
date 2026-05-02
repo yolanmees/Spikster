@@ -11,6 +11,11 @@ use Firebase\JWT\Key;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
+/**
+ * @deprecated Use Sanctum token authentication via EnsureApiUserAuthenticated instead.
+ *             Kept for backward compatibility with legacy Cipi API clients.
+ *             Will be removed in a future release.
+ */
 class CipiAuth
 {
     /**
@@ -25,6 +30,15 @@ class CipiAuth
         }
 
         $auth = $request->header('Authorization');
+
+        // Try Sanctum first if the bearer token is a valid Sanctum token
+        if ($auth && Str::startsWith($auth, 'Bearer ')
+            && $user = \Illuminate\Support\Facades\Auth::guard('sanctum')->user()) {
+            $request->setUserResolver(fn () => $user);
+
+            return $next($request);
+        }
+
         $token = null;
         $apikey = null;
 
@@ -45,7 +59,7 @@ class CipiAuth
 
         if ($token) {
             try {
-                JWT::decode($token, new Key(config('cipi.jwt_secret').'-Acs', 'HS256'));
+                JWT::decode($token, new Key(config('cipi.jwt_secret'), 'HS256'));
             } catch (ExpiredException $e) {
                 return response()->json([
                     'message' => 'Given token is expired.',

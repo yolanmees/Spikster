@@ -8,16 +8,13 @@ services:
   app:
     build:
       context: .
-      dockerfile: ${DOCKERFILE:-Dockerfile}
-      args:
-        - PHP_VERSION=${PHP_VERSION:-8.4}
+      dockerfile: ${DOCKERFILE:-dockerfile}
     container_name: spikster-app
     restart: unless-stopped
     working_dir: /var/www/html
     volumes:
-      - ./:/var/www/html:delegated
-      - ./storage:/var/www/html/storage:delegated
-      - ./bootstrap/cache:/var/www/html/bootstrap/cache:delegated
+      - app-data:/var/www/html/storage:delegated
+      - app-cache:/var/www/html/bootstrap/cache:delegated
     ports:
       - "${APP_PORT:-8000}:80"
     networks:
@@ -25,18 +22,18 @@ services:
     environment:
       APP_ENV: ${APP_ENV:-production}
       APP_DEBUG: ${APP_DEBUG:-false}
-      APP_KEY: ${APP_KEY}
+      APP_KEY: ${APP_KEY:?APP_KEY is required}
       APP_URL: ${APP_URL:-http://localhost}
 
       DB_CONNECTION: ${DB_CONNECTION:-mysql}
       DB_HOST: mysql
       DB_PORT: 3306
       DB_DATABASE: ${DB_DATABASE:-spikster}
-      DB_USERNAME: ${DB_USERNAME:-spikster}
-      DB_PASSWORD: ${DB_PASSWORD:-secret}
+      DB_USERNAME: ${DB_USERNAME:?DB_USERNAME is required}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
 
       REDIS_HOST: redis
-      REDIS_PASSWORD: ${REDIS_PASSWORD:-null}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
       REDIS_PORT: 6379
 
       CACHE_DRIVER: ${CACHE_DRIVER:-redis}
@@ -46,11 +43,15 @@ services:
       MAIL_MAILER: ${MAIL_MAILER:-smtp}
       MAIL_HOST: ${MAIL_HOST:-mailhog}
       MAIL_PORT: ${MAIL_PORT:-1025}
-      MAIL_USERNAME: ${MAIL_USERNAME:-null}
-      MAIL_PASSWORD: ${MAIL_PASSWORD:-null}
-      MAIL_ENCRYPTION: ${MAIL_ENCRYPTION:-null}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_ENCRYPTION: ${MAIL_ENCRYPTION:-tls}
       MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-hello@example.com}
       MAIL_FROM_NAME: ${MAIL_FROM_NAME:-Spikster}
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
     depends_on:
       mysql:
         condition: service_healthy
@@ -70,12 +71,12 @@ services:
     restart: unless-stopped
     command: --default-authentication-plugin=mysql_native_password
     ports:
-      - "${DB_PORT:-3306}:3306"
+      - "127.0.0.1:${DB_PORT:-3306}:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootsecret}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?DB_ROOT_PASSWORD is required}
       MYSQL_DATABASE: ${DB_DATABASE:-spikster}
-      MYSQL_USER: ${DB_USERNAME:-spikster}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_USER: ${DB_USERNAME:?DB_USERNAME is required}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
       MYSQL_ALLOW_EMPTY_PASSWORD: "no"
     volumes:
       - mysql-data:/var/lib/mysql
@@ -83,6 +84,13 @@ services:
       - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
     networks:
       - spikster
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETUID
+      - SETGID
+      - DAC_OVERRIDE
     healthcheck:
       test:
         [
@@ -90,10 +98,7 @@ services:
           "mysqladmin",
           "ping",
           "-h",
-          "localhost",
-          "-u",
-          "root",
-          "-p${DB_ROOT_PASSWORD:-rootsecret}",
+          "localhost"
         ]
       interval: 10s
       timeout: 5s
@@ -108,15 +113,19 @@ services:
     command: >
       redis-server
       --appendonly yes
-      --requirepass ${REDIS_PASSWORD:-}
+      --requirepass ${REDIS_PASSWORD}
       --maxmemory 256mb
       --maxmemory-policy allkeys-lru
-    ports:
-      - "${REDIS_PORT:-6379}:6379"
     volumes:
       - redis-data:/data
     networks:
       - spikster
+    cap_drop:
+      - ALL
+    cap_add:
+      - SETGID
+      - SETUID
+      - DAC_OVERRIDE
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -188,3 +197,9 @@ volumes:
   redis-data:
     driver: local
     name: spikster-redis-data
+  app-data:
+    driver: local
+    name: spikster-app-data
+  app-cache:
+    driver: local
+    name: spikster-app-cache

@@ -49,10 +49,12 @@ class RouteServiceProvider extends ServiceProvider
                 ->group(base_path('routes/auth.php'));
 
             Route::prefix('sh')
+                ->middleware('web')
                 ->namespace($this->namespace)
                 ->group(base_path('routes/sh.php'));
 
             Route::prefix('conf')
+                ->middleware('web')
                 ->namespace($this->namespace)
                 ->group(base_path('routes/conf.php'));
 
