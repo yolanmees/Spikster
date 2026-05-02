@@ -4,13 +4,15 @@ After=network.target
 
 [Service]
 Type=simple
+ExecStartPre=/bin/bash -c 'mkdir -p /var/run/spikster && chown root:www-data /var/run/spikster || true'
+ExecStartPre=/bin/rm -f /var/run/spikster.sock
 ExecStart=/usr/local/bin/spikster daemon
+ExecStartPost=/bin/chmod 770 /var/run/spikster.sock
+ExecStartPost=/bin/chgrp www-data /var/run/spikster.sock
 Restart=always
 RestartSec=5
 User=root
-# Unix socket accessible to www-data
 UMask=0007
-# TCP only on localhost — use SSH tunnel for remote access
 Environment="SPIKSTER_DAEMON_BIND=127.0.0.1:18999"
 
 [Install]
