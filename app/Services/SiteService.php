@@ -56,8 +56,10 @@ class SiteService
     public function createSite(array $data): Site
     {
         // Get server instance - lookup by UUID string server_id
-        $serverId = $data['server_id'];
-        $server = Server::where('server_id', $serverId)->firstOrFail();
+        $server = Server::find($data['server_id']);
+        if (!$server) {
+            throw new \RuntimeException('Server not found with id: ' . $data['server_id']);
+        }
 
         // Ensure server_id is set correctly as the internal database ID
         $data['server_id'] = $server->id;
