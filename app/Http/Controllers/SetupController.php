@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Server;
 use App\Models\SetupToken;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -48,6 +49,21 @@ class SetupController extends Controller
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
+            ]);
+        }
+
+        // Create initial panel server if none exists
+        if (Server::count() === 0) {
+            $serverIp = $request->getHttpHost() ?: gethostbyname(gethostname());
+            Server::create([
+                'server_id' => 'srv_' . Str::random(16),
+                'name' => gethostname() ?: 'Main Server',
+                'ip' => $serverIp ?: '127.0.0.1',
+                'password' => Str::random(24),
+                'database' => Str::random(24),
+                'provider' => 'manual',
+                'status' => 1,
+                'default' => true,
             ]);
         }
 
