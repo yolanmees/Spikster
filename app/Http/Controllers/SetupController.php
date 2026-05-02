@@ -54,7 +54,7 @@ class SetupController extends Controller
 
         // Create initial panel server if none exists
         if (Server::count() === 0) {
-            $serverIp = $request->getHttpHost() ?: gethostbyname(gethostname());
+            $serverIp = $request->getHttpHost() ?: (gethostbyname(gethostname()) !== gethostname() ? gethostbyname(gethostname()) : '127.0.0.1');
             Server::create([
                 'server_id' => 'srv_' . Str::random(16),
                 'name' => gethostname() ?: 'Main Server',

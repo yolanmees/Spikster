@@ -1119,7 +1119,7 @@ class ServerController extends Controller
         try {
             // Try to ping the server's API logs endpoint (lightweight check)
             $startTime = microtime(true);
-            $remote = Http::timeout(5)->get('http://'.$server->ip.'/api/logs');
+            $remote = Http::timeout(5)->get('http://'.$server->ip.'/api/health');
             $responseTime = round((microtime(true) - $startTime) * 1000); // Convert to milliseconds
 
             if ($remote->successful()) {
