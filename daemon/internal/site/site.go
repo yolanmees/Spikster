@@ -49,7 +49,6 @@ func Create(s Site) error {
 		{"write welcome page", func() error { return writeWelcome(s) }},
 		{"write nginx config", func() error { return writeNginxConfig(s) }},
 		{"write php-fpm pool", func() error { return WritePHPPool(s) }},
-		{"reload nginx", func() error { return reloadService("nginx") }},
 		{"reload php-fpm", func() error { return reloadService(fmt.Sprintf("php%s-fpm", s.PHP)) }},
 		{"create database", func() error { return createDatabase(s) }},
 		{"set permissions", func() error { return setPermissions(s) }},
@@ -84,7 +83,7 @@ func Delete(s Site) error {
 
 func createUser(s Site) error {
 	if run("id", s.Username) == nil {
-		return nil // already exists
+		return fmt.Errorf("user %s already exists", s.Username)
 	}
 	if err := run("useradd", "-m", "-s", "/bin/bash", "-d", "/home/"+s.Username, "-G", "www-data", s.Username); err != nil {
 		return err
@@ -184,7 +183,7 @@ func WriteCustomNginxConfig(s Site) error {
 	if err := run("nginx", "-t"); err != nil {
 		return fmt.Errorf("nginx config test failed: %w", err)
 	}
-	return reloadService("nginx")
+	return nil
 }
 
 func WritePHPPool(s Site) error {
@@ -193,6 +192,10 @@ func WritePHPPool(s Site) error {
 
 func ReloadPHP(s Site) error {
 	return reloadService(fmt.Sprintf("php%s-fpm", s.PHP))
+}
+
+func ReloadNginx() error {
+	return reloadService("nginx")
 }
 
 func createDatabase(s Site) error {
@@ -238,11 +241,16 @@ func runWithDBPass(pass, sql string) error {
 
 func setPermissions(s Site) error {
 	home := "/home/" + s.Username
-	run("chown", "-R", s.Username+":www-data", home)
-	run("chmod", "755", home)
-	run("find", home+"/web", "-type", "d", "-exec", "chmod", "755", "{}", "+")
-	run("find", home+"/web", "-type", "f", "-exec", "chmod", "644", "{}", "+")
-	return nil
+	if err := run("chown", "-R", s.Username+":www-data", home); err != nil {
+		return err
+	}
+	if err := run("chmod", "755", home); err != nil {
+		return err
+	}
+	if err := run("find", home+"/web", "-type", "d", "-exec", "chmod", "755", "{}", "+"); err != nil {
+		return err
+	}
+	return run("find", home+"/web", "-type", "f", "-exec", "chmod", "644", "{}", "+")
 }
 
 func reloadService(service string) error {

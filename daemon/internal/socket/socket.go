@@ -242,6 +242,9 @@ func dispatch(req Request) (string, error) {
 		if err := site.WriteCustomNginxConfig(s); err != nil {
 			return "", err
 		}
+		if err := site.ReloadNginx(); err != nil {
+			return "", err
+		}
 		return "nginx config updated", nil
 
 	// ── Spikster password reset ───────────────────────────────────────────────

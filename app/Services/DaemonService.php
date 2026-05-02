@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Log;
+
 /**
  * DaemonService
  *
@@ -23,35 +25,121 @@ class DaemonService
      */
     public function send(string $action, array $params = []): array
     {
+        $startTime = microtime(true);
+
+        Log::info('DaemonService: sending request', [
+            'action' => $action,
+            'params_keys' => array_keys($params),
+        ]);
+
         if (! file_exists($this->socketPath)) {
+            Log::error('DaemonService: socket file not found', [
+                'socket_path' => $this->socketPath,
+                'action' => $action,
+            ]);
             throw new \Exception('Spikster daemon is not running.');
         }
 
-        $socket = stream_socket_client("unix://{$this->socketPath}", $errno, $errstr, 10);
+        $socket = @stream_socket_client("unix://{$this->socketPath}", $errno, $errstr, 10);
 
         if (! $socket) {
+            Log::error('DaemonService: connection failed', [
+                'socket_path' => $this->socketPath,
+                'errno' => $errno,
+                'errstr' => $errstr,
+                'action' => $action,
+            ]);
             throw new \Exception("Cannot connect to daemon: {$errstr}");
         }
 
-        // Allow up to 60s for long-running operations (site create, ssl, backup)
         stream_set_timeout($socket, 60);
 
-        // Authenticate with daemon token before sending the payload
         $token = config('spikster.daemon_token');
+
+        if (empty($token)) {
+            Log::warning('DaemonService: empty daemon token in config');
+        }
+
         fwrite($socket, "TOKEN {$token}\n");
 
         $payload = json_encode(['action' => $action, 'params' => $params]);
         fwrite($socket, $payload);
 
         $response = '';
+        $chunkCount = 0;
+        $readTimeout = false;
+
         while (! feof($socket)) {
-            $response .= fread($socket, 4096);
+            $chunk = @fread($socket, 4096);
+
+            if ($chunk === false) {
+                $meta = stream_get_meta_data($socket);
+                if ($meta['timed_out']) {
+                    $readTimeout = true;
+                    Log::error('DaemonService: socket read timed out after 60s', [
+                        'action' => $action,
+                        'bytes_read' => strlen($response),
+                        'chunks_read' => $chunkCount,
+                    ]);
+                }
+                break;
+            }
+
+            if ($chunk === '') {
+                break;
+            }
+
+            $response .= $chunk;
+            $chunkCount++;
         }
         fclose($socket);
 
+        $elapsed = round((microtime(true) - $startTime) * 1000);
+
+        if ($readTimeout) {
+            Log::error('DaemonService: daemon did not respond in time', [
+                'action' => $action,
+                'elapsed_ms' => $elapsed,
+                'partial_response' => substr($response, 0, 500),
+            ]);
+            throw new \Exception('Daemon did not respond in time (60s timeout). The server may be overloaded.');
+        }
+
+        if ($response === '') {
+            Log::error('DaemonService: empty response', [
+                'action' => $action,
+                'elapsed_ms' => $elapsed,
+            ]);
+            throw new \Exception('Daemon returned an empty response.');
+        }
+
         $decoded = json_decode($response, true);
+
         if (! $decoded) {
+            Log::error('DaemonService: invalid JSON response', [
+                'action' => $action,
+                'elapsed_ms' => $elapsed,
+                'raw_response' => substr($response, 0, 1000),
+            ]);
             throw new \Exception('Invalid response from daemon.');
+        }
+
+        $success = $decoded['success'] ?? false;
+        $error = $decoded['error'] ?? '';
+
+        Log::info('DaemonService: request completed', [
+            'action' => $action,
+            'elapsed_ms' => $elapsed,
+            'success' => $success,
+            'error' => $error,
+        ]);
+
+        if (! $success && $error) {
+            Log::error('DaemonService: daemon returned error', [
+                'action' => $action,
+                'error' => $error,
+                'output' => $decoded['output'] ?? '',
+            ]);
         }
 
         return $decoded;

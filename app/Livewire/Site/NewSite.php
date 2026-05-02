@@ -4,6 +4,7 @@ namespace App\Livewire\Site;
 
 use App\Services\ServerService;
 use App\Services\SiteService;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
@@ -59,7 +60,6 @@ class NewSite extends Component
      */
     public function submit(SiteService $siteService, ServerService $serverService): void
     {
-        // Prevent double submission
         if ($this->isSubmitting) {
             return;
         }
@@ -67,10 +67,14 @@ class NewSite extends Component
         $this->isSubmitting = true;
 
         try {
-            // Validate the form
             $validated = $this->validate();
 
-            // Create site directly (sync queue may silently swallow exceptions)
+            Log::info('Site creation form submitted', [
+                'domain' => strtolower($validated['domain']),
+                'server_id' => $validated['serverId'],
+                'php' => $validated['php'],
+            ]);
+
             $siteService->createSite([
                 'server_id' => (int) $validated['serverId'],
                 'domain' => strtolower($validated['domain']),
@@ -80,23 +84,40 @@ class NewSite extends Component
                 'branch' => ! empty($validated['branch']) ? $validated['branch'] : null,
             ]);
 
-            // Flash success message
             session()->flash('success', 'Site created successfully!');
 
-            // Dispatch event to refresh site list
             $this->dispatch('site-created');
-
-            // Dispatch event to close modal
             $this->dispatch('close-modal');
 
-            // Reset form
             $this->resetForm($serverService);
         } catch (ValidationException $e) {
-            // Re-throw validation exceptions
+            Log::info('Site creation: validation failed', [
+                'errors' => $e->errors(),
+            ]);
             throw $e;
         } catch (\Exception $e) {
-            // Flash error message
-            session()->flash('error', 'Error creating site: '.$e->getMessage());
+            Log::error('Site creation failed', [
+                'message' => $e->getMessage(),
+                'exception' => get_class($e),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
+            $errorMessage = $e->getMessage();
+
+            // Give more helpful messages for common failures
+            if (str_contains($errorMessage, 'daemon is not running')) {
+                $errorMessage = 'The Spikster daemon is not running on the server. Please contact your system administrator.';
+            } elseif (str_contains($errorMessage, 'Cannot connect to daemon')) {
+                $errorMessage = 'The Spikster daemon is not responding. Please check that the daemon service is running on the target server.';
+            } elseif (str_contains($errorMessage, 'did not respond in time')) {
+                $errorMessage = 'The server timed out while creating the site. The server may be overloaded — please try again.';
+            } elseif (str_contains($errorMessage, 'Invalid response')) {
+                $errorMessage = 'The daemon returned an unexpected response. Please check the server logs.';
+            }
+
+            session()->flash('error', 'Error creating site: '.$errorMessage);
+            $this->dispatch('flash-error', message: 'Error creating site: '.$errorMessage);
         } finally {
             $this->isSubmitting = false;
         }

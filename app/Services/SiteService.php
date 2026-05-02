@@ -7,6 +7,7 @@ use App\Models\Server;
 use App\Models\Site;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 /**
@@ -55,11 +56,32 @@ class SiteService
      */
     public function createSite(array $data): Site
     {
+        Log::info('SiteService: starting site creation', [
+            'domain' => $data['domain'] ?? 'unknown',
+            'server_id' => $data['server_id'] ?? 'unknown',
+            'php' => $data['php'] ?? 'default',
+        ]);
+
+        // Bump PHP time limit — daemon provisioning (useradd, chpasswd, mkdir,
+        // nginx config, php-fpm pool, systemctl reload, mysql) can exceed 30s
+        // on slow VPS instances.
+        $previousTimeLimit = ini_get('max_execution_time');
+        set_time_limit(120);
+
         // Get server instance - lookup by UUID string server_id
         $server = Server::find($data['server_id']);
-        if (!$server) {
-            throw new \RuntimeException('Server not found with id: ' . $data['server_id']);
+        if (! $server) {
+            Log::error('SiteService: server not found', [
+                'server_id' => $data['server_id'],
+            ]);
+            throw new \RuntimeException('Server not found with id: '.$data['server_id']);
         }
+
+        Log::info('SiteService: server found', [
+            'server_name' => $server->name,
+            'server_ip' => $server->ip,
+            'server_id_db' => $server->id,
+        ]);
 
         // Ensure server_id is set correctly as the internal database ID
         $data['server_id'] = $server->id;
@@ -87,6 +109,13 @@ class SiteService
         $data['panel'] = $data['panel'] ?? false;
         $data['deploy'] = $data['deploy'] ?? ' ';
 
+        Log::info('SiteService: generated site credentials', [
+            'site_id' => $data['site_id'],
+            'username' => $data['username'],
+            'php' => $data['php'],
+            'basepath' => $data['basepath'],
+        ]);
+
         // Call the daemon first — if it fails we never write to the DB
         $daemonParams = [
             'id' => $data['site_id'],
@@ -97,13 +126,32 @@ class SiteService
             'db_pass' => $data['database'],
             'db_root' => config('database.connections.mysql.password'),
             'php' => $data['php'],
-            'basepath' => $data['basepath'] ?? '',
+            'basepath' => $data['basepath'],
         ];
 
+        Log::info('SiteService: calling daemon to provision site', [
+            'site_id' => $data['site_id'],
+            'domain' => $data['domain'],
+            'db_root_set' => ! empty($daemonParams['db_root']),
+        ]);
+
+        $daemonStart = microtime(true);
         $daemon = app(DaemonService::class);
         $success = $daemon->createSite($daemonParams);
+        $daemonElapsed = round((microtime(true) - $daemonStart) * 1000);
+
+        Log::info('SiteService: daemon call completed', [
+            'site_id' => $data['site_id'],
+            'success' => $success,
+            'elapsed_ms' => $daemonElapsed,
+        ]);
 
         if (! $success) {
+            Log::error('SiteService: daemon failed to create site', [
+                'site_id' => $data['site_id'],
+                'domain' => $data['domain'],
+                'elapsed_ms' => $daemonElapsed,
+            ]);
             throw new \RuntimeException('Daemon failed to create site on the server.');
         }
 
@@ -111,14 +159,32 @@ class SiteService
         // Wrap in try/catch so we can attempt cleanup if DB write fails
         try {
             $site = Site::create($data);
-        } catch (\Throwable $e) {
-            // Best-effort: remove what we just created on the server
-            $daemon->deleteSite([
-                'username' => $data['username'],
-                'db_name' => $data['username'],
-                'db_root' => config('database.connections.mysql.password'),
-                'php' => $data['php'],
+            Log::info('SiteService: site record created in database', [
+                'site_id' => $site->site_id,
+                'domain' => $site->domain,
+                'db_id' => $site->id,
             ]);
+        } catch (\Throwable $e) {
+            Log::error('SiteService: database insert failed after daemon success', [
+                'site_id' => $data['site_id'],
+                'domain' => $data['domain'],
+                'error' => $e->getMessage(),
+            ]);
+
+            // Best-effort: remove what we just created on the server
+            try {
+                $daemon->deleteSite([
+                    'username' => $data['username'],
+                    'db_name' => $data['username'],
+                    'db_root' => config('database.connections.mysql.password'),
+                    'php' => $data['php'],
+                ]);
+                Log::info('SiteService: cleanup after DB failure completed');
+            } catch (\Throwable $cleanupError) {
+                Log::error('SiteService: cleanup after DB failure also failed', [
+                    'error' => $cleanupError->getMessage(),
+                ]);
+            }
             throw $e;
         }
 
@@ -127,6 +193,15 @@ class SiteService
             'site_id' => $site->site_id,
             'domain' => $site->domain,
             'server_id' => $site->server_id,
+        ]);
+
+        // Restore original time limit
+        set_time_limit((int) $previousTimeLimit);
+
+        Log::info('SiteService: site creation completed successfully', [
+            'site_id' => $site->site_id,
+            'domain' => $site->domain,
+            'total_elapsed_ms' => round((microtime(true) - LARAVEL_START) * 1000),
         ]);
 
         return $site;
