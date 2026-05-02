@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Site;
 
-use App\Jobs\CreateSiteJob;
 use App\Services\ServerService;
 use App\Services\SiteService;
 use Illuminate\Validation\ValidationException;
@@ -71,21 +70,18 @@ class NewSite extends Component
             // Validate the form
             $validated = $this->validate();
 
-            // Dispatch site creation as background job (avoids 502 from php-fpm reload)
-            CreateSiteJob::dispatch(
-                [
-                    'server_id' => (int) $validated['serverId'],
-                    'domain' => strtolower($validated['domain']),
-                    'php' => $validated['php'],
-                    'basepath' => $validated['basepath'] ?? '/public',
-                    'repository' => ! empty($validated['repository']) ? $validated['repository'] : null,
-                    'branch' => ! empty($validated['branch']) ? $validated['branch'] : null,
-                ],
-                auth()->id() ?? 0,
-            );
+            // Create site directly (sync queue may silently swallow exceptions)
+            $siteService->createSite([
+                'server_id' => (int) $validated['serverId'],
+                'domain' => strtolower($validated['domain']),
+                'php' => $validated['php'],
+                'basepath' => $validated['basepath'] ?? '/public',
+                'repository' => ! empty($validated['repository']) ? $validated['repository'] : null,
+                'branch' => ! empty($validated['branch']) ? $validated['branch'] : null,
+            ]);
 
             // Flash success message
-            session()->flash('success', 'Site is being created. It will appear shortly.');
+            session()->flash('success', 'Site created successfully!');
 
             // Dispatch event to refresh site list
             $this->dispatch('site-created');
