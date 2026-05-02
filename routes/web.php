@@ -5,7 +5,6 @@ use App\Http\Controllers\FileManagerController;
 use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\NodejsController;
 use App\Http\Controllers\SetupController;
-use App\Http\Controllers\SiteController;
 use App\Models\Site;
 use Illuminate\Support\Facades\Route;
 
@@ -28,10 +27,6 @@ Route::get('/', function () {
     return 'Domain/Subdomain not configured on this Server!';
 });
 
-// Route::get('/login', function () {
-//     return view('login');
-// })->name('login');
-
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])->group(function () {
 
     Route::get('/dashboard', function () {
@@ -49,8 +44,6 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
 
     // phpmyadmin route with autologin
     Route::get('/autopma/{site_id}', [NodejsController::class, 'autoLoginPMA'])->name('autopma');
-
-    Route::get('/pdf/{site_id}/{token}', [SiteController::class, 'pdf']);
 
     Route::get('files/{folder_name?}', [FileManagerController::class, 'index'])->where('folder_name', '(.*)')->name('files.index');
     Route::post('files/view', [FileManagerController::class, 'show'])->name('files.show');

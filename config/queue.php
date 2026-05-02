@@ -113,21 +113,6 @@ return [
             'max_attempts' => 2,
             'backoff' => [30, 120],
         ],
-        \App\Jobs\Backup\CreateFullBackupSSH::class => [
-            'retry_after' => 1200,
-            'max_attempts' => 2,
-            'backoff' => [60, 300],
-        ],
-        \App\Jobs\Backup\UploadToS3SSH::class => [
-            'retry_after' => 1800,
-            'max_attempts' => 3,
-            'backoff' => [60, 300, 600],
-        ],
-        \App\Jobs\Backup\EncryptBackup::class => [
-            'retry_after' => 600,
-            'max_attempts' => 2,
-            'backoff' => [30, 120],
-        ],
     ],
 
 ];
