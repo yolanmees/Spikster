@@ -140,6 +140,10 @@ mkdir -p /etc/spikster
 echo -n "${DAEMON_TOKEN}" > /etc/spikster/daemon.token
 chmod 600 /etc/spikster/daemon.token
 
+echo -n "${DB_SPIKSTER_PASS}" > /etc/spikster/db.pass
+chmod 600 /etc/spikster/db.pass
+chmod 600 /etc/spikster/daemon.token
+
 # Systemd service
 cp ${APP_DIR}/daemon/systemd/spikster-daemon.service /etc/systemd/system/
 systemctl daemon-reload
