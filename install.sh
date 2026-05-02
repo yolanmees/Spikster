@@ -148,7 +148,28 @@ systemctl start spikster-daemon 2>/dev/null
 log "Spikster daemon running"
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 9. Cache & permissions
+# 9. Spikster monitoring agent
+# ─────────────────────────────────────────────────────────────────────────────
+info "Installing monitoring agent..."
+cp ${APP_DIR}/spikster-agent/spikster-agent /usr/local/bin/spikster-agent
+chmod +x /usr/local/bin/spikster-agent
+id -u spikster &>/dev/null || useradd -r -s /bin/false spikster
+cp ${APP_DIR}/spikster-agent/spikster-agent.service /etc/systemd/system/
+systemctl daemon-reload
+systemctl enable spikster-agent 2>/dev/null
+systemctl start spikster-agent 2>/dev/null
+log "Monitoring agent running (port 9273)"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 10. Laravel scheduler cron
+# ─────────────────────────────────────────────────────────────────────────────
+info "Setting up metrics scheduler..."
+echo "* * * * * cd ${APP_DIR} && php artisan schedule:run >> /dev/null 2>&1" > /etc/cron.d/spikster
+chmod 644 /etc/cron.d/spikster
+log "Metrics collection scheduled (every minute)"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 11. Cache & permissions
 # ─────────────────────────────────────────────────────────────────────────────
 php artisan config:cache 2>/dev/null
 php artisan route:cache 2>/dev/null
