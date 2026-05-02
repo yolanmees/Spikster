@@ -43,6 +43,11 @@ return [
             'provider' => 'users',
         ],
 
+        'sanctum' => [
+            'driver' => 'sanctum',
+            'provider' => 'users',
+        ],
+
         'api' => [
             'driver' => 'token',
             'provider' => 'users',

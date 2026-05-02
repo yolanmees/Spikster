@@ -3,12 +3,14 @@
 namespace App\Http\Middleware;
 
 use App\Models\Auth;
+use App\Models\User;
 use Closure;
 use Exception;
 use Firebase\JWT\ExpiredException;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth as AuthFacade;
 use Illuminate\Support\Str;
 
 /**
@@ -33,8 +35,8 @@ class CipiAuth
 
         // Try Sanctum first if the bearer token is a valid Sanctum token
         if ($auth && Str::startsWith($auth, 'Bearer ')
-            && $user = \Illuminate\Support\Facades\Auth::guard('sanctum')->user()) {
-            $request->setUserResolver(fn () => $user);
+            && $user = AuthFacade::guard('sanctum')->user()) {
+            $this->setAuthenticatedUser($request, $user);
 
             return $next($request);
         }
@@ -60,6 +62,7 @@ class CipiAuth
         if ($token) {
             try {
                 JWT::decode($token, new Key(config('cipi.jwt_secret'), 'HS256'));
+                $this->resolveLegacyUser($request);
             } catch (ExpiredException $e) {
                 return response()->json([
                     'message' => 'Given token is expired.',
@@ -80,8 +83,44 @@ class CipiAuth
                     'errors' => 'Invalid API Key.',
                 ], 401);
             }
+
+            $this->resolveLegacyUser($request);
         }
 
+        $request->attributes->set('auth_source', 'legacy_cipi');
+
         return $next($request);
+    }
+
+    /**
+     * Set the authenticated user on the request and auth guard.
+     */
+    private function setAuthenticatedUser(Request $request, \Illuminate\Contracts\Auth\Authenticatable $user): void
+    {
+        AuthFacade::setUser($user);
+        $request->setUserResolver(fn () => $user);
+    }
+
+    /**
+     * Resolve a User model for legacy Cipi JWT/API-key auth.
+     *
+     * Prioritises the panel admin email (CIPI_USERNAME), then the first Super Admin,
+     * then the first User in the database.
+     */
+    private function resolveLegacyUser(Request $request): void
+    {
+        if ($request->user()) {
+            return;
+        }
+
+        $user = User::where('email', config('cipi.username'))->first()
+            ?? (method_exists(User::class, 'role')
+                ? User::role('Super Admin')->first()
+                : null)
+            ?? User::first();
+
+        if ($user) {
+            $this->setAuthenticatedUser($request, $user);
+        }
     }
 }

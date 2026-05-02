@@ -40,7 +40,7 @@ class SecurityHeaders
         $reverbPort = config('reverb.servers.reverb.port', 8080);
         $wsHosts = app()->environment('local')
             ? "ws://localhost:* wss://localhost:* ws://127.0.0.1:* wss://127.0.0.1:* ws://{$reverbHost}:{$reverbPort} wss://{$reverbHost}:{$reverbPort}"
-            : "ws://{$reverbHost}:{$reverbPort} wss://{$reverbHost}:{$reverbPort}";
+            : "ws://{$reverbHost}:{$reverbPort} wss://{$reverbHost}:{$reverbPort} ws://localhost:{$reverbPort} wss://localhost:{$reverbPort}";
 
         $vitePort = env('VITE_PORT', 5173);
         $viteSrc = app()->environment('local')
@@ -48,7 +48,7 @@ class SecurityHeaders
             : '';
 
         $csp = "default-src 'self'; "
-            ."script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://cdn.datatables.net {$viteSrc}; "
+            ."script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://cdn.datatables.net https://code.jquery.com {$viteSrc}; "
             ."style-src 'self' 'unsafe-inline' https://cdn.datatables.net https://fonts.cdnfonts.com https://cdnjs.cloudflare.com {$viteSrc}; "
             ."img-src 'self' data: https:; "
             ."font-src 'self' data: https://fonts.cdnfonts.com https://cdnjs.cloudflare.com {$viteSrc}; "

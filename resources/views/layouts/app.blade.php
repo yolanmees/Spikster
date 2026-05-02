@@ -36,6 +36,7 @@
     </script>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
     <script>
@@ -195,7 +196,7 @@
             use Firebase\JWT\JWT;
             try {
                 $jwtSecret = config('cipi.jwt_secret');
-                $jwtToken = JWT::encode(['iat' => time(), 'exp' => time() + 900], $jwtSecret . '-Acs', 'HS256');
+                $jwtToken = JWT::encode(['iat' => time(), 'exp' => time() + (int) config('cipi.jwt_access', 900)], $jwtSecret, 'HS256');
             } catch (\Throwable $e) {
                 $jwtToken = '';
             }
@@ -203,6 +204,60 @@
         @if($jwtToken)
         localStorage.setItem('access_token', '{{ $jwtToken }}');
         @endif
+    </script>
+    <script>
+        // Global API helper — wraps fetch() with automatic auth header.
+        // Usage: api('/api/servers') → GET with JSON
+        //        api('/api/sites/1', 'POST', { domain: 'example.com' }) → POST with JSON body
+        //        api('/api/sites/1', 'PATCH', { php: '8.3' }) → PATCH with JSON body
+        async function api(url, method = 'GET', data = null) {
+            const opts = {
+                method,
+                headers: {
+                    'Authorization': 'Bearer ' + localStorage.getItem('access_token') || '',
+                    'Accept': 'application/json',
+                },
+            };
+            if (data) {
+                opts.headers['Content-Type'] = 'application/json';
+                opts.body = JSON.stringify(data);
+            }
+            const res = await fetch(url, opts);
+            if (res.status === 401) {
+                localStorage.clear();
+                window.location.replace('/login');
+                throw new Error('Unauthorized — redirecting to login');
+            }
+            if (!res.ok) {
+                const text = await res.text();
+                throw new Error(text || res.statusText);
+            }
+            return res.json();
+        }
+
+        // jQuery — global AJAX setup for pages that still use $.ajax
+        if (typeof $ !== 'undefined') {
+            $.ajaxSetup({
+                cache: false,
+                headers: {
+                    'Authorization': 'Bearer ' + localStorage.getItem('access_token') || '',
+                    'Accept': 'application/json',
+                },
+                error: function(xhr) {
+                    if (xhr.status === 401) {
+                        localStorage.clear();
+                        window.location.reload();
+                    }
+                },
+            });
+
+            // Legacy helpers (used by server/edit pages)
+            window.getDataNoDT = function(url) {
+                $.ajax({ type: 'GET', url, success: function(data) {
+                    try { localStorage.otherdata = JSON.stringify(data); } catch(e) {}
+                }});
+            };
+        }
     </script>
     @stack('scripts')
     @yield('js')

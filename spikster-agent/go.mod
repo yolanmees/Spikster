@@ -3,9 +3,9 @@ module github.com/spikster/agent
 go 1.23.0
 
 require (
-	github.com/shirou/gopsutil/v3 v3.23.12
 	github.com/go-chi/chi/v5 v5.0.11
 	github.com/go-chi/cors v1.2.1
+	github.com/shirou/gopsutil/v3 v3.23.12
 )
 
 require (
