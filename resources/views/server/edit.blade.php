@@ -156,6 +156,29 @@
         setInterval(getPing, 10000);
         getPing();
 
+        // Update stat summary cards from latest metrics
+        function refreshStats() {
+            fetch('/api/servers/{{ $server_id }}/metrics?hours=1', {
+                headers: { 'Authorization': 'Bearer ' + (localStorage.getItem('sanctum_token') || ''), 'Accept': 'application/json' }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data && data.labels && data.labels.length > 0) {
+                    const i = data.labels.length - 1;
+                    const cpuEl = document.getElementById('stat-cpu');
+                    const memEl = document.getElementById('stat-mem');
+                    const loadEl = document.getElementById('stat-load');
+                    const diskEl = document.getElementById('stat-disk');
+                    if (cpuEl && data.cpu && data.cpu[i] !== undefined) cpuEl.textContent = data.cpu[i].toFixed(1) + '%';
+                    if (memEl && data.memory && data.memory[i] !== undefined) memEl.textContent = data.memory[i].toFixed(1) + '%';
+                    if (loadEl && data.load && data.load[i] !== undefined) loadEl.textContent = data.load[i].toFixed(2);
+                    if (diskEl && data.disk && data.disk[i] !== undefined) diskEl.textContent = data.disk[i].toFixed(1) + '%';
+                }
+            }).catch(() => {});
+        }
+        setInterval(refreshStats, 15000);
+        setTimeout(refreshStats, 2000);
+
         // Change PHP CLI
         const changePhpBtn = document.getElementById('changephp');
         if (changePhpBtn) {
