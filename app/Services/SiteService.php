@@ -95,7 +95,7 @@ class SiteService
             'password' => $data['password'],
             'db_name' => $data['username'],
             'db_pass' => $data['database'],
-            'db_root' => env('DB_ROOT_PASS', $server->database),
+            'db_root' => config('database.connections.mysql.password'),
             'php' => $data['php'],
             'basepath' => $data['basepath'] ?? '',
         ];
@@ -116,7 +116,7 @@ class SiteService
             $daemon->deleteSite([
                 'username' => $data['username'],
                 'db_name' => $data['username'],
-                'db_root' => env('DB_ROOT_PASS', $server->database),
+                'db_root' => config('database.connections.mysql.password'),
                 'php' => $data['php'],
             ]);
             throw $e;
