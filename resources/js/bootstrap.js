@@ -34,4 +34,14 @@ if (import.meta.env.VITE_REVERB_APP_KEY) {
         enabledTransports: ['ws', 'wss'],
         disableStats: true,
     });
+
+    // Suppress Pusher connection errors in console when Reverb is misconfigured.
+    // The app works without WebSockets — Livewire events handle UI updates synchronously.
+    if (window.Pusher && window.Pusher.instances) {
+        Object.values(window.Pusher.instances).forEach((instance) => {
+            if (instance.connection && instance.connection.bind) {
+                instance.connection.bind('error', () => {});
+            }
+        });
+    }
 }
