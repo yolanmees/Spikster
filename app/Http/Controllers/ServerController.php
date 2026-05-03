@@ -1421,11 +1421,12 @@ class ServerController extends Controller
 
         $this->authorize('viewSites', $server);
 
-        $sites = Site::where('panel', false)->where('server_id', $server->id)->get();
-        $response = [];
+        $sites = Site::where('panel', false)
+            ->where('server_id', $server->id)
+            ->paginate(25);
 
-        foreach ($sites as $site) {
-            $data = [
+        $sites->getCollection()->transform(function ($site) {
+            return [
                 'site_id' => $site->site_id,
                 'domain' => $site->domain,
                 'username' => $site->username,
@@ -1433,10 +1434,9 @@ class ServerController extends Controller
                 'basepath' => $site->basepath,
                 'aliases' => count($site->aliases),
             ];
-            array_push($response, $data);
-        }
+        });
 
-        return response()->json($response);
+        return response()->json($sites);
     }
 
     /**
