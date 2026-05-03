@@ -26,6 +26,17 @@ DAEMON_TOKEN=$(openssl rand -hex 32)
 APP_DIR="/var/www/spikster"
 
 # ─────────────────────────────────────────────────────────────────────────────
+# 0. Swap (needed on 1GB droplets for composer)
+# ─────────────────────────────────────────────────────────────────────────────
+if [ ! -f /swapfile ]; then
+    fallocate -l 2G /swapfile 2>/dev/null || dd if=/dev/zero of=/swapfile bs=1M count=2048 2>/dev/null
+    chmod 600 /swapfile
+    mkswap /swapfile >/dev/null
+    swapon /swapfile
+    echo '/swapfile none swap sw 0 0' >> /etc/fstab
+fi
+
+# ─────────────────────────────────────────────────────────────────────────────
 # 1. System packages
 # ─────────────────────────────────────────────────────────────────────────────
 info "Installing system packages..."
