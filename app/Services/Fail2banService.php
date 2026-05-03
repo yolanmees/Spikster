@@ -40,7 +40,7 @@ class Fail2banService
             $banned = $this->getBannedIps($server);
             $jails  = [];
             foreach ($banned as $entry) {
-                $jail = $entry['jail'] ?? 'sshd';
+                $jail = $entry[1] ?? 'sshd';
                 if (! in_array($jail, array_column($jails, 'name'))) {
                     $jails[] = ['name' => $jail];
                 }
@@ -102,7 +102,7 @@ class Fail2banService
     {
         return array_values(array_filter(
             $this->getBannedIps($server),
-            fn($b) => ($b['ip'] ?? '') === $ip
+            fn($b) => ($b[0] ?? '') === $ip
         ));
     }
 
@@ -155,7 +155,7 @@ class Fail2banService
         $banned = $this->getBannedIps($server);
         $stats  = [];
         foreach ($banned as $entry) {
-            $jail = $entry['jail'] ?? 'unknown';
+            $jail = $entry[1] ?? 'unknown';
             $stats[$jail] = ($stats[$jail] ?? 0) + 1;
         }
         return $stats;
@@ -208,7 +208,6 @@ class Fail2banService
 
         // Python dict format: [{'jail': ['ip1', 'ip2']}, ...]
         if (str_starts_with($output, '[')) {
-            // Extract all jail:'ip' pairs
             preg_match_all("/'([^']+)':\s*\[([^\]]*)\]/", $output, $jailMatches, PREG_SET_ORDER);
             foreach ($jailMatches as $match) {
                 $jail     = $match[1];
@@ -216,7 +215,7 @@ class Fail2banService
                 preg_match_all("/'([^']+)'/", $ipString, $ipMatches);
                 foreach ($ipMatches[1] as $ip) {
                     if (filter_var($ip, FILTER_VALIDATE_IP)) {
-                        $ips[] = ['ip' => $ip, 'jail' => $jail];
+                        $ips[] = [$ip, $jail, null]; // [ip, jail, timestamp]
                     }
                 }
             }
@@ -227,7 +226,7 @@ class Fail2banService
         foreach (array_filter(explode("\n", $output)) as $line) {
             $parts = preg_split('/[\s|]+/', trim($line), 2);
             if (! empty($parts[0]) && filter_var($parts[0], FILTER_VALIDATE_IP)) {
-                $ips[] = ['ip' => $parts[0], 'jail' => $parts[1] ?? 'unknown'];
+                $ips[] = [$parts[0], $parts[1] ?? 'unknown', null];
             }
         }
 
