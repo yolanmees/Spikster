@@ -167,7 +167,32 @@ systemctl start spikster-agent 2>/dev/null
 log "Monitoring agent running (port 9273)"
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 10. Laravel scheduler cron
+# 10. Queue worker
+# ─────────────────────────────────────────────────────────────────────────────
+info "Setting up queue worker..."
+cat > /etc/systemd/system/spikster-queue.service << 'QEOF'
+[Unit]
+Description=Spikster Queue Worker
+After=network.target mysql.service
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/spikster
+ExecStart=/usr/bin/php artisan queue:work --sleep=3 --tries=3 --timeout=120
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+QEOF
+systemctl daemon-reload
+systemctl enable spikster-queue 2>/dev/null
+systemctl start spikster-queue 2>/dev/null
+log "Queue worker running"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 11. Laravel scheduler cron
 # ─────────────────────────────────────────────────────────────────────────────
 info "Setting up metrics scheduler..."
 echo "* * * * * cd ${APP_DIR} && php artisan schedule:run >> /dev/null 2>&1" > /etc/cron.d/spikster
