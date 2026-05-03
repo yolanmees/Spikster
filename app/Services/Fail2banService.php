@@ -24,14 +24,7 @@ class Fail2banService
             if (! ($result['success'] ?? false)) {
                 return [];
             }
-            // Output is newline-separated "ip jail" pairs
-            $lines = array_filter(explode("\n", trim($result['output'] ?? '')));
-            $ips   = [];
-            foreach ($lines as $line) {
-                $parts = preg_split('/\s+/', trim($line), 2);
-                $ips[] = ['ip' => $parts[0], 'jail' => $parts[1] ?? 'unknown'];
-            }
-            return $ips;
+            return $this->parseFailbanOutput($result['output'] ?? '');
         } catch (\Throwable $e) {
             Log::error('Fail2ban getBannedIps error: ' . $e->getMessage());
             return [];
@@ -44,16 +37,11 @@ class Fail2banService
     public function getJails(Server $server): array
     {
         try {
-            $result = $this->daemon->send('server.fail2ban-list');
-            if (! ($result['success'] ?? false)) {
-                return [['name' => 'sshd']];
-            }
-            $lines = array_filter(explode("\n", trim($result['output'] ?? '')));
-            $jails = [];
-            foreach ($lines as $line) {
-                $parts = preg_split('/\s+/', trim($line), 2);
-                $jail  = $parts[1] ?? null;
-                if ($jail && ! in_array($jail, array_column($jails, 'name'))) {
+            $banned = $this->getBannedIps($server);
+            $jails  = [];
+            foreach ($banned as $entry) {
+                $jail = $entry['jail'] ?? 'sshd';
+                if (! in_array($jail, array_column($jails, 'name'))) {
                     $jails[] = ['name' => $jail];
                 }
             }
@@ -201,5 +189,48 @@ class Fail2banService
         } catch (\Throwable) {
             return false;
         }
+    }
+
+    /**
+     * Parse fail2ban-list output.
+     * Handles both:
+     *   - sqlite: "ip jail\n..." format
+     *   - fail2ban-client: "[{'sshd': ['ip1', 'ip2']}, ...]" Python-dict format
+     */
+    private function parseFailbanOutput(string $output): array
+    {
+        $output = trim($output);
+        if (empty($output)) {
+            return [];
+        }
+
+        $ips = [];
+
+        // Python dict format: [{'jail': ['ip1', 'ip2']}, ...]
+        if (str_starts_with($output, '[')) {
+            // Extract all jail:'ip' pairs
+            preg_match_all("/'([^']+)':\s*\[([^\]]*)\]/", $output, $jailMatches, PREG_SET_ORDER);
+            foreach ($jailMatches as $match) {
+                $jail     = $match[1];
+                $ipString = $match[2];
+                preg_match_all("/'([^']+)'/", $ipString, $ipMatches);
+                foreach ($ipMatches[1] as $ip) {
+                    if (filter_var($ip, FILTER_VALIDATE_IP)) {
+                        $ips[] = ['ip' => $ip, 'jail' => $jail];
+                    }
+                }
+            }
+            return $ips;
+        }
+
+        // SQLite format: "ip jail" per line
+        foreach (array_filter(explode("\n", $output)) as $line) {
+            $parts = preg_split('/[\s|]+/', trim($line), 2);
+            if (! empty($parts[0]) && filter_var($parts[0], FILTER_VALIDATE_IP)) {
+                $ips[] = ['ip' => $parts[0], 'jail' => $parts[1] ?? 'unknown'];
+            }
+        }
+
+        return $ips;
     }
 }
