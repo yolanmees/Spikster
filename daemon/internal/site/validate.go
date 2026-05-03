@@ -28,3 +28,11 @@ func ValidateSite(s Site) error {
 	}
 	return nil
 }
+
+// validateUsername checks a standalone username (used by deploy, logrotate, etc.)
+func validateUsername(u string) error {
+	if !reUsername.MatchString(u) {
+		return fmt.Errorf("invalid username %q: must be 2-32 chars, lowercase, start with letter, only [a-z0-9_]", u)
+	}
+	return nil
+}

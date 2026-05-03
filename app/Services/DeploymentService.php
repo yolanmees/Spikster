@@ -2,26 +2,20 @@
 
 namespace App\Services;
 
+use App\Models\Server;
 use App\Models\Site;
 
 /**
  * Deployment Service
  *
- * Handles site deployment operations.
+ * Handles site deployment operations via the Go daemon.
  */
 class DeploymentService
 {
     public function __construct(
-        protected SSHService $sshService
+        protected RemoteDaemonService $daemon
     ) {}
 
-    /**
-     * Deploy a site from Git repository.
-     */
-    /**
-     * Validate a git branch/tag name to prevent command injection.
-     * Allows: letters, digits, /, -, _, .
-     */
     protected function validateBranch(string $branch): string
     {
         if (! preg_match('/^[a-zA-Z0-9\/\-_\.]+$/', $branch)) {
@@ -31,10 +25,6 @@ class DeploymentService
         return $branch;
     }
 
-    /**
-     * Validate a Git repository URL to prevent shell injection.
-     * Allows https://, git://, git@, and ssh:// URLs only.
-     */
     protected function validateRepositoryUrl(string $url): string
     {
         if (! preg_match('/^(https?:\/\/|git:\/\/|git@|ssh:\/\/)[\w\.\/\-_:@]+(\.git)?$/', $url)) {
@@ -51,118 +41,49 @@ class DeploymentService
         }
 
         $server = $site->server;
-        $sitePath = escapeshellarg("/home/{$site->username}/{$site->domain}");
-
-        $steps = [
-            'pull_code' => false,
-            'install_dependencies' => false,
-            'run_migrations' => false,
-            'clear_cache' => false,
-            'restart_services' => false,
-        ];
 
         if ($dryRun) {
-            $commands = [];
-            $commands[] = "cd {$sitePath} && git pull origin ".$this->validateBranch($site->branch);
-            $commands[] = "test -f {$sitePath}/composer.json";
-            $commands[] = "cd {$sitePath} && composer install --no-dev --optimize-autoloader";
-            $commands[] = "test -f {$sitePath}/artisan";
-            $commands[] = "cd {$sitePath} && php artisan migrate --force";
-            $commands[] = "cd {$sitePath} && php artisan cache:clear";
-            $commands[] = "test -f {$sitePath}/package.json";
-            $commands[] = "cd {$sitePath} && npm install && npm run build";
-            $commands[] = "Restart php{$site->php}-fpm";
-            $commands[] = "chown {$site->username}:{$site->username} {$sitePath}";
-
             return [
                 'success' => true,
                 'dry_run' => true,
-                'steps' => $steps,
                 'message' => 'Dry run completed',
-                'commands' => $commands,
+                'commands' => [
+                    "git pull origin {$site->branch}",
+                    "composer install --no-dev --optimize-autoloader",
+                    "php artisan migrate --force",
+                    "php artisan cache:clear",
+                    "npm install && npm run build",
+                    "systemctl reload php{$site->php}-fpm",
+                    "chown {$site->username}:{$site->username}",
+                ],
             ];
         }
 
         try {
-            // Pull latest code
-            $this->sshService->executeCommand(
-                $server,
-                "cd {$sitePath} && git pull origin ".$this->validateBranch($site->branch)
-            );
-            $steps['pull_code'] = true;
-
-            // Install Composer dependencies if composer.json exists
-            $composerCheck = $this->sshService->executeCommand(
-                $server,
-                "test -f {$sitePath}/composer.json && echo 'exists' || echo 'not found'"
-            );
-
-            if (str_contains($composerCheck, 'exists')) {
-                $this->sshService->executeCommand(
-                    $server,
-                    "cd {$sitePath} && composer install --no-dev --optimize-autoloader"
-                );
-                $steps['install_dependencies'] = true;
-            }
-
-            // Run Laravel migrations if artisan exists
-            $artisanCheck = $this->sshService->executeCommand(
-                $server,
-                "test -f {$sitePath}/artisan && echo 'exists' || echo 'not found'"
-            );
-
-            if (str_contains($artisanCheck, 'exists')) {
-                $this->sshService->executeCommand(
-                    $server,
-                    "cd {$sitePath} && php artisan migrate --force"
-                );
-                $steps['run_migrations'] = true;
-
-                // Clear Laravel cache
-                $this->sshService->executeCommand(
-                    $server,
-                    "cd {$sitePath} && php artisan cache:clear && php artisan config:clear && php artisan view:clear"
-                );
-                $steps['clear_cache'] = true;
-            }
-
-            // Install NPM dependencies if package.json exists
-            $npmCheck = $this->sshService->executeCommand(
-                $server,
-                "test -f {$sitePath}/package.json && echo 'exists' || echo 'not found'"
-            );
-
-            if (str_contains($npmCheck, 'exists')) {
-                $this->sshService->executeCommand(
-                    $server,
-                    "cd {$sitePath} && npm install && npm run build"
-                );
-            }
-
-            // Restart PHP-FPM for the site's PHP version
-            $this->sshService->restartService($server, "php{$site->php}-fpm");
-            $steps['restart_services'] = true;
-
-            // Change ownership
-            $this->sshService->changeOwnership($server, $sitePath, $site->username, $site->username);
+            $result = $this->daemon->deploySite($server, [
+                'username' => $site->username,
+                'repo_url' => $this->validateRepositoryUrl($site->repository),
+                'branch' => $this->validateBranch($site->branch ?? 'main'),
+                'php' => $site->php ?? '8.3',
+                'composer' => 'true',
+                'npm' => 'true',
+                'artisan_migrate' => 'true',
+                'artisan_cache' => 'true',
+            ]);
 
             return [
-                'success' => true,
-                'steps' => $steps,
-                'message' => 'Deployment completed successfully',
+                'success' => $result['success'] ?? false,
+                'message' => $result['output'] ?? 'Deployment completed',
+                'error' => $result['error'] ?? null,
             ];
         } catch (\Exception $e) {
             return [
                 'success' => false,
-                'steps' => $steps,
                 'error' => $e->getMessage(),
             ];
         }
     }
 
-    /**
-     * Clone a Git repository to a site.
-     */
     public function cloneRepository(Site $site): bool
     {
         if (! $site->hasRepository()) {
@@ -170,82 +91,50 @@ class DeploymentService
         }
 
         $server = $site->server;
-        $sitePath = escapeshellarg("/home/{$site->username}/{$site->domain}");
+        $sitePath = "/home/{$site->username}/git";
 
-        // Remove existing directory
-        $this->sshService->deleteDirectory($server, $sitePath);
+        $this->daemon->deleteDirectory($server, $sitePath);
 
-        // Clone repository (validate URL to prevent shell injection)
-        $this->sshService->executeCommand(
-            $server,
-            'git clone '.$this->validateRepositoryUrl($site->repository)." {$sitePath}"
-        );
+        $result = $this->daemon->deploySite($server, [
+            'username' => $site->username,
+            'repo_url' => $this->validateRepositoryUrl($site->repository),
+            'branch' => $this->validateBranch($site->branch ?? 'main'),
+            'php' => $site->php ?? '8.3',
+            'composer' => 'false',
+            'npm' => 'false',
+            'artisan_migrate' => 'false',
+            'artisan_cache' => 'false',
+        ]);
 
-        // Checkout specific branch
-        if ($site->branch && $site->branch !== 'main' && $site->branch !== 'master') {
-            $this->sshService->executeCommand(
-                $server,
-                "cd {$sitePath} && git checkout ".$this->validateBranch($site->branch)
-            );
-        }
-
-        // Change ownership
-        $this->sshService->changeOwnership($server, $sitePath, $site->username, $site->username);
-
-        return true;
+        return $result['success'] ?? false;
     }
 
-    /**
-     * Run custom deployment script.
-     */
     public function runCustomScript(Site $site, string $script): string
     {
         $server = $site->server;
-        $sitePath = escapeshellarg("/home/{$site->username}/{$site->domain}");
-
-        // Write script via SFTP to avoid shell injection through echo-quoting
-        $localTmp = tempnam(sys_get_temp_dir(), 'deploy_');
-        // Use LOCK_EX to prevent concurrent write races
-        if (file_put_contents($localTmp, $script, LOCK_EX) === false) {
-            throw new \RuntimeException("Failed to write temporary deploy script to {$localTmp}");
-        }
-
         $scriptPath = "/tmp/deploy_{$site->site_id}.sh";
 
-        try {
-            $this->sshService->uploadFile($server, $localTmp, $scriptPath);
-        } finally {
-            @unlink($localTmp);
-        }
+        $this->daemon->uploadFile($server, $scriptPath, $script);
 
-        $this->sshService->executeCommand($server, "chmod +x {$scriptPath}");
+        $result = $this->daemon->send($server, 'site.deploy-script', [
+            'username' => $site->username,
+            'content' => $script,
+        ]);
 
-        // Execute script
-        $output = $this->sshService->executeCommand(
-            $server,
-            "cd {$sitePath} && {$scriptPath}"
-        );
-
-        // Cleanup
-        $this->sshService->executeCommand($server, "rm -f {$scriptPath}");
-
-        return $output;
+        return $result['output'] ?? '';
     }
 
-    /**
-     * Get deployment status/history.
-     */
     public function getDeploymentHistory(Site $site): array
     {
         $server = $site->server;
-        $sitePath = escapeshellarg("/home/{$site->username}/{$site->domain}");
 
-        // Get last 10 git commits
-        $output = $this->sshService->executeCommand(
-            $server,
-            "cd {$sitePath} && git log --oneline -10"
-        );
+        $result = $this->daemon->deployHistory($server, $site->username, 10);
 
+        if (! ($result['success'] ?? false)) {
+            return [];
+        }
+
+        $output = $result['output'] ?? '';
         $commits = [];
         $lines = explode("\n", trim($output));
 
@@ -264,27 +153,16 @@ class DeploymentService
         return $commits;
     }
 
-    /**
-     * Rollback to a previous commit.
-     */
     public function rollback(Site $site, string $commitHash): bool
     {
-        // Validate commitHash to prevent shell injection (must be a valid git SHA)
         if (! preg_match('/^[0-9a-f]{7,40}$/i', $commitHash)) {
             throw new \InvalidArgumentException('Invalid commit hash format');
         }
 
         $server = $site->server;
-        $sitePath = escapeshellarg("/home/{$site->username}/{$site->domain}");
 
-        $this->sshService->executeCommand(
-            $server,
-            "cd {$sitePath} && git reset --hard {$commitHash}"
-        );
+        $result = $this->daemon->rollbackDeploy($server, $site->username, $commitHash);
 
-        // Run deployment steps again
-        $this->deploySite($site);
-
-        return true;
+        return $result['success'] ?? false;
     }
 }

@@ -221,6 +221,36 @@ func dispatch(req Request) (string, error) {
 		if err != nil { return "", err }
 		return "php cli updated", nil
 
+	// ── Deploy ──────────────────────────────────────────────────────────────────
+	case "site.deploy":
+		d := site.DeployParams{
+			Username:      req.Params["username"],
+			RepoURL:       req.Params["repo_url"],
+			Branch:        req.Params["branch"],
+			PHP:           req.Params["php"],
+			Composer:      req.Params["composer"] == "true",
+			NPM:           req.Params["npm"] == "true",
+			ArtisanMig:    req.Params["artisan_migrate"] == "true",
+			ArtisanCache:  req.Params["artisan_cache"] == "true",
+		}
+		out, err := site.Deploy(d)
+		if err != nil { return "", err }
+		return out, nil
+
+	case "site.deploy-rollback":
+		out, err := site.DeployRollback(req.Params["username"], req.Params["commit_hash"])
+		if err != nil { return "", err }
+		return out, nil
+
+	case "site.deploy-history":
+		count := 10
+		if n, err := strconv.Atoi(req.Params["count"]); err == nil && n > 0 {
+			count = n
+		}
+		out, err := site.DeployHistory(req.Params["username"], count)
+		if err != nil { return "", err }
+		return out, nil
+
 	// ── Deploy script ─────────────────────────────────────────────────────────
 	case "site.php-settings":
 		s := siteFromParams(req.Params)
@@ -296,6 +326,16 @@ func dispatch(req Request) (string, error) {
 		if err != nil { return "", err }
 		return path, nil
 
+	case "backup.encrypt":
+		path, err := backup.EncryptBackup(req.Params["filepath"], req.Params["password"])
+		if err != nil { return "", err }
+		return path, nil
+
+	case "backup.decrypt":
+		path, err := backup.DecryptBackup(req.Params["filepath"], req.Params["password"])
+		if err != nil { return "", err }
+		return path, nil
+
 	case "backup.restore":
 		p := req.Params
 		r := backup.RestoreRequest{
@@ -352,6 +392,26 @@ func dispatch(req Request) (string, error) {
 	case "ftp.delete":
 		if err := ftp.DeleteUser(req.Params["username"]); err != nil { return "", err }
 		return "ftp user deleted", nil
+
+	case "ftp.disk-usage":
+		usage, err := ftp.GetDiskUsage(req.Params["username"])
+		if err != nil { return "", err }
+		enc, _ := json.Marshal(usage)
+		return string(enc), nil
+
+	case "ftp.update-quota":
+		quotaMB := 0
+		if q := req.Params["quota_mb"]; q != "" {
+			if n, err := strconv.Atoi(q); err == nil {
+				quotaMB = n
+			}
+		}
+		if err := ftp.UpdateQuota(req.Params["username"], quotaMB); err != nil { return "", err }
+		return "ftp quota updated", nil
+
+	case "ftp.test":
+		if err := ftp.TestConnection(req.Params["username"], req.Params["password"]); err != nil { return "", err }
+		return "ftp connection ok", nil
 
 
 	// ── Server utils ─────────────────────────────────────────────────────────
@@ -458,6 +518,44 @@ func dispatch(req Request) (string, error) {
 		if err := email.InstallRoundcube(par); err != nil { return "", err }
 		return "roundcube installed", nil
 
+	case "email.set-filters":
+		p := req.Params
+		par := email.SpamFilterParams{
+			Domain:           p["domain"],
+			SpamAction:       p["spam_action"],
+			SpamScore:        p["spam_score"],
+			VirusAction:      p["virus_action"],
+			RejectSpam:       p["reject_spam"] == "true",
+			RejectPhishing:   p["reject_phishing"] == "true",
+			EnableDkimCheck:  p["enable_dkim_check"] == "true",
+			EnableSpfCheck:   p["enable_spf_check"] == "true",
+			EnableDmarcCheck: p["enable_dmarc_check"] == "true",
+		}
+		if err := email.SetFilters(par); err != nil { return "", err }
+		return "spam filters updated", nil
+
+	case "email.queue-list":
+		out, err := email.QueueList()
+		if err != nil { return "", err }
+		return out, nil
+
+	case "email.queue-retry":
+		if err := email.QueueRetry(req.Params["queue_id"]); err != nil { return "", err }
+		return "queue retry triggered", nil
+
+	case "email.queue-delete":
+		if err := email.QueueDelete(req.Params["queue_id"]); err != nil { return "", err }
+		return "queue item deleted", nil
+
+	case "email.log-tail":
+		lines := 100
+		if n, err := strconv.Atoi(req.Params["lines"]); err == nil && n > 0 {
+			lines = n
+		}
+		out, err := email.LogTail(lines)
+		if err != nil { return "", err }
+		return out, nil
+
 	// ── Fail2ban management ───────────────────────────────────────────────────
 	case "fail2ban.ban":
 		if err := server.Fail2banBan(req.Params["ip"], req.Params["jail"]); err != nil { return "", err }
@@ -470,6 +568,39 @@ func dispatch(req Request) (string, error) {
 	case "fail2ban.whitelist":
 		if err := server.Fail2banWhitelist(req.Params["ip"]); err != nil { return "", err }
 		return "ip whitelisted", nil
+
+	// ── File operations ──────────────────────────────────────────────────────
+	case "file.delete-dir":
+		if err := server.DeleteDirectory(req.Params["path"]); err != nil { return "", err }
+		return "directory deleted", nil
+
+	case "file.upload":
+		if err := server.UploadFile(req.Params["path"], []byte(req.Params["content"])); err != nil { return "", err }
+		return "file uploaded", nil
+
+	case "file.chown":
+		if err := server.ChangeOwnership(req.Params["path"], req.Params["owner"], req.Params["group"]); err != nil { return "", err }
+		return "ownership changed", nil
+
+	case "file.chmod":
+		mode := os.FileMode(0644)
+		if m := req.Params["mode"]; m != "" {
+			if n, err := strconv.ParseUint(m, 8, 32); err == nil {
+				mode = os.FileMode(n)
+			}
+		}
+		if err := server.SetPermissions(req.Params["path"], mode); err != nil { return "", err }
+		return "permissions set", nil
+
+	// ── Log rotation ─────────────────────────────────────────────────────────
+	case "log.rotate":
+		day := req.Params["day"]
+		if day == "" {
+			day = fmt.Sprintf("%d", int(time.Now().Weekday()))
+		}
+		out, err := server.LogRotate(day)
+		if err != nil { return "", err }
+		return out, nil
 
 
 	default:

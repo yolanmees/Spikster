@@ -368,6 +368,60 @@ class RemoteDaemonService
         return $this->send($server, 'fail2ban.whitelist', ['ip' => $ip])['success'] ?? false;
     }
 
+    // ─── Deployment ───────────────────────────────────────────────────────────
+
+    public function deploySite(Server $server, array $params): array
+    {
+        return $this->send($server, 'site.deploy', $params);
+    }
+
+    public function rollbackDeploy(Server $server, string $username, string $commitHash): array
+    {
+        return $this->send($server, 'site.deploy-rollback', [
+            'username' => $username,
+            'commit_hash' => $commitHash,
+        ]);
+    }
+
+    public function deployHistory(Server $server, string $username, int $count = 10): array
+    {
+        return $this->send($server, 'site.deploy-history', [
+            'username' => $username,
+            'count' => (string) $count,
+        ]);
+    }
+
+    // ─── File operations ──────────────────────────────────────────────────────
+
+    public function deleteDirectory(Server $server, string $path): bool
+    {
+        return $this->send($server, 'file.delete-dir', ['path' => $path])['success'] ?? false;
+    }
+
+    public function uploadFile(Server $server, string $path, string $content): bool
+    {
+        return $this->send($server, 'file.upload', [
+            'path' => $path,
+            'content' => $content,
+        ])['success'] ?? false;
+    }
+
+    public function changeOwnership(Server $server, string $path, string $owner, string $group = ''): bool
+    {
+        return $this->send($server, 'file.chown', [
+            'path' => $path,
+            'owner' => $owner,
+            'group' => $group,
+        ])['success'] ?? false;
+    }
+
+    // ─── Log rotation ─────────────────────────────────────────────────────────
+
+    public function rotateLogs(Server $server, string $day = ''): array
+    {
+        return $this->send($server, 'log.rotate', ['day' => $day]);
+    }
+
     // ─── Mail queue & log management ─────────────────────────────────────────
 
     /**
