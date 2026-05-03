@@ -95,11 +95,12 @@ systemctl enable mysql redis php${PHP_PKG_VER}-fpm 2>/dev/null || true
 # 2. MySQL setup
 # ─────────────────────────────────────────────────────────────────────────────
 info "Configuring MySQL..."
-# Switch MySQL root to native password
-mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '${DB_ROOT_PASS}'; FLUSH PRIVILEGES;" 2>/dev/null || true
-# Create spikster database + user
-mysql -u root -p"${DB_ROOT_PASS}" -e "CREATE DATABASE IF NOT EXISTS spikster CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" 2>/dev/null
-mysql -u root -p"${DB_ROOT_PASS}" -e "CREATE USER IF NOT EXISTS 'spikster'@'localhost' IDENTIFIED BY '${DB_SPIKSTER_PASS}'; GRANT ALL ON spikster.* TO 'spikster'@'localhost'; FLUSH PRIVILEGES;" 2>/dev/null
+# Ubuntu 22.04+: root uses auth_socket, so use sudo mysql (no password needed initially)
+mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '${DB_ROOT_PASS}'; FLUSH PRIVILEGES;" 2>/dev/null   || sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '${DB_ROOT_PASS}'; FLUSH PRIVILEGES;" 2>/dev/null   || true
+# Create spikster database + user (try both auth methods)
+_mysql_root() { mysql -u root -p"${DB_ROOT_PASS}" "$@" 2>/dev/null || sudo mysql "$@" 2>/dev/null; }
+_mysql_root -e "CREATE DATABASE IF NOT EXISTS spikster CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+_mysql_root -e "CREATE USER IF NOT EXISTS 'spikster'@'localhost' IDENTIFIED BY '${DB_SPIKSTER_PASS}'; GRANT ALL ON spikster.* TO 'spikster'@'localhost'; FLUSH PRIVILEGES;"
 log "MySQL configured"
 
 # ─────────────────────────────────────────────────────────────────────────────
