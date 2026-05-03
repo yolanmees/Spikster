@@ -21,7 +21,13 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     })->name('server.edit.section');
 
     Route::get('/servers/{server_id}/fail2ban', function ($server_id) {
-        return view('server.fail2ban', compact('server_id'));
+        $fail2banInstalled = false;
+        try {
+            $daemon = app(\App\Services\DaemonService::class);
+            $result = $daemon->status('fail2ban');
+            $fail2banInstalled = str_contains($result, 'active') || str_contains($result, 'running');
+        } catch (\Throwable) {}
+        return view('server.fail2ban', compact('server_id', 'fail2banInstalled'));
     })->name('server.fail2ban');
 
     Route::get('/servers/{server_id}/packages', function ($server_id) {

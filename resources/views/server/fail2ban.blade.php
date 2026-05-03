@@ -9,6 +9,7 @@
              deploying: false,
              deploySuccess: false,
              deployError: null,
+             noticeVisible: {{ $fail2banInstalled ? 'false' : 'true' }},
              async deployApi() {
                  this.deploying = true;
                  this.deploySuccess = false;
@@ -21,6 +22,7 @@
                      const data = await response.json();
                      if (response.ok) {
                          this.deploySuccess = true;
+                         this.noticeVisible = false;
                          setTimeout(() => { this.deploySuccess = false; }, 5000);
                      } else {
                          this.deployError = data.message || 'Failed to deploy API';
@@ -40,7 +42,7 @@
         </x-page-header>
 
         {{-- Deploy API Notice --}}
-        <x-alert type="info">
+        <x-alert type="info" x-show="noticeVisible" x-cloak>
             <div class="flex items-start justify-between gap-4">
                 <div>
                     <p class="font-semibold">Fail2ban API Setup Required</p>
