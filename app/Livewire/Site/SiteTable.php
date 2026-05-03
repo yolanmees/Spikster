@@ -25,6 +25,8 @@ class SiteTable extends Component
 
     public $siteToDelete = null;
 
+    public $polling = false;
+
     /**
      * Render the component.
      */
@@ -153,6 +155,18 @@ class SiteTable extends Component
     public function onSiteSubmitted(): void
     {
         $this->resetPage();
+        $this->polling = false;
+    }
+
+    /**
+     * Triggered when the NewSite form is submitted via queue job.
+     * Enables polling until the site appears or the Echo event fires.
+     */
+    #[On('site-create-queued')]
+    public function onSiteCreateQueued(): void
+    {
+        $this->polling = true;
+        $this->resetPage();
     }
 
     /**
@@ -162,6 +176,7 @@ class SiteTable extends Component
     #[On('echo:sites.{userId},site.created')]
     public function onSiteCreatedByJob(): void
     {
+        $this->polling = false;
         $this->resetPage();
     }
 

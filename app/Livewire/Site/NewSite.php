@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Site;
 
+use App\Jobs\CreateSiteJob;
 use App\Services\ServerService;
 use App\Services\SiteService;
 use Illuminate\Support\Facades\Log;
@@ -75,18 +76,21 @@ class NewSite extends Component
                 'php' => $validated['php'],
             ]);
 
-            $siteService->createSite([
+            // Dispatch to queue worker instead of calling synchronously.
+            // The Go daemon reloads PHP-FPM during provisioning, which kills the
+            // panel's own PHP-FPM worker mid-request if we run synchronously.
+            CreateSiteJob::dispatch([
                 'server_id' => (int) $validated['serverId'],
                 'domain' => strtolower($validated['domain']),
                 'php' => $validated['php'],
                 'basepath' => $validated['basepath'] ?? '/public',
                 'repository' => ! empty($validated['repository']) ? $validated['repository'] : null,
                 'branch' => ! empty($validated['branch']) ? $validated['branch'] : null,
-            ]);
+            ], auth()->id());
 
-            session()->flash('success', 'Site created successfully!');
+            session()->flash('success', 'Site creation queued. The page will refresh automatically when done.');
 
-            $this->dispatch('site-created');
+            $this->dispatch('site-create-queued');
             $this->dispatch('close-modal');
 
             $this->resetForm($serverService);
@@ -105,7 +109,6 @@ class NewSite extends Component
 
             $errorMessage = $e->getMessage();
 
-            // Give more helpful messages for common failures
             if (str_contains($errorMessage, 'daemon is not running')) {
                 $errorMessage = 'The Spikster daemon is not running on the server. Please contact your system administrator.';
             } elseif (str_contains($errorMessage, 'Cannot connect to daemon')) {

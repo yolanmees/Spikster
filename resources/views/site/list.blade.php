@@ -74,7 +74,6 @@
 <script>
     document.addEventListener('livewire:init', () => {
         Livewire.on('close-modal', () => window.dispatchEvent(new CustomEvent('close-modal')));
-        Livewire.on('site-created', () => window.dispatchEvent(new CustomEvent('close-modal')));
         Livewire.on('open-new-site-modal', () => window.dispatchEvent(new CustomEvent('open-modal', { detail: 'new-site' })));
 
         // Forward Livewire flash-* events to Alpine page-level toast
