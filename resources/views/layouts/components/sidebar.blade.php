@@ -23,7 +23,7 @@
 
                 {{-- User footer --}}
                 <li class="-mx-6 mt-auto border-t border-zinc-200 dark:border-zinc-800">
-                    <a href="{{ route('profile.show') }}"
+                    <a href="{{ route('profile.show') }}" wire:navigate
                         class="flex items-center gap-x-4 px-6 py-4 text-sm font-semibold leading-6 text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-all duration-200">
                         <div class="h-9 w-9 rounded-full bg-zinc-950 dark:bg-white flex items-center justify-center text-white dark:text-zinc-950 font-bold text-xs shrink-0">
                             {{ strtoupper(substr(Auth::user()->name ?? 'U', 0, 2)) }}

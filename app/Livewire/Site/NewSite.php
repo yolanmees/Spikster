@@ -88,12 +88,10 @@ class NewSite extends Component
                 'branch' => ! empty($validated['branch']) ? $validated['branch'] : null,
             ], auth()->id());
 
-            session()->flash('success', 'Site creation queued. The page will refresh automatically when done.');
+            session()->flash('success', 'Site creation has been queued successfully.');
 
             $this->dispatch('site-create-queued');
-            $this->dispatch('close-modal');
-
-            $this->resetForm($serverService);
+            $this->redirect(route('site.list'));
         } catch (ValidationException $e) {
             Log::info('Site creation: validation failed', [
                 'errors' => $e->errors(),

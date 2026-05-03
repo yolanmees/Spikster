@@ -12,6 +12,10 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         return view('site.list');
     })->name('site.list');
 
+    Route::get('/sites/create', function () {
+        return view('site.create');
+    })->name('site.create');
+
     Route::get('/sites/{site_id}', function ($site_id) {
         return redirect()->route('site.edit.section', ['site_id' => $site_id, 'section' => 'overview']);
     })->name('site.edit');
