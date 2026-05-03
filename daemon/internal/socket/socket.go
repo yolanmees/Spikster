@@ -14,6 +14,7 @@ import (
 
 	"github.com/yolanmees/spikster/daemon/internal/backup"
 	"github.com/yolanmees/spikster/daemon/internal/email"
+	"github.com/yolanmees/spikster/daemon/internal/metrics"
 	"github.com/yolanmees/spikster/daemon/internal/server"
 	"github.com/yolanmees/spikster/daemon/internal/cron"
 	"github.com/yolanmees/spikster/daemon/internal/ftp"
@@ -116,6 +117,12 @@ func respond(conn net.Conn, success bool, output, errMsg string) {
 
 func dispatch(req Request) (string, error) {
 	switch req.Action {
+
+	// ── Metrics ──────────────────────────────────────────────────────────────
+	case "metrics":
+		out, err := metrics.CollectJSON()
+		if err != nil { return "", err }
+		return out, nil
 
 	// ── Service management ────────────────────────────────────────────────
 	case "restart":

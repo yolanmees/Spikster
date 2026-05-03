@@ -1,8 +1,0 @@
-build/
-*.log
-*.exe
-*.test
-.DS_Store
-*.swp
-*.swo
-*~

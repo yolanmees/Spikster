@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/yolanmees/spikster/daemon/internal/installer"
+	"github.com/yolanmees/spikster/daemon/internal/metrics"
 	"github.com/yolanmees/spikster/daemon/internal/socket"
 )
 
@@ -27,6 +28,7 @@ func main() {
 			}
 		}
 		go socket.StartTCP(port)
+		go metrics.StartHTTPServer(":9273")
 		socket.Start()
 
 	case "install":
