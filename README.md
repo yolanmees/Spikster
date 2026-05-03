@@ -1,44 +1,52 @@
 <img src="https://github.com/yolanmees/Spikster/blob/master/utility/design/banner.png?raw=true">
 
-![GitHub stars](https://img.shields.io/github/stars/yolanmees/Spikster?style=social)
-![GitHub watchers](https://img.shields.io/github/watchers/yolanmees/Spikster?style=social)
-![GitHub issues](https://img.shields.io/github/issues/yolanmees/Spikster)
-![GitHub](https://img.shields.io/github/license/yolanmees/Spikster)
-![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/yolanmees/Spikster?label=version)
+<p align="center">
+  <a href="https://github.com/yolanmees/Spikster/stargazers"><img src="https://img.shields.io/github/stars/yolanmees/Spikster?style=social" alt="GitHub Stars"></a>
+  <a href="https://github.com/yolanmees/Spikster/watchers"><img src="https://img.shields.io/github/watchers/yolanmees/Spikster?style=social" alt="GitHub Watchers"></a>
+  <a href="https://github.com/yolanmees/Spikster/issues"><img src="https://img.shields.io/github/issues/yolanmees/Spikster" alt="GitHub Issues"></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/github/license/yolanmees/Spikster" alt="License"></a>
+  <a href="https://github.com/yolanmees/Spikster/releases"><img src="https://img.shields.io/github/v/tag/yolanmees/Spikster?label=version" alt="Version"></a>
+</p>
 
-## About
+<h3 align="center">Open-source VPS control panel for PHP developers.<br>Deploy and manage servers without being a sysadmin.</h3>
 
-Spikster is a Laravel based cloud server control panel that supports Digital Ocean, AWS, Vultr, Google Cloud, Linode, Azure and other VPS. It comes with nginx, Mysql, multi PHP-FPM versions, multi users, Supervisor, Composer, npm, free Let's Encrypt certificates, Git deployment, backups, ffmpeg, fail2ban, Redis, API and with a simple graphical interface useful to manage Laravel, Codeigniter, Symfony, WordPress or other PHP applications. With Spikster you don’t need to be a Sys Admin to deploy and manage websites and PHP applications powered by cloud VPS.
+---
+
+## What is Spikster?
+
+Spikster is a **self-hosted server control panel** built with Laravel. It gives you a clean web UI to manage VPS servers on DigitalOcean, AWS, Vultr, Linode, Hetzner, Google Cloud, Azure and more — without touching the command line after setup.
+
+It handles everything a PHP developer needs: sites, databases, SSL, queues, DNS, deployments, and real-time server monitoring — all in one place.
+
+> **Free. Open-source. No monthly fees.**  
+> A powerful alternative to Forge, RunCloud, Ploi, CyberPanel, Plesk, and cPanel.
+
+---
 
 ## Features
 
--   Easy install: setup one or more servers with a click in few minutes without be a Linux expert.
+- **One-command install** — full LEMP stack up and running in minutes
+- **Multi-PHP support** — run PHP 8.1, 8.2, 8.3, 8.4 side by side
+- **Site management** — create, configure and deploy PHP/Laravel/WordPress sites
+- **Free SSL** — automatic Let's Encrypt certificates for all your domains
+- **Database management** — MySQL databases and users via UI
+- **DNS management** — manage domains and DNS records
+- **Real-time monitoring** — live CPU, RAM, disk and load stats
+- **Queue worker management** — Supervisor-backed queue workers
+- **Git deployment** — deploy from GitHub/GitLab with a single click
+- **Security built-in** — fail2ban, isolated system users, no open ports
+- **REST API + Swagger** — integrate Spikster with your own tools
+- **Roles & permissions** — multi-user access control
+- **Backups** — scheduled backups to remote storage
+- **WebSocket support** — Laravel Reverb ready out of the box
 
--   Server Management: manage one or more servers in as easy as a few clicks without be a LEMP Guru.
+---
 
--   Perfect stack for PHP devs: Spikster comes with nginx, PHP, MySql, Bind9(DNS), Composer, npm and Supervisor.
-
--   Multi-PHP: Run simultaneous PHP versions at your ease & convenience.
-
--   Secure: no unsed open ports, unprivileged PHP, isolated system users and filesystem, only SFTP (no insecure FTP), Free SSL certificates everywhere.
-
--   Always update: Spikster takes care about your business and automatically keeps your server's software up to date so you always have the latest security patches.
-
--   Integrate Spikster with your own software via Rest API and Swagger.
-
--   Real-time servers stats: Keep an eye on everything through an awesome dashboard.
-
--   Easylly manage your Domains, DNS, Hosting, SSL, Databases, Logs, and more.
-
-## Documentation
-
-Documentation at: https://spikster.com/
-
-## Installation
+## One-command Install
 
 > [!IMPORTANT]
-> Requires a fresh **Ubuntu 22.04 or 24.04** VPS with at least 1 vCPU, 1GB RAM and 10GB disk.
-> Make sure ports **22, 80 and 443** are open before you start.
+> Requires a fresh **Ubuntu 22.04, 24.04 or 25.10** VPS with at least 1 vCPU, 1GB RAM and 10GB disk.
+> Make sure ports **22, 80 and 443** are open.
 
 SSH into your server as root and run:
 
@@ -46,60 +54,78 @@ SSH into your server as root and run:
 curl -fsSL https://raw.githubusercontent.com/yolanmees/Spikster/v2-update/install.sh | bash
 ```
 
-That's it. The installer takes care of everything. When it finishes, you'll see:
+That's it. The installer handles nginx, PHP, MySQL, Redis, SSL, services — everything. When done, you'll get:
 
 ```
 Panel URL:   http://<your-server-ip>
 Setup URL:   http://<your-server-ip>/setup/<token>
 ```
 
-Open the **Setup URL** in your browser to create your admin account. Your server is already connected — no further configuration needed.
+Open the **Setup URL** to create your admin account. Your server is already connected.
 
-## Spikster LEMP environment
+---
 
--   nginx: 1.18
--   PHP-FPM: 8.3, 8.2, 8.1, 8.0, 7.4
--   MySql: 8
--   node: 16
--   npm: 8
--   Composer: 2
+## Stack
+
+| Component | Version |
+|-----------|---------|
+| nginx | 1.18+ |
+| PHP-FPM | 8.1, 8.2, 8.3, 8.4 |
+| MySQL | 8.x / 9.x |
+| Redis | 7+ |
+| Composer | 2 |
+| Node / npm | 18 / 9 |
+
+---
 
 ## Screenshots
 
-![](https://spikster.com/images/Spikster-server-overview.png)
+![Server Overview](https://spikster.com/images/Spikster-server-overview.png)
 
-![](https://spikster.com/images/Spikster-site-overview.png)
+![Site Management](https://spikster.com/images/Spikster-site-overview.png)
 
-![](https://spikster.com/images/Spikster-wordpress.png)
+![WordPress Support](https://spikster.com/images/Spikster-wordpress.png)
 
-## Why use Spikster?
+---
 
-Spikster is easy, stable, powerful and free for any personal and commercial use and it's a perfect alternative to Cpanel, Plesk, Runcloud, CyberPanel, DirectAdmin, Forge and similar software...
+## Why Spikster?
 
-## Spikster Roadmap... what's next?
+Most control panels are either expensive (Forge, RunCloud, Ploi charge monthly), bloated (cPanel, Plesk), or outdated. Spikster is **free, modern, and built by developers for developers** — with a clean UI and a codebase you can actually read and extend.
 
--   User roles and permissions
--   New install process
--   Apps installer
--   Backups
--   ...
+- ✅ No subscription fees
+- ✅ Self-hosted — your servers, your data
+- ✅ Built on Laravel — easy to customize
+- ✅ Actively developed
 
-## Join the community
+---
 
-Join our discord server: https://discord.gg/ne99uNEetG
+## Roadmap
+
+- [x] Roles & permissions
+- [x] Automated one-command installer
+- [x] Real-time server monitoring
+- [x] WebSocket support (Reverb)
+- [ ] App marketplace (WordPress, n8n, etc.)
+- [ ] Backup to S3 / Cloudflare R2
+- [ ] Mobile-friendly UI
+
+---
 
 ## Contributing
 
-Thank you for considering contributing to the Spikster project
+PRs and issues are welcome. If you find Spikster useful, **drop a ⭐ on GitHub** — it helps more people find the project.
 
-#### ...anyway star this project on Github, Thank you ;)
+- [Open an issue](https://github.com/yolanmees/Spikster/issues)
+- [Join the Discord](https://discord.gg/ne99uNEetG)
 
-## Licence
+---
 
-Spikster is open-sourced software licensed under the [MIT License](./LICENSE).
+## Documentation
 
-## Need support with Spikster?
+Full docs at [spikster.com](https://spikster.com/)
 
-Please open an issue here: https://github.com/yolanmees/Spikster/issues.
+---
 
-### ...enjoy Spikster :)
+## License
+
+Spikster is open-source software licensed under the [MIT License](./LICENSE).
