@@ -589,8 +589,8 @@ func ResetSpiksterPassword(newPass string) error {
 // ─── Panel nginx domain ───────────────────────────────────────────────────────
 
 var panelNginxTpl = `server {
-    listen 80;
-    listen [::]:80;
+    listen 80 default_server;
+    listen [::]:80 default_server;
     server_tokens off;
     server_name {{.Domain}};
     root /var/www/html/public;

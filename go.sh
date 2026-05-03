@@ -762,6 +762,14 @@ EOF
     # Replace database and application configurations using sed
     sed -i "s/DB_USERNAME=dbuser/DB_USERNAME=spikster/g" /var/www/html/.env
     sed -i "s/DB_PASSWORD=dbpass/DB_PASSWORD=$DBPASS/g" /var/www/html/.env
+    # DB_ROOT_PASS — MySQL root password for daemon database operations
+    if grep -q "DB_ROOT_PASS=" /var/www/html/.env; then
+        sed -i "s/DB_ROOT_PASS=.*/DB_ROOT_PASS=$DBPASS/" /var/www/html/.env
+    else
+        echo "DB_ROOT_PASS=$DBPASS" >> /var/www/html/.env
+    fi
+    # QUEUE_CONNECTION — use database driver so queue jobs run in CLI, not PHP-FPM
+    sed -i "s/QUEUE_CONNECTION=.*/QUEUE_CONNECTION=database/g" /var/www/html/.env
     # Write daemon token to .env
     if grep -q "DAEMON_TOKEN=" /var/www/html/.env; then
         sed -i "s/DAEMON_TOKEN=.*/DAEMON_TOKEN=$DAEMON_TOKEN/" /var/www/html/.env

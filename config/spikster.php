@@ -41,4 +41,14 @@ return [
     */
     'services' => ['nginx', 'php', 'mysql', 'redis', 'supervisor'],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Database root password
+    |--------------------------------------------------------------------------
+    | MySQL root password used by the Go daemon for CREATE DATABASE operations.
+    | Falls back to the Laravel DB password for environments where spikster
+    | and root share the same credentials (go.sh setup).
+    */
+    'db_root_pass' => env('DB_ROOT_PASS', config('database.connections.mysql.password')),
+
 ];

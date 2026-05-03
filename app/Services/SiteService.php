@@ -124,7 +124,7 @@ class SiteService
             'password' => $data['password'],
             'db_name' => $data['username'],
             'db_pass' => $data['database'],
-            'db_root' => env('DB_ROOT_PASS', config('database.connections.mysql.password')),
+            'db_root' => config('spikster.db_root_pass'),
             'php' => $data['php'],
             'basepath' => $data['basepath'],
         ];
@@ -176,7 +176,7 @@ class SiteService
                 $daemon->deleteSite([
                     'username' => $data['username'],
                     'db_name' => $data['username'],
-                    'db_root' => env('DB_ROOT_PASS', config('database.connections.mysql.password')),
+                    'db_root' => config('spikster.db_root_pass'),
                     'php' => $data['php'],
                 ]);
                 Log::info('SiteService: cleanup after DB failure completed');
