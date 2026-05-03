@@ -42,7 +42,11 @@ else
     apt-get update -qq
 fi
 apt-get install -y -qq nginx mysql-server redis-server git curl wget unzip openssl expect >/dev/null 2>&1
-apt-get install -y -qq php8.5-fpm php8.5-cli php8.5-mysql php8.5-zip php8.5-gd php8.5-mbstring php8.5-curl php8.5-xml php8.5-bcmath php8.5-intl php8.5-redis >/dev/null 2>&1
+apt-get install -y -qq php8.5-fpm php8.5-cli php8.5-mysql php8.5-zip php8.5-gd php8.5-mbstring php8.5-curl php8.5-xml php8.5-bcmath php8.5-intl php8.5-dev >/dev/null 2>&1
+apt-get install -y -qq php-pear >/dev/null 2>&1 || true
+pecl install redis >/dev/null 2>&1 || true
+echo "extension=redis.so" > /etc/php/8.5/mods-available/redis.ini
+phpenmod redis 2>/dev/null || true
 log "System packages installed"
 
 # Start services
