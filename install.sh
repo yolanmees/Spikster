@@ -206,6 +206,10 @@ systemctl enable spikster-queue 2>/dev/null
 systemctl start spikster-queue 2>/dev/null
 log "Queue worker running"
 
+# Allow www-data to run fail2ban-client via sudo (for status checks)
+echo "www-data ALL=(root) NOPASSWD: /usr/bin/fail2ban-client status*" > /etc/sudoers.d/spikster-fail2ban
+chmod 440 /etc/sudoers.d/spikster-fail2ban
+
 # ─────────────────────────────────────────────────────────────────────────────
 # 11. Reverb WebSocket server
 # ─────────────────────────────────────────────────────────────────────────────

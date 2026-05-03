@@ -39,7 +39,7 @@ class Fail2banService
         try {
             $result = $this->daemon->send('site.deploy-script', [
                 'username' => 'root',
-                'script'   => 'fail2ban-client status 2>/dev/null',
+                'script'   => 'sudo fail2ban-client status 2>/dev/null',
             ]);
             $output = $result['output'] ?? '';
             preg_match('/Jail list:\s*(.+)/i', $output, $m);
@@ -65,7 +65,7 @@ class Fail2banService
         try {
             $result = $this->daemon->send('site.deploy-script', [
                 'username' => 'root',
-                'script'   => "fail2ban-client status {$jail} 2>/dev/null",
+                'script'   => "sudo fail2ban-client status {$jail} 2>/dev/null",
             ]);
             $output = $result['output'] ?? '';
 
