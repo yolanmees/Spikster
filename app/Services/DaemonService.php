@@ -62,7 +62,7 @@ class DaemonService
 
         fwrite($socket, "TOKEN {$token}\n");
 
-        $payload = json_encode(['action' => $action, 'params' => $params]);
+        $payload = json_encode(['action' => $action, 'params' => empty($params) ? (object)[] : $params]);
         fwrite($socket, $payload);
         stream_socket_shutdown($socket, STREAM_SHUT_WR);
 
