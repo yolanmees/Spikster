@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Server;
 
 use App\Http\Controllers\Controller;
 use App\Models\Server;
+use App\Services\DaemonService;
 use App\Services\Fail2banService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -12,7 +13,8 @@ use Illuminate\Support\Facades\Validator;
 class Fail2banController extends Controller
 {
     public function __construct(
-        protected Fail2banService $fail2banService
+        protected Fail2banService $fail2banService,
+        protected DaemonService $daemon
     ) {}
 
     /**
@@ -248,6 +250,40 @@ class Fail2banController extends Controller
             Log::error('Fail2ban get whitelist error: '.$th->getMessage());
 
             return response()->json(['message' => 'Failed to fetch whitelist', 'errors' => $th->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Install fail2ban on the server via daemon
+     */
+    public function deploy(string $server_id)
+    {
+        $server = Server::where('server_id', $server_id)->where('status', 1)->first();
+
+        if (! $server) {
+            return response()->json(['message' => 'Server not found'], 404);
+        }
+
+        try {
+            $result = $this->daemon->send('server.package-install', ['package' => 'fail2ban']);
+
+            if ($result['success'] ?? false) {
+                // Enable and start fail2ban
+                $this->daemon->send('start', ['service' => 'fail2ban']);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Fail2ban installed and started successfully',
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => $result['error'] ?? 'Failed to install fail2ban',
+            ], 500);
+        } catch (\Throwable $th) {
+            Log::error('Fail2ban deploy error: ' . $th->getMessage());
+            return response()->json(['message' => 'Failed to deploy fail2ban: ' . $th->getMessage()], 500);
         }
     }
 }

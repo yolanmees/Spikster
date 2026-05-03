@@ -102,7 +102,10 @@ class SiteHealthController extends Controller
     private function checkDiskUsage(Site $site): array
     {
         try {
-            $result = $this->daemon->send('server.disk-usage');
+            $result = $this->daemon->send('site.deploy-script', [
+                'username' => $site->username,
+                'script'   => "df / | awk 'NR==2{print $5}'",
+            ]);
 
             if (isset($result['output'])) {
                 preg_match('/(\d+)%/', $result['output'], $matches);

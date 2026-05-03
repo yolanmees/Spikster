@@ -84,6 +84,7 @@ Route::middleware(['api.unified-auth'])->group(function () {
     Route::get('/servers/{server_id}/fail2ban/logs', [Fail2banController::class, 'logs']);
     Route::post('/servers/{server_id}/fail2ban/whitelist', [Fail2banController::class, 'whitelistIp']);
     Route::get('/servers/{server_id}/fail2ban/whitelist', [Fail2banController::class, 'getWhitelist']);
+    Route::post('/servers/{server_id}/fail2ban/deploy', [Fail2banController::class, 'deploy']);
     // fail2banDeploy removed - relied on deleted SSHService
 
     // Cron Job Execution endpoints

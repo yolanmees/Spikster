@@ -72,7 +72,6 @@ class ModuleRegistry
     }
 
     public function discover(): array
-    public function discover(): array
     {
         $discovered = [];
         $modules = ModuleFacade::all();
