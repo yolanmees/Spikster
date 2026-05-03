@@ -124,6 +124,12 @@ func dispatch(req Request) (string, error) {
 		if err != nil { return "", err }
 		return out, nil
 
+	// ── Malware scan ─────────────────────────────────────────────────────────
+	case "server.malware-scan":
+		out, err := server.MalwareScan()
+		if err != nil { return "", err }
+		return out, nil
+
 	// ── Service management ────────────────────────────────────────────────
 	case "restart":
 		return systemctlAction("restart", req.Params["service"])

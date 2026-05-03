@@ -4,7 +4,9 @@ namespace App\Console;
 
 use App\Console\Commands\LogRotate;
 use App\Console\Commands\MonitoringCheckCommand;
+use App\Console\Commands\SecurityAuditCommand;
 use App\Console\Commands\ServerSetupCheck;
+use App\Console\Commands\VulnerabilityScanCommand;
 use App\Jobs\FetchServerMetricsJob;
 use App\Models\Backup;
 use App\Models\Server;
@@ -25,7 +27,9 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         LogRotate::class,
         MonitoringCheckCommand::class,
+        SecurityAuditCommand::class,
         ServerSetupCheck::class,
+        VulnerabilityScanCommand::class,
     ];
 
     /**
@@ -60,6 +64,16 @@ class Kernel extends ConsoleKernel
         })->dailyAt('03:00')->name('cleanup-old-metrics');
 
         $schedule->command('audit:cleanup')->weekly()->sundays()->at('02:00');
+
+        // Security: weekly vulnerability scan
+        $schedule->command('spikster:vuln-scan --json')
+            ->weekly()->sundays()->at('03:00')
+            ->name('vulnerability-scan');
+
+        // Security: daily security audit
+        $schedule->command('spikster:security-audit')
+            ->dailyAt('02:30')
+            ->name('security-audit');
 
         // Backup System - Process scheduled backups
         $schedule->call(function () {

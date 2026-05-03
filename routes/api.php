@@ -61,7 +61,7 @@ Route::middleware(['api.unified-auth'])->group(function () {
     Route::get('/servers/{server_id}/stats/cpu', [MonitoringController::class, 'statsCpu']);
     Route::get('/servers/{server_id}/stats/mem', [MonitoringController::class, 'statsMem']);
     Route::get('/servers/{server_id}/stats/load', [MonitoringController::class, 'statsLoad']);
-    Route::get('/servers/{server_id}/stats/disk', [MonitoringController::class, 'statsDisk']);
+    Route::post('/servers/{server_id}/malware-scan', [MonitoringController::class, 'malwareScan']);
     Route::get('/servers/{server_id}/metrics', [ServerMetricsController::class, 'getChartData']);
     Route::post('/servers/{server_id}/rootreset', [ServerController::class, 'rootreset']);
     Route::post('/servers/{server_id}/servicerestart/{service}', [ServerController::class, 'servicerestart']);
@@ -113,8 +113,9 @@ Route::middleware(['api.unified-auth'])->group(function () {
     Route::post('/sites/{site_id}/aliases', [AliasController::class, 'store']);
     Route::delete('/sites/{site_id}/aliases/{alias_id}', [AliasController::class, 'destroy']);
 
-    // Site Health
-    Route::get('/sites/{site_id}/health', [SiteHealthController::class, 'check']);
+        // Site Health
+        Route::get('/sites/{site_id}/health', [SiteHealthController::class, 'check']);
+        Route::post('/sites/{site_id}/file-scan', [SiteHealthController::class, 'fileScan']);
 
     // Deployments
     Route::post('/sites/{site_id}/deploy', [DeployController::class, 'deploy'])->middleware('idempotency');

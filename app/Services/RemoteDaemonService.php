@@ -285,11 +285,13 @@ class RemoteDaemonService
         float $spamScore,
         bool $antivirus
     ): bool {
+        $domain = substr(strrchr($email, '@'), 1) ?: '';
+
         return $this->send($server, 'email.set-filters', [
-            'email' => $email,
-            'spam_filter' => $spamFilter ? 'true' : 'false',
+            'domain' => $domain,
+            'spam_action' => $spamFilter ? 'tag' : '',
             'spam_score' => (string) $spamScore,
-            'antivirus' => $antivirus ? 'true' : 'false',
+            'virus_action' => $antivirus ? 'reject' : '',
         ])['success'] ?? false;
     }
 
@@ -420,6 +422,13 @@ class RemoteDaemonService
     public function rotateLogs(Server $server, string $day = ''): array
     {
         return $this->send($server, 'log.rotate', ['day' => $day]);
+    }
+
+    // ─── Malware scan ─────────────────────────────────────────────────────────
+
+    public function malwareScan(Server $server): array
+    {
+        return $this->send($server, 'server.malware-scan', []);
     }
 
     // ─── Mail queue & log management ─────────────────────────────────────────

@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\ScanResult;
 use App\Models\Site;
 use App\Services\DaemonService;
+use App\Services\MalwareScannerService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -129,6 +131,37 @@ class SiteHealthController extends Controller
                 'status' => 'warn',
                 'detail' => "Cannot check disk: {$e->getMessage()}",
             ];
+        }
+    }
+
+    public function fileScan(string $siteId): JsonResponse
+    {
+        $site = Site::where('site_id', $siteId)->firstOrFail();
+
+        try {
+            $scanner = app(MalwareScannerService::class);
+            $result = $scanner->scanSite($site);
+
+            ScanResult::create([
+                'site_id' => $siteId,
+                'type' => 'site-scan',
+                'status' => $result['is_clean'] ? 'clean' : 'warning',
+                'findings' => $result['findings'] ?? [],
+                'findings_count' => $result['findings_count'] ?? 0,
+                'files_scanned' => $result['files_scanned'] ?? 0,
+                'scanned_by' => auth()->user()?->email ?? 'system',
+                'scanned_at' => now(),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'scan' => $result,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+            ], 500);
         }
     }
 }
