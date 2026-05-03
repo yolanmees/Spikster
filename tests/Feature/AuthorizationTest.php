@@ -60,19 +60,19 @@ class AuthorizationTest extends TestCase
         ];
     }
 
-    // ─── 422: Unauthenticated / missing auth ─────────────────────────────
+    // ─── 401: Unauthenticated / missing auth ─────────────────────────────
 
     #[Test]
-    public function unauthenticated_returns_422(): void
+    public function unauthenticated_returns_401(): void
     {
-        $this->getJson('/api/servers')->assertStatus(422);
-        $this->getJson('/api/sites')->assertStatus(422);
+        $this->getJson('/api/servers')->assertStatus(401);
+        $this->getJson('/api/sites')->assertStatus(401);
     }
 
     #[Test]
-    public function unauthenticated_delete_site_returns_422(): void
+    public function unauthenticated_delete_site_returns_401(): void
     {
-        $this->deleteJson("/api/sites/{$this->site->site_id}")->assertStatus(422);
+        $this->deleteJson("/api/sites/{$this->site->site_id}")->assertStatus(401);
     }
 
     #[Test]
@@ -89,6 +89,7 @@ class AuthorizationTest extends TestCase
     #[Test]
     public function customer_cannot_list_servers(): void
     {
+        $this->withoutExceptionHandling();
         $this->expectException(AuthorizationException::class);
         $this->getJson('/api/servers', $this->authHeaders($this->customer));
     }

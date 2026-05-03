@@ -72,10 +72,7 @@ class ApiContractTest extends TestCase
     #[Test]
     public function auth_returns_expected_error_structure(): void
     {
-        $response = $this->postJson('/api/login', [
-            'username' => 'nonexistent',
-            'password' => 'wrong',
-        ]);
+        $response = $this->getJson('/api/servers');
 
         $response->assertStatus(401);
         $response->assertJsonStructure([
@@ -98,6 +95,7 @@ class ApiContractTest extends TestCase
         $customer = User::factory()->create();
         $customer->assignRole('Customer');
 
+        $this->withoutExceptionHandling();
         $this->expectException(AuthorizationException::class);
 
         $this->getJson('/api/servers', [

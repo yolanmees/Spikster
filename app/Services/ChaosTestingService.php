@@ -87,9 +87,21 @@ class ChaosTestingService
             \App\Models\ServerMetric::create([
                 'server_id' => $server->server_id,
                 'cpu_percent' => 99.9,
+                'cpu_cores' => 1,
+                'memory_total' => 1024,
+                'memory_used' => 512,
+                'memory_free' => 512,
                 'memory_percent' => 50,
+                'disk_total' => 1024,
+                'disk_used' => 614,
+                'disk_free' => 410,
                 'disk_percent' => 60,
                 'load_1' => 12.5,
+                'load_5' => 6.0,
+                'load_15' => 3.0,
+                'network_bytes_sent' => 1000,
+                'network_bytes_recv' => 2000,
+                'uptime_seconds' => 86400,
                 'measured_at' => now(),
             ]);
         }

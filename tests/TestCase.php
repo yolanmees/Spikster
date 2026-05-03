@@ -18,9 +18,6 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUp();
 
-        // Disable exception handling for better error messages
-        $this->withoutExceptionHandling();
-
         // Additional setup can go here
     }
 

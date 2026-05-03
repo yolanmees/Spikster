@@ -28,6 +28,7 @@ class SecurityHelper
      */
     public static function sanitizeDomain(string $domain): string
     {
+        $domain = strip_tags($domain);
         $domain = strtolower(trim($domain));
         $domain = preg_replace('/[^a-z0-9\-\.]/', '', $domain);
 

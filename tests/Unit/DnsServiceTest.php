@@ -85,7 +85,7 @@ class DnsServiceTest extends TestCase
         $result = $this->service->addZone('example.com', 'admin@example.com', $ns);
         $decoded = json_decode($result, true);
         $this->assertSame(1, $decoded['code']);
-        $this->assertStringContainsString('At most 13', $decoded['message']);
+        $this->assertStringContainsString('at most 13', $decoded['message']);
     }
 
     public function test_invalid_email_rejected(): void

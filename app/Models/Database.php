@@ -10,6 +10,8 @@ class Database extends Model
     use HasFactory;
 
     protected $fillable = [
+        'site_id',
+        'user_id',
         'database_name',
     ];
 

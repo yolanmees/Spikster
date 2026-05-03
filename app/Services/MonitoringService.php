@@ -17,10 +17,10 @@ class MonitoringService
      */
     public function getLatestMetrics(Server $server): ?array
     {
-        $cacheKey = "server_metrics_{$server->id}";
+        $cacheKey = "server_metrics_{$server->server_id}";
 
         // Try to get from database first
-        $metric = ServerMetric::getLatestForServer($server->id);
+        $metric = ServerMetric::getLatestForServer($server->server_id);
 
         if ($metric) {
             $data = $this->formatMetricForDisplay($metric);
@@ -35,7 +35,7 @@ class MonitoringService
         if (config('monitoring.use_cached_metrics', true)) {
             $cached = Cache::get($cacheKey);
             if ($cached) {
-                Log::info("Using cached metrics for server {$server->id}");
+                Log::info("Using cached metrics for server {$server->server_id}");
 
                 return array_merge($cached, ['cached' => true]);
             }
@@ -49,7 +49,7 @@ class MonitoringService
      */
     public function getMetricsForPeriod(Server $server, int $hours = 24): array
     {
-        return ServerMetric::forServer($server->id)
+        return ServerMetric::forServer($server->server_id)
             ->lastHours($hours)
             ->orderBy('measured_at', 'asc')
             ->get()
@@ -62,7 +62,7 @@ class MonitoringService
      */
     public function getChartData(Server $server, int $hours = 24): array
     {
-        return ServerMetric::getTimeSeriesData($server->id, $hours);
+        return ServerMetric::getTimeSeriesData($server->server_id, $hours);
     }
 
     /**
@@ -70,7 +70,7 @@ class MonitoringService
      */
     public function getAggregatedStats(Server $server, int $hours = 24): array
     {
-        return ServerMetric::getAggregatedMetrics($server->id, $hours);
+        return ServerMetric::getAggregatedMetrics($server->server_id, $hours);
     }
 
     /**
@@ -78,7 +78,7 @@ class MonitoringService
      */
     public function checkServerHealth(Server $server): array
     {
-        $metric = ServerMetric::getLatestForServer($server->id);
+        $metric = ServerMetric::getLatestForServer($server->server_id);
 
         if (! $metric) {
             return [

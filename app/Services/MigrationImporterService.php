@@ -155,7 +155,7 @@ class MigrationImporterService
                 $db = Database::create([
                     'database_name' => $dbData['name'],
                     'site_id' => $site->site_id,
-                    'user_id' => auth()->id(),
+                    'user_id' => auth()->id() ?? 1,
                 ]);
 
                 if (! empty($dbData['users'])) {

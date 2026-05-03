@@ -26,7 +26,7 @@ class DnsService
         if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $email = str_replace('@', '.', $email);
         } else {
-            throw new \Exception('Invalid email address');
+            return json_encode(['code' => 1, 'message' => 'Error: Invalid email address.']);
         }
         foreach ($nameservers as $key => $value) {
             $nameservers[$key] = htmlspecialchars($value, ENT_QUOTES, 'utf-8');

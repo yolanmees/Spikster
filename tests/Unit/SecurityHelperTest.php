@@ -42,7 +42,7 @@ class SecurityHelperTest extends TestCase
     public function test_sanitize_filename_prevents_traversal(): void
     {
         $this->assertEquals('file.txt', SecurityHelper::sanitizeFilename('../../file.txt'));
-        $this->assertEquals('file.txt', SecurityHelper::sanitizeFilename('/etc/passwd'));
+        $this->assertEquals('passwd', SecurityHelper::sanitizeFilename('/etc/passwd'));
     }
 
     public function test_sanitize_shell_value_blocks_metacharacters(): void

@@ -33,14 +33,15 @@ class SecurityTest extends TestCase
         // Disable exception handling to see raw HTTP status
         $this->withoutMiddleware(VerifyCsrfToken::class);
 
-        $response = $this->post('/auth', [
-            'username' => 'testuser',
+        $response = $this->post('/login', [
+            'email' => 'testuser@example.com',
             'password' => 'password',
         ]);
 
         // With CSRF middleware disabled, request should go through
         // With it enabled (normal), it would return 419
-        $response->assertStatus(401); // Unauthorized (credentials invalid, but CSRF passed)
+        // Laravel redirects to login with error flash on invalid credentials
+        $response->assertStatus(302);
     }
 
     /**
