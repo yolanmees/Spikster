@@ -36,36 +36,24 @@ Documentation at: https://spikster.com/
 
 ## Installation
 
-Install Spikster
-
-```
-ssh ubuntu@<your server IP address>
-sudo -s
-wget -O - https://raw.githubusercontent.com/yolanmees/Spikster/master/go.sh | bash
-```
-
-Remember to open ports: 22, 80 and 443!
-
-#### Installation Note
-
-Before you can use Spikster, please make sure your server fulfils these requirements:
-
--   Ubuntu version:
-    -   22.04 x86_64 LTS (Recommended)
-    -   23.04 x86_64
-    -   24.04 x86_64 LTS
--   10GB free disk space
-
-Hardware Requirement: At least 1 core processor / 512MB minimum RAM / At least 1 public IP Address (IPv6 and NAT VPS are not supported) / For VPS providers such as AWS, those providers already include an external firewall for your VPS.
-
-Installation may take up to about 30 minutes which may also depend on your server's internet speed. After the installation is completed, you are ready to use Spikster to manage your servers.
-
 > [!IMPORTANT]
-> At the end of the installation you are given all the credentials you need for spikster / mysql.
->
-> The default login for the spikster dashboard is administrator@localhost / password
+> Requires a fresh **Ubuntu 22.04 or 24.04** VPS with at least 1 vCPU, 1GB RAM and 10GB disk.
+> Make sure ports **22, 80 and 443** are open before you start.
 
-To correctly manage remote servers Spikster has to be on a public IP address (IPv4). Do not use it in localhost!
+SSH into your server as root and run:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/yolanmees/Spikster/v2-update/install.sh | bash
+```
+
+That's it. The installer takes care of everything. When it finishes, you'll see:
+
+```
+Panel URL:   http://<your-server-ip>
+Setup URL:   http://<your-server-ip>/setup/<token>
+```
+
+Open the **Setup URL** in your browser to create your admin account. Your server is already connected — no further configuration needed.
 
 ## Spikster LEMP environment
 
