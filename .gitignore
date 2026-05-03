@@ -23,3 +23,9 @@ public/ghkey_*.php
 /multipass/
 /.vscode/
 /new_design/
+/docker/
+Dockerfile*
+docker-compose*
+dockerfile
+.dockerignore
+.env.docker*
