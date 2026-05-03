@@ -349,8 +349,8 @@
                     <div class="mb-6">
                         <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Description</h4>
                         <div class="text-gray-700 dark:text-gray-300 prose dark:prose-invert max-w-none">
-                            {!! $selectedWpOrgPlugin['sections']['description'] ??
-                                ($selectedWpOrgPlugin['short_description'] ?? 'No description available.') !!}
+                            {!! strip_tags(($selectedWpOrgPlugin['sections']['description'] ??
+                                ($selectedWpOrgPlugin['short_description'] ?? 'No description available.')), '<p><a><strong><em><ul><ol><li><br><h3><h4><blockquote><code><pre>') !!}
                         </div>
                     </div>
 

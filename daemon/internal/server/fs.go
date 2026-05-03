@@ -70,5 +70,9 @@ func isSafePath(p string) bool {
 	if err != nil {
 		return false
 	}
+	// Resolve symlinks to prevent bypass via symlink to /etc/
+	if resolved, err := filepath.EvalSymlinks(abs); err == nil {
+		abs = resolved
+	}
 	return strings.HasPrefix(abs, "/home/") && !strings.Contains(abs, "..")
 }

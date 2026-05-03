@@ -17,20 +17,23 @@ class SecurityHeaders
     {
         $response = $next($request);
 
-        // Prevent clickjacking attacks
-        $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
+        $headers = config('security.headers', []);
 
-        // Prevent MIME type sniffing
-        $response->headers->set('X-Content-Type-Options', 'nosniff');
-
-        // Enable XSS protection
-        $response->headers->set('X-XSS-Protection', '1; mode=block');
-
-        // Enforce HTTPS
-        $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
-
-        // Referrer policy
-        $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
+        if (! empty($headers['x_frame_options'])) {
+            $response->headers->set('X-Frame-Options', $headers['x_frame_options']);
+        }
+        if (! empty($headers['x_content_type_options'])) {
+            $response->headers->set('X-Content-Type-Options', $headers['x_content_type_options']);
+        }
+        if (! empty($headers['x_xss_protection'])) {
+            $response->headers->set('X-XSS-Protection', $headers['x_xss_protection']);
+        }
+        if (! empty($headers['strict_transport_security'])) {
+            $response->headers->set('Strict-Transport-Security', $headers['strict_transport_security']);
+        }
+        if (! empty($headers['referrer_policy'])) {
+            $response->headers->set('Referrer-Policy', $headers['referrer_policy']);
+        }
 
         // Permissions policy
         $response->headers->set('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');

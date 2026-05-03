@@ -3,10 +3,10 @@ package socket
 import (
 	"encoding/json"
 	"fmt"
+	"net"
 	"strconv"
 	"time"
 	"log"
-	"net"
 	"os"
 	"os/exec"
 	"bufio"
@@ -224,7 +224,11 @@ func dispatch(req Request) (string, error) {
 		return "supervisor updated", nil
 
 	case "server.supervisorctl":
-		out, err := site.SupervisorCtl(req.Params["action"], req.Params["process"])
+		process := req.Params["process"]
+		if process != "" && !safeProcessName(process) {
+			return "", fmt.Errorf("invalid process name: %q", process)
+		}
+		out, err := site.SupervisorCtl(req.Params["action"], process)
 		if err != nil { return "", err }
 		return out, nil
 
@@ -571,15 +575,27 @@ func dispatch(req Request) (string, error) {
 
 	// ── Fail2ban management ───────────────────────────────────────────────────
 	case "fail2ban.ban":
-		if err := server.Fail2banBan(req.Params["ip"], req.Params["jail"]); err != nil { return "", err }
+		ip := req.Params["ip"]
+		if net.ParseIP(ip) == nil {
+			return "", fmt.Errorf("invalid IP address: %q", ip)
+		}
+		if err := server.Fail2banBan(ip, req.Params["jail"]); err != nil { return "", err }
 		return "ip banned", nil
 
 	case "fail2ban.unban":
-		if err := server.Fail2banUnban(req.Params["ip"], req.Params["jail"]); err != nil { return "", err }
+		ip := req.Params["ip"]
+		if net.ParseIP(ip) == nil {
+			return "", fmt.Errorf("invalid IP address: %q", ip)
+		}
+		if err := server.Fail2banUnban(ip, req.Params["jail"]); err != nil { return "", err }
 		return "ip unbanned", nil
 
 	case "fail2ban.whitelist":
-		if err := server.Fail2banWhitelist(req.Params["ip"]); err != nil { return "", err }
+		ip := req.Params["ip"]
+		if net.ParseIP(ip) == nil {
+			return "", fmt.Errorf("invalid IP address: %q", ip)
+		}
+		if err := server.Fail2banWhitelist(ip); err != nil { return "", err }
 		return "ip whitelisted", nil
 
 	// ── File operations ──────────────────────────────────────────────────────
@@ -588,7 +604,11 @@ func dispatch(req Request) (string, error) {
 		return "directory deleted", nil
 
 	case "file.upload":
-		if err := server.UploadFile(req.Params["path"], []byte(req.Params["content"])); err != nil { return "", err }
+		content := req.Params["content"]
+		if len(content) > 100*1024*1024 { // 100MB limit
+			return "", fmt.Errorf("file too large: %d bytes", len(content))
+		}
+		if err := server.UploadFile(req.Params["path"], []byte(content)); err != nil { return "", err }
 		return "file uploaded", nil
 
 	case "file.chown":
@@ -599,7 +619,7 @@ func dispatch(req Request) (string, error) {
 		mode := os.FileMode(0644)
 		if m := req.Params["mode"]; m != "" {
 			if n, err := strconv.ParseUint(m, 8, 32); err == nil {
-				mode = os.FileMode(n)
+				mode = os.FileMode(n) & 0777 // strip setuid/setgid/sticky
 			}
 		}
 		if err := server.SetPermissions(req.Params["path"], mode); err != nil { return "", err }
@@ -610,6 +630,10 @@ func dispatch(req Request) (string, error) {
 		day := req.Params["day"]
 		if day == "" {
 			day = fmt.Sprintf("%d", int(time.Now().Weekday()))
+		}
+		// Validate day is numeric to prevent path traversal
+		if _, err := strconv.Atoi(day); err != nil {
+			return "", fmt.Errorf("invalid day parameter: must be numeric")
 		}
 		out, err := server.LogRotate(day)
 		if err != nil { return "", err }
@@ -630,8 +654,26 @@ func systemctlAction(action, service string) (string, error) {
 	if !allowedServices[service] {
 		return "", fmt.Errorf("service not allowed: %s", service)
 	}
+	switch action {
+	case "restart", "start", "stop", "reload", "status":
+	default:
+		return "", fmt.Errorf("action not allowed: %s", action)
+	}
 	out, err := exec.Command("systemctl", action, service).CombinedOutput()
 	return string(out), err
+}
+
+func safeProcessName(name string) bool {
+	if len(name) == 0 || len(name) > 64 {
+		return false
+	}
+	for _, c := range name {
+		if !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
+			(c >= '0' && c <= '9') || c == '_' || c == '-') {
+			return false
+		}
+	}
+	return true
 }
 
 func siteFromParams(p map[string]string) site.Site {

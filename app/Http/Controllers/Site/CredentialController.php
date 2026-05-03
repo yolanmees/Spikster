@@ -123,6 +123,12 @@ class CredentialController extends Controller
             return back();
         }
 
-        return redirect()->to('mysecureadmin/index.php?username='.$site->username.'&password='.$site->database);
+        session()->put("pma_auth_{$site_id}", [
+            'username' => $site->username,
+            'password' => $site->database,
+            'expires' => now()->addMinute()->timestamp,
+        ]);
+
+        return redirect()->to('mysecureadmin/index.php?site='.$site_id);
     }
 }

@@ -25,9 +25,17 @@ func Write(content string) error {
 			continue
 		}
 		// Check for dangerous commands
-		if strings.Contains(line, "rm -rf /") || strings.Contains(line, "mkfs") ||
-			strings.Contains(line, "dd if=") || strings.Contains(line, "> /dev/sd") {
-			return fmt.Errorf("cron line %d: command blocked for security", i+1)
+		dangerous := []string{
+			"rm -rf ", "mkfs", "dd if=", "dd<", ">/dev/sd", ">/dev/hd",
+			">>/dev/sd", ">/dev/nvme", "wget ", "curl ", "nc ",
+			"chmod 777", "chmod -R 777", ":(){ :|:& };:", // fork bomb
+			"\\x", "base64 -d", "sh -c", "bash -c",
+		}
+		lower := strings.ToLower(line)
+		for _, d := range dangerous {
+			if strings.Contains(lower, d) {
+				return fmt.Errorf("cron line %d: command blocked for security", i+1)
+			}
 		}
 		// Validate basic structure (5-6 time fields + user + command)
 		fields := strings.Fields(line)

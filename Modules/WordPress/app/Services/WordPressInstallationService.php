@@ -105,62 +105,68 @@ class WordPressInstallationService
         try {
             $ssh = $this->sshService->connect($server);
 
+            $escPath = escapeshellarg($path);
+            $escPass = escapeshellarg($server->password);
+
             // Create directory
             Log::info('Creating WordPress directory', ['path' => $path]);
-            $ssh->exec("echo '{$server->password}' | sudo -S mkdir -p {$path}");
+            $ssh->exec("echo {$escPass} | sudo -S mkdir -p {$escPath}");
 
             // Verify directory
-            $dirCheck = trim($ssh->exec("test -d {$path} && echo 'exists' || echo 'not found'"));
+            $dirCheck = trim($ssh->exec("test -d {$escPath} && echo 'exists' || echo 'not found'"));
             if ($dirCheck !== 'exists') {
                 return ['success' => false, 'message' => 'Failed to create installation directory'];
             }
 
             // Download WordPress
             Log::info('Downloading WordPress');
-            $downloadCmd = "echo '{$server->password}' | sudo -S curl -L -o {$path}/wordpress.tar.gz https://wordpress.org/latest.tar.gz 2>&1";
+            $downloadCmd = "echo {$escPass} | sudo -S curl -L -o {$escPath}/wordpress.tar.gz https://wordpress.org/latest.tar.gz 2>&1";
             $ssh->exec($downloadCmd);
 
             // Verify download
-            $checkDownload = trim($ssh->exec("test -f {$path}/wordpress.tar.gz && echo 'exists' || echo 'not found'"));
+            $checkDownload = trim($ssh->exec("test -f {$escPath}/wordpress.tar.gz && echo 'exists' || echo 'not found'"));
             if ($checkDownload !== 'exists') {
                 return ['success' => false, 'message' => 'Failed to download WordPress'];
             }
 
             // Check file size
-            $fileSize = trim($ssh->exec("stat -c%s {$path}/wordpress.tar.gz 2>&1 || stat -f%z {$path}/wordpress.tar.gz 2>&1"));
+            $fileSize = trim($ssh->exec("stat -c%s {$escPath}/wordpress.tar.gz 2>&1 || stat -f%z {$escPath}/wordpress.tar.gz 2>&1"));
             if (intval($fileSize) < 1000000) {
                 return ['success' => false, 'message' => 'Downloaded file is too small or corrupt'];
             }
 
             // Extract WordPress
             Log::info('Extracting WordPress');
-            $ssh->exec("echo '{$server->password}' | sudo -S tar -xzf {$path}/wordpress.tar.gz -C {$path} 2>&1");
+            $ssh->exec("echo {$escPass} | sudo -S tar -xzf {$escPath}/wordpress.tar.gz -C {$escPath} 2>&1");
 
             // Move files from wordpress/ subdirectory
-            $ssh->exec("echo '{$server->password}' | sudo -S bash -c 'shopt -s dotglob && mv {$path}/wordpress/* {$path}/ && rmdir {$path}/wordpress && rm {$path}/wordpress.tar.gz' 2>&1");
+            $ssh->exec("echo {$escPass} | sudo -S bash -c 'shopt -s dotglob && mv {$escPath}/wordpress/* {$escPath}/ && rmdir {$escPath}/wordpress && rm {$escPath}/wordpress.tar.gz' 2>&1");
 
             // Verify extraction
-            $checkFile = trim($ssh->exec("test -f {$path}/wp-config-sample.php && echo 'exists' || echo 'not found'"));
+            $checkFile = trim($ssh->exec("test -f {$escPath}/wp-config-sample.php && echo 'exists' || echo 'not found'"));
             if ($checkFile !== 'exists') {
                 return ['success' => false, 'message' => 'Failed to extract WordPress files'];
             }
 
             // Create wp-config.php
-            $ssh->exec("echo '{$server->password}' | sudo -S cp {$path}/wp-config-sample.php {$path}/wp-config.php");
+            $ssh->exec("echo {$escPass} | sudo -S cp {$escPath}/wp-config-sample.php {$escPath}/wp-config.php");
 
             // Update database credentials
-            $ssh->exec("echo '{$server->password}' | sudo -S sed -i 's/database_name_here/{$dbName}/g' {$path}/wp-config.php");
-            $ssh->exec("echo '{$server->password}' | sudo -S sed -i 's/username_here/{$dbUser}/g' {$path}/wp-config.php");
-            $ssh->exec("echo '{$server->password}' | sudo -S sed -i 's/password_here/{$dbPassword}/g' {$path}/wp-config.php");
+            $escDbName = escapeshellarg($dbName);
+            $escDbUser = escapeshellarg($dbUser);
+            $escDbPass = escapeshellarg($dbPassword);
+            $ssh->exec("echo {$escPass} | sudo -S sed -i 's/database_name_here/{$escDbName}/g' {$escPath}/wp-config.php");
+            $ssh->exec("echo {$escPass} | sudo -S sed -i 's/username_here/{$escDbUser}/g' {$escPath}/wp-config.php");
+            $ssh->exec("echo {$escPass} | sudo -S sed -i 's/password_here/{$escDbPass}/g' {$escPath}/wp-config.php");
 
             // Generate security keys
             $authKey = Str::random(64);
-            $ssh->exec("echo '{$server->password}' | sudo -S sed -i \"s/put your unique phrase here/{$authKey}/\" {$path}/wp-config.php");
+            $ssh->exec("echo {$escPass} | sudo -S sed -i \"s/put your unique phrase here/{$authKey}/\" {$escPath}/wp-config.php");
 
             // Set permissions
-            $ssh->exec("echo '{$server->password}' | sudo -S chown -R www-data:www-data {$path}");
-            $ssh->exec("echo '{$server->password}' | sudo -S find {$path} -type d -exec chmod 755 {} \\;");
-            $ssh->exec("echo '{$server->password}' | sudo -S find {$path} -type f -exec chmod 644 {} \\;");
+            $ssh->exec("echo {$escPass} | sudo -S chown -R www-data:www-data {$escPath}");
+            $ssh->exec("echo {$escPass} | sudo -S find {$escPath} -type d -exec chmod 755 {} \\;");
+            $ssh->exec("echo {$escPass} | sudo -S find {$escPath} -type f -exec chmod 644 {} \\;");
 
             $ssh->disconnect();
 

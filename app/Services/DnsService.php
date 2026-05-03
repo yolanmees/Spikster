@@ -79,7 +79,7 @@ class DnsService
             file "'.$zoneFile.'";
         };
         ';
-        exec('rndc addzone '.$zone.' '.escapeshellarg($zoneConfig), $output, $return_var);
+            exec('rndc addzone '.escapeshellarg($zone).' '.escapeshellarg($zoneConfig), $output, $return_var);
         if ($return_var != 0) {
             return json_encode(['code' => 1, 'message' => "Error: Failed to add zone $zone. Error: ".implode("\n", $output)]);
         }
@@ -296,7 +296,7 @@ class DnsService
         foreach ($resolvers as $resolver) {
             $output = [];
             $returnVar = 0;
-            exec("dig @{$resolver} {$domain} {$type} +short 2>/dev/null", $output, $returnVar);
+            exec("dig @{$resolver} ".escapeshellarg($domain)." ".escapeshellarg($type)." +short 2>/dev/null", $output, $returnVar);
             $results[$resolver] = [
                 'resolver' => $resolver,
                 'records' => $returnVar === 0 ? array_filter($output) : [],

@@ -18,7 +18,7 @@ return [
 
     // Role-based access control
     'rbac' => [
-        'panel_admin_bypass' => env('RBAC_PANEL_ADMIN_BYPASS', true),
+        'panel_admin_bypass' => env('RBAC_PANEL_ADMIN_BYPASS', false),
         'panel_admin_identifier' => env('RBAC_PANEL_ADMIN_IDENTIFIER', 'admin@localhost'),
     ],
 
@@ -55,7 +55,7 @@ return [
     // Two-factor authentication
     '2fa' => [
         'enabled' => env('2FA_ENABLED', true),
-        'required_for_admin' => env('2FA_REQUIRED_FOR_ADMIN', false),
+        'required_for_admin' => env('2FA_REQUIRED_FOR_ADMIN', true),
     ],
 
     // Content Security Policy

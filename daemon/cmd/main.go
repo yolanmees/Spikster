@@ -111,23 +111,35 @@ func selfUpdate() {
 	// Download SHA256 checksum
 	checksumURL := versionURL + ".sha256"
 	checksumOut, err := exec.Command("curl", "-fsSL", checksumURL).CombinedOutput()
-	if err == nil {
-		// Verify checksum if available
-		expected := strings.TrimSpace(string(checksumOut))
-		parts := strings.SplitN(expected, " ", 2)
-		if len(parts) >= 1 {
-			expectedHash := parts[0]
-			hashOut, err := exec.Command("sha256sum", tmpPath).CombinedOutput()
-			if err == nil {
-				actualParts := strings.SplitN(strings.TrimSpace(string(hashOut)), " ", 2)
-				if len(actualParts) >= 1 && actualParts[0] != expectedHash {
-					fmt.Printf("❌ Checksum mismatch: expected %s, got %s\n", expectedHash, actualParts[0])
-					os.Exit(1)
-				}
-				fmt.Println("  ✅ Checksum verified")
-			}
-		}
+	if err != nil {
+		fmt.Printf("❌ Checksum download failed: %v — aborting update for safety\n", err)
+		os.Exit(1)
 	}
+
+	expected := strings.TrimSpace(string(checksumOut))
+	parts := strings.SplitN(expected, " ", 2)
+	var expectedHash string
+	if len(parts) >= 1 {
+		expectedHash = parts[0]
+	}
+
+	if expectedHash == "" {
+		fmt.Println("❌ Empty checksum received — aborting update for safety")
+		os.Exit(1)
+	}
+
+	hashOut, err := exec.Command("sha256sum", tmpPath).CombinedOutput()
+	if err != nil {
+		fmt.Printf("❌ Cannot compute SHA256: %v — aborting update for safety\n", err)
+		os.Exit(1)
+	}
+
+	actualParts := strings.SplitN(strings.TrimSpace(string(hashOut)), " ", 2)
+	if len(actualParts) < 1 || actualParts[0] != expectedHash {
+		fmt.Printf("❌ Checksum mismatch: expected %s, got %s\n", expectedHash, actualParts[0])
+		os.Exit(1)
+	}
+	fmt.Println("  ✅ Checksum verified")
 
 	// Make it executable
 	if err := os.Chmod(tmpPath, 0755); err != nil {

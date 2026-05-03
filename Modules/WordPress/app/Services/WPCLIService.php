@@ -16,14 +16,19 @@ class WPCLIService
 
     public function executeCommand(WordPressInstallation $installation, string $command): array
     {
+        // Validate command against allowed WP-CLI subcommands
+        if (! $this->isSafeWpCliCommand($command)) {
+            throw new \InvalidArgumentException('Unsafe WP-CLI command detected');
+        }
+
         try {
             $server = $installation->site->server;
-            $path = $installation->getFullPath();
+            $path = escapeshellarg($installation->getFullPath());
 
             $ssh = $this->sshService->connect($server);
 
             // Execute WP-CLI command as www-data user
-            $fullCommand = "echo '{$server->password}' | sudo -S -u www-data wp {$command} --path={$path} 2>&1";
+            $fullCommand = "echo ".escapeshellarg($server->password)." | sudo -S -u www-data wp {$command} --path={$path} 2>&1";
             $output = $ssh->exec($fullCommand);
 
             $ssh->disconnect();
@@ -399,5 +404,34 @@ class WPCLIService
     public function deletePlugin(WordPressInstallation $installation, string $pluginSlug): array
     {
         return $this->executeCommand($installation, "plugin delete {$pluginSlug}");
+    }
+
+    /**
+     * Validate that a WP-CLI command only contains allowed subcommands and safe characters.
+     */
+    protected function isSafeWpCliCommand(string $command): bool
+    {
+        $allowedSubcommands = [
+            'core', 'plugin', 'theme', 'user', 'option', 'post', 'term',
+            'menu', 'widget', 'sidebar', 'db', 'config', 'cap', 'role',
+            'transient', 'cron', 'cache', 'site', 'network', 'i18n',
+            'language', 'maintenance-mode', 'scaffold', 'search-replace',
+            'media', 'comment', 'taxonomy', 'export', 'import', 'rewrite',
+            'super-admin', 'package', 'server', 'eval-file',
+        ];
+
+        $command = trim($command);
+        $firstWord = strtolower(explode(' ', $command, 2)[0] ?? '');
+
+        if (! in_array($firstWord, $allowedSubcommands, true)) {
+            return false;
+        }
+
+        // Block shell metacharacters and dangerous patterns
+        if (preg_match('/[;&|`$(){}[\]!<>#~*?"\'\n\r\t\\\\]/', $command)) {
+            return false;
+        }
+
+        return true;
     }
 }

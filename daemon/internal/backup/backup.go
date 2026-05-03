@@ -68,6 +68,11 @@ func CreateFull(r BackupRequest) (string, error) {
 
 // Restore extracts a backup archive and restores files + database
 func Restore(r RestoreRequest) error {
+	// Validate SiteRoot is under /home/
+	if !isSafeSiteRoot(r.SiteRoot) {
+		return fmt.Errorf("unsafe site_root: %q", r.SiteRoot)
+	}
+
 	restoreDir := filepath.Join(backupBase, "restore-tmp-"+time.Now().Format("20060102150405"))
 	defer os.RemoveAll(restoreDir)
 
@@ -101,8 +106,19 @@ func Restore(r RestoreRequest) error {
 	// Restore files
 	filesArchive := filepath.Join(innerDir, "files.tar.gz")
 	if _, err := os.Stat(filesArchive); err == nil {
+		// Validate inner tar for path traversal
+		innerList, innerListErr := exec.Command("tar", "-tzf", filesArchive).CombinedOutput()
+		if innerListErr != nil {
+			return fmt.Errorf("list inner archive: %w", innerListErr)
+		}
+		for _, entry := range strings.Split(strings.TrimSpace(string(innerList)), "\n") {
+			if strings.Contains(entry, "..") || strings.HasPrefix(entry, "/") {
+				return fmt.Errorf("inner archive contains unsafe path: %q", entry)
+			}
+		}
+
 		os.MkdirAll(r.SiteRoot, 0755)
-		if err := run("tar", "-xzf", filesArchive, "-C", r.SiteRoot); err != nil {
+		if err := run("tar", "-xzf", filesArchive, "-C", r.SiteRoot, "--no-same-owner"); err != nil {
 			return fmt.Errorf("restore files: %w", err)
 		}
 		run("chown", "-R", r.Username+":www-data", r.SiteRoot)
@@ -218,6 +234,14 @@ func run(args ...string) error {
 		return fmt.Errorf("%s: %s", args[0], strings.TrimSpace(string(out)))
 	}
 	return nil
+}
+
+func isSafeSiteRoot(p string) bool {
+	abs, err := filepath.Abs(p)
+	if err != nil {
+		return false
+	}
+	return strings.HasPrefix(abs, "/home/") && !strings.Contains(abs, "..")
 }
 
 // ─── Upload helpers ─────────────────────────────────────────────────────────

@@ -2,12 +2,15 @@ package socket
 
 import (
 	"bufio"
+	"crypto/subtle"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net"
 	"os"
 	"strings"
+	"sync"
+	"time"
+	"log"
 )
 
 // StartTCP starts a TCP listener for remote panel connections.
@@ -78,10 +81,27 @@ func handleWithReader(conn net.Conn) {
 // Uses bufio.Reader to avoid consuming pipelined JSON data (fix for protocol bug
 // where raw conn.Read could read token + part of the JSON body in one call).
 // The client must send "TOKEN <value>\n" as the very first line.
+// Rate-limited per IP to prevent brute-force attacks.
 func authenticateTCP(conn net.Conn) bool {
 	token, err := readDaemonToken()
 	if err != nil {
 		log.Printf("TCP auth: cannot read daemon token: %v", err)
+		return false
+	}
+
+	// Rate limit: max 5 auth attempts per IP per minute
+	host, _, _ := net.SplitHostPort(conn.RemoteAddr().String())
+	rateLimiter.Lock()
+	now := time.Now()
+	bucket, exists := rateLimiter.entries[host]
+	if !exists || now.Sub(bucket.window) > time.Minute {
+		bucket = &rateBucket{attempts: 0, window: now}
+		rateLimiter.entries[host] = bucket
+	}
+	bucket.attempts++
+	rateLimiter.Unlock()
+
+	if bucket.attempts > 5 {
 		return false
 	}
 
@@ -94,11 +114,28 @@ func authenticateTCP(conn net.Conn) bool {
 	line = strings.TrimSpace(line)
 	parts := strings.SplitN(line, " ", 2)
 	if len(parts) != 2 || parts[0] != "TOKEN" {
+		time.Sleep(500 * time.Millisecond) // slow down brute force
 		return false
 	}
 
-	return parts[1] == token
+	// Constant-time comparison to prevent timing side-channel
+	if subtle.ConstantTimeCompare([]byte(parts[1]), []byte(token)) != 1 {
+		time.Sleep(500 * time.Millisecond)
+		return false
+	}
+
+	return true
 }
+
+type rateBucket struct {
+	attempts int
+	window   time.Time
+}
+
+var rateLimiter = struct {
+	sync.Mutex
+	entries map[string]*rateBucket
+}{entries: make(map[string]*rateBucket)}
 
 // readDaemonToken reads the shared secret from /etc/spikster/daemon.token.
 func readDaemonToken() (string, error) {

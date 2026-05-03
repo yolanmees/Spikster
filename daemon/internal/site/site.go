@@ -515,6 +515,15 @@ type SupervisorConfig struct {
 }
 
 func UpdateSupervisor(username, script string) error {
+	// Validate script to prevent config injection
+	if script != "" {
+		if strings.ContainsAny(script, ";&|`$(){}[]!<>#~\n\r\\\"'") {
+			return fmt.Errorf("unsafe characters in supervisor script")
+		}
+		if strings.Contains(script, "..") || strings.HasPrefix(script, "/") {
+			return fmt.Errorf("supervisor script must be a command name, not a path")
+		}
+	}
 	confPath := fmt.Sprintf("/etc/supervisor/conf.d/%s.conf", username)
 	os.Remove(confPath)
 	if script == "" {

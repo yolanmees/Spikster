@@ -101,7 +101,7 @@ class DaemonService
             Log::error('DaemonService: daemon did not respond in time', [
                 'action' => $action,
                 'elapsed_ms' => $elapsed,
-                'partial_response' => substr($response, 0, 500),
+                'partial_response' => $this->redactSensitive(substr($response, 0, 500)),
             ]);
             throw new \Exception('Daemon did not respond in time (60s timeout). The server may be overloaded.');
         }
@@ -120,7 +120,7 @@ class DaemonService
             Log::error('DaemonService: invalid JSON response', [
                 'action' => $action,
                 'elapsed_ms' => $elapsed,
-                'raw_response' => substr($response, 0, 1000),
+                'raw_response' => $this->redactSensitive(substr($response, 0, 1000)),
             ]);
             throw new \Exception('Invalid response from daemon.');
         }
@@ -411,5 +411,17 @@ class DaemonService
     public function supervisorCtl(string $action, string $process = ''): array
     {
         return $this->send('server.supervisorctl', compact('action', 'process'));
+    }
+
+    /**
+     * Redact sensitive fields (passwords, tokens) from logged daemon responses.
+     */
+    private function redactSensitive(string $text): string
+    {
+        $text = preg_replace('/"password"\s*:\s*"[^"]*"/', '"password":"***REDACTED***"', $text);
+        $text = preg_replace('/"db_pass"\s*:\s*"[^"]*"/', '"db_pass":"***REDACTED***"', $text);
+        $text = preg_replace('/"db_root"\s*:\s*"[^"]*"/', '"db_root":"***REDACTED***"', $text);
+
+        return $text;
     }
 }

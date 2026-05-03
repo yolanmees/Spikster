@@ -214,7 +214,7 @@
 
         // Parse and display log content
         function parseAndDisplayLog() {
-            const rawLog = {!! json_encode($log['log']) !!};
+            const rawLog = {!! json_encode($log['log'], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!};
             const lines = rawLog.split('\n');
             logLines = [];
 
