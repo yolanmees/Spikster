@@ -37,7 +37,7 @@ PHP_VER=$(php -r "echo PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION;" 2>/dev/null || 
 if dpkg -l php8.5-fpm 2>/dev/null | grep -q "^ii"; then
     info "PHP 8.3 already installed, skipping repo setup"
 else
-    curl -fsSL https://packages.sury.org/php/apt.gpg | gpg --dearmor -o /usr/share/keyrings/sury-php.gpg 2>/dev/null
+    curl -fsSL https://packages.sury.org/php/apt.gpg | gpg --yes --dearmor -o /usr/share/keyrings/sury-php.gpg 2>/dev/null
     echo "deb [signed-by=/usr/share/keyrings/sury-php.gpg] https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/sury-php.list
     apt-get update -qq
 fi
