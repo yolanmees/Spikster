@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 	"text/template"
+	"time"
 )
 
 type Site struct {
@@ -49,7 +50,13 @@ func Create(s Site) error {
 		{"write welcome page", func() error { return writeWelcome(s) }},
 		{"write nginx config", func() error { return writeNginxConfig(s) }},
 		{"write php-fpm pool", func() error { return WritePHPPool(s) }},
-		{"reload php-fpm", func() error { return reloadService(fmt.Sprintf("php%s-fpm", s.PHP)) }},
+		{"reload php-fpm", func() error {
+			go func() {
+				time.Sleep(3 * time.Second)
+				reloadService(fmt.Sprintf("php%s-fpm", s.PHP))
+			}()
+			return nil
+		}},
 		{"create database", func() error { return createDatabase(s) }},
 		{"set permissions", func() error { return setPermissions(s) }},
 	}
@@ -223,7 +230,7 @@ func readDBRootPass() (string, error) {
 // runWithDBPass executes a MySQL statement using a credentials temp file to
 // avoid exposing the password in the process list.
 func runWithDBPass(pass, sql string) error {
-	cnf := fmt.Sprintf("[client]\nuser=spikster\npassword=%s\n", pass)
+	cnf := fmt.Sprintf("[client]\nuser=root\npassword=%s\n", pass)
 	tmp, err := os.CreateTemp("", "spikster-mysql-*.cnf")
 	if err != nil {
 		return err

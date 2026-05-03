@@ -85,6 +85,7 @@ sed -i "s/DB_USERNAME=.*/DB_USERNAME=spikster/" .env
 sed -i "s/DB_PASSWORD=.*/DB_PASSWORD=${DB_SPIKSTER_PASS}/" .env
 sed -i "s/DB_ROOT_PASS=.*/DB_ROOT_PASS=${DB_ROOT_PASS}/" .env 2>/dev/null || true
 sed -i "s/SPIKSTER_DAEMON_TOKEN=.*/SPIKSTER_DAEMON_TOKEN=${DAEMON_TOKEN}/" .env
+sed -i "s/QUEUE_CONNECTION=.*/QUEUE_CONNECTION=database/" .env
 sed -i "s/APP_DEBUG=true/APP_DEBUG=false/" .env
 
 # MySQL root password for daemon
@@ -109,7 +110,8 @@ log "Database migrated and seeded"
 info "Configuring Nginx..."
 cat > /etc/nginx/sites-enabled/spikster-panel << 'NGINX'
 server {
-    listen 80;
+    listen 80 default_server;
+    listen [::]:80 default_server;
     server_name _;
     root /var/www/spikster/public;
     index index.php index.html;
@@ -140,7 +142,7 @@ mkdir -p /etc/spikster
 echo -n "${DAEMON_TOKEN}" > /etc/spikster/daemon.token
 chmod 600 /etc/spikster/daemon.token
 
-echo -n "${DB_SPIKSTER_PASS}" > /etc/spikster/db.pass
+echo -n "${DB_ROOT_PASS}" > /etc/spikster/db.pass
 chmod 600 /etc/spikster/db.pass
 chmod 600 /etc/spikster/daemon.token
 
