@@ -87,6 +87,21 @@ sed -i "s/DB_ROOT_PASS=.*/DB_ROOT_PASS=${DB_ROOT_PASS}/" .env 2>/dev/null || tru
 sed -i "s/SPIKSTER_DAEMON_TOKEN=.*/SPIKSTER_DAEMON_TOKEN=${DAEMON_TOKEN}/" .env
 sed -i "s/QUEUE_CONNECTION=.*/QUEUE_CONNECTION=database/" .env
 sed -i "s/APP_DEBUG=true/APP_DEBUG=false/" .env
+sed -i "s/BROADCAST_DRIVER=.*/BROADCAST_DRIVER=reverb/" .env 2>/dev/null || echo "BROADCAST_DRIVER=reverb" >> .env
+cat >> .env << ENVEOF
+
+REVERB_APP_ID=spikster
+REVERB_APP_KEY=spikster-key
+REVERB_APP_SECRET=spikster-secret
+REVERB_HOST=${IP}
+REVERB_PORT=8080
+REVERB_SCHEME=http
+
+VITE_REVERB_APP_KEY=spikster-key
+VITE_REVERB_HOST=${IP}
+VITE_REVERB_PORT=8080
+VITE_REVERB_SCHEME=http
+ENVEOF
 
 # MySQL root password for daemon
 echo "" >> .env
@@ -190,6 +205,31 @@ systemctl daemon-reload
 systemctl enable spikster-queue 2>/dev/null
 systemctl start spikster-queue 2>/dev/null
 log "Queue worker running"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 11. Reverb WebSocket server
+# ─────────────────────────────────────────────────────────────────────────────
+info "Setting up Reverb WebSocket..."
+cat > /etc/systemd/system/spikster-reverb.service << 'REOF'
+[Unit]
+Description=Spikster Reverb WebSocket
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/spikster
+ExecStart=/usr/bin/php artisan reverb:start --host=0.0.0.0 --port=8080
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+REOF
+systemctl daemon-reload
+systemctl enable spikster-reverb 2>/dev/null
+systemctl start spikster-reverb 2>/dev/null
+log "Reverb WebSocket running (port 8080)"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 11. Laravel scheduler cron
