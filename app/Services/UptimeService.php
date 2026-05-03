@@ -9,7 +9,7 @@ class UptimeService
 {
     public function getTimeline(Server $server, int $days = 7): array
     {
-        $metrics = ServerMetric::forServer($server->server_id)
+        $metrics = ServerMetric::forServer($server->id)
             ->lastDays($days)
             ->orderBy('measured_at')
             ->get(['measured_at', 'uptime_seconds']);

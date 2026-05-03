@@ -163,7 +163,7 @@ class FileManagerController extends Controller
             'pathName' => 'required|string',
         ]);
 
-        $pathName = $validated['pathName'];
+        $pathName = $this->validatePath($validated['pathName']);
         $ext = Str::afterLast($pathName, '.');
 
         if (! in_array($ext, [
@@ -237,7 +237,7 @@ class FileManagerController extends Controller
             'pathName' => 'required|string',
         ]);
 
-        $pathName = $validated['pathName'];
+        $pathName = $this->validatePath($validated['pathName']);
         $ext = Str::afterLast($pathName, '.');
 
         if (! in_array($ext, ['jpg', 'png', 'jpeg', 'webm', 'flv', 'mp3', 'svg', 'WebP', 'mkv', 'gif', 'amv', '3gp', 'flv', 'f4v', 'f4p', 'svi', 'f4a', 'f4b'])) {
@@ -286,11 +286,16 @@ class FileManagerController extends Controller
             'pathName' => 'required|string',
         ]);
 
-        $pathName = $validated['pathName'];
+        $pathName = $this->validatePath($validated['pathName']);
+
+        // Block deletion of site root or home directories
+        if (rtrim($pathName, '/') === '/home' || realpath($pathName) === '/home') {
+            return response()->json(['status' => false, 'message' => 'Cannot delete system directory'], 403);
+        }
 
         try {
             unlink($pathName);
-            response()->json(
+            return response()->json(
                 [
                     'status' => true,
                     'message' => 'file deleted successfully!',
@@ -298,7 +303,7 @@ class FileManagerController extends Controller
                 200
             );
         } catch (Exception $ex) {
-            response()->json(
+            return response()->json(
                 [
                     'status' => false,
                     'message' => 'failed to  delete file!',
@@ -332,7 +337,7 @@ class FileManagerController extends Controller
             'pathName' => 'required|string',
         ]);
 
-        $path = $validated['pathName'];
+        $path = $this->validatePath($validated['pathName']);
 
         return 'download_file_object/'.encrypt($path);
     }
@@ -588,5 +593,23 @@ class FileManagerController extends Controller
         }
 
         return '/';
+    }
+
+    /**
+     * Validate and resolve file path to prevent path traversal.
+     */
+    private function validatePath(string $path): string
+    {
+        $realPath = realpath($path);
+
+        if ($realPath === false) {
+            abort(404, 'File not found');
+        }
+
+        if (! str_starts_with($realPath, '/home/')) {
+            abort(403, 'Access denied: path outside allowed directories');
+        }
+
+        return $realPath;
     }
 }

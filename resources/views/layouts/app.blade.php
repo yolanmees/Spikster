@@ -237,8 +237,64 @@
             return res.json();
         }
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
     @stack('scripts')
     @livewireScripts
     @yield('js')
+
+    {{-- Toast container --}}
+    <div
+        x-data="{
+            toasts: [],
+            addToast(event) {
+                const { message, type = 'success', undo = null } = event.detail;
+                const id = Date.now() + Math.random();
+                this.toasts.push({ id, message, type, undo, show: true });
+                setTimeout(() => this.dismiss(id), undo ? 10000 : 5000);
+            },
+            dismiss(id) {
+                const t = this.toasts.find(t => t.id === id);
+                if (t) t.show = false;
+                setTimeout(() => this.toasts = this.toasts.filter(t => t.id !== id), 300);
+            }
+        }"
+        @notify.window="addToast"
+        class="fixed bottom-0 right-0 z-50 m-4 flex flex-col gap-3 pointer-events-none w-full max-w-sm"
+    >
+        <template x-for="toast in toasts" :key="toast.id">
+            <div x-show="toast.show"
+                x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0 translate-y-2"
+                x-transition:enter-end="opacity-100 translate-y-0"
+                x-transition:leave="transition ease-in duration-200"
+                x-transition:leave-start="opacity-100 translate-y-0"
+                x-transition:leave-end="opacity-0 translate-y-2"
+                class="pointer-events-auto w-full rounded-xl border shadow-lg backdrop-blur-md px-4 py-3"
+                :class="toast.type === 'error'
+                    ? 'bg-red-50 dark:bg-red-900/90 border-red-200 dark:border-red-700'
+                    : 'bg-white dark:bg-zinc-900/95 border-zinc-200 dark:border-zinc-700'"
+            >
+                <div class="flex items-center gap-3">
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium"
+                            :class="toast.type === 'error' ? 'text-red-800 dark:text-red-200' : 'text-zinc-900 dark:text-zinc-100'"
+                            x-text="toast.message"
+                        ></p>
+                    </div>
+                    <button x-show="toast.undo"
+                        @click="$dispatch(toast.undo.event, toast.undo.params); dismiss(toast.id)"
+                        class="shrink-0 text-sm font-semibold text-purple-700 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300"
+                    >
+                        Undo
+                    </button>
+                    <button @click="dismiss(toast.id)" class="shrink-0 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </template>
+    </div>
 </body>
 </html>

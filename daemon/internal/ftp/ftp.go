@@ -41,7 +41,33 @@ func EnsureInstalled() error {
 			return err
 		}
 	}
+	// Write secure main config
+	if err := writeMainConfig(); err != nil {
+		return err
+	}
 	return writePAMConfig()
+}
+
+func writeMainConfig() error {
+	cfg := `listen=YES
+listen_ipv6=NO
+anonymous_enable=NO
+local_enable=YES
+write_enable=YES
+local_umask=022
+dirmessage_enable=YES
+xferlog_enable=YES
+connect_from_port_20=YES
+xferlog_std_format=YES
+pam_service_name=vsftpd.virtual
+userlist_enable=YES
+userlist_deny=NO
+user_config_dir=` + usersDir + `
+guest_enable=YES
+guest_username=www-data
+virtual_use_local_privs=YES
+`
+	return os.WriteFile("/etc/vsftpd.conf", []byte(cfg), 0644)
 }
 
 // CreateUser adds an FTP virtual user
@@ -60,7 +86,7 @@ func CreateUser(u FTPUser) error {
 	}
 
 	// Per-user config
-	userConf := fmt.Sprintf("local_root=%s\nwrite_enable=YES\ndownload_enable=YES\n", u.HomeDir)
+	userConf := fmt.Sprintf("local_root=%s\nwrite_enable=YES\ndownload_enable=YES\nchroot_local_user=YES\nallow_writeable_chroot=YES\n", u.HomeDir)
 	if err := os.WriteFile(fmt.Sprintf("%s/%s", usersDir, u.Username), []byte(userConf), 0600); err != nil {
 		return err
 	}

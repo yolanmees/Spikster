@@ -21,6 +21,8 @@ func StartTCP(port string) {
 		port = "18999"
 	}
 
+	startRateLimiterCleanup()
+
 	// Only localhost by default — remote access via SSH tunnel
 	bind := "127.0.0.1:" + port
 
@@ -136,6 +138,23 @@ var rateLimiter = struct {
 	sync.Mutex
 	entries map[string]*rateBucket
 }{entries: make(map[string]*rateBucket)}
+
+// startRateLimiterCleanup periodically removes expired entries from the rate limiter map.
+func startRateLimiterCleanup() {
+	go func() {
+		for {
+			time.Sleep(5 * time.Minute)
+			rateLimiter.Lock()
+			now := time.Now()
+			for ip, bucket := range rateLimiter.entries {
+				if now.Sub(bucket.window) > 10*time.Minute {
+					delete(rateLimiter.entries, ip)
+				}
+			}
+			rateLimiter.Unlock()
+		}
+	}()
+}
 
 // readDaemonToken reads the shared secret from /etc/spikster/daemon.token.
 func readDaemonToken() (string, error) {

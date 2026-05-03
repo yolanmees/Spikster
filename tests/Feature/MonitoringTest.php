@@ -34,7 +34,7 @@ class MonitoringTest extends TestCase
     public function test_health_check_returns_healthy_for_normal_metrics(): void
     {
         ServerMetric::factory()->create([
-            'server_id' => $this->server->server_id,
+            'server_id' => $this->server->id,
             'cpu_percent' => 30,
             'memory_percent' => 40,
             'disk_percent' => 50,
@@ -50,7 +50,7 @@ class MonitoringTest extends TestCase
     public function test_health_check_detects_high_cpu(): void
     {
         ServerMetric::factory()->create([
-            'server_id' => $this->server->server_id,
+            'server_id' => $this->server->id,
             'cpu_percent' => 85,
             'memory_percent' => 40,
             'disk_percent' => 50,
@@ -67,7 +67,7 @@ class MonitoringTest extends TestCase
     public function test_health_check_detects_critical_disk(): void
     {
         ServerMetric::factory()->create([
-            'server_id' => $this->server->server_id,
+            'server_id' => $this->server->id,
             'cpu_percent' => 30,
             'memory_percent' => 40,
             'disk_percent' => 95,
@@ -83,7 +83,7 @@ class MonitoringTest extends TestCase
     public function test_alerting_service_returns_healthy_when_no_alerts(): void
     {
         ServerMetric::factory()->create([
-            'server_id' => $this->server->server_id,
+            'server_id' => $this->server->id,
             'cpu_percent' => 30,
             'memory_percent' => 40,
             'disk_percent' => 50,
@@ -100,7 +100,7 @@ class MonitoringTest extends TestCase
     public function test_alerting_service_triggers_on_threshold_breach(): void
     {
         ServerMetric::factory()->create([
-            'server_id' => $this->server->server_id,
+            'server_id' => $this->server->id,
             'cpu_percent' => 95,
             'memory_percent' => 40,
             'disk_percent' => 50,

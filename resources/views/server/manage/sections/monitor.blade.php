@@ -1,6 +1,6 @@
 {{-- Real-time monitoring charts --}}
 <div class="space-y-4">
-    {{-- Stat summary row (design inspired by new_design/index.html metric cards) --}}
+    {{-- Stat summary row --}}
     <div class="grid grid-cols-2 xl:grid-cols-4 gap-3">
         @foreach ([
             ['label' => 'CPU Usage',    'id' => 'stat-cpu',  'icon' => 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', 'bg' => 'bg-purple-50 dark:bg-purple-900/20', 'color' => 'text-purple-700 dark:text-purple-300'],
@@ -24,21 +24,9 @@
 
     {{-- Livewire chart components --}}
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4">
-            <p class="text-sm font-semibold text-zinc-950 dark:text-white mb-3">CPU</p>
-            @livewire('stats.cpu', ['server_id' => $server_id])
-        </div>
-        <div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4">
-            <p class="text-sm font-semibold text-zinc-950 dark:text-white mb-3">Memory</p>
-            @livewire('stats.mem', ['server_id' => $server_id])
-        </div>
-        <div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4">
-            <p class="text-sm font-semibold text-zinc-950 dark:text-white mb-3">Load Average</p>
-            @livewire('stats.load', ['server_id' => $server_id])
-        </div>
-        <div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4">
-            <p class="text-sm font-semibold text-zinc-950 dark:text-white mb-3">Disk Usage</p>
-            @livewire('stats.disk', ['server_id' => $server_id])
-        </div>
+        @livewire('stats.chart', ['server_id' => $server_id, 'type' => 'cpu'])
+        @livewire('stats.chart', ['server_id' => $server_id, 'type' => 'mem'])
+        @livewire('stats.chart', ['server_id' => $server_id, 'type' => 'load'])
+        @livewire('stats.chart', ['server_id' => $server_id, 'type' => 'disk'])
     </div>
 </div>

@@ -49,7 +49,7 @@ Route::middleware(['api.unified-auth'])->group(function () {
 
     // Servers
     Route::get('/servers', [ServerController::class, 'index']);
-    Route::post('/servers', [ServerController::class, 'create'])->middleware('idempotency');
+    Route::post('/servers', [ServerController::class, 'create'])->middleware('idempotency')->middleware('throttle:sensitive');
     Route::get('/servers/panel', [ServerController::class, 'panel']);
     Route::patch('/servers/panel/domain', [ServerController::class, 'paneldomain']);
     Route::post('/servers/panel/ssl', [ServerController::class, 'panelssl']);
@@ -58,9 +58,6 @@ Route::middleware(['api.unified-auth'])->group(function () {
     Route::patch('/servers/{server_id}', [ServerController::class, 'edit']);
     Route::get('/servers/{server_id}/ping', [ServerController::class, 'ping']);
     Route::get('/servers/{server_id}/healthy', [ServerController::class, 'healthy']);
-    Route::get('/servers/{server_id}/stats/cpu', [MonitoringController::class, 'statsCpu']);
-    Route::get('/servers/{server_id}/stats/mem', [MonitoringController::class, 'statsMem']);
-    Route::get('/servers/{server_id}/stats/load', [MonitoringController::class, 'statsLoad']);
     Route::post('/servers/{server_id}/malware-scan', [MonitoringController::class, 'malwareScan']);
     Route::get('/servers/{server_id}/metrics', [ServerMetricsController::class, 'getChartData']);
     Route::post('/servers/{server_id}/rootreset', [ServerController::class, 'rootreset']);
@@ -96,7 +93,7 @@ Route::middleware(['api.unified-auth'])->group(function () {
 
     // Sites
     Route::get('/sites', [SiteController::class, 'index']);
-    Route::post('/sites', [SiteController::class, 'create'])->middleware('idempotency');
+    Route::post('/sites', [SiteController::class, 'create'])->middleware('idempotency')->middleware('throttle:sensitive');
     Route::patch('/sites/{site_id}', [SiteController::class, 'edit']);
     Route::delete('/sites/{site_id}', [SiteController::class, 'destroy']);
     Route::get('/sites/{site_id}', [SiteController::class, 'show']);

@@ -68,13 +68,13 @@ class ServerMetric extends Model
      */
     public function server(): BelongsTo
     {
-        return $this->belongsTo(Server::class, 'server_id', 'server_id');
+        return $this->belongsTo(Server::class, 'server_id', 'id');
     }
 
     /**
      * Scope to get metrics for a specific server.
      */
-    public function scopeForServer($query, string $serverId)
+    public function scopeForServer($query, int $serverId)
     {
         return $query->where('server_id', $serverId);
     }
@@ -114,7 +114,7 @@ class ServerMetric extends Model
     /**
      * Get the latest metric for a specific server.
      */
-    public static function getLatestForServer(string $serverId): ?self
+    public static function getLatestForServer(int $serverId): ?self
     {
         return static::forServer($serverId)
             ->latest()
@@ -124,7 +124,7 @@ class ServerMetric extends Model
     /**
      * Get aggregated metrics for a server over a time period.
      */
-    public static function getAggregatedMetrics(string $serverId, int $hours = 24): array
+    public static function getAggregatedMetrics(int $serverId, int $hours = 24): array
     {
         $metrics = static::forServer($serverId)
             ->lastHours($hours)
@@ -172,7 +172,7 @@ class ServerMetric extends Model
     /**
      * Delete metrics older than N days for a specific server.
      */
-    public static function cleanupForServer(string $serverId, int $daysToKeep = 30): int
+    public static function cleanupForServer(int $serverId, int $daysToKeep = 30): int
     {
         return static::forServer($serverId)
             ->where('created_at', '<', now()->subDays($daysToKeep))
@@ -187,7 +187,7 @@ class ServerMetric extends Model
      * - 6 hours: Group by 5 minutes - ~72 points
      * - 12+ hours: Group by hour - varies by range
      */
-    public static function getTimeSeriesData(string $serverId, int $hours = 24): array
+    public static function getTimeSeriesData(int $serverId, int $hours = 24): array
     {
         // Determine grouping strategy based on time range
         if ($hours <= 1) {

@@ -660,7 +660,7 @@ func EnablePanelSSL(domain string) error {
 
 func SetupNodejs(username string, port int, script string) error {
 	// Validate script name to prevent command injection
-	if script == "" || strings.ContainsAny(script, ";&|`$(){}[]!<>#~") {
+	if script == "" || strings.ContainsAny(script, ";&|`$(){}[]!<>#~'\"\n\r\\") {
 		return fmt.Errorf("invalid script name: %q", script)
 	}
 	if strings.Contains(script, "..") || strings.HasPrefix(script, "/") {

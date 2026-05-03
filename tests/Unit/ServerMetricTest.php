@@ -11,19 +11,19 @@ class ServerMetricTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_metric_belongs_to_server_by_uuid(): void
+    public function test_metric_belongs_to_server(): void
     {
         $server = Server::factory()->create();
-        $metric = ServerMetric::factory()->create(['server_id' => $server->server_id]);
+        $metric = ServerMetric::factory()->create(['server_id' => $server->id]);
 
         $this->assertInstanceOf(Server::class, $metric->server);
-        $this->assertEquals($server->server_id, $metric->server->server_id);
+        $this->assertEquals($server->id, $metric->server->id);
     }
 
-    public function test_server_has_many_metrics_by_uuid(): void
+    public function test_server_has_many_metrics(): void
     {
         $server = Server::factory()->create();
-        ServerMetric::factory(3)->create(['server_id' => $server->server_id]);
+        ServerMetric::factory(3)->create(['server_id' => $server->id]);
 
         $this->assertEquals(3, $server->metrics()->count());
     }
@@ -32,15 +32,15 @@ class ServerMetricTest extends TestCase
     {
         $server = Server::factory()->create();
         ServerMetric::factory()->create([
-            'server_id' => $server->server_id,
+            'server_id' => $server->id,
             'measured_at' => now()->subHours(2),
         ]);
         $latest = ServerMetric::factory()->create([
-            'server_id' => $server->server_id,
+            'server_id' => $server->id,
             'measured_at' => now(),
         ]);
 
-        $result = ServerMetric::forServer($server->server_id)->latest()->first();
+        $result = ServerMetric::forServer($server->id)->latest()->first();
         $this->assertEquals($latest->id, $result->id);
     }
 
@@ -48,11 +48,11 @@ class ServerMetricTest extends TestCase
     {
         $server = Server::factory()->create();
         ServerMetric::factory()->create([
-            'server_id' => $server->server_id,
+            'server_id' => $server->id,
             'created_at' => now()->subDays(60),
         ]);
         ServerMetric::factory()->create([
-            'server_id' => $server->server_id,
+            'server_id' => $server->id,
             'created_at' => now(),
         ]);
 
@@ -65,11 +65,11 @@ class ServerMetricTest extends TestCase
     {
         $server = Server::factory()->create();
         $metric = ServerMetric::factory()->create([
-            'server_id' => $server->server_id,
+            'server_id' => $server->id,
             'measured_at' => now(),
         ]);
 
-        $result = ServerMetric::getLatestForServer($server->server_id);
+        $result = ServerMetric::getLatestForServer($server->id);
         $this->assertEquals($metric->id, $result->id);
     }
 
@@ -77,14 +77,14 @@ class ServerMetricTest extends TestCase
     {
         $server = Server::factory()->create();
         ServerMetric::factory(5)->create([
-            'server_id' => $server->server_id,
+            'server_id' => $server->id,
             'cpu_percent' => 50,
             'memory_percent' => 60,
             'disk_percent' => 70,
             'measured_at' => now()->subMinutes(rand(1, 60)),
         ]);
 
-        $aggregated = ServerMetric::getAggregatedMetrics($server->server_id, 24);
+        $aggregated = ServerMetric::getAggregatedMetrics($server->id, 24);
         $this->assertArrayHasKey('cpu', $aggregated);
         $this->assertArrayHasKey('memory', $aggregated);
         $this->assertArrayHasKey('disk', $aggregated);

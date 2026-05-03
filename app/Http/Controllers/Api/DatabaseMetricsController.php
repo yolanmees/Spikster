@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Database;
+use App\Models\Site;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
@@ -14,6 +15,9 @@ class DatabaseMetricsController extends Controller
      */
     public function metrics(string $site_id): JsonResponse
     {
+        $site = Site::where('site_id', $site_id)->firstOrFail();
+        $this->authorize('view', $site);
+
         $databases = Database::where('site_id', $site_id)->pluck('database_name');
 
         if ($databases->isEmpty()) {

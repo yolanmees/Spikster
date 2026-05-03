@@ -33,6 +33,11 @@ class ApiKey extends Component
 
     public function generateApiKey()
     {
+        abort_unless(Auth::user()?->can('api.access'), 403);
+
+        // Delete existing dashboard token before creating new one
+        Auth::user()->tokens()->where('name', 'API Token')->delete();
+
         $this->api_key = Auth::user()->createToken('API Token')->plainTextToken;
         $this->show_api_key = true;
     }

@@ -372,8 +372,10 @@ func UpdateAutoresponder(p AutoresponderParams) error {
 		return nil
 	}
 
-	subject := strings.ReplaceAll(p.Subject, `"`, `\"`)
-	message := strings.ReplaceAll(p.Message, `"`, `\"`)
+	subject := sanitizeSieveString(p.Subject)
+	message := sanitizeSieveString(p.Message)
+	startDate := sanitizeSieveString(p.StartDate)
+	endDate := sanitizeSieveString(p.EndDate)
 
 	var sb strings.Builder
 	sb.WriteString("require [\"vacation\", \"date\", \"relational\"];\n\n")
@@ -381,7 +383,7 @@ func UpdateAutoresponder(p AutoresponderParams) error {
 	if p.StartDate != "" && p.EndDate != "" {
 		sb.WriteString(fmt.Sprintf(
 			"if allof (\n  currentdate :value \"ge\" \"date\" \"%s\",\n  currentdate :value \"le\" \"date\" \"%s\"\n) {\n  vacation :days 1 :subject \"%s\" \"%s\";\n}\n",
-			p.StartDate, p.EndDate, subject, message))
+			startDate, endDate, subject, message))
 	} else {
 		sb.WriteString(fmt.Sprintf("vacation :days 1 :subject \"%s\" \"%s\";\n", subject, message))
 	}
@@ -428,8 +430,8 @@ func InstallRoundcube(p RoundcubeParams) error {
 		return fmt.Errorf("create env file: %w", err)
 	}
 	envPath := envFile.Name()
-	fmt.Fprintf(envFile, "RC_DOMAIN=%s\nRC_SITEROOT=%s\nRC_DBNAME=%s\nRC_DBUSER=%s\nRC_DBPASS=%s\n",
-		p.Domain, p.SiteRoot, p.DBName, p.DBUser, p.DBPass)
+	fmt.Fprintf(envFile, "RC_DOMAIN=%s\nRC_SITEROOT='%s'\nRC_DBNAME='%s'\nRC_DBUSER='%s'\nRC_DBPASS='%s'\n",
+		p.Domain, shellSafe(p.SiteRoot), shellSafe(p.DBName), shellSafe(p.DBUser), shellSafe(p.DBPass))
 	envFile.Close()
 	defer os.Remove(envPath)
 
@@ -475,4 +477,19 @@ location ^~ /webmail {
 		return err
 	}
 	return run("systemctl", "reload", "nginx")
+}
+
+// sanitizeSieveString escapes a string for safe inclusion in a Sieve script.
+// Strips newlines, backslashes, and escapes double quotes.
+func sanitizeSieveString(s string) string {
+	s = strings.ReplaceAll(s, "\r", "")
+	s = strings.ReplaceAll(s, "\n", " ")
+	s = strings.ReplaceAll(s, `\`, `\\`)
+	s = strings.ReplaceAll(s, `"`, `\"`)
+	return s
+}
+
+// shellSafe escapes a value for safe inclusion in single-quoted shell strings.
+func shellSafe(s string) string {
+	return strings.ReplaceAll(s, "'", "'\\''")
 }

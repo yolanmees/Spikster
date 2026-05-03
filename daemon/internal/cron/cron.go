@@ -26,10 +26,19 @@ func Write(content string) error {
 		}
 		// Check for dangerous commands
 		dangerous := []string{
-			"rm -rf ", "mkfs", "dd if=", "dd<", ">/dev/sd", ">/dev/hd",
-			">>/dev/sd", ">/dev/nvme", "wget ", "curl ", "nc ",
-			"chmod 777", "chmod -R 777", ":(){ :|:& };:", // fork bomb
-			"\\x", "base64 -d", "sh -c", "bash -c",
+			"rm -rf ", "rm -r -f ", "rm -fr ", "mkfs.", "mkfs ", "dd if=", "dd<",
+			">/dev/sd", ">>/dev/sd", ">/dev/hd", ">/dev/nvme", ">/dev/vd",
+			">/dev/md", ">/dev/loop", ">/dev/xvd",
+			"wget ", "curl ", "nc ", "ncat ",
+			"chmod 777", "chmod -R 777",
+			":(){ :|:& };:", ".() { .|.& };.",
+			"\\x", "base64 -d", "base64 --decode",
+			"sh -c", "bash -c", "zsh -c", "dash -c",
+			"python -c", "python3 -c", "perl -e", "ruby -e", "php -r",
+			"iptables -F", "ufw disable", "reboot", "shutdown", "halt",
+			"kill -9 -1", "killall -9",
+			"$(id)", "$(whoami)", "$(curl", "$(wget", "$(bash", "$(sh",
+			"`id`", "`whoami`", "`curl", "`wget", "`bash", "`sh",
 		}
 		lower := strings.ToLower(line)
 		for _, d := range dangerous {

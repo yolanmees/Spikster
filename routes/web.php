@@ -65,6 +65,10 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         return view('backup.index', ['site' => $site]);
     })->name('backups.index');
 
+    Route::get('/sites/{site}/backups/schedules/create', function (Site $site) {
+        return view('backup.schedule-create', ['site' => $site]);
+    })->name('backups.schedules.create');
+
     // Email Management
     Route::get('/sites/{site}/email', function (Site $site) {
         return view('email.index', ['site' => $site]);

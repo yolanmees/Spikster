@@ -9,6 +9,10 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         return view('server.list');
     })->name('server.list');
 
+    Route::get('/servers/create', function () {
+        return view('server.create');
+    })->name('server.create');
+
     Route::get('/servers/{server_id}', function ($server_id) {
         return redirect()->route('server.edit.section', ['server_id' => $server_id, 'section' => 'overview']);
     })->name('server.edit');

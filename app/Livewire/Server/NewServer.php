@@ -70,26 +70,13 @@ class NewServer extends Component
             ]);
 
             // Flash success message
-            session()->flash('success', 'Server succesvol aangemaakt.');
+            session()->flash('success', 'Server has been created successfully.');
 
             // Dispatch event to refresh server list
             $this->dispatch('server-created');
 
-            // Close modal
-            $this->dispatch('close-modal');
-
-            // Reset form
-            $this->reset([
-                'serverName',
-                'serverIp',
-                'serverProvider',
-                'serverApiKey',
-                'serverLocation',
-                'serverSshPort',
-                'serverSshPassword',
-            ]);
-
-            $this->serverSshPort = 22;
+            // Redirect to server list
+            $this->redirect(route('server.list'));
         } catch (ValidationException $e) {
             // Re-throw validation exceptions
             throw $e;

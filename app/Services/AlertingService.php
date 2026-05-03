@@ -17,7 +17,7 @@ class AlertingService
     public function checkAndAlert(Server $server): array
     {
         $issues = [];
-        $metric = ServerMetric::getLatestForServer($server->server_id);
+        $metric = ServerMetric::getLatestForServer($server->id);
 
         if (! $metric) {
             return ['status' => 'unknown', 'alerts_sent' => false, 'issues' => []];

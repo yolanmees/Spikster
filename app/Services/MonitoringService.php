@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\Server;
 use App\Models\ServerMetric;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class MonitoringService
@@ -20,7 +19,7 @@ class MonitoringService
         $cacheKey = "server_metrics_{$server->server_id}";
 
         // Try to get from database first
-        $metric = ServerMetric::getLatestForServer($server->server_id);
+        $metric = ServerMetric::getLatestForServer($server->id);
 
         if ($metric) {
             $data = $this->formatMetricForDisplay($metric);
@@ -49,7 +48,7 @@ class MonitoringService
      */
     public function getMetricsForPeriod(Server $server, int $hours = 24): array
     {
-        return ServerMetric::forServer($server->server_id)
+        return ServerMetric::forServer($server->id)
             ->lastHours($hours)
             ->orderBy('measured_at', 'asc')
             ->get()
@@ -62,7 +61,7 @@ class MonitoringService
      */
     public function getChartData(Server $server, int $hours = 24): array
     {
-        return ServerMetric::getTimeSeriesData($server->server_id, $hours);
+        return ServerMetric::getTimeSeriesData($server->id, $hours);
     }
 
     /**
@@ -70,7 +69,7 @@ class MonitoringService
      */
     public function getAggregatedStats(Server $server, int $hours = 24): array
     {
-        return ServerMetric::getAggregatedMetrics($server->server_id, $hours);
+        return ServerMetric::getAggregatedMetrics($server->id, $hours);
     }
 
     /**
@@ -78,7 +77,7 @@ class MonitoringService
      */
     public function checkServerHealth(Server $server): array
     {
-        $metric = ServerMetric::getLatestForServer($server->server_id);
+        $metric = ServerMetric::getLatestForServer($server->id);
 
         if (! $metric) {
             return [
@@ -128,43 +127,6 @@ class MonitoringService
             'message' => count($issues).' issue(s) detected',
             'issues' => $issues,
         ];
-    }
-
-    /**
-     * Test connection to the monitoring agent.
-     */
-    public function testAgentConnection(Server $server): array
-    {
-        $port = config('monitoring.agent_port', 9273);
-        $host = $server->ip ?? $server->domain;
-        $healthUrl = "http://{$host}:{$port}/health";
-
-        try {
-            $response = Http::timeout(5)->get($healthUrl);
-
-            if ($response->successful()) {
-                $data = $response->json();
-
-                return [
-                    'success' => true,
-                    'message' => 'Agent is running',
-                    'data' => $data,
-                ];
-            }
-
-            return [
-                'success' => false,
-                'message' => "Agent returned status {$response->status()}",
-                'data' => null,
-            ];
-
-        } catch (\Exception $e) {
-            return [
-                'success' => false,
-                'message' => "Connection failed: {$e->getMessage()}",
-                'data' => null,
-            ];
-        }
     }
 
     /**

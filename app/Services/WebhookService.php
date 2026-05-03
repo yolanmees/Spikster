@@ -33,6 +33,11 @@ class WebhookService
 
     public function send(Webhook $webhook, string $event, array $payload): WebhookDelivery
     {
+        // Validate URL destination before sending — block SSRF to internal services
+        if (! $this->isSafeUrl($webhook->url)) {
+            throw new \InvalidArgumentException('Webhook URL targets an internal or unsafe destination.');
+        }
+
         $body = [
             'event' => $event,
             'timestamp' => now()->toIso8601String(),
@@ -101,12 +106,38 @@ class WebhookService
 
     public function availableEvents(): array
     {
-        $grouped = [];
-        foreach (self::EVENTS as $event) {
-            $parts = explode('.', $event, 2);
-            $grouped[$parts[0]][] = $event;
+        return self::EVENTS;
+    }
+
+    /**
+     * Check if a URL is safe to send webhooks to — blocks internal/private IPs.
+     */
+    private function isSafeUrl(string $url): bool
+    {
+        $host = parse_url($url, PHP_URL_HOST);
+        if (! $host) {
+            return false;
         }
 
-        return $grouped;
+        // Block localhost variations
+        $lowerHost = strtolower($host);
+        if (in_array($lowerHost, ['localhost', '127.0.0.1', '::1', '0.0.0.0'])) {
+            return false;
+        }
+
+        // Resolve DNS and check for private/internal IPs
+        $ip = gethostbyname($host);
+        if ($ip === $host || $ip === '') {
+            return false; // DNS resolution failed
+        }
+
+        // Block private, loopback, link-local, and cloud metadata IPs
+        if (
+            filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false
+        ) {
+            return false;
+        }
+
+        return true;
     }
 }

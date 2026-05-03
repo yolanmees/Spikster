@@ -49,50 +49,30 @@ class LogManagerController extends Controller
     public function show($log): JsonResponse
     {
         $originalLog = $log;
-        // check if log contains a underscore and if so, replace it with a slash
-        if (strpos($log, '_') !== false) {
-            $log = str_replace('_', '/', $log);
-        }
-        if (file_exists(storage_path('logs/'.$log))) {
-            $content = file_get_contents(storage_path('logs/'.$log));
+        // Only allow log files, not arbitrary paths
+        $log = $this->resolveLogPath($log);
 
-            return response()->json([
-                'name' => $originalLog,
-                'log' => $content,
-            ]);
-        } elseif (file_exists(storage_path('server_logs/'.$log))) {
-            $content = file_get_contents(storage_path('server_logs/'.$log));
-
-            return response()->json([
-                'name' => $originalLog,
-                'log' => $content,
-            ]);
-        } else {
-            dd($log);
-
-            return response()->json([
-                'error' => 'Log not found',
-            ], 404);
+        if ($log === null) {
+            return response()->json(['error' => 'Log not found'], 404);
         }
 
+        $content = file_get_contents($log);
+
+        return response()->json([
+            'name' => $originalLog,
+            'log' => $content,
+        ]);
     }
 
     public function download($log): BinaryFileResponse|JsonResponse
     {
-        // check if log contains a underscore and if so, replace it with a slash
-        if (strpos($log, '_') !== false) {
-            $log = str_replace('_', '/', $log);
+        $log = $this->resolveLogPath($log);
+
+        if ($log === null) {
+            return response()->json(['error' => 'Log not found'], 404);
         }
 
-        if (file_exists(storage_path('logs/'.$log))) {
-            return response()->download(storage_path('logs/'.$log));
-        } elseif (file_exists(storage_path('server_logs/'.$log))) {
-            return response()->download(storage_path('server_logs/'.$log));
-        } else {
-            return response()->json([
-                'error' => 'Log not found',
-            ], 404);
-        }
+        return response()->download($log);
     }
 
     public function delete($log): JsonResponse
@@ -118,5 +98,41 @@ class LogManagerController extends Controller
                 'error' => 'Log not found',
             ], 404);
         }
+    }
+
+    /**
+     * Resolve a log name to a safe absolute path within the logs directory.
+     */
+    private function resolveLogPath(string $log): ?string
+    {
+        // Block path traversal attempts
+        if (str_contains($log, '..') || str_contains($log, "\0")) {
+            return null;
+        }
+
+        // Allow underscores that represent subdirectory separators (from index listing)
+        if (str_contains($log, '_')) {
+            $log = str_replace('_', '/', $log);
+        }
+
+        // Build candidate paths
+        $candidates = [
+            storage_path('logs/'.$log),
+            storage_path('server_logs/'.$log),
+        ];
+
+        foreach ($candidates as $candidate) {
+            $realPath = realpath($candidate);
+            if ($realPath === false) {
+                continue;
+            }
+            // Ensure resolved path is within the logs directory
+            if (str_starts_with($realPath, storage_path('logs'))
+                || str_starts_with($realPath, storage_path('server_logs'))) {
+                return $realPath;
+            }
+        }
+
+        return null;
     }
 }

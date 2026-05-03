@@ -9,7 +9,7 @@ class NoisyTenantService
 {
     public function getResourceUsage(Server $server): array
     {
-        $metrics = ServerMetric::forServer($server->server_id)
+        $metrics = ServerMetric::forServer($server->id)
             ->lastHours(24)
             ->get();
 
@@ -75,7 +75,7 @@ class NoisyTenantService
         $totalDisk = 0;
 
         foreach ($servers as $server) {
-            $metric = ServerMetric::getLatestForServer($server->server_id);
+            $metric = ServerMetric::getLatestForServer($server->id);
             $totalSites += $server->sites()->count();
 
             if ($metric) {

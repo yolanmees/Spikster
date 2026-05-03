@@ -121,6 +121,8 @@ class ModuleController extends Controller
 
     public function discover(): JsonResponse
     {
+        $this->authorize('server.configure');
+
         try {
             $discovered = $this->registry->discover();
 
@@ -139,6 +141,8 @@ class ModuleController extends Controller
 
     public function install(Request $request): JsonResponse
     {
+        $this->authorize('server.configure');
+
         $request->validate([
             'alias' => 'required|string',
         ]);
@@ -161,6 +165,8 @@ class ModuleController extends Controller
 
     public function enable(Module $module): JsonResponse
     {
+        $this->authorize('server.configure');
+
         try {
             $this->registry->enable($module);
 
@@ -179,6 +185,8 @@ class ModuleController extends Controller
 
     public function disable(Module $module): JsonResponse
     {
+        $this->authorize('server.configure');
+
         try {
             $this->registry->disable($module);
 

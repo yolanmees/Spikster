@@ -1,19 +1,6 @@
 <div>
-    @script
-        <script>
-            $wire.on('close-modal', () => {
-                const modal = document.getElementById('newServerModal');
-                if (modal) modal.classList.add('hidden');
-            });
-        </script>
-    @endscript
-
     <form wire:submit="submit">
         <div class="space-y-6">
-            {{-- Flash Messages --}}
-            @if (session()->has('success'))
-                <livewire:components.alert type="success" :message="session('success')" :dismissible="true" />
-            @endif
             @if (session()->has('error'))
                 <livewire:components.alert type="error" :message="session('error')" :dismissible="true" />
             @endif

@@ -19,8 +19,9 @@ class LogManagerController extends Controller
 
     public function show($server_id, $log): View
     {
-        $server = Server::where(['server_id' => $server_id])->first();
-        $server_url = 'http://'.$server->ip.'/api/logs/'.$log;
+        $server = Server::where(['server_id' => $server_id])->firstOrFail();
+        $log = $this->sanitizeLogParam($log);
+        $server_url = 'http://'.$server->ip.'/api/logs/'.urlencode($log);
         $log = json_decode(file_get_contents($server_url), true);
 
         return view('server.logs.show', compact('server', 'log'));
@@ -28,12 +29,13 @@ class LogManagerController extends Controller
 
     public function download($server_id, $log)
     {
-        $server = Server::where(['server_id' => $server_id])->first();
-        $server_url = 'http://'.$server->ip.'/api/logs/'.$log.'/download';
+        $server = Server::where(['server_id' => $server_id])->firstOrFail();
+        $log = $this->sanitizeLogParam($log);
+        $server_url = 'http://'.$server->ip.'/api/logs/'.urlencode($log).'/download';
 
         // Stream the file from the remote server
         $content = file_get_contents($server_url);
-        $filename = str_replace('_', '_', $log);
+        $filename = basename($log);
 
         return response($content)
             ->header('Content-Type', 'text/plain')
@@ -42,8 +44,9 @@ class LogManagerController extends Controller
 
     public function delete($server_id, $log): RedirectResponse
     {
-        $server = Server::where(['server_id' => $server_id])->first();
-        $server_url = 'http://'.$server->ip.'/api/logs/'.$log;
+        $server = Server::where(['server_id' => $server_id])->firstOrFail();
+        $log = $this->sanitizeLogParam($log);
+        $server_url = 'http://'.$server->ip.'/api/logs/'.urlencode($log);
 
         // Create a DELETE request
         $context = stream_context_create([
@@ -57,5 +60,17 @@ class LogManagerController extends Controller
 
         return redirect()->route('logs.index', ['server_id' => $server_id])
             ->with('success', 'Log file deleted successfully');
+    }
+
+    /**
+     * Sanitize log parameter to prevent path traversal.
+     */
+    private function sanitizeLogParam(string $log): string
+    {
+        if (str_contains($log, '..') || str_contains($log, "\0")) {
+            abort(400, 'Invalid log path');
+        }
+
+        return $log;
     }
 }
