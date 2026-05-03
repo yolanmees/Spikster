@@ -41,9 +41,12 @@ class SecurityHeaders
         // Content Security Policy (adjust as needed)
         $reverbHost = config('reverb.servers.reverb.host', 'localhost');
         $reverbPort = config('reverb.servers.reverb.port', 8080);
+        $reverbHostname = config('reverb.servers.reverb.hostname', env('REVERB_HOST', ''));
+        $serverIp = request()->getHost();
+        $additionalHost = ($reverbHostname && $reverbHostname !== '0.0.0.0') ? $reverbHostname : $serverIp;
         $wsHosts = app()->environment('local')
-            ? "ws://localhost:* wss://localhost:* ws://127.0.0.1:* wss://127.0.0.1:* ws://{$reverbHost}:{$reverbPort} wss://{$reverbHost}:{$reverbPort}"
-            : "ws://{$reverbHost}:{$reverbPort} wss://{$reverbHost}:{$reverbPort} ws://localhost:{$reverbPort} wss://localhost:{$reverbPort}";
+            ? "ws://localhost:* wss://localhost:* ws://127.0.0.1:* wss://127.0.0.1:* ws://{$reverbHost}:{$reverbPort} wss://{$reverbHost}:{$reverbPort} ws://{$additionalHost}:{$reverbPort} wss://{$additionalHost}:{$reverbPort}"
+            : "ws://{$reverbHost}:{$reverbPort} wss://{$reverbHost}:{$reverbPort} ws://localhost:{$reverbPort} wss://localhost:{$reverbPort} ws://{$additionalHost}:{$reverbPort} wss://{$additionalHost}:{$reverbPort}";
 
         $vitePort = env('VITE_PORT', 5173);
         $viteSrc = app()->environment('local')
