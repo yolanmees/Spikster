@@ -11,7 +11,7 @@
     <select
         @if ($model) wire:model.live="{{ $model }}" @endif
         {{ $attributes->except(['class', 'for', 'label', 'model', 'options'])->merge([
-            'class' => 'block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-700/20 disabled:opacity-60 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-purple-400'
+            'class' => 'block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-700/20 disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:focus:border-purple-400'
         ]) }}>
         {{ $slot }}
         @foreach ($options as $value => $label)

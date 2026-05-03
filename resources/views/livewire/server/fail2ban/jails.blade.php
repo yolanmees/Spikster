@@ -39,7 +39,7 @@
             <div class="-mx-6 -mb-6">
                 <x-table-wrapper>
                     <table class="min-w-full divide-y divide-gray-300">
-                        <thead class="bg-gray-50 dark:bg-gray-800">
+                        <thead class="bg-zinc-900 dark:bg-zinc-900">
                             <tr>
                                 <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 dark:text-white sm:pl-6">Jail Name</th>
                                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">Currently Banned</th>
@@ -48,9 +48,9 @@
                                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">Status</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-200 bg-white dark:bg-gray-900">
+                        <tbody class="divide-y divide-gray-200 bg-zinc-950 dark:bg-zinc-950">
                             @foreach ($jails as $jail)
-                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                                <tr class="hover:bg-zinc-800 dark:hover:bg-zinc-800 transition-colors">
                                     <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 dark:text-white sm:pl-6">
                                         <span class="font-mono">{{ $jail['name'] }}</span>
                                     </td>

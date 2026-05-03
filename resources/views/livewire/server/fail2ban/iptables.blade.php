@@ -40,7 +40,7 @@
         <div class="-mx-6 -mb-6">
             <x-table-wrapper>
                 <table class="min-w-full divide-y divide-gray-300">
-                    <thead class="bg-gray-50 dark:bg-gray-800">
+                    <thead class="bg-zinc-900 dark:bg-zinc-900">
                         <tr>
                             <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 dark:text-white sm:pl-6">IP Address</th>
                             <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">Jail</th>
@@ -48,13 +48,13 @@
                             <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6 text-right text-sm font-semibold text-gray-900 dark:text-white">Actions</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200 bg-white dark:bg-gray-900">
+                    <tbody class="divide-y divide-gray-200 bg-zinc-950 dark:bg-zinc-950">
                         @php $filteredIps = $this->getFilteredIptables(); @endphp
 
                         @if (count($filteredIps) > 0)
                             @foreach ($filteredIps as $ip)
                                 @if (is_array($ip) && count($ip) >= 2)
-                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                                    <tr class="hover:bg-zinc-800 dark:hover:bg-zinc-800 transition-colors">
                                         <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 dark:text-white sm:pl-6">
                                             <span class="font-mono">{{ $ip[0] ?? 'N/A' }}</span>
                                         </td>

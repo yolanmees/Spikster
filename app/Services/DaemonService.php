@@ -64,6 +64,7 @@ class DaemonService
 
         $payload = json_encode(['action' => $action, 'params' => $params]);
         fwrite($socket, $payload);
+        stream_socket_shutdown($socket, STREAM_SHUT_WR);
 
         $response = '';
         $chunkCount = 0;
