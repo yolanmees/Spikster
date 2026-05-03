@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DiagnosticsController;
+use App\Http\Controllers\Server\Fail2banController;
 use App\Http\Controllers\FileManagerController;
 use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\NodejsController;
@@ -86,6 +87,11 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         Route::post('/{module}/enable', [ModuleController::class, 'enable'])->name('enable');
         Route::post('/{module}/disable', [ModuleController::class, 'disable'])->name('disable');
     });
+});
+
+// Fail2ban deploy — web session authenticated
+Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])->group(function () {
+    Route::post('/servers/{server_id}/fail2ban/deploy', [Fail2banController::class, 'deploy'])->name('server.fail2ban.deploy');
 });
 
 // Setup wizard — token-based, one time use, no auth required

@@ -14,7 +14,7 @@
                  this.deploySuccess = false;
                  this.deployError = null;
                  try {
-                     const response = await fetch('/api/servers/{{ $server_id }}/fail2ban/deploy', {
+                     const response = await fetch('/servers/{{ $server_id }}/fail2ban/deploy', {
                          method: 'POST',
                          headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
                      });
