@@ -31,10 +31,16 @@ APP_DIR="/var/www/spikster"
 info "Installing system packages..."
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
-apt-get install -y -qq software-properties-common curl gnupg >/dev/null 2>&1
-# Add ondrej/php PPA for PHP 8.3 on Ubuntu 22.04+
-add-apt-repository -y ppa:ondrej/php >/dev/null 2>&1
-apt-get update -qq
+apt-get install -y -qq software-properties-common curl gnupg ca-certificates lsb-release >/dev/null 2>&1
+# Add deb.sury.org repo for PHP 8.3 on Ubuntu 22.04+
+PHP_VER=$(php -r "echo PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION;" 2>/dev/null || echo "0")
+if dpkg -l php8.3-fpm 2>/dev/null | grep -q "^ii"; then
+    info "PHP 8.3 already installed, skipping repo setup"
+else
+    curl -fsSL https://packages.sury.org/php/apt.gpg | gpg --dearmor -o /usr/share/keyrings/sury-php.gpg 2>/dev/null
+    echo "deb [signed-by=/usr/share/keyrings/sury-php.gpg] https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/sury-php.list
+    apt-get update -qq
+fi
 apt-get install -y -qq nginx mysql-server redis-server git curl wget unzip openssl expect >/dev/null 2>&1
 apt-get install -y -qq php8.3-fpm php8.3-cli php8.3-mysql php8.3-zip php8.3-gd php8.3-mbstring php8.3-curl php8.3-xml php8.3-bcmath php8.3-intl php8.3-redis >/dev/null 2>&1
 log "System packages installed"
