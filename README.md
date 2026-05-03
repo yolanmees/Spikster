@@ -19,7 +19,7 @@ Spikster is a **self-hosted server control panel** built with Laravel. It gives 
 It handles everything a PHP developer needs: sites, databases, SSL, queues, DNS, deployments, and real-time server monitoring — all in one place.
 
 > **Free. Open-source. No monthly fees.**  
-> A powerful alternative to Forge, RunCloud, Ploi, CyberPanel, and cPanel.
+> A powerful alternative to Forge, RunCloud, Ploi, CyberPanel, Plesk, and cPanel.
 
 ---
 
