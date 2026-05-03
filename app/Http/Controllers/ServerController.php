@@ -117,12 +117,10 @@ class ServerController extends Controller
     {
         $this->authorize('viewAny', Server::class);
 
-        $servers = $this->serverService->getAllServers();
-        $response = [];
+        $servers = Server::withCount('sites')->get();
 
-        foreach ($servers as $server) {
-            $stats = $this->serverService->getServerStats($server);
-            $data = [
+        return response()->json(
+            $servers->map(fn ($server) => [
                 'server_id' => $server->server_id,
                 'name' => $server->name,
                 'ip' => $server->ip,
@@ -130,12 +128,10 @@ class ServerController extends Controller
                 'location' => $server->location,
                 'default' => $server->default,
                 'status' => $server->status,
-                'sites' => $stats['sites_count'],
-            ];
-            array_push($response, $data);
-        }
-
-        return response()->json($response, 200);
+                'sites' => $server->sites_count,
+            ])->toArray(),
+            200
+        );
     }
 
     /**

@@ -201,20 +201,33 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>`;
     }
 
-    async function loadMetrics(serverId) {
+    async function refreshMetrics(activeServers) {
+        const ids = activeServers.map(s => s.server_id).join(',');
         try {
-            const res = await fetch(`/api/servers/${serverId}/healthy`, {
+            const res = await fetch('/api/servers/metrics/batch?ids=' + encodeURIComponent(ids), {
                 headers: { 'Authorization': 'Bearer ' + localStorage.sanctum_token, 'Accept': 'application/json' }
             });
             if (!res.ok) return;
             const data = await res.json();
             const fmt = v => `<span class="${metricColor(v)}">${v}%</span>`;
-            const cpuEl = document.getElementById('cpu-' + serverId);
-            const ramEl = document.getElementById('ram-' + serverId);
-            const hddEl = document.getElementById('hdd-' + serverId);
-            if (cpuEl) cpuEl.innerHTML = fmt(data.cpu ?? 0);
-            if (ramEl) ramEl.innerHTML = fmt(data.ram ?? 0);
-            if (hddEl) hddEl.innerHTML = fmt(data.hdd ?? 0);
+
+            for (const s of activeServers) {
+                const m = data.servers[s.server_id];
+                const cpu = m ? m.cpu : 0;
+                const mem = m ? m.memory : 0;
+                const dsk = m ? m.disk : 0;
+                const cpuEl = document.getElementById('cpu-' + s.server_id);
+                const ramEl = document.getElementById('ram-' + s.server_id);
+                const hddEl = document.getElementById('hdd-' + s.server_id);
+                if (cpuEl) cpuEl.innerHTML = fmt(cpu);
+                if (ramEl) ramEl.innerHTML = fmt(mem);
+                if (hddEl) hddEl.innerHTML = fmt(dsk);
+            }
+
+            const statCpu = document.getElementById('stat-cpu');
+            const statRam = document.getElementById('stat-ram');
+            if (statCpu && data.averages) statCpu.textContent = data.averages.cpu + '%';
+            if (statRam && data.averages) statRam.textContent = data.averages.memory + '%';
         } catch(e) {}
     }
 
@@ -233,18 +246,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!active.length) { grid.innerHTML = emptyState(); return; }
 
         grid.innerHTML = serverTable(active);
-        active.forEach(s => loadMetrics(s.server_id));
-        setInterval(() => active.forEach(s => loadMetrics(s.server_id)), 30000);
-
-        setTimeout(() => {
-            const avg = arr => arr.length ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length) : 0;
-            const cpuVals = active.map(s => parseInt(document.getElementById('cpu-' + s.server_id)?.textContent) || 0);
-            const ramVals = active.map(s => parseInt(document.getElementById('ram-' + s.server_id)?.textContent) || 0);
-            const statCpu = document.getElementById('stat-cpu');
-            const statRam = document.getElementById('stat-ram');
-            if (statCpu) statCpu.textContent = avg(cpuVals) + '%';
-            if (statRam) statRam.textContent = avg(ramVals) + '%';
-        }, 3000);
+        refreshMetrics(active);
+        setInterval(() => refreshMetrics(active), 30000);
     })
     .catch(() => { grid.innerHTML = emptyState(); });
 });

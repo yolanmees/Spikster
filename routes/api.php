@@ -60,13 +60,14 @@ Route::middleware(['api.unified-auth'])->group(function () {
     Route::patch('/servers/panel/domain', [ServerController::class, 'paneldomain']);
     Route::post('/servers/panel/ssl', [ServerController::class, 'panelssl']);
 
-    // Noisy tenant & capacity (must be before {server_id} routes)
+    // Noisy tenant, capacity & batch metrics (must be before {server_id} routes)
     Route::get('/servers/noisy-tenants', fn (NoisyTenantService $noisy) => response()->json(
         $noisy->getNoisyTenants()
     ));
     Route::get('/servers/capacity-plan', fn (NoisyTenantService $noisy) => response()->json(
         $noisy->getCapacityPlan()
     ));
+    Route::get('/servers/metrics/batch', [ServerMetricsController::class, 'getBatchMetrics']);
 
     Route::delete('/servers/{server_id}', [ServerController::class, 'destroy']);
     Route::get('/servers/{server_id}', [ServerController::class, 'show']);

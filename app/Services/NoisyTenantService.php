@@ -9,23 +9,24 @@ class NoisyTenantService
 {
     public function getResourceUsage(Server $server): array
     {
-        $metrics = ServerMetric::forServer($server->id)
+        $agg = ServerMetric::forServer($server->id)
             ->lastHours(24)
-            ->get();
+            ->selectRaw('AVG(cpu_percent) as avg_cpu, MAX(cpu_percent) as max_cpu, AVG(memory_percent) as avg_memory, MAX(memory_percent) as max_memory, AVG(disk_percent) as avg_disk')
+            ->first();
 
-        if ($metrics->isEmpty()) {
+        if (! $agg || $agg->avg_cpu === null) {
             return [];
         }
 
         return [
             'server_id' => $server->server_id,
             'server_name' => $server->name,
-            'avg_cpu' => round($metrics->avg('cpu_percent'), 2),
-            'max_cpu' => round($metrics->max('cpu_percent'), 2),
-            'avg_memory' => round($metrics->avg('memory_percent'), 2),
-            'max_memory' => round($metrics->max('memory_percent'), 2),
-            'avg_disk' => round($metrics->avg('disk_percent'), 2),
-            'sites_count' => $server->sites()->count(),
+            'avg_cpu' => round((float) $agg->avg_cpu, 2),
+            'max_cpu' => round((float) $agg->max_cpu, 2),
+            'avg_memory' => round((float) $agg->avg_memory, 2),
+            'max_memory' => round((float) $agg->max_memory, 2),
+            'avg_disk' => round((float) $agg->avg_disk, 2),
+            'sites_count' => $server->sites_count ?? $server->sites()->count(),
         ];
     }
 
@@ -68,16 +69,23 @@ class NoisyTenantService
 
     public function getCapacityPlan(): array
     {
-        $servers = Server::active()->get();
-        $totalSites = 0;
+        $servers = Server::active()->withCount('sites')->get();
+        $serverIds = $servers->pluck('id');
+        $totalSites = $servers->sum('sites_count');
+
+        $latestMetrics = ServerMetric::whereIn('server_id', $serverIds)
+            ->whereIn('id', function ($q) {
+                $q->selectRaw('MAX(id)')->from('server_metrics')->groupBy('server_id');
+            })
+            ->get()
+            ->keyBy('server_id');
+
         $totalCpu = 0;
         $totalMemory = 0;
         $totalDisk = 0;
 
         foreach ($servers as $server) {
-            $metric = ServerMetric::getLatestForServer($server->id);
-            $totalSites += $server->sites()->count();
-
+            $metric = $latestMetrics->get($server->id);
             if ($metric) {
                 $totalCpu += $metric->cpu_percent;
                 $totalMemory += $metric->memory_percent;

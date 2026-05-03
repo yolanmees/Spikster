@@ -11,7 +11,7 @@ class TopSites extends Component
 
     public function mount()
     {
-        $this->sites = Site::take(5)->get();
+        $this->sites = Site::with('server')->take(5)->get();
     }
 
     public function render()
