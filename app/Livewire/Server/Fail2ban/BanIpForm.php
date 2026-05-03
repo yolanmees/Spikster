@@ -3,58 +3,43 @@
 namespace App\Livewire\Server\Fail2ban;
 
 use App\Models\Server;
-use Illuminate\Support\Facades\Http;
+use App\Services\DaemonService;
+use App\Services\Fail2banService;
 use Livewire\Component;
 
 class BanIpForm extends Component
 {
     public $server_id;
-
     public $server;
-
     public $ip = '';
-
     public $jail = 'sshd';
-
     public $jails = [];
-
-    public $action = 'ban'; // 'ban' or 'whitelist'
+    public $action = 'ban';
 
     protected $rules = [
-        'ip' => 'required|ip',
+        'ip'   => 'required|ip',
         'jail' => 'required|string',
     ];
 
     protected $messages = [
         'ip.required' => 'IP address is required',
-        'ip.ip' => 'Please enter a valid IP address',
+        'ip.ip'       => 'Please enter a valid IP address',
         'jail.required' => 'Please select a jail',
     ];
-
-    public function render()
-    {
-        return view('livewire.server.fail2ban.ban-ip-form');
-    }
 
     public function mount($server_id)
     {
         $this->server_id = $server_id;
-        $this->server = Server::where(['server_id' => $server_id])->first();
+        $this->server    = Server::where('server_id', $server_id)->first();
         $this->loadJails();
     }
 
     public function loadJails()
     {
         try {
-            $url = config('app.url').'/api/servers/'.$this->server->server_id.'/fail2ban/jails';
-            $response = Http::get($url);
-
-            if ($response->successful()) {
-                $data = $response->json();
-                $this->jails = $data['jails'] ?? [];
-            }
-        } catch (\Exception $e) {
-            // Use default jail if can't load
+            $service    = app(Fail2banService::class);
+            $this->jails = $service->getJails($this->server);
+        } catch (\Throwable) {
             $this->jails = [['name' => 'sshd']];
         }
     }
@@ -64,22 +49,18 @@ class BanIpForm extends Component
         $this->validate();
 
         try {
-            $url = config('app.url').'/api/servers/'.$this->server->server_id.'/fail2ban/ban';
-            $response = Http::post($url, [
-                'ip' => $this->ip,
-                'jail' => $this->jail,
-            ]);
+            $service = app(Fail2banService::class);
+            $result  = $service->banIp($this->server, $this->ip, $this->jail);
 
-            if ($response->successful()) {
-                session()->flash('success', "IP {$this->ip} has been banned successfully in jail {$this->jail}.");
+            if ($result) {
+                session()->flash('success', "IP {$this->ip} banned successfully in jail {$this->jail}.");
                 $this->reset('ip');
                 $this->dispatch('refreshIptables');
             } else {
-                $data = $response->json();
-                session()->flash('error', $data['message'] ?? 'Failed to ban IP address.');
+                session()->flash('error', 'Failed to ban IP address.');
             }
-        } catch (\Exception $e) {
-            session()->flash('error', 'Error: '.$e->getMessage());
+        } catch (\Throwable $e) {
+            session()->flash('error', 'Error: ' . $e->getMessage());
         }
     }
 
@@ -88,21 +69,18 @@ class BanIpForm extends Component
         $this->validate(['ip' => 'required|ip']);
 
         try {
-            $url = config('app.url').'/api/servers/'.$this->server->server_id.'/fail2ban/whitelist';
-            $response = Http::post($url, [
-                'ip' => $this->ip,
-            ]);
+            $service = app(Fail2banService::class);
+            $result  = $service->whitelistIp($this->server, $this->ip);
 
-            if ($response->successful()) {
-                session()->flash('success', "IP {$this->ip} has been whitelisted successfully.");
+            if ($result) {
+                session()->flash('success', "IP {$this->ip} whitelisted successfully.");
                 $this->reset('ip');
                 $this->dispatch('refreshIptables');
             } else {
-                $data = $response->json();
-                session()->flash('error', $data['message'] ?? 'Failed to whitelist IP address.');
+                session()->flash('error', 'Failed to whitelist IP.');
             }
-        } catch (\Exception $e) {
-            session()->flash('error', 'Error: '.$e->getMessage());
+        } catch (\Throwable $e) {
+            session()->flash('error', 'Error: ' . $e->getMessage());
         }
     }
 
@@ -122,19 +100,21 @@ class BanIpForm extends Component
         }
 
         try {
-            $url = config('app.url').'/api/servers/'.$this->server->server_id.'/fail2ban/check/'.$this->ip;
-            $response = Http::get($url);
+            $service = app(Fail2banService::class);
+            $banned  = $service->isIpBanned($this->server, $this->ip);
 
-            if ($response->successful()) {
-                $data = $response->json();
-                if ($data['is_banned']) {
-                    session()->flash('info', "IP {$this->ip} is currently banned in ".count($data['ban_details']).' jail(s).');
-                } else {
-                    session()->flash('info', "IP {$this->ip} is not currently banned.");
-                }
+            if (! empty($banned)) {
+                session()->flash('info', "IP {$this->ip} is currently banned in " . count($banned) . ' jail(s).');
+            } else {
+                session()->flash('info', "IP {$this->ip} is not currently banned.");
             }
-        } catch (\Exception $e) {
-            // Silently fail
+        } catch (\Throwable) {
+            // silently fail
         }
+    }
+
+    public function render()
+    {
+        return view('livewire.server.fail2ban.ban-ip-form');
     }
 }
