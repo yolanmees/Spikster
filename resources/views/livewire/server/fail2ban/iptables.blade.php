@@ -59,7 +59,7 @@
                                             <span class="font-mono">{{ $ip[0] ?? 'N/A' }}</span>
                                         </td>
                                         <td class="whitespace-nowrap px-3 py-4 text-sm">
-                                            <x-badge color="blue" :text="$ip[1] ?? 'N/A'" />
+                                            <x-badge color="zinc" :text="$ip[1] ?? 'N/A'" />
                                         </td>
                                         <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
                                             @if (isset($ip[2]))
@@ -74,7 +74,7 @@
                                                 wire:confirm="Are you sure you want to unban {{ $ip[0] }}?"
                                                 wire:loading.attr="disabled"
                                                 wire:target="unbanIp('{{ $ip[0] }}')"
-                                                class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium inline-flex items-center gap-1">
+                                                class="text-purple-700 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 font-medium inline-flex items-center gap-1">
                                                 <span wire:loading.remove wire:target="unbanIp('{{ $ip[0] }}')">Unban</span>
                                                 <span wire:loading wire:target="unbanIp('{{ $ip[0] }}')"><x-wire-spinner size="sm" /></span>
                                             </button>

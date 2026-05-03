@@ -74,7 +74,7 @@
                                     Subject <span class="text-red-500">*</span>
                                 </label>
                                 <input wire:model="subject" type="text"
-                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-purple-700 focus:border-purple-700 sm:text-sm">
                                 @error('subject')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
@@ -86,7 +86,7 @@
                                     Message <span class="text-red-500">*</span>
                                 </label>
                                 <textarea wire:model="message" rows="6"
-                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"></textarea>
+                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-purple-700 focus:border-purple-700 sm:text-sm"></textarea>
                                 @error('message')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
@@ -102,7 +102,7 @@
                                         Start Date <span class="text-red-500">*</span>
                                     </label>
                                     <input wire:model="start_date" type="date"
-                                        class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                        class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-purple-700 focus:border-purple-700 sm:text-sm">
                                     @error('start_date')
                                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
@@ -112,7 +112,7 @@
                                         End Date (Optional)
                                     </label>
                                     <input wire:model="end_date" type="date"
-                                        class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                        class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-purple-700 focus:border-purple-700 sm:text-sm">
                                     @error('end_date')
                                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
@@ -123,7 +123,7 @@
                             <div class="flex items-start">
                                 <div class="flex items-center h-5">
                                     <input wire:model="is_active" type="checkbox" id="is_active"
-                                        class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded">
+                                        class="focus:ring-purple-700 h-4 w-4 text-purple-700 border-gray-300 dark:border-gray-600 rounded">
                                 </div>
                                 <div class="ml-3 text-sm">
                                     <label for="is_active" class="font-medium text-gray-700 dark:text-gray-300">
@@ -139,7 +139,7 @@
                                     Cancel
                                 </button>
                                 <button type="submit" wire:loading.attr="disabled"
-                                    class="px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">
+                                    class="px-4 py-2 bg-purple-700 border border-transparent rounded-md text-sm font-medium text-white hover:bg-purple-800 disabled:opacity-50">
                                     <span wire:loading.remove wire:target="save">Save</span>
                                     <span wire:loading wire:target="save">Saving...</span>
                                 </button>

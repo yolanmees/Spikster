@@ -29,7 +29,7 @@
                 <div
                     class="inline-flex rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 p-1">
                     <button onclick="filterLevel('all')" id="filter-all"
-                        class="filter-btn px-3 py-1.5 text-xs font-semibold rounded-md transition-all bg-blue-500 text-white">
+                        class="filter-btn px-3 py-1.5 text-xs font-semibold rounded-md transition-all bg-purple-700 text-white">
                         All
                     </button>
                     <button onclick="filterLevel('error')" id="filter-error"
@@ -44,7 +44,7 @@
                     </button>
                     <button onclick="filterLevel('info')" id="filter-info"
                         class="filter-btn px-3 py-1.5 text-xs font-semibold rounded-md transition-all text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
-                        <span class="inline-block w-2 h-2 rounded-full bg-blue-500 mr-1"></span>
+                        <span class="inline-block w-2 h-2 rounded-full bg-zinc-500 mr-1"></span>
                         Info
                     </button>
                 </div>
@@ -88,7 +88,7 @@
     <div class="mb-4">
         <div class="relative">
             <input type="text" id="searchLog" placeholder="Search in log content..."
-                class="w-full px-4 py-3 pl-12 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                class="w-full px-4 py-3 pl-12 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-700 focus:border-transparent transition-all">
             <svg class="w-5 h-5 absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none"
                 stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -148,8 +148,8 @@
         </div>
         <div class="bg-white dark:bg-gray-800/30 rounded-lg border border-gray-200 dark:border-gray-700/50 p-4">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center">
-                    <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor"
+                <div class="w-10 h-10 rounded-lg bg-zinc-100 dark:bg-zinc-800/50 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor"
                         viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -157,7 +157,7 @@
                 </div>
                 <div>
                     <p class="text-xs text-gray-500 dark:text-gray-400">Info</p>
-                    <p class="text-lg font-bold text-blue-600 dark:text-blue-400" id="info-count">0</p>
+                    <p class="text-lg font-bold text-zinc-600 dark:text-zinc-400" id="info-count">0</p>
                 </div>
             </div>
         </div>
@@ -179,7 +179,7 @@
                     <label class="inline-flex items-center cursor-pointer">
                         <input type="checkbox" id="line-wrap" class="sr-only peer" onchange="toggleLineWrap()">
                         <div
-                            class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
+                            class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-purple-700">
                         </div>
                         <span class="ms-2 text-sm font-medium text-gray-700 dark:text-gray-300">Wrap Lines</span>
                     </label>
@@ -239,7 +239,7 @@
                     warningCount++;
                 } else if (line.match(/\b(INFO|DEBUG|NOTICE)\b/i)) {
                     level = 'info';
-                    colorClass = 'text-blue-400';
+                    colorClass = 'text-zinc-400';
                     infoCount++;
                 }
 
@@ -320,7 +320,7 @@
                 case 'warning':
                     return 'border-yellow-500';
                 case 'info':
-                    return 'border-blue-500';
+                    return 'border-zinc-500';
                 default:
                     return 'border-gray-700';
             }
@@ -342,13 +342,13 @@
 
             // Update button states
             document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.classList.remove('bg-blue-500', 'text-white');
+                btn.classList.remove('bg-purple-700', 'text-white');
                 btn.classList.add('text-gray-600', 'dark:text-gray-300', 'hover:bg-gray-100',
                     'dark:hover:bg-gray-600');
             });
 
             const activeBtn = document.getElementById(`filter-${level}`);
-            activeBtn.classList.add('bg-blue-500', 'text-white');
+            activeBtn.classList.add('bg-purple-700', 'text-white');
             activeBtn.classList.remove('text-gray-600', 'dark:text-gray-300', 'hover:bg-gray-100',
             'dark:hover:bg-gray-600');
 

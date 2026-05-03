@@ -42,8 +42,8 @@
                             <td class="py-3 px-2">
                                 <span class="inline-flex items-center gap-1.5">
                                     @if ($deployment->isRunning())
-                                        <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                                        <span class="text-blue-600 dark:text-blue-400 font-medium">Running</span>
+                                        <span class="w-2 h-2 rounded-full bg-purple-700 animate-pulse"></span>
+                                        <span class="text-zinc-600 dark:text-zinc-400 font-medium">Running</span>
                                     @elseif ($deployment->isSuccessful())
                                         <span class="w-2 h-2 rounded-full bg-green-500"></span>
                                         <span class="text-green-600 dark:text-green-400 font-medium">Success</span>

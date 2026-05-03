@@ -32,7 +32,7 @@
                                         wire:click="install('{{ $package['package'] }}')"
                                         wire:loading.attr="disabled"
                                         wire:target="install('{{ $package['package'] }}')"
-                                        class="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium">
+                                        class="inline-flex items-center gap-1 text-zinc-600 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-300 font-medium">
                                         <span wire:loading.remove wire:target="install('{{ $package['package'] }}')">Install</span>
                                         <span wire:loading wire:target="install('{{ $package['package'] }}')">
                                             <x-wire-spinner size="sm" />

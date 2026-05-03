@@ -102,7 +102,7 @@
                     <div>
                         <x-label for="ftp_notes" value="Notes" />
                         <textarea id="ftp_notes" wire:model="notes" rows="2"
-                            class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"></textarea>
+                            class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:border-zinc-500 focus:ring-zinc-500 text-sm"></textarea>
                         @error('notes') <x-input-error :messages="$message" class="mt-1" /> @enderror
                     </div>
                 </div>

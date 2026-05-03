@@ -18,7 +18,7 @@
         <x-stat-card
             title="Total Quota"
             :value="number_format($statistics['total_quota_mb'] / 1024, 1) . ' GB'"
-            color="blue"
+            color="zinc"
             icon='<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7c0-2-1-3-3-3H7c-2 0-3 1-3 3z"/></svg>'
         />
         <x-stat-card
@@ -143,7 +143,7 @@
                                 <div class="flex justify-end space-x-2">
                                     {{-- Connection Info --}}
                                     <button wire:loading.attr="disabled" wire:target="openConnectionInfoModal('{{ $user->ftp_user_id }}')" wire:click="openConnectionInfoModal('{{ $user->ftp_user_id }}')"
-                                        title="Connection Info" class="text-indigo-600 hover:text-indigo-900">
+                                        title="Connection Info" class="text-zinc-600 hover:text-zinc-900">
                                         <svg class="h-5 w-5" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -153,7 +153,7 @@
 
                                     {{-- Edit --}}
                                     <button wire:loading.attr="disabled" wire:target="openEditModal('{{ $user->ftp_user_id }}')" wire:click="openEditModal('{{ $user->ftp_user_id }}')" title="Edit"
-                                        class="text-blue-600 hover:text-blue-900">
+                                        class="text-zinc-600 hover:text-zinc-900">
                                         <svg class="h-5 w-5" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -237,7 +237,7 @@
                                 </svg>
                                 <p class="mt-4">No FTP users found</p>
                                 <button wire:click="openCreateModal"
-                                    class="mt-2 text-indigo-600 hover:text-indigo-900">Create your first FTP
+                                    class="mt-2 text-purple-700 hover:text-purple-800">Create your first FTP
                                     user</button>
                             </td>
                         </tr>

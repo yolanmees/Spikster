@@ -14,7 +14,7 @@
                 <p class="mt-1 text-sm text-gray-500">Automate your backups with scheduled tasks</p>
             </div>
             <button wire:click="openCreateModal"
-                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                class="px-4 py-2 bg-purple-700 text-white rounded-md hover:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-700">
                 Create Schedule
             </button>
         </div>
@@ -33,7 +33,7 @@
                         </div>
                         <div class="flex items-center gap-2">
                             <button wire:click="toggleSchedule({{ $schedule->id }})"
-                                class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 {{ $schedule->is_active ? 'bg-blue-600' : 'bg-gray-200' }}">
+                                class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-700 focus:ring-offset-2 {{ $schedule->is_active ? 'bg-purple-700' : 'bg-gray-200' }}">
                                 <span
                                     class="translate-x-0 inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $schedule->is_active ? 'translate-x-5' : 'translate-x-0' }}"></span>
                             </button>
@@ -45,7 +45,7 @@
                         <div class="flex items-center gap-2">
                             <span
                                 class="px-3 py-1 text-xs font-semibold rounded-full
-                                @if ($schedule->type === 'full') bg-blue-100 text-blue-800
+                                @if ($schedule->type === 'full') bg-zinc-100 text-zinc-800
                                 @elseif($schedule->type === 'incremental') bg-purple-100 text-purple-800
                                 @elseif($schedule->type === 'database') bg-green-100 text-green-800
                                 @else bg-gray-100 text-gray-800 @endif">
@@ -117,7 +117,7 @@
                 </svg>
                 <p class="mt-4 text-gray-500">No backup schedules configured</p>
                 <button wire:click="openCreateModal"
-                    class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                    class="mt-4 px-4 py-2 bg-purple-700 text-white rounded-md hover:bg-purple-800">
                     Create First Schedule
                 </button>
             </div>
@@ -144,7 +144,7 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700">Schedule Name</label>
                                     <input type="text" wire:model="name" required
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-700 focus:ring-purple-700">
                                     @error('name')
                                         <span class="text-red-500 text-xs">{{ $message }}</span>
                                     @enderror
@@ -154,7 +154,7 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700">Backup Type</label>
                                     <select wire:model="type" required
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-700 focus:ring-purple-700">
                                         <option value="full">Full Backup (Files + Database + Email)</option>
                                         <option value="incremental">Incremental Backup (Changed files only)</option>
                                         <option value="database">Database Only</option>
@@ -169,7 +169,7 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700">Frequency</label>
                                     <select wire:model.live="frequency" required
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-700 focus:ring-purple-700">
                                         <option value="daily">Daily</option>
                                         <option value="weekly">Weekly</option>
                                         <option value="monthly">Monthly</option>
@@ -185,7 +185,7 @@
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">Time</label>
                                         <input type="time" wire:model="time" required
-                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-700 focus:ring-purple-700">
                                         @error('time')
                                             <span class="text-red-500 text-xs">{{ $message }}</span>
                                         @enderror
@@ -197,7 +197,7 @@
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">Day of Week</label>
                                         <select wire:model="day_of_week"
-                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-700 focus:ring-purple-700">
                                             <option value="0">Sunday</option>
                                             <option value="1">Monday</option>
                                             <option value="2">Tuesday</option>
@@ -215,7 +215,7 @@
                                         <label class="block text-sm font-medium text-gray-700">Day of Month</label>
                                         <input type="number" wire:model="day_of_month" min="1"
                                             max="31"
-                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-700 focus:ring-purple-700">
                                     </div>
                                 @endif
 
@@ -224,7 +224,7 @@
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">Cron Expression</label>
                                         <input type="text" wire:model="cron_expression" placeholder="0 2 * * *"
-                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-700 focus:ring-purple-700">
                                         <p class="mt-1 text-xs text-gray-500">Example: 0 2 * * * (every day at 2:00 AM)
                                         </p>
                                         @error('cron_expression')
@@ -236,7 +236,7 @@
                                 {{-- Encryption --}}
                                 <div class="flex items-center">
                                     <input type="checkbox" wire:model="is_encrypted" id="is_encrypted"
-                                        class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                        class="h-4 w-4 text-purple-700 focus:ring-purple-700 border-gray-300 rounded">
                                     <label for="is_encrypted" class="ml-2 block text-sm text-gray-700">
                                         Encrypt backups (GPG AES-256)
                                     </label>
@@ -248,19 +248,19 @@
                                         <label class="block text-sm font-medium text-gray-700">Keep Last N
                                             Backups</label>
                                         <input type="number" wire:model="retention_count" min="1"
-                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-700 focus:ring-purple-700">
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">Keep for N Days</label>
                                         <input type="number" wire:model="retention_days" min="1"
-                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-700 focus:ring-purple-700">
                                     </div>
                                 </div>
 
                                 {{-- Active Status --}}
                                 <div class="flex items-center">
                                     <input type="checkbox" wire:model="is_active" id="is_active"
-                                        class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                        class="h-4 w-4 text-purple-700 focus:ring-purple-700 border-gray-300 rounded">
                                     <label for="is_active" class="ml-2 block text-sm text-gray-700">
                                         Enable schedule immediately
                                     </label>
@@ -270,7 +270,7 @@
 
                         <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                             <button type="submit"
-                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
+                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-purple-700 text-base font-medium text-white hover:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-700 sm:ml-3 sm:w-auto sm:text-sm">
                                 {{ $showCreateModal ? 'Create Schedule' : 'Update Schedule' }}
                             </button>
                             <button type="button"

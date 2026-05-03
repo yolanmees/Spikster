@@ -32,12 +32,12 @@
         subtitle="Git and automation"
         description="Configure repository deployment and WordPress management."
         status="Optional"
-        statusClass="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+        statusClass="bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
         :href="route('site.edit.section', ['site_id' => $site_id, 'section' => 'integrations'])"
         buttonLabel="Open Integrations"
     >
         <x-slot name="icon">
-            <x-icon icon="server" class="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            <x-icon icon="server" class="h-4 w-4 text-zinc-600 dark:text-zinc-400" />
         </x-slot>
     </x-site-management-card>
 

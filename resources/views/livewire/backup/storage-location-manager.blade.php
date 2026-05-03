@@ -117,7 +117,7 @@
                                 <span class="w-2 h-2 rounded-full {{ $location->is_active ? 'bg-green-500' : 'bg-zinc-400' }}"></span>
                                 <h4 class="font-medium text-zinc-900 dark:text-white truncate">{{ $location->name }}</h4>
                                 @if ($location->is_default)
-                                    <span class="px-2 py-0.5 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">Default</span>
+                                    <span class="px-2 py-0.5 text-xs bg-zinc-100 dark:bg-zinc-800/50 text-zinc-700 dark:text-zinc-300 rounded">Default</span>
                                 @endif
                             </div>
                             <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
@@ -132,7 +132,7 @@
                             @endif
                         </div>
                         <div class="flex items-center gap-2 ml-4 shrink-0">
-                            <button wire:click="test('{{ $location->id }}')" class="text-xs text-blue-600 hover:underline">Test</button>
+                            <button wire:click="test('{{ $location->id }}')" class="text-xs text-zinc-600 hover:underline">Test</button>
                             <button wire:click="edit('{{ $location->id }}')" class="text-xs text-zinc-600 hover:underline">Edit</button>
                             <button wire:click="delete('{{ $location->id }}')" wire:confirm="Delete this storage location?" class="text-xs text-red-600 hover:underline">Delete</button>
                         </div>

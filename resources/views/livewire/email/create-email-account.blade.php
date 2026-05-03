@@ -43,7 +43,7 @@
         <div class="space-y-3 pt-2">
             <label class="flex items-start gap-3 cursor-pointer">
                 <input wire:model="enable_spam_filter" type="checkbox" id="enable_spam_filter"
-                    class="mt-0.5 h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500">
+                    class="mt-0.5 h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-purple-700 focus:ring-purple-700">
                 <div>
                     <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Enable Spam Filter</span>
                     <p class="text-xs text-gray-500 dark:text-gray-400">Use SpamAssassin to filter spam emails.</p>
@@ -52,7 +52,7 @@
 
             <label class="flex items-start gap-3 cursor-pointer">
                 <input wire:model="enable_virus_scan" type="checkbox" id="enable_virus_scan"
-                    class="mt-0.5 h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500">
+                    class="mt-0.5 h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-purple-700 focus:ring-purple-700">
                 <div>
                     <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Enable Virus Scanning</span>
                     <p class="text-xs text-gray-500 dark:text-gray-400">Use ClamAV to scan attachments for viruses.</p>
@@ -61,7 +61,7 @@
 
             <label class="flex items-start gap-3 cursor-pointer">
                 <input wire:model="is_active" type="checkbox" id="is_active"
-                    class="mt-0.5 h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500">
+                    class="mt-0.5 h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-purple-700 focus:ring-purple-700">
                 <div>
                     <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Active</span>
                     <p class="text-xs text-gray-500 dark:text-gray-400">Email account can send and receive emails.</p>

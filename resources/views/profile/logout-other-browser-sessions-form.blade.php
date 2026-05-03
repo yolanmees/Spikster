@@ -16,13 +16,13 @@
             <div class="space-y-3">
                 @foreach ($this->sessions as $session)
                     <div
-                        class="flex items-center gap-4 p-4 rounded-lg border {{ $session->is_current_device ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700' : 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600' }}">
+                        class="flex items-center gap-4 p-4 rounded-lg border {{ $session->is_current_device ? 'bg-zinc-100 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-600' : 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600' }}">
                         <!-- Device Icon -->
                         <div class="flex-shrink-0">
                             @if ($session->agent->isDesktop())
                                 <div
-                                    class="w-12 h-12 rounded-lg {{ $session->is_current_device ? 'bg-blue-100 dark:bg-blue-900/50' : 'bg-gray-200 dark:bg-gray-600' }} flex items-center justify-center">
-                                    <svg class="w-6 h-6 {{ $session->is_current_device ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400' }}"
+                                    class="w-12 h-12 rounded-lg {{ $session->is_current_device ? 'bg-zinc-100 dark:bg-zinc-800/50' : 'bg-gray-200 dark:bg-gray-600' }} flex items-center justify-center">
+                                    <svg class="w-6 h-6 {{ $session->is_current_device ? 'text-zinc-600 dark:text-zinc-400' : 'text-gray-600 dark:text-gray-400' }}"
                                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -30,8 +30,8 @@
                                 </div>
                             @else
                                 <div
-                                    class="w-12 h-12 rounded-lg {{ $session->is_current_device ? 'bg-blue-100 dark:bg-blue-900/50' : 'bg-gray-200 dark:bg-gray-600' }} flex items-center justify-center">
-                                    <svg class="w-6 h-6 {{ $session->is_current_device ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400' }}"
+                                    class="w-12 h-12 rounded-lg {{ $session->is_current_device ? 'bg-zinc-100 dark:bg-zinc-800/50' : 'bg-gray-200 dark:bg-gray-600' }} flex items-center justify-center">
+                                    <svg class="w-6 h-6 {{ $session->is_current_device ? 'text-zinc-600 dark:text-zinc-400' : 'text-gray-600 dark:text-gray-400' }}"
                                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
@@ -49,7 +49,7 @@
                                 </p>
                                 @if ($session->is_current_device)
                                     <span
-                                        class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-700">
+                                        class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-zinc-100 dark:bg-zinc-800/50 text-zinc-800 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-600">
                                         {{ __('This device') }}
                                     </span>
                                 @endif

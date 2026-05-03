@@ -100,7 +100,7 @@
                             <button wire:click="toggle({{ $webhook->id }})" class="text-xs {{ $webhook->is_active ? 'text-amber-600' : 'text-green-600' }} hover:underline">
                                 {{ $webhook->is_active ? 'Disable' : 'Enable' }}
                             </button>
-                            <button wire:click="test({{ $webhook->id }})" class="text-xs text-blue-600 hover:underline">Test</button>
+                            <button wire:click="test({{ $webhook->id }})" class="text-xs text-zinc-600 hover:underline">Test</button>
                             <button wire:click="edit({{ $webhook->id }})" class="text-xs text-zinc-600 hover:underline">Edit</button>
                             <button wire:click="delete({{ $webhook->id }})" wire:confirm="Delete this webhook?" class="text-xs text-red-600 hover:underline">Delete</button>
                         </div>

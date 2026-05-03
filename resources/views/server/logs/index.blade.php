@@ -32,7 +32,7 @@
     <div class="mb-6">
         <div class="relative">
             <input type="text" id="searchLogs" placeholder="Search log files..."
-                class="w-full px-4 py-3 pl-12 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                class="w-full px-4 py-3 pl-12 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-700 focus:border-transparent transition-all">
             <svg class="w-5 h-5 absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none"
                 stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -47,14 +47,14 @@
             <x-card size="lg" dark="false">
                 <x-slot name="header">
                     <div class="flex items-center gap-2">
-                        <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor"
+                        <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                         Application Logs
                         <span
-                            class="ml-auto px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
+                            class="ml-auto px-2 py-1 text-xs font-semibold rounded-full bg-zinc-100 dark:bg-zinc-800/50 text-zinc-800 dark:text-zinc-300">
                             {{ count($logs['logs']) }}
                         </span>
                     </div>
@@ -62,13 +62,13 @@
 
                 <div class="space-y-2" id="app-logs">
                     @forelse ($logs['logs'] as $log)
-                        <div class="log-item flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-all duration-200 group"
+                        <div class="log-item flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-zinc-500 dark:hover:border-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-all duration-200 group"
                             data-log-name="{{ strtolower($log['name']) }}">
                             <a href="{{ route('logs.show', ['server_id' => $server->server_id, 'log' => $log['name']]) }}"
                                 class="flex items-center gap-3 flex-1 min-w-0">
                                 <div
-                                    class="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center flex-shrink-0">
-                                    <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none"
+                                    class="w-10 h-10 rounded-lg bg-zinc-100 dark:bg-zinc-800/50 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none"
                                         stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
@@ -92,7 +92,7 @@
                                             d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                     </svg>
                                 </button>
-                                <svg class="w-5 h-5 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors flex-shrink-0"
+                                <svg class="w-5 h-5 text-gray-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors flex-shrink-0"
                                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M9 5l7 7-7 7" />

@@ -42,7 +42,7 @@
                         <button wire:click="start('{{ $proc['name'] }}')" class="px-2 py-1 text-xs bg-green-100 hover:bg-green-200 dark:bg-green-900/30 dark:hover:bg-green-800/50 text-green-700 dark:text-green-300 rounded transition-colors">Start</button>
                         <button wire:click="stop('{{ $proc['name'] }}')" class="px-2 py-1 text-xs bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-800/50 text-red-700 dark:text-red-300 rounded transition-colors">Stop</button>
                         <button wire:click="restart('{{ $proc['name'] }}')" class="px-2 py-1 text-xs bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 rounded transition-colors">Restart</button>
-                        <button wire:click="tail('{{ $proc['name'] }}')" class="px-2 py-1 text-xs bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-800/50 text-blue-700 dark:text-blue-300 rounded transition-colors">Log</button>
+                        <button wire:click="tail('{{ $proc['name'] }}')" class="px-2 py-1 text-xs bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 rounded transition-colors">Log</button>
                     </div>
                 </div>
             @endforeach

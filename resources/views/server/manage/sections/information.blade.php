@@ -48,12 +48,12 @@
         subtitle="Software"
         description="View and manage software packages installed on this server."
         status="Info"
-        statusClass="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+        statusClass="bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
         :href="route('server.packages-installed', ['server_id' => $server_id])"
         buttonLabel="Open Packages"
     >
         <x-slot name="icon">
-            <svg class="h-4 w-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="h-4 w-4 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
             </svg>
         </x-slot>

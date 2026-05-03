@@ -97,11 +97,11 @@
             <!-- Actions -->
             <div class="flex gap-2">
                 <button wire:click="showUpdate" type="button"
-                    class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition">
+                    class="inline-flex items-center px-4 py-2 bg-purple-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-purple-800 focus:bg-purple-800 active:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-purple-700 focus:ring-offset-2 transition">
                     Update Quota
                 </button>
                 <button wire:click="refresh" type="button"
-                    class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition">
+                    class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-700 focus:ring-offset-2 transition">
                     <svg wire:loading.remove wire:target="refresh" class="h-4 w-4 mr-2" fill="none"
                         stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -138,7 +138,7 @@
                                 New Quota (MB)
                             </label>
                             <input wire:model="newQuota" type="number" min="100" max="10240" step="100"
-                                class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-purple-700 focus:border-purple-700 sm:text-sm">
                             @error('newQuota')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -152,7 +152,7 @@
                                 Cancel
                             </button>
                             <button type="submit" wire:loading.attr="disabled"
-                                class="px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">
+                                class="px-4 py-2 bg-purple-700 border border-transparent rounded-md text-sm font-medium text-white hover:bg-purple-800 disabled:opacity-50">
                                 Update
                             </button>
                         </div>

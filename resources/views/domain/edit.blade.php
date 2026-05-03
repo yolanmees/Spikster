@@ -119,8 +119,8 @@
                                         @php
                                             $typeColors = [
                                                 'A'     => 'bg-purple-100 text-purple-700 dark:bg-purple-700/15 dark:text-purple-300',
-                                                'AAAA'  => 'bg-indigo-100 text-indigo-700 dark:bg-indigo-700/15 dark:text-indigo-300',
-                                                'CNAME' => 'bg-blue-100 text-blue-700 dark:bg-blue-700/15 dark:text-blue-300',
+                                        'AAAA'  => 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300',
+                                        'CNAME' => 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300',
                                                 'MX'    => 'bg-amber-100 text-amber-700 dark:bg-amber-700/15 dark:text-amber-300',
                                                 'TXT'   => 'bg-emerald-100 text-emerald-700 dark:bg-emerald-700/15 dark:text-emerald-300',
                                                 'NS'    => 'bg-rose-100 text-rose-700 dark:bg-rose-700/15 dark:text-rose-300',

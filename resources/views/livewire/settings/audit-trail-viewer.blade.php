@@ -81,7 +81,7 @@
                                 <span class="px-2 py-0.5 text-xs rounded
                                     {{ $log->severity === 'critical' ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300' : '' }}
                                     {{ $log->severity === 'warning' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300' : '' }}
-                                    {{ $log->severity === 'info' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' : '' }}">
+                                    {{ $log->severity === 'info' ? 'bg-zinc-100 dark:bg-zinc-800/50 text-zinc-700 dark:text-zinc-300' : '' }}">
                                     {{ ucfirst($log->severity) }}
                                 </span>
                             </td>

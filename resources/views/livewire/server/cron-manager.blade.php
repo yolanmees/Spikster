@@ -146,7 +146,7 @@
                                             </span>
                                         @else
                                             <span
-                                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-zinc-100 text-zinc-800 dark:bg-zinc-800/50 dark:text-zinc-300">
                                                 <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                                     <path fill-rule="evenodd"
                                                         d="M2 5a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm3.293 1.293a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 01-1.414-1.414L7.586 10 5.293 7.707a1 1 0 010-1.414zM11 12a1 1 0 100 2h3a1 1 0 100-2h-3z"
@@ -178,7 +178,7 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <div class="flex items-center justify-end gap-2">
                                             <button wire:click="edit({{ $cronJob->id }})"
-                                                class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">
+                                                class="text-purple-700 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -240,7 +240,7 @@
                                             Scope <span class="text-red-500">*</span>
                                         </label>
                                         <select wire:model.live="scope"
-                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-700 focus:ring-purple-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                                             <option value="server">Server-wide</option>
                                             <option value="site">Specific Site</option>
                                         </select>
@@ -258,7 +258,7 @@
                                                 Site <span class="text-red-500">*</span>
                                             </label>
                                             <select wire:model="site_id"
-                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-700 focus:ring-purple-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                                                 <option value="">Select a site</option>
                                                 @foreach ($sites as $site)
                                                     <option value="{{ $site->id }}">{{ $site->domain }}</option>
@@ -276,7 +276,7 @@
                                             Description
                                         </label>
                                         <input type="text" wire:model="description"
-                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-700 focus:ring-purple-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                                         @error('description')
                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                         @enderror
@@ -288,7 +288,7 @@
                                             Command <span class="text-red-500">*</span>
                                         </label>
                                         <input type="text" wire:model="command"
-                                            class="mt-1 block w-full font-mono rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                            class="mt-1 block w-full font-mono rounded-md border-gray-300 shadow-sm focus:border-purple-700 focus:ring-purple-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                             placeholder="/usr/bin/php /home/user/script.php">
                                         @error('command')
                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -301,7 +301,7 @@
                                             Schedule Preset
                                         </label>
                                         <select wire:model.live="schedule"
-                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-700 focus:ring-purple-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                                             @foreach ($presetSchedules as $value => $label)
                                                 <option value="{{ $value }}">{{ $label }}</option>
                                             @endforeach
@@ -315,7 +315,7 @@
                                                 Custom Schedule (Cron Expression) <span class="text-red-500">*</span>
                                             </label>
                                             <input type="text" wire:model="schedule"
-                                                class="mt-1 block w-full font-mono rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                                class="mt-1 block w-full font-mono rounded-md border-gray-300 shadow-sm focus:border-purple-700 focus:ring-purple-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                                 placeholder="* * * * *">
                                             <p class="mt-1 text-xs text-gray-500">Format: minute hour day month weekday
                                             </p>
@@ -331,7 +331,7 @@
                                             Output File (Optional)
                                         </label>
                                         <input type="text" wire:model="output_file"
-                                            class="mt-1 block w-full font-mono rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                            class="mt-1 block w-full font-mono rounded-md border-gray-300 shadow-sm focus:border-purple-700 focus:ring-purple-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                             placeholder="/var/log/mycron.log">
                                         <p class="mt-1 text-xs text-gray-500">Leave empty to discard output</p>
                                         @error('output_file')
@@ -343,7 +343,7 @@
                                     <div class="space-y-2">
                                         <div class="flex items-center">
                                             <input type="checkbox" wire:model="enabled" id="enabled"
-                                                class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                                class="rounded border-gray-300 text-purple-700 shadow-sm focus:border-purple-700 focus:ring-purple-700">
                                             <label for="enabled"
                                                 class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
                                                 Enabled
@@ -352,7 +352,7 @@
 
                                         <div class="flex items-center">
                                             <input type="checkbox" wire:model="notify_on_error" id="notify_on_error"
-                                                class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                                class="rounded border-gray-300 text-purple-700 shadow-sm focus:border-purple-700 focus:ring-purple-700">
                                             <label for="notify_on_error"
                                                 class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
                                                 Notify on error
@@ -405,7 +405,7 @@
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 @foreach ($templates as $key => $template)
-                                    <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:border-indigo-500 dark:hover:border-indigo-500 transition-colors cursor-pointer"
+                                    <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:border-purple-700 dark:hover:border-purple-700 transition-colors cursor-pointer"
                                         wire:click="useTemplate('{{ $key }}')">
                                         <h4 class="font-semibold text-gray-900 dark:text-white mb-1">
                                             {{ $template['name'] }}
@@ -417,7 +417,7 @@
                                             <div class="flex items-center gap-2 text-xs">
                                                 <span
                                                     class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
-                                                    {{ $template['scope'] === 'site' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300' : 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' }}">
+                                                    {{ $template['scope'] === 'site' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300' : 'bg-zinc-100 text-zinc-800 dark:bg-zinc-800/50 dark:text-zinc-300' }}">
                                                     {{ ucfirst($template['scope']) }}
                                                 </span>
                                                 <code
@@ -438,24 +438,24 @@
         @endif
 
         <!-- Help Section -->
-        <div class="mt-6 bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 rounded">
+        <div class="mt-6 bg-zinc-100 dark:bg-zinc-800/50 border-l-4 border-zinc-500 p-4 rounded">
             <div class="flex">
                 <div class="flex-shrink-0">
-                    <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                    <svg class="h-5 w-5 text-zinc-400" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd"
                             d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
                             clip-rule="evenodd" />
                     </svg>
                 </div>
                 <div class="ml-3">
-                    <p class="text-sm text-blue-700 dark:text-blue-300">
+                    <p class="text-sm text-zinc-700 dark:text-zinc-300">
                         <strong>Cron Expression Format:</strong> minute (0-59) hour (0-23) day (1-31) month (1-12)
                         weekday (0-7)
                     </p>
-                    <p class="mt-2 text-sm text-blue-700 dark:text-blue-300">
-                        <strong>Examples:</strong> <code class="bg-blue-100 dark:bg-blue-800 px-1 rounded">0 2 * *
+                    <p class="mt-2 text-sm text-zinc-700 dark:text-zinc-300">
+                        <strong>Examples:</strong> <code class="bg-zinc-200 dark:bg-zinc-700 px-1 rounded">0 2 * *
                             *</code> runs daily at 2:00 AM,
-                        <code class="bg-blue-100 dark:bg-blue-800 px-1 rounded">*/15 * * * *</code> runs every 15
+                        <code class="bg-zinc-200 dark:bg-zinc-700 px-1 rounded">*/15 * * * *</code> runs every 15
                         minutes
                     </p>
                 </div>

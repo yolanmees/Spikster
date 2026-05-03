@@ -78,7 +78,7 @@
                     {{-- Require SSL --}}
                     <div class="flex items-start gap-3">
                         <input wire:model="require_ssl" id="edit_require_ssl" type="checkbox"
-                            class="mt-1 h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500">
+                            class="mt-1 h-4 w-4 text-purple-700 border-gray-300 dark:border-gray-600 rounded focus:ring-purple-700">
                         <div>
                             <label for="edit_require_ssl" class="text-sm font-medium text-gray-700 dark:text-gray-300">Require SSL/TLS</label>
                             <p class="text-xs text-gray-500 dark:text-gray-400">Force encrypted connections</p>
@@ -88,7 +88,7 @@
                     {{-- Active Status --}}
                     <div class="flex items-start gap-3">
                         <input wire:model="is_active" id="edit_is_active" type="checkbox"
-                            class="mt-1 h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500">
+                            class="mt-1 h-4 w-4 text-purple-700 border-gray-300 dark:border-gray-600 rounded focus:ring-purple-700">
                         <div>
                             <label for="edit_is_active" class="text-sm font-medium text-gray-700 dark:text-gray-300">Active</label>
                             <p class="text-xs text-gray-500 dark:text-gray-400">Enable or disable this FTP account</p>
@@ -106,7 +106,7 @@
                     <div>
                         <x-label for="edit_notes" value="Notes" />
                         <textarea wire:model="notes" id="edit_notes" rows="3"
-                            class="mt-1 block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all sm:text-sm"></textarea>
+                            class="mt-1 block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 focus:ring-2 focus:ring-zinc-500 focus:border-transparent transition-all sm:text-sm"></textarea>
                         @error('notes') <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
                     </div>
                 </div>

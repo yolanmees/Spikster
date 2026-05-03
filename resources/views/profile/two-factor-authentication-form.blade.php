@@ -59,8 +59,8 @@
         @if ($this->enabled)
             @if ($showingQrCode)
                 <!-- QR Code Section -->
-                <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-700">
-                    <p class="text-sm font-medium text-blue-900 dark:text-blue-100 mb-4">
+                <div class="bg-zinc-100 dark:bg-zinc-800/50 rounded-lg p-4 border border-zinc-200 dark:border-zinc-700">
+                    <p class="text-sm font-medium text-zinc-900 dark:text-zinc-100 mb-4">
                         @if ($showingConfirmation)
                             {{ __('To finish enabling two factor authentication, scan the following QR code using your phone\'s authenticator application or enter the setup key and provide the generated OTP code.') }}
                         @else
