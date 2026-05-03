@@ -32,26 +32,53 @@ info "Installing system packages..."
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
 apt-get install -y -qq software-properties-common curl gnupg ca-certificates lsb-release >/dev/null 2>&1
-# Add deb.sury.org repo for PHP 8.3 on Ubuntu 22.04+
-PHP_VER=$(php -r "echo PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION;" 2>/dev/null || echo "0")
-if dpkg -l php8.5-fpm 2>/dev/null | grep -q "^ii"; then
-    info "PHP 8.3 already installed, skipping repo setup"
-else
-    curl -fsSL https://packages.sury.org/php/apt.gpg | gpg --yes --dearmor -o /usr/share/keyrings/sury-php.gpg 2>/dev/null
-    echo "deb [signed-by=/usr/share/keyrings/sury-php.gpg] https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/sury-php.list
-    apt-get update -qq
+
+# Detect best available PHP version (prefer 8.4, fall back to 8.3, then sury for 8.5)
+DISTRO_CODENAME=$(lsb_release -sc)
+PHP_PKG_VER=""
+# Try native repos first (Ubuntu 25.10+ has 8.4)
+for VER in 8.4 8.3; do
+    if apt-cache show php${VER}-fpm >/dev/null 2>&1; then
+        PHP_PKG_VER=$VER
+        info "Using PHP ${PHP_PKG_VER} from native repos"
+        break
+    fi
+done
+# If not found natively, try sury.org (22.04 jammy → 8.5)
+if [ -z "$PHP_PKG_VER" ]; then
+    SURY_CODENAMES="jammy noble resolute"
+    if echo "$SURY_CODENAMES" | grep -qw "$DISTRO_CODENAME"; then
+        curl -fsSL https://packages.sury.org/php/apt.gpg | gpg --yes --dearmor -o /usr/share/keyrings/sury-php.gpg 2>/dev/null
+        echo "deb [signed-by=/usr/share/keyrings/sury-php.gpg] https://packages.sury.org/php/ ${DISTRO_CODENAME} main" > /etc/apt/sources.list.d/sury-php.list
+        apt-get update -qq
+        for VER in 8.5 8.4 8.3; do
+            if apt-cache show php${VER}-fpm >/dev/null 2>&1; then
+                PHP_PKG_VER=$VER
+                info "Using PHP ${PHP_PKG_VER} from sury.org"
+                break
+            fi
+        done
+    fi
 fi
+[ -z "$PHP_PKG_VER" ] && err "Could not find PHP 8.3+ in any repo for ${DISTRO_CODENAME}"
+PHP_SOCK_VER=$PHP_PKG_VER
+
 apt-get install -y -qq nginx mysql-server redis-server git curl wget unzip openssl expect >/dev/null 2>&1
-apt-get install -y -qq php8.5-fpm php8.5-cli php8.5-mysql php8.5-zip php8.5-gd php8.5-mbstring php8.5-curl php8.5-xml php8.5-bcmath php8.5-intl php8.5-dev >/dev/null 2>&1
-apt-get install -y -qq php-pear >/dev/null 2>&1 || true
-pecl install redis >/dev/null 2>&1 || true
-echo "extension=redis.so" > /etc/php/8.5/mods-available/redis.ini
-phpenmod redis 2>/dev/null || true
-log "System packages installed"
+apt-get install -y -qq php${PHP_PKG_VER}-fpm php${PHP_PKG_VER}-cli php${PHP_PKG_VER}-mysql php${PHP_PKG_VER}-zip php${PHP_PKG_VER}-gd php${PHP_PKG_VER}-mbstring php${PHP_PKG_VER}-curl php${PHP_PKG_VER}-xml php${PHP_PKG_VER}-bcmath php${PHP_PKG_VER}-intl >/dev/null 2>&1
+# php-redis: available as package or via PECL
+if apt-cache show php${PHP_PKG_VER}-redis >/dev/null 2>&1; then
+    apt-get install -y -qq php${PHP_PKG_VER}-redis >/dev/null 2>&1 || true
+else
+    apt-get install -y -qq php${PHP_PKG_VER}-dev php-pear >/dev/null 2>&1 || true
+    pecl install redis >/dev/null 2>&1 || true
+    echo "extension=redis.so" > /etc/php/${PHP_PKG_VER}/mods-available/redis.ini
+    phpenmod redis 2>/dev/null || true
+fi
+log "System packages installed (PHP ${PHP_PKG_VER})"
 
 # Start services
-systemctl start mysql redis php8.5-fpm 2>/dev/null || true
-systemctl enable mysql redis php8.5-fpm 2>/dev/null || true
+systemctl start mysql redis php${PHP_PKG_VER}-fpm 2>/dev/null || true
+systemctl enable mysql redis php${PHP_PKG_VER}-fpm 2>/dev/null || true
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 2. MySQL setup
@@ -146,7 +173,7 @@ server {
     index index.php index.html;
     location / { try_files $uri /index.php?$query_string; }
     location ~ \.php$ {
-        fastcgi_pass unix:/var/run/php/php8.5-fpm.sock;
+        fastcgi_pass unix:/var/run/php/php${PHP_SOCK_VER}-fpm.sock;
         fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
         include fastcgi_params;
     }
