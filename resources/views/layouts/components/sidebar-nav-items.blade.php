@@ -65,16 +65,6 @@
     </a>
 </li>
 
-{{-- Diagnostics --}}
-<li>
-    <a href="/diagnostics" class="@if(request()->is('diagnostics*')) sidebar-item-active @else sidebar-item @endif">
-        <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17l-1.5-1.5M9 12l3-3m0 0l3 3m-3-3v6M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
-        <span>Diagnostics</span>
-    </a>
-</li>
-
 {{-- Settings --}}
 <li>
     <a href="/settings" class="@if(request()->is('settings*')) sidebar-item-active @else sidebar-item @endif">

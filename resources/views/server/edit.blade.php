@@ -13,6 +13,7 @@
             'information' => 'Information',
             'security'    => 'Security',
             'tools'       => 'Tools',
+            'diagnostics' => 'Diagnostics',
         ];
     @endphp
 

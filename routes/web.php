@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\DiagnosticsController;
 use App\Http\Controllers\Server\Fail2banController;
 use App\Http\Controllers\FileManagerController;
 use App\Http\Controllers\ModuleController;
@@ -76,10 +75,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         return view('ftp.index', ['site' => $site]);
     })->name('ftp.index');
 
-    // Diagnostics
-    Route::get('/diagnostics', [DiagnosticsController::class, 'index'])->name('diagnostics');
-
-    // Module Management
+        // Module Management
     Route::prefix('modules')->name('modules.')->group(function () {
         Route::get('/', [ModuleController::class, 'index'])->name('index');
         Route::get('/{module}', [ModuleController::class, 'show'])->name('show');
