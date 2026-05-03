@@ -32,33 +32,58 @@ class Fail2banService
     }
 
     /**
-     * Get all available Fail2ban jails.
+     * Get all available Fail2ban jails with full stats.
      */
     public function getJails(Server $server): array
     {
         try {
-            $banned = $this->getBannedIps($server);
-            $jails  = [];
-            foreach ($banned as $entry) {
-                $jail = $entry[1] ?? 'sshd';
-                if (! in_array($jail, array_column($jails, 'name'))) {
-                    $jails[] = ['name' => $jail];
-                }
+            $result = $this->daemon->send('site.deploy-script', [
+                'username' => 'root',
+                'script'   => 'fail2ban-client status 2>/dev/null',
+            ]);
+            $output = $result['output'] ?? '';
+            preg_match('/Jail list:\s*(.+)/i', $output, $m);
+            $jailNames = array_map('trim', explode(',', $m[1] ?? 'sshd'));
+
+            $jails = [];
+            foreach ($jailNames as $name) {
+                if (empty($name)) continue;
+                $jails[] = $this->getJailStatus($server, $name);
             }
-            return $jails ?: [['name' => 'sshd']];
+            return $jails ?: [['name' => 'sshd', 'current_banned' => 0, 'total_banned' => 0, 'current_failed' => 0, 'total_failed' => 0]];
         } catch (\Throwable $e) {
             Log::error('Fail2ban getJails error: ' . $e->getMessage());
-            return [['name' => 'sshd']];
+            return [];
         }
     }
 
     /**
-     * Get jail status (returns basic info).
+     * Get jail status with full stats via fail2ban-client.
      */
     public function getJailStatus(Server $server, string $jail): array
     {
-        $banned = array_filter($this->getBannedIps($server), fn($b) => ($b['jail'] ?? '') === $jail);
-        return ['jail' => $jail, 'banned_count' => count($banned), 'banned' => array_values($banned)];
+        try {
+            $result = $this->daemon->send('site.deploy-script', [
+                'username' => 'root',
+                'script'   => "fail2ban-client status {$jail} 2>/dev/null",
+            ]);
+            $output = $result['output'] ?? '';
+
+            preg_match('/Currently failed:\s*(\d+)/i', $output, $cf);
+            preg_match('/Total failed:\s*(\d+)/i',     $output, $tf);
+            preg_match('/Currently banned:\s*(\d+)/i', $output, $cb);
+            preg_match('/Total banned:\s*(\d+)/i',     $output, $tb);
+
+            return [
+                'name'           => $jail,
+                'current_failed' => (int)($cf[1] ?? 0),
+                'total_failed'   => (int)($tf[1] ?? 0),
+                'current_banned' => (int)($cb[1] ?? 0),
+                'total_banned'   => (int)($tb[1] ?? 0),
+            ];
+        } catch (\Throwable) {
+            return ['name' => $jail, 'current_banned' => 0, 'total_banned' => 0, 'current_failed' => 0, 'total_failed' => 0];
+        }
     }
 
     /**
@@ -148,17 +173,27 @@ class Fail2banService
     }
 
     /**
-     * Get statistics (count of banned IPs per jail).
+     * Get aggregate statistics for the stat cards.
      */
     public function getStatistics(Server $server): array
     {
-        $banned = $this->getBannedIps($server);
-        $stats  = [];
-        foreach ($banned as $entry) {
-            $jail = $entry[1] ?? 'unknown';
-            $stats[$jail] = ($stats[$jail] ?? 0) + 1;
+        try {
+            $jails       = $this->getJails($server);
+            $totalBanned = 0;
+            $totalBans   = 0;
+            foreach ($jails as $jail) {
+                $totalBanned += $jail['current_banned'] ?? 0;
+                $totalBans   += $jail['total_banned']   ?? 0;
+            }
+            return [
+                'total_jails'      => count($jails),
+                'jails_active'     => count($jails),
+                'total_banned_ips' => $totalBanned,
+                'total_bans'       => $totalBans,
+            ];
+        } catch (\Throwable) {
+            return ['total_jails' => 0, 'jails_active' => 0, 'total_banned_ips' => 0, 'total_bans' => 0];
         }
-        return $stats;
     }
 
     /**
