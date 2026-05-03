@@ -113,7 +113,7 @@
 
     {{-- Create User Modal --}}
     @if ($showCreateModal)
-        <x-modal title="Create New User" max-width="lg">
+        <x-modal title="Create New User" max-width="lg" closeAction="resetForm">
             <form wire:submit.prevent="createUser" class="space-y-4">
                 <div>
                     <x-label for="name" value="Name" />
@@ -156,7 +156,7 @@
 
     {{-- Edit User Modal --}}
     @if ($showEditModal)
-        <x-modal title="Edit User" max-width="lg">
+        <x-modal title="Edit User" max-width="lg" closeAction="resetForm">
             <form wire:submit.prevent="updateUser" class="space-y-4">
                 <div>
                     <x-label for="edit_name" value="Name" />

@@ -3,6 +3,7 @@
     'title'      => null,
     'maxWidth'   => '2xl',
     'closeable'  => true,
+    'closeAction' => null,
 ])
 
 @php
@@ -41,7 +42,13 @@
         x-transition:leave-start="opacity-100"
         x-transition:leave-end="opacity-0"
         class="fixed inset-0 bg-zinc-950/70 backdrop-blur-md"
-        @if($closeable) @click="open = false" @endif
+        @if($closeable)
+            @if($closeAction)
+                @click="open = false; $wire.{{ $closeAction }}()"
+            @else
+                @click="open = false"
+            @endif
+        @endif
     ></div>
 
     {{-- Panel --}}
@@ -64,7 +71,12 @@
                         {{ $title ?? $header }}
                     </h3>
                     @if($closeable)
-                        <button type="button" @click="open = false"
+                        <button type="button"
+                            @if($closeAction)
+                                @click="open = false; $wire.{{ $closeAction }}()"
+                            @else
+                                @click="open = false"
+                            @endif
                             class="inline-flex items-center justify-center w-8 h-8 rounded-xl border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 bg-white/80 dark:bg-zinc-900/80 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>

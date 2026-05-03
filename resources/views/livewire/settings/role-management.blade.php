@@ -113,7 +113,7 @@
 
     {{-- Create Role Modal --}}
     @if ($showCreateModal)
-        <x-modal title="Create New Role" max-width="2xl">
+        <x-modal title="Create New Role" max-width="2xl" closeAction="resetForm">
             <form wire:submit.prevent="createRole" class="space-y-4">
                 <div>
                     <x-label for="roleName_create" value="Role Name" />
@@ -149,7 +149,7 @@
 
     {{-- Edit Role Modal --}}
     @if ($showEditModal)
-        <x-modal title="Edit Role" max-width="2xl">
+        <x-modal title="Edit Role" max-width="2xl" closeAction="resetForm">
             <form wire:submit.prevent="updateRole" class="space-y-4">
                 <div>
                     <x-label for="roleName_edit" value="Role Name" />
