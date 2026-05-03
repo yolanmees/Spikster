@@ -51,4 +51,16 @@ return [
     */
     'db_root_pass' => env('DB_ROOT_PASS', ''),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Noisy Tenant Thresholds
+    |--------------------------------------------------------------------------
+    | Thresholds for identifying servers with high resource usage (noisy tenants).
+    */
+    'noisy_tenant_thresholds' => [
+        'cpu' => 80,
+        'memory' => 85,
+        'disk' => 90,
+    ],
+
 ];

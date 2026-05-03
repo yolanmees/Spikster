@@ -17,12 +17,18 @@ use App\Http\Controllers\Server\MonitoringController;
 use App\Http\Controllers\Server\PackagesController;
 use App\Http\Controllers\ServerController;
 use App\Http\Controllers\ServerMetricsController;
+use App\Models\Server;
+use App\Models\Site;
 use App\Http\Controllers\Site\AliasController;
 use App\Http\Controllers\Site\CredentialController;
 use App\Http\Controllers\Site\MailQueueController;
 use App\Http\Controllers\Site\MailStatusController;
 use App\Http\Controllers\Site\SshKeyController;
 use App\Http\Controllers\SiteController;
+use App\Services\DrRunbookService;
+use App\Services\FileIntegrityService;
+use App\Services\NoisyTenantService;
+use App\Services\UptimeService;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -53,6 +59,15 @@ Route::middleware(['api.unified-auth'])->group(function () {
     Route::get('/servers/panel', [ServerController::class, 'panel']);
     Route::patch('/servers/panel/domain', [ServerController::class, 'paneldomain']);
     Route::post('/servers/panel/ssl', [ServerController::class, 'panelssl']);
+
+    // Noisy tenant & capacity (must be before {server_id} routes)
+    Route::get('/servers/noisy-tenants', fn (NoisyTenantService $noisy) => response()->json(
+        $noisy->getNoisyTenants()
+    ));
+    Route::get('/servers/capacity-plan', fn (NoisyTenantService $noisy) => response()->json(
+        $noisy->getCapacityPlan()
+    ));
+
     Route::delete('/servers/{server_id}', [ServerController::class, 'destroy']);
     Route::get('/servers/{server_id}', [ServerController::class, 'show']);
     Route::patch('/servers/{server_id}', [ServerController::class, 'edit']);
@@ -70,6 +85,12 @@ Route::middleware(['api.unified-auth'])->group(function () {
     Route::post('/servers/{server_id}/packages/uninstall', [PackagesController::class, 'uninstall']);
     Route::get('/servers/{server_id}/services', [MonitoringController::class, 'listServices']);
     Route::post('/servers/{server_id}/services/manage', [MonitoringController::class, 'manageService']);
+    Route::get('/servers/{server_id}/uptime', fn (string $server_id, UptimeService $uptime) => response()->json(
+        $uptime->getTimeline(Server::where('server_id', $server_id)->firstOrFail(), (int) request()->get('days', 7))
+    ));
+    Route::get('/servers/{server_id}/resource-usage', fn (string $server_id, NoisyTenantService $noisy) => response()->json(
+        $noisy->getResourceUsage(Server::where('server_id', $server_id)->firstOrFail())
+    ));
 
     // Fail2ban endpoints
     Route::get('/servers/{server_id}/fail2ban/jails', [Fail2banController::class, 'jails']);
@@ -113,6 +134,14 @@ Route::middleware(['api.unified-auth'])->group(function () {
         // Site Health
         Route::get('/sites/{site_id}/health', [SiteHealthController::class, 'check']);
         Route::post('/sites/{site_id}/file-scan', [SiteHealthController::class, 'fileScan']);
+
+        // File Integrity
+        Route::post('/sites/{site_id}/integrity/baseline', fn (string $site_id, FileIntegrityService $integrity) => response()->json(
+            $integrity->generateBaseline(Site::where('site_id', $site_id)->firstOrFail())
+        ));
+        Route::get('/sites/{site_id}/integrity/verify', fn (string $site_id, FileIntegrityService $integrity) => response()->json(
+            $integrity->verify(Site::where('site_id', $site_id)->firstOrFail())
+        ));
 
     // Deployments
     Route::post('/sites/{site_id}/deploy', [DeployController::class, 'deploy'])->middleware('idempotency');
@@ -252,4 +281,23 @@ Route::prefix('modules')->middleware(['api.unified-auth'])->group(function () {
     Route::post('/{module}/disable', [ModuleController::class, 'disable']);
     Route::get('/{module}/health', [ModuleController::class, 'checkHealth']);
     Route::get('/{module}/dependencies', [ModuleController::class, 'checkDependencies']);
+});
+
+// Incident Response & Status Page
+Route::middleware(['api.unified-auth'])->group(function () {
+    Route::get('/incident-runbooks', fn (DrRunbookService $runbook) => response()->json(
+        $runbook->getRunbooks()
+    ));
+    Route::get('/incident-runbooks/{name}', fn (string $name, DrRunbookService $runbook) => response()->json(
+        $runbook->getRunbooks()[$name] ?? ['error' => 'Runbook not found']
+    ));
+    Route::get('/incident-severity-criteria', fn (DrRunbookService $runbook) => response()->json(
+        $runbook->getP1P2P3Criteria()
+    ));
+    Route::get('/incident-response-process', fn (DrRunbookService $runbook) => response()->json(
+        $runbook->getIncidentResponseProcess()
+    ));
+    Route::get('/status-page', fn (DrRunbookService $runbook) => response()->json(
+        $runbook->getStatusPageData()
+    ));
 });

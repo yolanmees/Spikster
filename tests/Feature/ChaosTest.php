@@ -46,7 +46,7 @@ class ChaosTest extends TestCase
         $this->assertEquals('simulated', $result['status']);
 
         $this->assertDatabaseHas('server_metrics', [
-            'server_id' => $server->server_id,
+            'server_id' => $server->id,
             'cpu_percent' => 99.9,
         ]);
     }

@@ -500,7 +500,7 @@ class ServerController extends Controller
         $stats = $this->serverService->getServerStats($server);
 
         return response()->json([
-            'sever_id' => $server->server_id,
+            'server_id' => $server->server_id,
             'name' => $server->name,
             'ip' => $server->ip,
             'location' => $server->location,
@@ -631,7 +631,7 @@ class ServerController extends Controller
         }
 
         return response()->json([
-            'sever_id' => $server->server_id,
+            'server_id' => $server->server_id,
             'name' => $server->name,
             'ip' => $server->ip,
             'location' => $server->location,
@@ -1045,7 +1045,7 @@ class ServerController extends Controller
         $server->save();
 
         return response()->json([
-            'sever_id' => $server->server_id,
+            'server_id' => $server->server_id,
             'name' => $server->name,
             'ip' => $server->ip,
             'location' => $server->location,
@@ -1536,9 +1536,9 @@ class ServerController extends Controller
                 ->first();
             if ($latest) {
                 return response()->json([
-                    'cpu' => (int) $latest->cpu,
-                    'ram' => (int) $latest->memory,
-                    'hdd' => (int) $latest->disk,
+                    'cpu' => (int) $latest->cpu_percent,
+                    'ram' => (int) $latest->memory_percent,
+                    'hdd' => (int) $latest->disk_percent,
                     'status' => 'online',
                 ]);
             }

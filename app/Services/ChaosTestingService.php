@@ -42,7 +42,7 @@ class ChaosTestingService
     {
         if ($server) {
             Cache::put("agent_down_{$server->server_id}", true, 300);
-            Cache::put("server_metrics_{$server->id}", null, 300);
+            Cache::put("server_metrics_{$server->server_id}", null, 300);
         }
 
         return [
@@ -85,7 +85,7 @@ class ChaosTestingService
         if ($server) {
             // Inject a fake metric with high CPU
             \App\Models\ServerMetric::create([
-                'server_id' => $server->server_id,
+                'server_id' => $server->id,
                 'cpu_percent' => 99.9,
                 'cpu_cores' => 1,
                 'memory_total' => 1024,

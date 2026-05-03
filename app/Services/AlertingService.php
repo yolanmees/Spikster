@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Log;
 class AlertingService
 {
     public function __construct(
-        protected MonitoringService $monitoringService,
         protected WebhookService $webhookService
     ) {}
 

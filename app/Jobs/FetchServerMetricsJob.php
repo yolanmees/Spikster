@@ -119,9 +119,7 @@ class FetchServerMetricsJob implements ShouldBeUnique, ShouldQueue
      */
     private function isServerActive(): bool
     {
-        // Add your logic here - check if server should be monitored
-        // For example, check if server has monitoring enabled
-        return true; // For now, monitor all servers
+        return $this->server->isActive();
     }
 
     /**
