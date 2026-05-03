@@ -22,6 +22,19 @@ func Fail2banList() (string, error) {
 	return strings.TrimSpace(string(out)), nil
 }
 
+// Fail2banStatus returns fail2ban-client status output for a jail
+func Fail2banStatus(jail string) (string, error) {
+	args := []string{"status"}
+	if jail != "" {
+		args = append(args, jail)
+	}
+	out, err := exec.Command("fail2ban-client", args...).Output()
+	if err != nil {
+		return "", fmt.Errorf("fail2ban-client status failed: %w", err)
+	}
+	return strings.TrimSpace(string(out)), nil
+}
+
 // PackageList returns installed packages via dpkg
 func PackageList() (string, error) {
 	out, err := exec.Command("dpkg", "--get-selections").Output()

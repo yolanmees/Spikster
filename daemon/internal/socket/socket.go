@@ -360,6 +360,11 @@ func dispatch(req Request) (string, error) {
 		if err != nil { return "", err }
 		return out, nil
 
+	case "server.fail2ban-status":
+		out, err := server.Fail2banStatus(req.Params["jail"])
+		if err != nil { return "", err }
+		return out, nil
+
 	case "server.package-list":
 		out, err := server.PackageList()
 		if err != nil { return "", err }

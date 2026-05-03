@@ -37,10 +37,7 @@ class Fail2banService
     public function getJails(Server $server): array
     {
         try {
-            $result = $this->daemon->send('site.deploy-script', [
-                'username' => 'root',
-                'script'   => 'sudo fail2ban-client status 2>/dev/null',
-            ]);
+            $result = $this->daemon->send('server.fail2ban-status', ['jail' => '']);
             $output = $result['output'] ?? '';
             preg_match('/Jail list:\s*(.+)/i', $output, $m);
             $jailNames = array_map('trim', explode(',', $m[1] ?? 'sshd'));
@@ -63,10 +60,7 @@ class Fail2banService
     public function getJailStatus(Server $server, string $jail): array
     {
         try {
-            $result = $this->daemon->send('site.deploy-script', [
-                'username' => 'root',
-                'script'   => "sudo fail2ban-client status {$jail} 2>/dev/null",
-            ]);
+            $result = $this->daemon->send('server.fail2ban-status', ['jail' => $jail]);
             $output = $result['output'] ?? '';
 
             preg_match('/Currently failed:\s*(\d+)/i', $output, $cf);
