@@ -188,6 +188,22 @@ class SiteService
             throw $e;
         }
 
+        // Automatically create a primary domain record
+        try {
+            app(DomainService::class)->createDomain([
+                'domain' => $data['domain'],
+                'server_id' => $server->server_id,
+                'site_id' => $site->site_id,
+                'is_primary' => true,
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning('SiteService: failed to auto-create domain record', [
+                'site_id' => $site->site_id,
+                'domain' => $data['domain'],
+                'error' => $e->getMessage(),
+            ]);
+        }
+
         AuditService::logCreate($site, "Site created: {$site->domain}");
         app(WebhookService::class)->dispatch('site.created', [
             'site_id' => $site->site_id,
