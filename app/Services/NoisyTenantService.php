@@ -40,7 +40,7 @@ class NoisyTenantService
 
         $noisy = [];
 
-        foreach (Server::active()->get() as $server) {
+        foreach (Server::active()->withCount('sites')->get() as $server) {
             $usage = $this->getResourceUsage($server);
 
             if (empty($usage)) {

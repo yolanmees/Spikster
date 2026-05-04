@@ -74,6 +74,11 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         return view('email.index', ['site' => $site]);
     })->name('email.index');
 
+    // Site Tools
+    Route::get('/sites/{site}/tools', function (Site $site) {
+        return view('site.tools', ['site' => $site]);
+    })->name('site.tools');
+
     // FTP Management
     Route::get('/sites/{site}/ftp', function (Site $site) {
         return view('ftp.index', ['site' => $site]);

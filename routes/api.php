@@ -17,6 +17,7 @@ use App\Http\Controllers\Server\MonitoringController;
 use App\Http\Controllers\Server\PackagesController;
 use App\Http\Controllers\ServerController;
 use App\Http\Controllers\ServerMetricsController;
+use Illuminate\Http\Request;
 use App\Models\Server;
 use App\Models\Site;
 use App\Http\Controllers\Site\AliasController;
@@ -25,6 +26,7 @@ use App\Http\Controllers\Site\MailQueueController;
 use App\Http\Controllers\Site\MailStatusController;
 use App\Http\Controllers\Site\SshKeyController;
 use App\Http\Controllers\SiteController;
+use App\Services\DomainService;
 use App\Services\DrRunbookService;
 use App\Services\FileIntegrityService;
 use App\Services\NoisyTenantService;
@@ -105,6 +107,23 @@ Route::middleware(['api.unified-auth'])->group(function () {
     Route::get('/servers/{server_id}/fail2ban/whitelist', [Fail2banController::class, 'getWhitelist']);
     Route::post('/servers/{server_id}/fail2ban/deploy', [Fail2banController::class, 'deploy']);
     // fail2banDeploy removed - relied on deleted SSHService
+
+    // Domain API endpoints
+    Route::get('/domains', fn (DomainService $domains) => response()->json(
+        $domains->getAllDomains()
+    ));
+    Route::get('/domains/{domain_id}', fn (string $domain_id, DomainService $domains) => response()->json(
+        $domains->getDomainById($domain_id) ?? ['error' => 'Domain not found']
+    ));
+    Route::post('/domains', fn (Request $request, DomainService $domains) => response()->json(
+        $domains->createDomain($request->all()), 201
+    ));
+    Route::put('/domains/{domain_id}', fn (string $domain_id, Request $request, DomainService $domains) => response()->json(
+        $domains->updateDomain($domains->getDomainById($domain_id), $request->all())
+    ));
+    Route::delete('/domains/{domain_id}', fn (string $domain_id, DomainService $domains) => response()->json(
+        ['deleted' => $domains->deleteDomain($domains->getDomainById($domain_id))]
+    ));
 
     // Cron Job Execution endpoints
     Route::post('/cron-executions', [CronExecutionController::class, 'store']);

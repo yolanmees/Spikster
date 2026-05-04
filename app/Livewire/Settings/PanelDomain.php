@@ -4,6 +4,7 @@ namespace App\Livewire\Settings;
 
 use App\Models\Server;
 use App\Models\Site;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Livewire\Component;
 
@@ -25,12 +26,29 @@ class PanelDomain extends Component
 
     public function updatePanelDomain()
     {
-        // send update over api to server
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer '.auth()->user()->tokens->first()->token,
-        ])->patch(config('app.url').'api/servers/panel/domain', [
-            'domain' => $this->panel_domain,
-        ]);
-        putenv('app.url='.$this->panel_domain);
+        $token = Auth::user()->createToken('panel-domain')->plainTextToken;
+
+        try {
+            Http::withToken($token)->patch(config('app.url').'/api/servers/panel/domain', [
+                'domain' => $this->panel_domain,
+            ]);
+
+            session()->flash('message', 'Panel domain updated successfully.');
+        } finally {
+            Auth::user()->tokens()->where('name', 'panel-domain')->delete();
+        }
+    }
+
+    public function sslPanelDomain()
+    {
+        $token = Auth::user()->createToken('panel-ssl')->plainTextToken;
+
+        try {
+            Http::withToken($token)->post(config('app.url').'/api/servers/panel/ssl');
+
+            session()->flash('message', 'SSL configured for panel domain.');
+        } finally {
+            Auth::user()->tokens()->where('name', 'panel-ssl')->delete();
+        }
     }
 }

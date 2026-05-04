@@ -583,6 +583,30 @@ func WriteDeployScript(username, content string) error {
 	return run("chown", username+":www-data", path)
 }
 
+// ─── Execute command as user ────────────────────────────────────────────
+func ExecCommand(username, command string) (string, error) {
+	// Create a temporary script
+	tmpFile := fmt.Sprintf("/tmp/spikster_exec_%s_%d.sh", username, time.Now().UnixNano())
+	script := fmt.Sprintf("#!/bin/bash\nsu - %s -c %s\n", username, shellEscape(command))
+	if err := os.WriteFile(tmpFile, []byte(script), 0700); err != nil {
+		return "", fmt.Errorf("failed to write exec script: %w", err)
+	}
+	defer os.Remove(tmpFile)
+	
+	cmd := exec.Command("/bin/bash", tmpFile)
+	out, err := cmd.CombinedOutput()
+	output := strings.TrimSpace(string(out))
+	if err != nil {
+		return output, fmt.Errorf("command failed: %w\noutput: %s", err, output)
+	}
+	return output, nil
+}
+
+func shellEscape(s string) string {
+	replacer := strings.NewReplacer("'", "'\\''")
+	return "'" + replacer.Replace(s) + "'"
+}
+
 // ─── Spikster user password reset ─────────────────────────────────────────────
 
 func ResetSpiksterPassword(newPass string) error {

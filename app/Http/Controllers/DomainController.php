@@ -6,6 +6,7 @@ use App\Models\DnsRecord;
 use App\Models\Domain;
 use App\Models\Server;
 use App\Models\Site;
+use App\Services\DaemonService;
 use App\Services\DnsService;
 use App\Services\DomainService;
 use Illuminate\Http\Request;
@@ -13,18 +14,19 @@ use Illuminate\Http\Request;
 class DomainController extends Controller
 {
     protected $domainService;
-
     protected $dnsService;
+    protected $daemonService;
 
-    public function __construct(DomainService $domainService, DnsService $dnsService)
-    {
+    public function __construct(
+        DomainService $domainService,
+        DnsService $dnsService,
+        DaemonService $daemonService
+    ) {
         $this->domainService = $domainService;
         $this->dnsService = $dnsService;
+        $this->daemonService = $daemonService;
     }
 
-    /**
-     * Display a listing of all domains.
-     */
     public function index()
     {
         $stats = [
@@ -37,9 +39,6 @@ class DomainController extends Controller
         return view('domain.list', compact('stats'));
     }
 
-    /**
-     * Show the form for creating a new domain.
-     */
     public function create()
     {
         $servers = Server::all();
@@ -48,9 +47,6 @@ class DomainController extends Controller
         return view('domain.create', compact('servers', 'sites'));
     }
 
-    /**
-     * Store a newly created domain.
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -61,12 +57,23 @@ class DomainController extends Controller
         ]);
 
         try {
-            $this->domainService->createDomain([
+            $data = [
                 'domain' => $validated['domain'],
                 'server_id' => $validated['server_id'],
                 'site_id' => $validated['site_id'] ?? null,
                 'is_primary' => $validated['is_primary'] ?? false,
-            ]);
+            ];
+            $domain = $this->domainService->createDomain($data);
+
+            // Sync with daemon for alias domains (non-primary)
+            if (! $domain->is_primary && $domain->site) {
+                $this->daemonService->createAlias(
+                    $domain->domain,
+                    $domain->site->username,
+                    $domain->site->php,
+                    $domain->site->basepath ?? ''
+                );
+            }
 
             session()->flash('success', 'Domain successfully created.');
         } catch (\Exception $e) {
@@ -76,9 +83,6 @@ class DomainController extends Controller
         return redirect()->route('domain.list');
     }
 
-    /**
-     * Display the specified domain with DNS records.
-     */
     public function show($domain_id)
     {
         $domain = $this->domainService->getDomainById($domain_id);
@@ -93,9 +97,55 @@ class DomainController extends Controller
         return view('domain.edit', compact('domain', 'dnsRecords', 'stats'));
     }
 
-    /**
-     * Show the form for creating a new DNS record.
-     */
+    public function update(Request $request, $domain_id)
+    {
+        $domain = $this->domainService->getDomainById($domain_id);
+
+        if (! $domain) {
+            abort(404, 'Domain not found');
+        }
+
+        $validated = $request->validate([
+            'domain' => 'required|string|max:255',
+            'server_id' => 'required|string|exists:servers,server_id',
+            'site_id' => 'nullable|string|exists:sites,site_id',
+            'is_primary' => 'nullable|boolean',
+        ]);
+
+        try {
+            $this->domainService->updateDomain($domain, $validated);
+            session()->flash('success', 'Domain updated.');
+        } catch (\Exception $e) {
+            session()->flash('error', 'Failed to update domain: '.$e->getMessage());
+        }
+
+        return redirect()->route('domain.show', $domain_id);
+    }
+
+    public function destroy($domain_id)
+    {
+        $domain = $this->domainService->getDomainById($domain_id);
+
+        if (! $domain) {
+            abort(404, 'Domain not found');
+        }
+
+        // Remove daemon alias if non-primary with a site
+        if (! $domain->is_primary && $domain->site) {
+            try {
+                $this->daemonService->deleteAlias($domain->domain);
+            } catch (\Exception $e) {
+                // Continue with DB deletion even if daemon fails
+            }
+        }
+
+        $this->domainService->deleteDomain($domain);
+
+        session()->flash('success', 'Domain deleted.');
+
+        return redirect()->route('domain.list');
+    }
+
     public function newDnsRecord($domain_id)
     {
         $domain = $this->domainService->getDomainById($domain_id);
@@ -107,9 +157,6 @@ class DomainController extends Controller
         return view('domain.dns.new', compact('domain'));
     }
 
-    /**
-     * Store a newly created DNS record.
-     */
     public function createDnsRecord(Request $request, $domain_id)
     {
         $domain = $this->domainService->getDomainById($domain_id);
@@ -120,21 +167,13 @@ class DomainController extends Controller
 
         $request->validate([
             'zone' => 'required|string',
-            'type' => 'required|string|in:A,AAAA,CNAME,MX,TXT,NS,SRV',
+            'type' => 'required|string|in:A,AAAA,CNAME,MX,TXT,NS,SRV,CAA,PTR,CERT,SSHFP,TLSA,SOA',
             'value' => 'required|string',
             'ttl' => 'nullable|integer|min:60|max:86400',
             'priority' => 'nullable|integer|min:0|max:65535',
         ]);
 
         try {
-            $this->dnsService->addRecord(
-                $domain->domain,
-                $request->zone,
-                $request->type,
-                $request->value,
-                $request->ttl ?? 3600
-            );
-
             $dnsRecord = new DnsRecord;
             $dnsRecord->domain_id = $domain_id;
             $dnsRecord->site_id = $domain->site_id;
@@ -145,17 +184,26 @@ class DomainController extends Controller
             $dnsRecord->priority = $request->priority;
             $dnsRecord->save();
 
-            session()->flash('success', 'DNS record successfully created.');
+            $this->dnsService->addRecord(
+                $domain->domain,
+                $request->zone,
+                $request->type,
+                $request->value,
+                $request->ttl ?? 3600
+            );
+
+            session()->flash('success', 'DNS record created.');
         } catch (\Exception $e) {
+            // Rollback DB record if zone sync failed
+            if (isset($dnsRecord) && $dnsRecord->exists) {
+                $dnsRecord->delete();
+            }
             session()->flash('error', 'Failed to create DNS record: '.$e->getMessage());
         }
 
         return redirect()->route('domain.show', $domain_id);
     }
 
-    /**
-     * Show the form for editing the specified DNS record.
-     */
     public function editDnsRecord($domain_id, $dns_id)
     {
         $domain = $this->domainService->getDomainById($domain_id);
@@ -168,9 +216,6 @@ class DomainController extends Controller
         return view('domain.dns.edit', compact('domain', 'dnsRecord'));
     }
 
-    /**
-     * Update the specified DNS record.
-     */
     public function updateDnsRecord(Request $request, $domain_id, $dns_id)
     {
         $domain = $this->domainService->getDomainById($domain_id);
@@ -182,31 +227,19 @@ class DomainController extends Controller
 
         $request->validate([
             'zone' => 'required|string',
-            'type' => 'required|string|in:A,AAAA,CNAME,MX,TXT,NS,SRV',
+            'type' => 'required|string|in:A,AAAA,CNAME,MX,TXT,NS,SRV,CAA,PTR,CERT,SSHFP,TLSA,SOA',
             'value' => 'required|string',
             'ttl' => 'nullable|integer|min:60|max:86400',
             'priority' => 'nullable|integer|min:0|max:65535',
         ]);
 
         try {
-            // Delete old record
-            $this->dnsService->deleteRecord(
-                $domain->domain,
-                $dnsRecord->zone,
-                $dnsRecord->type,
-                $dnsRecord->value
-            );
+            // Store old values for zone rollback
+            $oldZone = $dnsRecord->zone;
+            $oldType = $dnsRecord->type;
+            $oldValue = $dnsRecord->value;
 
-            // Add new record
-            $this->dnsService->addRecord(
-                $domain->domain,
-                $request->zone,
-                $request->type,
-                $request->value,
-                $request->ttl ?? 3600
-            );
-
-            // Update database
+            // Update DB first
             $dnsRecord->ttl = $request->ttl ?? 3600;
             $dnsRecord->zone = $request->zone;
             $dnsRecord->type = $request->type;
@@ -214,7 +247,26 @@ class DomainController extends Controller
             $dnsRecord->priority = $request->priority;
             $dnsRecord->save();
 
-            session()->flash('success', 'DNS record successfully updated.');
+            // Then update zone file
+            try {
+                $this->dnsService->deleteRecord($domain->domain, $oldZone, $oldType, $oldValue);
+                $this->dnsService->addRecord(
+                    $domain->domain,
+                    $request->zone,
+                    $request->type,
+                    $request->value,
+                    $request->ttl ?? 3600
+                );
+            } catch (\Exception $e) {
+                // Zone sync failed — rollback DB to old values
+                $dnsRecord->zone = $oldZone;
+                $dnsRecord->type = $oldType;
+                $dnsRecord->value = $oldValue;
+                $dnsRecord->save();
+                throw $e;
+            }
+
+            session()->flash('success', 'DNS record updated.');
         } catch (\Exception $e) {
             session()->flash('error', 'Failed to update DNS record: '.$e->getMessage());
         }
@@ -222,9 +274,6 @@ class DomainController extends Controller
         return redirect()->route('domain.show', $domain_id);
     }
 
-    /**
-     * Remove the specified DNS record.
-     */
     public function deleteDnsRecord($domain_id, $dns_id)
     {
         $domain = $this->domainService->getDomainById($domain_id);
@@ -235,16 +284,17 @@ class DomainController extends Controller
         }
 
         try {
-            $this->dnsService->deleteRecord(
-                $domain->domain,
-                $dnsRecord->zone,
-                $dnsRecord->type,
-                $dnsRecord->value
-            );
+            $zone = $dnsRecord->zone;
+            $type = $dnsRecord->type;
+            $value = $dnsRecord->value;
 
+            // Delete from DB first
             $dnsRecord->delete();
 
-            session()->flash('success', 'DNS record successfully deleted.');
+            // Then remove from zone file
+            $this->dnsService->deleteRecord($domain->domain, $zone, $type, $value);
+
+            session()->flash('success', 'DNS record deleted.');
         } catch (\Exception $e) {
             session()->flash('error', 'Failed to delete DNS record: '.$e->getMessage());
         }

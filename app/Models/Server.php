@@ -102,6 +102,16 @@ class Server extends Model
     }
 
     /**
+     * Get all domains for this server.
+     *
+     * @return HasMany<Domain>
+     */
+    public function domains(): HasMany
+    {
+        return $this->hasMany(Domain::class, 'server_id', 'server_id');
+    }
+
+    /**
      * Get all metrics for this server.
      *
      * @return HasMany<ServerMetric>

@@ -348,13 +348,6 @@ class ServerController extends Controller
 
         if ($server->default) {
             return response()->json([
-                'message' => __('spikster.server_not_found_message_default'),
-                'errors' => __('spikster.server_not_found'),
-            ], 404);
-        }
-
-        if ($server->default) {
-            return response()->json([
                 'message' => __('spikster.delete_default_server_message'),
                 'errors' => __('spikster.bad_request'),
             ], 400);
@@ -637,7 +630,7 @@ class ServerController extends Controller
             'github_key' => $server->github_key,
             'build' => $server->build,
             'cron' => $server->cron,
-            'sites' => count($server->sites),
+            'sites' => $server->sites()->count(),
         ]);
     }
 
@@ -731,7 +724,7 @@ class ServerController extends Controller
             $newsite->database = Str::random(24);
             $newsite->panel = true;
             $newsite->save();
-            app(DaemonService::class)->send('panel.domain-add', ['domain' => $server->domain]);
+            app(DaemonService::class)->send('panel.domain-add', ['domain' => $request->domain]);
         }
 
         return response()->json([]);
@@ -1488,16 +1481,9 @@ class ServerController extends Controller
 
         $this->authorize('viewDomains', $server);
 
-        $response = [];
+        $domains = $server->domains()->pluck('domain')->toArray();
 
-        foreach ($server->allsites as $site) {
-            array_push($response, $site->domain);
-            foreach ($site->aliases as $alias) {
-                array_push($response, $alias->domain);
-            }
-        }
-
-        return response()->json($response);
+        return response()->json($domains);
     }
 
     public function createdatabase(Request $request)

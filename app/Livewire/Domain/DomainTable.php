@@ -3,7 +3,6 @@
 namespace App\Livewire\Domain;
 
 use App\Services\DomainService;
-use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -84,12 +83,4 @@ class DomainTable extends Component
         }
     }
 
-    /**
-     * Refresh the component when a domain is created.
-     */
-    #[On('domain-created')]
-    public function refresh(): void
-    {
-        // Component will auto-refresh
-    }
 }

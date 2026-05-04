@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Site;
 
 use App\Http\Controllers\Controller;
 use App\Models\Alias;
+use App\Models\Domain;
 use App\Models\Site;
 use App\Services\DaemonService;
 use Illuminate\Http\Request;
@@ -12,9 +13,6 @@ use Illuminate\Support\Str;
 
 class AliasController extends Controller
 {
-    /**
-     * List all site aliases
-     */
     public function index(string $site_id)
     {
         $site = Site::where('site_id', $site_id)->first();
@@ -37,9 +35,6 @@ class AliasController extends Controller
         return response()->json($response);
     }
 
-    /**
-     * Add an alias to site
-     */
     public function store(Request $request, string $site_id)
     {
         $site = Site::where('site_id', $site_id)->first();
@@ -59,13 +54,15 @@ class AliasController extends Controller
             ], 400);
         }
 
+        $domain = strtolower($request->domain);
+
         $conflict = false;
-        foreach ($site->server->allsites as $checksite) {
-            if ($checksite->domain == strtolower($request->domain)) {
+        foreach ($site->server->allsites()->with('aliases')->get() as $checksite) {
+            if ($checksite->domain === $domain) {
                 $conflict = true;
             }
             foreach ($checksite->aliases as $alias) {
-                if ($alias->domain == strtolower($request->domain)) {
+                if ($alias->domain === $domain) {
                     $conflict = true;
                 }
             }
@@ -78,11 +75,21 @@ class AliasController extends Controller
             ], 409);
         }
 
+        $aliasId = Str::uuid();
+
         $alias = new Alias;
-        $alias->alias_id = Str::uuid();
+        $alias->alias_id = $aliasId;
         $alias->site_id = $site->id;
-        $alias->domain = strtolower($request->domain);
+        $alias->domain = $domain;
         $alias->save();
+
+        Domain::create([
+            'domain_id' => $aliasId,
+            'site_id' => $site->site_id,
+            'server_id' => $site->server->server_id,
+            'domain' => $domain,
+            'is_primary' => false,
+        ]);
 
         app(DaemonService::class)->createAlias(
             $alias->domain,
@@ -97,9 +104,6 @@ class AliasController extends Controller
         ]);
     }
 
-    /**
-     * Delete an alias
-     */
     public function destroy(string $site_id, string $alias_id)
     {
         $site = Site::where('site_id', $site_id)->first();
@@ -121,6 +125,7 @@ class AliasController extends Controller
         }
 
         app(DaemonService::class)->deleteAlias($alias->domain);
+        Domain::where('domain_id', $alias_id)->delete();
         $alias->delete();
 
         return response()->json([]);

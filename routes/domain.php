@@ -15,6 +15,10 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     // View domain with DNS records
     Route::get('/domains/{domain_id}', [DomainController::class, 'show'])->name('domain.show');
 
+    // Update / delete domain
+    Route::put('/domains/{domain_id}', [DomainController::class, 'update'])->name('domain.update');
+    Route::delete('/domains/{domain_id}', [DomainController::class, 'destroy'])->name('domain.destroy');
+
     // DNS record management
     Route::get('/domains/{domain_id}/dns/new', [DomainController::class, 'newDnsRecord'])->name('domain.dns.new');
     Route::post('/domains/{domain_id}/dns/create', [DomainController::class, 'createDnsRecord'])->name('domain.dns.create');

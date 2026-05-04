@@ -279,6 +279,19 @@ func dispatch(req Request) (string, error) {
 		}
 		return "php settings updated", nil
 
+	case "site.exec":
+		username := req.Params["username"]
+		command := req.Params["command"]
+		if command == "" {
+			return "", fmt.Errorf("command is required")
+		}
+		out, err := site.ExecCommand(username, command)
+		if err != nil {
+			// Return output even on error (command may have failed but still produced output)
+			return out, err
+		}
+		return out, nil
+
 	case "site.deploy-script":
 		err := site.WriteDeployScript(req.Params["username"], req.Params["content"])
 		if err != nil { return "", err }

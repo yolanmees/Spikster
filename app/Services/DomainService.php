@@ -112,7 +112,7 @@ class DomainService
     public function getDomainStats(Domain $domain): array
     {
         return [
-            'dns_records_count' => $domain->dnsRecords()->count(),
+            'dns_records_count' => $domain->dnsRecords->count(),
             'site_name' => $domain->site?->domain ?? 'N/A',
             'server_name' => $domain->server?->name ?? 'N/A',
             'server_ip' => $domain->server?->ip ?? 'N/A',

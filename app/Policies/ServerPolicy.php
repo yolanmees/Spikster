@@ -49,7 +49,7 @@ class ServerPolicy
         }
 
         // Prevent deletion if server has active sites
-        if ($server->sites()->count() > 0) {
+        if ($server->sites_count > 0 || $server->sites()->count() > 0) {
             return false;
         }
 
