@@ -17,6 +17,7 @@
             'integrations' => 'Integrations',
             'deployments' => 'Deployments',
             'services' => 'Services',
+            'tools' => 'Tools',
         ];
     @endphp
 

@@ -21,7 +21,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     })->name('site.edit');
 
     Route::get('/sites/{site_id}/manage/{section}', function ($site_id, $section) {
-        $allowedSections = ['overview', 'configuration', 'security', 'integrations', 'services'];
+        $allowedSections = ['overview', 'configuration', 'security', 'integrations', 'deployments', 'services', 'tools'];
 
         abort_unless(in_array($section, $allowedSections, true), 404);
 
