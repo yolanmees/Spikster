@@ -234,6 +234,7 @@ return [
         /*
          * Application Service Providers...
          */
+        App\Providers\ModuleAutoloadServiceProvider::class,
         AppServiceProvider::class,
         App\Providers\AuthServiceProvider::class,
         App\Providers\BroadcastServiceProvider::class,
