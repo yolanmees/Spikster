@@ -94,7 +94,7 @@ class InstallationWizard extends Component
         try {
             $service = app(WordPressInstallationService::class);
 
-            $this->installation = $service->install([
+            $result = $service->install([
                 'site_id' => $this->site_id,
                 'path' => $this->path,
                 'url' => $this->url,
@@ -104,6 +104,13 @@ class InstallationWizard extends Component
                 'auto_update' => $this->auto_update,
             ]);
 
+            if (! ($result['success'] ?? false)) {
+                session()->flash('error', 'Installation failed: ' . ($result['message'] ?? 'unknown error'));
+                $this->isInstalling = false;
+                return;
+            }
+
+            $this->installation = $result['installation'];
             $this->installationComplete = true;
             session()->flash('success', 'WordPress installed successfully!');
         } catch (\Exception $e) {

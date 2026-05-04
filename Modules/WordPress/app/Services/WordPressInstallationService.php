@@ -4,7 +4,7 @@ namespace Modules\WordPress\Services;
 
 use App\Models\Site;
 use App\Services\DatabaseService;
-use App\Services\SSHService;
+use App\Services\RemoteDaemonService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Modules\WordPress\Models\WordPressInstallation;
@@ -13,13 +13,12 @@ class WordPressInstallationService
 {
     public function __construct(
         protected DatabaseService $databaseService,
-        protected SSHService $sshService
+        protected RemoteDaemonService $daemon
     ) {}
 
     public function install(array $data): array
     {
         try {
-            // Get site and server
             $site = Site::where('site_id', $data['site_id'])->first();
             if (! $site) {
                 return ['success' => false, 'message' => 'Site not found'];
@@ -31,8 +30,8 @@ class WordPressInstallationService
             }
 
             // Create database and user
-            $dbName = 'wp_'.Str::random(8);
-            $dbUser = 'user_'.Str::random(8);
+            $dbName     = 'wp_'.Str::random(8);
+            $dbUser     = 'user_'.Str::random(8);
             $dbPassword = Str::random(16);
 
             $databaseResponse = $this->databaseService->createDatabase($dbName, $data['site_id']);
@@ -54,35 +53,69 @@ class WordPressInstallationService
                 return $linkResponse;
             }
 
-            // Install WordPress files
+            // Build full path
             $path = $site->rootpath.'/'.trim($data['path'], '/');
-            $installResult = $this->installWordPressFiles($server, $path, $dbName, $dbUser, $dbPassword);
 
-            if (! $installResult['success']) {
-                return $installResult;
+            // Step 1 — install WP files + wp-config.php via daemon
+            $filesResult = $this->daemon->send($server, 'wordpress.install-files', [
+                'username'    => $site->username,
+                'path'        => $path,
+                'db_name'     => $dbName,
+                'db_user'     => $dbUser,
+                'db_password' => $dbPassword,
+            ]);
+
+            if (! ($filesResult['success'] ?? false)) {
+                return [
+                    'success' => false,
+                    'message' => 'WordPress file installation failed: '.($filesResult['error'] ?? 'unknown error'),
+                ];
             }
 
-            // Create installation record
+            // Step 2 — run wp core install via daemon
+            $url   = $data['url'] ?? 'https://'.$site->domain.'/'.trim($data['path'], '/');
+            $email = $data['admin_email'] ?? 'admin@'.$site->domain;
+
+            $coreResult = $this->daemon->send($server, 'wordpress.core-install', [
+                'username'    => $site->username,
+                'path'        => $path,
+                'url'         => $url,
+                'title'       => $data['title'] ?? $site->domain,
+                'admin_user'  => $data['username'],
+                'admin_pass'  => $data['password'],
+                'admin_email' => $email,
+                'locale'      => $data['locale'] ?? 'en_US',
+            ]);
+
+            if (! ($coreResult['success'] ?? false)) {
+                return [
+                    'success' => false,
+                    'message' => 'WordPress core install failed: '.($coreResult['error'] ?? 'unknown error'),
+                ];
+            }
+
+            // Save installation record
             $installation = WordPressInstallation::create([
-                'site_id' => $data['site_id'],
-                'path' => $data['path'],
-                'url' => $data['url'] ?? 'https://'.$site->domain.'/'.trim($data['path'], '/'),
-                'admin_username' => $data['username'],
-                'admin_password' => $data['password'],
-                'database_id' => $databaseResponse['database']->id,
+                'site_id'          => $data['site_id'],
+                'path'             => $data['path'],
+                'url'              => $url,
+                'admin_username'   => $data['username'],
+                'admin_password'   => $data['password'],
+                'database_id'      => $databaseResponse['database']->id,
                 'database_user_id' => $userResponse['user']->id,
-                'locale' => $data['locale'] ?? 'en_US',
-                'status' => 'active',
-                'installed_at' => now(),
+                'locale'           => $data['locale'] ?? 'en_US',
+                'auto_update'      => $data['auto_update'] ?? false,
+                'status'           => 'active',
+                'installed_at'     => now(),
             ]);
 
             return [
-                'success' => true,
-                'message' => "WordPress installed successfully at {$path}",
+                'success'      => true,
+                'message'      => "WordPress installed successfully at {$path}",
                 'installation' => $installation,
                 'db_credentials' => [
-                    'name' => $dbName,
-                    'user' => $dbUser,
+                    'name'     => $dbName,
+                    'user'     => $dbUser,
                     'password' => $dbPassword,
                 ],
             ];
@@ -100,102 +133,21 @@ class WordPressInstallationService
         }
     }
 
-    protected function installWordPressFiles($server, string $path, string $dbName, string $dbUser, string $dbPassword): array
-    {
-        try {
-            $ssh = $this->sshService->connect($server);
-
-            $escPath = escapeshellarg($path);
-            $escPass = escapeshellarg($server->password);
-
-            // Create directory
-            Log::info('Creating WordPress directory', ['path' => $path]);
-            $ssh->exec("echo {$escPass} | sudo -S mkdir -p {$escPath}");
-
-            // Verify directory
-            $dirCheck = trim($ssh->exec("test -d {$escPath} && echo 'exists' || echo 'not found'"));
-            if ($dirCheck !== 'exists') {
-                return ['success' => false, 'message' => 'Failed to create installation directory'];
-            }
-
-            // Download WordPress
-            Log::info('Downloading WordPress');
-            $downloadCmd = "echo {$escPass} | sudo -S curl -L -o {$escPath}/wordpress.tar.gz https://wordpress.org/latest.tar.gz 2>&1";
-            $ssh->exec($downloadCmd);
-
-            // Verify download
-            $checkDownload = trim($ssh->exec("test -f {$escPath}/wordpress.tar.gz && echo 'exists' || echo 'not found'"));
-            if ($checkDownload !== 'exists') {
-                return ['success' => false, 'message' => 'Failed to download WordPress'];
-            }
-
-            // Check file size
-            $fileSize = trim($ssh->exec("stat -c%s {$escPath}/wordpress.tar.gz 2>&1 || stat -f%z {$escPath}/wordpress.tar.gz 2>&1"));
-            if (intval($fileSize) < 1000000) {
-                return ['success' => false, 'message' => 'Downloaded file is too small or corrupt'];
-            }
-
-            // Extract WordPress
-            Log::info('Extracting WordPress');
-            $ssh->exec("echo {$escPass} | sudo -S tar -xzf {$escPath}/wordpress.tar.gz -C {$escPath} 2>&1");
-
-            // Move files from wordpress/ subdirectory
-            $ssh->exec("echo {$escPass} | sudo -S bash -c 'shopt -s dotglob && mv {$escPath}/wordpress/* {$escPath}/ && rmdir {$escPath}/wordpress && rm {$escPath}/wordpress.tar.gz' 2>&1");
-
-            // Verify extraction
-            $checkFile = trim($ssh->exec("test -f {$escPath}/wp-config-sample.php && echo 'exists' || echo 'not found'"));
-            if ($checkFile !== 'exists') {
-                return ['success' => false, 'message' => 'Failed to extract WordPress files'];
-            }
-
-            // Create wp-config.php
-            $ssh->exec("echo {$escPass} | sudo -S cp {$escPath}/wp-config-sample.php {$escPath}/wp-config.php");
-
-            // Update database credentials
-            $escDbName = escapeshellarg($dbName);
-            $escDbUser = escapeshellarg($dbUser);
-            $escDbPass = escapeshellarg($dbPassword);
-            $ssh->exec("echo {$escPass} | sudo -S sed -i 's/database_name_here/{$escDbName}/g' {$escPath}/wp-config.php");
-            $ssh->exec("echo {$escPass} | sudo -S sed -i 's/username_here/{$escDbUser}/g' {$escPath}/wp-config.php");
-            $ssh->exec("echo {$escPass} | sudo -S sed -i 's/password_here/{$escDbPass}/g' {$escPath}/wp-config.php");
-
-            // Generate security keys
-            $authKey = Str::random(64);
-            $ssh->exec("echo {$escPass} | sudo -S sed -i \"s/put your unique phrase here/{$authKey}/\" {$escPath}/wp-config.php");
-
-            // Set permissions
-            $ssh->exec("echo {$escPass} | sudo -S chown -R www-data:www-data {$escPath}");
-            $ssh->exec("echo {$escPass} | sudo -S find {$escPath} -type d -exec chmod 755 {} \\;");
-            $ssh->exec("echo {$escPass} | sudo -S find {$escPath} -type f -exec chmod 644 {} \\;");
-
-            $ssh->disconnect();
-
-            return ['success' => true];
-
-        } catch (\Exception $e) {
-            Log::error('WordPress files installation failed', [
-                'error' => $e->getMessage(),
-                'path' => $path,
-            ]);
-
-            return [
-                'success' => false,
-                'message' => 'Failed to install WordPress files: '.$e->getMessage(),
-            ];
-        }
-    }
-
     public function uninstall(WordPressInstallation $installation): array
     {
         try {
-            $site = $installation->site;
+            $site   = $installation->site;
             $server = $site->server;
-            $path = $installation->getFullPath();
+            $path   = $installation->getFullPath();
 
-            // Remove files via SSH
-            $ssh = $this->sshService->connect($server);
-            $ssh->exec("echo '{$server->password}' | sudo -S rm -rf {$path}");
-            $ssh->disconnect();
+            // Remove files via daemon
+            $result = $this->daemon->send($server, 'wordpress.uninstall-files', ['path' => $path]);
+            if (! ($result['success'] ?? false)) {
+                Log::warning('WordPress file removal failed', [
+                    'path'  => $path,
+                    'error' => $result['error'] ?? '',
+                ]);
+            }
 
             // Delete database
             $this->databaseService->deleteDatabase($installation->database_id, $installation->site_id);
@@ -210,7 +162,7 @@ class WordPressInstallationService
 
         } catch (\Exception $e) {
             Log::error('WordPress uninstallation failed', [
-                'error' => $e->getMessage(),
+                'error'           => $e->getMessage(),
                 'installation_id' => $installation->id,
             ]);
 

@@ -19,6 +19,7 @@ import (
 	"github.com/yolanmees/spikster/daemon/internal/cron"
 	"github.com/yolanmees/spikster/daemon/internal/ftp"
 	"github.com/yolanmees/spikster/daemon/internal/site"
+	"github.com/yolanmees/spikster/daemon/internal/wordpress"
 )
 
 const socketPath = "/var/run/spikster.sock"
@@ -651,6 +652,52 @@ func dispatch(req Request) (string, error) {
 		out, err := server.LogRotate(day)
 		if err != nil { return "", err }
 		return out, nil
+
+
+	// ── WordPress management ──────────────────────────────────────────────────
+	case "wordpress.install-files":
+		p := req.Params
+		params := wordpress.InstallParams{
+			Username:   p["username"],
+			Path:       p["path"],
+			DBName:     p["db_name"],
+			DBUser:     p["db_user"],
+			DBPassword: p["db_password"],
+		}
+		if err := wordpress.InstallFiles(params); err != nil {
+			return "", err
+		}
+		return "wordpress files installed", nil
+
+	case "wordpress.core-install":
+		p := req.Params
+		params := wordpress.CoreInstallParams{
+			Username:   p["username"],
+			Path:       p["path"],
+			URL:        p["url"],
+			Title:      p["title"],
+			AdminUser:  p["admin_user"],
+			AdminPass:  p["admin_pass"],
+			AdminEmail: p["admin_email"],
+			Locale:     p["locale"],
+		}
+		if err := wordpress.CoreInstall(params); err != nil {
+			return "", err
+		}
+		return "wordpress installed", nil
+
+	case "wordpress.cli":
+		out, err := wordpress.ExecCLI(req.Params["username"], req.Params["path"], req.Params["command"])
+		if err != nil {
+			return out, err
+		}
+		return out, nil
+
+	case "wordpress.uninstall-files":
+		if err := wordpress.UninstallFiles(req.Params["path"]); err != nil {
+			return "", err
+		}
+		return "wordpress files removed", nil
 
 
 	default:
