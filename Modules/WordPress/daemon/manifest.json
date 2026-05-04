@@ -1,0 +1,11 @@
+{
+  "name": "wordpress",
+  "version": "1.0.0",
+  "handler": "daemon/handler",
+  "actions": [
+    "wordpress.install-files",
+    "wordpress.core-install",
+    "wordpress.cli",
+    "wordpress.uninstall-files"
+  ]
+}

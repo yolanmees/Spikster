@@ -11,6 +11,7 @@ import (
 	"os/exec"
 	"bufio"
 	"strings"
+	"path/filepath"
 
 	"github.com/yolanmees/spikster/daemon/internal/backup"
 	"github.com/yolanmees/spikster/daemon/internal/email"
@@ -19,7 +20,7 @@ import (
 	"github.com/yolanmees/spikster/daemon/internal/cron"
 	"github.com/yolanmees/spikster/daemon/internal/ftp"
 	"github.com/yolanmees/spikster/daemon/internal/site"
-	"github.com/yolanmees/spikster/daemon/internal/wordpress"
+	"github.com/yolanmees/spikster/daemon/internal/modulehost"
 )
 
 const socketPath = "/var/run/spikster.sock"
@@ -36,6 +37,7 @@ type Response struct {
 }
 
 func Start() {
+	modulehost.LoadModules("/var/www/html/Modules")
 	os.Remove(socketPath)
 	l, err := net.Listen("unix", socketPath)
 	if err != nil {
@@ -654,54 +656,89 @@ func dispatch(req Request) (string, error) {
 		return out, nil
 
 
-	// ── WordPress management ──────────────────────────────────────────────────
-	case "wordpress.install-files":
-		p := req.Params
-		params := wordpress.InstallParams{
-			Username:   p["username"],
-			Path:       p["path"],
-			DBName:     p["db_name"],
-			DBUser:     p["db_user"],
-			DBPassword: p["db_password"],
+	// ── Module API (whitelisted actions for module handlers) ──────────────────
+	case "module.exec":
+		username := req.Params["username"]
+		command := req.Params["command"]
+		if command == "" {
+			return "", fmt.Errorf("module.exec: command is required")
 		}
-		if err := wordpress.InstallFiles(params); err != nil {
-			return "", err
-		}
-		return "wordpress files installed", nil
+		return site.ExecCommand(username, command)
 
-	case "wordpress.core-install":
-		p := req.Params
-		params := wordpress.CoreInstallParams{
-			Username:   p["username"],
-			Path:       p["path"],
-			URL:        p["url"],
-			Title:      p["title"],
-			AdminUser:  p["admin_user"],
-			AdminPass:  p["admin_pass"],
-			AdminEmail: p["admin_email"],
-			Locale:     p["locale"],
+	case "module.file.read":
+		path := req.Params["path"]
+		if !strings.HasPrefix(filepath.Clean(path), "/home/") {
+			return "", fmt.Errorf("module.file.read: path must be under /home/")
 		}
-		if err := wordpress.CoreInstall(params); err != nil {
-			return "", err
-		}
-		return "wordpress installed", nil
-
-	case "wordpress.cli":
-		out, err := wordpress.ExecCLI(req.Params["username"], req.Params["path"], req.Params["command"])
+		data, err := os.ReadFile(path)
 		if err != nil {
-			return out, err
+			return "", fmt.Errorf("module.file.read: %w", err)
 		}
-		return out, nil
+		if len(data) > 10*1024*1024 {
+			return "", fmt.Errorf("module.file.read: file exceeds 10MB limit")
+		}
+		return string(data), nil
 
-	case "wordpress.uninstall-files":
-		if err := wordpress.UninstallFiles(req.Params["path"]); err != nil {
+	case "module.file.write":
+		path := req.Params["path"]
+		if !strings.HasPrefix(filepath.Clean(path), "/home/") {
+			return "", fmt.Errorf("module.file.write: path must be under /home/")
+		}
+		if err := os.WriteFile(path, []byte(req.Params["content"]), 0644); err != nil {
+			return "", fmt.Errorf("module.file.write: %w", err)
+		}
+		return "file written", nil
+
+	case "module.file.chown":
+		if err := server.ChangeOwnership(req.Params["path"], req.Params["owner"], req.Params["group"]); err != nil {
 			return "", err
 		}
-		return "wordpress files removed", nil
+		return "ownership changed", nil
 
+	case "module.mysql.query":
+		sql := strings.TrimSpace(req.Params["sql"])
+		upper := strings.ToUpper(sql)
+		if !strings.HasPrefix(upper, "SELECT") {
+			return "", fmt.Errorf("module.mysql.query: only SELECT queries are allowed")
+		}
+		cnf := fmt.Sprintf("[client]\nuser=root\npassword=%s\n", req.Params["db_root"])
+		tmp, err := os.CreateTemp("", "spikster-mod-mysql-*.cnf")
+		if err != nil {
+			return "", err
+		}
+		defer os.Remove(tmp.Name())
+		tmp.WriteString(cnf)
+		tmp.Close()
+		os.Chmod(tmp.Name(), 0600)
+		out, err := exec.Command("mysql", "--defaults-extra-file="+tmp.Name(), "-e", sql).CombinedOutput()
+		if err != nil {
+			return "", fmt.Errorf("module.mysql.query: %s", strings.TrimSpace(string(out)))
+		}
+		return string(out), nil
 
+	case "module.nginx.reload":
+		out, err := exec.Command("systemctl", "reload", "nginx").CombinedOutput()
+		if err != nil {
+			return "", fmt.Errorf("nginx reload: %s", strings.TrimSpace(string(out)))
+		}
+		return "nginx reloaded", nil
+
+	case "module.cron.read":
+		return cron.Read()
+
+	case "module.cron.write":
+		if err := cron.Write(req.Params["content"]); err != nil {
+			return "", err
+		}
+		return "cron updated", nil
+
+	// ── Module handler fallback ───────────────────────────────────────────────
 	default:
-		return "", fmt.Errorf("unknown action: %s", req.Action)
+		out, err := modulehost.Dispatch(req.Action, req.Params)
+		if err != nil && strings.Contains(err.Error(), "no module handler for action") {
+			return "", fmt.Errorf("unknown action: %s", req.Action)
+		}
+		return out, err
 	}
 }
 
