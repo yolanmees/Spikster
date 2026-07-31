@@ -60,10 +60,20 @@ func PackageRemove(pkg string) error {
 	return run("apt-get", "remove", "-y", pkg)
 }
 
-// validate checks package name for safety
+// validate checks package name for safety.
+// Allowed set matches Debian policy for binary package names:
+// letters, digits, '.', '+', '-'; first character must be alphanumeric.
+// This blocks shell metacharacters (; | & ` $ space etc.) entirely.
 func validate(pkg string) error {
+	if pkg == "" {
+		return fmt.Errorf("invalid package name: %s", pkg)
+	}
+	first := pkg[0]
+	if !((first >= 'a' && first <= 'z') || (first >= 'A' && first <= 'Z') || (first >= '0' && first <= '9')) {
+		return fmt.Errorf("invalid package name: %s", pkg)
+	}
 	for _, c := range pkg {
-		if !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '-' || c == '.' || c == '_') {
+		if !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '-' || c == '.' || c == '+') {
 			return fmt.Errorf("invalid package name: %s", pkg)
 		}
 	}

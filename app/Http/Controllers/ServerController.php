@@ -228,7 +228,7 @@ class ServerController extends Controller
      *                  property="setup",
      *                  description="Server setup script",
      *                  type="string",
-     *                  example="https://panel.domain.ltd/sh/setup/123456"
+     *                  example="https://panel.domain.ltd/sh/setup/srv_abc?expires=...&signature=..."
      *              ),
      *          )
      *      ),
@@ -284,7 +284,7 @@ class ServerController extends Controller
             'provider' => $server->provider,
             'location' => $server->location,
             'ip' => $server->ip,
-            'setup' => URL::to('/sh/setup/'.$server->server_id),
+            'setup' => URL::temporarySignedRoute('sh.setup', now()->addHours(24), ['server_id' => $server->server_id]),
         ]);
     }
 

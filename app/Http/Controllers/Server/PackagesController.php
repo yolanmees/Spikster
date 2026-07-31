@@ -59,7 +59,14 @@ class PackagesController extends Controller
     public function install(string $server_id, Request $request)
     {
         Server::where('server_id', $server_id)->where('status', 1)->firstOrFail();
-        $package = $request->package;
+
+        $package = $this->validatedPackage($request);
+        if (is_null($package)) {
+            return response()->json([
+                'message' => __('spikster.invalid_package_message'),
+                'errors' => __('spikster.invalid_package'),
+            ], 422);
+        }
 
         try {
             app(DaemonService::class)->send('server.package-install', ['package' => $package]);
@@ -76,7 +83,14 @@ class PackagesController extends Controller
     public function uninstall(string $server_id, Request $request)
     {
         Server::where('server_id', $server_id)->where('status', 1)->firstOrFail();
-        $package = $request->package;
+
+        $package = $this->validatedPackage($request);
+        if (is_null($package)) {
+            return response()->json([
+                'message' => __('spikster.invalid_package_message'),
+                'errors' => __('spikster.invalid_package'),
+            ], 422);
+        }
 
         try {
             app(DaemonService::class)->send('server.package-remove', ['package' => $package]);
@@ -88,5 +102,27 @@ class PackagesController extends Controller
         }
 
         return response()->json([]);
+    }
+
+    /**
+     * Validate a Debian package name: must start with an alphanumeric
+     * character and only contain alphanumerics, '.', '+', '-' or '_'.
+     * This blocks shell metacharacters (; | & ` $ etc.) before the
+     * payload ever reaches the daemon. The daemon applies the same
+     * whitelist as a second line of defense.
+     */
+    protected function validatedPackage(Request $request): ?string
+    {
+        $package = $request->input('package');
+
+        if (! is_string($package) || $package === '') {
+            return null;
+        }
+
+        if (! preg_match('/^[a-zA-Z0-9][a-zA-Z0-9.+-]*$/', $package)) {
+            return null;
+        }
+
+        return $package;
     }
 }

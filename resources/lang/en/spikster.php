@@ -221,4 +221,8 @@ return [
     'username_updated_success' => 'Username has been updated',
     'password_updated_success' => 'Password has been updated',
     'new_api_key_success' => 'New API Key',
+
+    // Package management
+    'invalid_package' => 'invalid_package',
+    'invalid_package_message' => 'Invalid package name. Only letters, digits, dots, plus and minus are allowed.',
 ];

@@ -84,8 +84,8 @@ Route::middleware(['api.unified-auth'])->group(function () {
     Route::get('/servers/{server_id}/domains', [ServerController::class, 'domains']);
     Route::get('/servers/{server_id}/fail2ban', [ServerController::class, 'fail2ban']);
     Route::get('/servers/{server_id}/packages', [PackagesController::class, 'index']);
-    Route::post('/servers/{server_id}/packages/install', [PackagesController::class, 'install']);
-    Route::post('/servers/{server_id}/packages/uninstall', [PackagesController::class, 'uninstall']);
+    Route::post('/servers/{server_id}/packages/install', [PackagesController::class, 'install'])->middleware('throttle:ssh');
+    Route::post('/servers/{server_id}/packages/uninstall', [PackagesController::class, 'uninstall'])->middleware('throttle:ssh');
     Route::get('/servers/{server_id}/services', [MonitoringController::class, 'listServices']);
     Route::post('/servers/{server_id}/services/manage', [MonitoringController::class, 'manageService']);
     Route::get('/servers/{server_id}/uptime', fn (string $server_id, UptimeService $uptime) => response()->json(
